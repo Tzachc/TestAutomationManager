@@ -1,0 +1,449 @@
+﻿<mah:MetroWindow x:Class="TestAutomationManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:stats="clr-namespace:TestAutomationManager.Services.Statistics"        mc:Ignorable="d"
+        Title="Test Automation Manager" 
+        Height="800" Width="1400"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PrimaryBackgroundBrush}"
+        BorderBrush="{StaticResource BorderBrush}"
+        BorderThickness="1"
+        TitleCharacterCasing="Normal"
+        GlowBrush="{StaticResource PrimaryBlueBrush}"
+        ShowTitleBar="True"
+        TitleBarHeight="48"
+        NonActiveWindowTitleBrush="{StaticResource SecondaryBackgroundBrush}"
+        WindowTitleBrush="{StaticResource SecondaryBackgroundBrush}"
+        TitleForeground="{StaticResource TextPrimaryBrush}"
+        ResizeMode="CanResize">
+
+    <!-- 🎨 CUSTOM TITLE BAR -->
+    <mah:MetroWindow.TitleTemplate>
+        <DataTemplate>
+            <Grid Height="48" Background="{StaticResource SecondaryBackgroundBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 💎 LEFT: App Title Only -->
+                <StackPanel Grid.Column="0" 
+                       Orientation="Horizontal" 
+                       VerticalAlignment="Center"
+                       Margin="20,0,0,0">
+                    <TextBlock Text="Test Automation Manager" 
+                         FontSize="14" 
+                         FontWeight="SemiBold" 
+                         Foreground="{StaticResource TextPrimaryBrush}"/>
+                </StackPanel>
+
+                <!-- 🎯 CENTER: Test Status Overview - LIVE DATA -->
+                <StackPanel Grid.Column="1"
+                       Orientation="Horizontal" 
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       DataContext="{x:Static stats:TestStatisticsService.Instance}">
+                    <!-- Active Badge -->
+                    <Border Background="{StaticResource CardBackgroundBrush}"
+                       BorderBrush="{StaticResource BorderBrush}"
+                       BorderThickness="1"
+                       CornerRadius="6"
+                       Padding="10,5"
+                       Margin="6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" 
+                                Fill="{StaticResource PrimaryBlueBrush}" 
+                                Margin="0,0,8,0"/>
+                            <TextBlock FontSize="11" 
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 FontWeight="Medium">
+                            <Run Text="{Binding ActiveCount, Mode=OneWay}"/>
+                            <Run Text=" Active"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Passed Badge -->
+                    <Border Background="{StaticResource CardBackgroundBrush}"
+                       BorderBrush="{StaticResource BorderBrush}"
+                       BorderThickness="1"
+                       CornerRadius="6"
+                       Padding="10,5"
+                       Margin="6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" 
+                                Fill="{StaticResource SuccessBrush}" 
+                                Margin="0,0,8,0"/>
+                            <TextBlock FontSize="11" 
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 FontWeight="Medium">
+                            <Run Text="{Binding PassedCount, Mode=OneWay}"/>
+                            <Run Text=" Passed"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Failed Badge -->
+                    <Border Background="{StaticResource CardBackgroundBrush}"
+                       BorderBrush="{StaticResource BorderBrush}"
+                       BorderThickness="1"
+                       CornerRadius="6"
+                       Padding="10,5"
+                       Margin="6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" 
+                                Fill="{StaticResource ErrorBrush}" 
+                                Margin="0,0,8,0"/>
+                            <TextBlock FontSize="11" 
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 FontWeight="Medium">
+                            <Run Text="{Binding FailedCount, Mode=OneWay}"/>
+                            <Run Text=" Failed"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Running Badge -->
+                    <Border Background="{StaticResource CardBackgroundBrush}"
+                       BorderBrush="{StaticResource BorderBrush}"
+                       BorderThickness="1"
+                       CornerRadius="6"
+                       Padding="10,5"
+                       Margin="6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" 
+                                Fill="{StaticResource WarningBrush}" 
+                                Margin="0,0,8,0"/>
+                            <TextBlock FontSize="11" 
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 FontWeight="Medium">
+                            <Run Text="{Binding RunningCount, Mode=OneWay}"/>
+                            <Run Text=" Running"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ⚙️ RIGHT: Quick Actions -->
+                <StackPanel Grid.Column="2" 
+                       Orientation="Horizontal" 
+                       VerticalAlignment="Center"
+                       Margin="0,0,120,0">
+
+                    <!-- Settings Button -->
+                    <Button Style="{StaticResource IconButton}" 
+                       Width="32" Height="32"
+                       ToolTip="Settings"
+                       Margin="4,0">
+                        <TextBlock Text="⚙️" FontSize="14"/>
+                    </Button>
+
+                    <!-- Notifications Button -->
+                    <Button Style="{StaticResource IconButton}" 
+                       Width="32" Height="32"
+                       ToolTip="Notifications"
+                       Margin="4,0">
+                        <Grid>
+                            <TextBlock Text="🔔" FontSize="14"/>
+                            <!-- Notification Badge -->
+                            <Ellipse Width="8" Height="8" 
+                                Fill="{StaticResource ErrorBrush}"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="0,-2,-2,0"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- User Profile Button -->
+                    <Button Style="{StaticResource IconButton}" 
+                       Width="32" Height="32"
+                       ToolTip="Profile"
+                       Margin="4,0,8,0">
+                        <Border Width="24" Height="24"
+                           Background="{StaticResource PrimaryBlueBrush}"
+                           CornerRadius="12">
+                            <TextBlock Text="U" 
+                                 FontSize="12" 
+                                 FontWeight="Bold"
+                                 Foreground="White"
+                                 HorizontalAlignment="Center" 
+                                 VerticalAlignment="Center"/>
+                        </Border>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </mah:MetroWindow.TitleTemplate>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 🎨 PROFESSIONAL SIDEBAR -->
+        <Border Grid.Column="0" 
+                Background="{StaticResource SecondaryBackgroundBrush}"
+                BorderThickness="0,0,1,0"
+                BorderBrush="{StaticResource BorderBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 💎 MODERN HEADER -->
+                <Border Grid.Row="0" Padding="20,24">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Logo Section -->
+                        <Border Grid.Row="0"
+                                Width="48" 
+                                Height="48" 
+                                Background="{StaticResource PrimaryBlueBrush}"
+                                CornerRadius="12"
+                                HorizontalAlignment="Center">
+                            <Grid>
+                                <TextBlock Text="T" 
+                                         FontSize="24" 
+                                         FontWeight="Bold"
+                                         Foreground="#010409"
+                                         HorizontalAlignment="Center" 
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- App Name -->
+                        <StackPanel Grid.Row="1" Margin="0,16,0,0">
+                            <TextBlock Text="Test Manager" 
+                                     FontSize="16" 
+                                     FontWeight="SemiBold" 
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Automation Platform" 
+                                     FontSize="11"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     Foreground="{StaticResource TextSecondaryBrush}" 
+                                     Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 🎯 NAVIGATION -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12,8">
+                    <StackPanel>
+                        <!-- Main Section -->
+                        <TextBlock Text="WORKSPACE" 
+                                 FontSize="10" 
+                                 FontWeight="SemiBold" 
+                                 Foreground="{StaticResource TextTertiaryBrush}" 
+                                 Margin="8,0,0,8"/>
+
+                        <RadioButton x:Name="TestsRadio" 
+                                   GroupName="Navigation" 
+                                   IsChecked="True" 
+                                   Style="{StaticResource NavigationRadioButton}" 
+                                   Tag="Tests" 
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📝" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Tests" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton GroupName="Navigation" 
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Processes" 
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Processes" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton GroupName="Navigation" 
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Functions" 
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚡" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Functions" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <!-- Divider -->
+                        <Border Height="1" 
+                               Background="{StaticResource BorderBrush}" 
+                               Margin="8,16"/>
+
+                        <!-- Analytics Section -->
+                        <TextBlock Text="INSIGHTS" 
+                                 FontSize="10" 
+                                 FontWeight="SemiBold" 
+                                 Foreground="{StaticResource TextTertiaryBrush}" 
+                                 Margin="8,0,0,8"/>
+
+                        <RadioButton GroupName="Navigation" 
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Reports" 
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📊" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Reports" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <RadioButton GroupName="Navigation" 
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Settings" 
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Settings" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 🟢 STATUS INDICATOR -->
+                <!-- 🟢 STATUS INDICATOR - LIVE DATABASE CONNECTION -->
+                <Border Grid.Row="2" 
+       Margin="12,8,12,16"
+       Background="{StaticResource CardBackgroundBrush}"
+       BorderBrush="{StaticResource BorderBrush}"
+       BorderThickness="1"
+       CornerRadius="8"
+       Padding="12"
+       Cursor="Hand"
+       ToolTip="Click to refresh connection status"
+       MouseLeftButtonDown="SystemStatus_Click">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Status Icon with Dynamic Background -->
+                        <Border Width="32" Height="32" 
+               CornerRadius="6">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#1A2F23"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SystemStatusText}" Value="All systems online">
+                                            <Setter Property="Background" Value="#1A2F23"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SystemStatusText}" Value="Database offline">
+                                            <Setter Property="Background" Value="#2F1A1A"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SystemStatusText}" Value="Checking connection...">
+                                            <Setter Property="Background" Value="#2F2A1A"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <!-- Status Dot with Dynamic Color -->
+                            <Ellipse Width="8" Height="8" Fill="{Binding SystemStatusColor}"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <TextBlock Text="System Status" 
+                     FontSize="11" 
+                     Foreground="{StaticResource TextSecondaryBrush}" 
+                     FontWeight="Medium"/>
+                            <TextBlock Text="{Binding SystemStatusText}" 
+                     FontSize="10" 
+                     Foreground="{Binding SystemStatusColor}" 
+                     Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- 🎯 MAIN CONTENT AREA -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 🔥 PROFESSIONAL TOOLBAR -->
+            <Border Grid.Row="0" 
+                   Background="{StaticResource SecondaryBackgroundBrush}"
+                   BorderThickness="0,0,0,1"
+                   BorderBrush="{StaticResource BorderBrush}"
+                   Padding="24,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Title Section -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock x:Name="PageTitle" 
+                                 Text="Tests" 
+                                 FontSize="20" 
+                                 FontWeight="SemiBold" 
+                                 Foreground="{StaticResource TextPrimaryBrush}" 
+                                 VerticalAlignment="Center"/>
+
+                        <Border Style="{StaticResource Badge}"
+                               Margin="12,0,0,0"
+                               VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RecordCountText}" 
+         FontSize="11" 
+         Foreground="{StaticResource TextSecondaryBrush}" 
+         FontWeight="SemiBold"/>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Search Box -->
+                        <TextBox Width="260" 
+                               Style="{StaticResource ModernTextBox}"
+                               x:Name="SearchBox" 
+                               TextChanged="SearchBox_TextChanged"
+                               Margin="0,0,12,0"/>
+
+                        <!-- Refresh Button -->
+                        <Button Style="{StaticResource SecondaryButton}" 
+                              Padding="10,8"
+                              Margin="0,0,8,0" 
+                              Click="Refresh_Click"
+                              ToolTip="Refresh">
+                            <TextBlock Text="🔄" FontSize="14"/>
+                        </Button>
+
+                        <!-- Add New Button -->
+                        <Button Style="{StaticResource PrimaryButton}" 
+                              Click="AddNew_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="+" Margin="0,0,6,0" FontSize="16" FontWeight="Bold"/>
+                                <TextBlock Text="New Test" FontSize="13"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ✨ CONTENT FRAME -->
+            <Border Grid.Row="1" Background="{StaticResource PrimaryBackgroundBrush}">
+                <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden"/>
+            </Border>
+        </Grid>
+    </Grid>
+</mah:MetroWindow>
