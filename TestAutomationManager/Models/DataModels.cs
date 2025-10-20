@@ -255,4 +255,34 @@ namespace TestAutomationManager.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+    /// <summary>
+    /// Represents metadata about an external table (actual SQL table)
+    /// </summary>
+    public class ExternalTableInfo
+    {
+        public int TestId { get; set; }
+        public string TableName { get; set; }  // e.g., "ExtTable1"
+        public string TestName { get; set; }   // e.g., "Login Test - Standard User"
+        public int RowCount { get; set; }
+        public string Category { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a row from any ExtTable (dynamic data)
+    /// </summary>
+    public class ExternalTableRow
+    {
+        public int Id { get; set; }
+        public string IterationName { get; set; }
+        public string Run { get; set; }
+        public string ExcludeProcess { get; set; }
+        public DateTime? LastTimePassed { get; set; }
+        public string Exception { get; set; }
+        public string Image { get; set; }
+        public string RegistrationURL2 { get; set; }
+        public string Username3 { get; set; }
+        public string Password4 { get; set; }
+        public string ConnStr75 { get; set; }
+        public string SqlQueryResult { get; set; }
+    }
 }

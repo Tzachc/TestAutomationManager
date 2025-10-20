@@ -266,6 +266,16 @@ namespace TestAutomationManager.Views
             TestStatisticsService.Instance.UpdateStatistics(_allTests);
         }
 
+        /// <summary>
+        /// ⭐ Force refresh statistics (called when tab becomes active)
+        /// This ensures the title bar statistics are updated when switching tabs
+        /// </summary>
+        public void ForceRefreshStatistics()
+        {
+            UpdateStatistics();
+            System.Diagnostics.Debug.WriteLine("✓ Force refreshed statistics for active tab");
+        }
+
         // ================================================
         // PUBLIC METHODS
         // ================================================
@@ -290,6 +300,118 @@ namespace TestAutomationManager.Views
             DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
             DatabaseWatcherService.Instance.StopWatching();
             System.Diagnostics.Debug.WriteLine("✓ Database watcher stopped (view unloaded)");
+        }
+
+        /// <summary>
+        /// Handle Edit button click
+        /// </summary>
+        private void EditTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Test test)
+            {
+                MessageBox.Show(
+                    $"Edit functionality for Test #{test.Id} '{test.Name}' is coming soon!",
+                    "Coming Soon",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
+        }
+
+        /// <summary>
+        /// Handle Run button click
+        /// </summary>
+        private void RunTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Test test)
+            {
+                MessageBox.Show(
+                    $"Run functionality for Test #{test.Id} '{test.Name}' is coming soon!\n\nThis will execute the test automation.",
+                    "Coming Soon",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
+        }
+
+        /// <summary>
+        /// Handle Delete button click
+        /// </summary>
+        private async void DeleteTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Test test)
+            {
+                try
+                {
+                    // Count associated processes and functions
+                    int processCount = test.Processes?.Count ?? 0;
+                    int functionCount = test.Processes?.Sum(p => p.Functions?.Count ?? 0) ?? 0;
+
+                    // Build warning message
+                    string warningMessage = $"Are you sure you want to delete this test?\n\n" +
+                                          $"Test: {test.Name} (ID #{test.Id})\n" +
+                                          $"Category: {test.Category}\n\n";
+
+                    if (processCount > 0)
+                    {
+                        warningMessage += $"⚠️ This will also delete:\n" +
+                                        $"  • {processCount} process{(processCount != 1 ? "es" : "")}\n" +
+                                        $"  • {functionCount} function{(functionCount != 1 ? "s" : "")}\n\n";
+                    }
+
+                    warningMessage += "This action cannot be undone!";
+
+                    // Show confirmation dialog
+                    var result = MessageBox.Show(
+                        warningMessage,
+                        "Confirm Deletion",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning,
+                        MessageBoxResult.No
+                    );
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Disable button to prevent double-click
+                        button.IsEnabled = false;
+
+                        System.Diagnostics.Debug.WriteLine($"🗑️ Deleting test #{test.Id}...");
+
+                        // Delete from database
+                        await _repository.DeleteTestAsync(test.Id);
+
+                        System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} deleted successfully!");
+
+                        // Show success message
+                        MessageBox.Show(
+                            $"Test '{test.Name}' has been deleted successfully!",
+                            "Test Deleted",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information
+                        );
+
+                        // Refresh data from database
+                        // The DatabaseWatcherService will pick it up, but force immediate refresh
+                        RefreshData();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Error deleting test: {ex.Message}");
+                    MessageBox.Show(
+                        $"Failed to delete test.\n\nError: {ex.Message}",
+                        "Delete Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+
+                    // Re-enable button
+                    if (sender is Button btn)
+                    {
+                        btn.IsEnabled = true;
+                    }
+                }
+            }
         }
     }
 }

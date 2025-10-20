@@ -1,20 +1,47 @@
 ﻿using MahApps.Metro.Controls;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using TestAutomationManager.Data;
+using TestAutomationManager.Models;
+using TestAutomationManager.Repositories;
 using TestAutomationManager.Services.Statistics;
 
 namespace TestAutomationManager
 {
     public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
-        private Views.TestsView _currentTestsView;
+        // Tab tracking
+        private class TabInfo
+        {
+            public string Id { get; set; }
+            public string Title { get; set; }
+            public string Icon { get; set; }
+            public TabItem TabItem { get; set; }
+            public object Content { get; set; }
+        }
+
+        private List<TabInfo> _openTabs = new List<TabInfo>();
         private string _recordCountText;
         private string _systemStatusText;
         private System.Windows.Media.Brush _systemStatusColor;
+        private bool _isExtTablesExpanded = false;
+        private readonly ITestRepository _repository;
+        public ObservableCollection<ExternalTableInfo> ExtTablesList { get; set; }
+        private ObservableCollection<ExternalTableInfo> _allExtTables;
+
+        // Tab drag and drop
+        private Point _dragStartPoint;
+        private bool _isDragging = false;
+        private TabItem _draggedTab = null;
 
         // ================================================
         // PROPERTIES FOR BINDING
@@ -59,14 +86,143 @@ namespace TestAutomationManager
             InitializeComponent();
             DataContext = this;
 
+            _repository = new TestRepository();
+            ExtTablesList = new ObservableCollection<ExternalTableInfo>();
+            _allExtTables = new ObservableCollection<ExternalTableInfo>();
+            ExtTablesItemsControl.ItemsSource = ExtTablesList;
+
+            // Subscribe to tab selection changed
+            ContentTabControl.SelectionChanged += ContentTabControl_SelectionChanged;
+
             // Initialize system status
             CheckDatabaseConnection();
 
             // Subscribe to statistics changes
             TestStatisticsService.Instance.PropertyChanged += OnStatisticsChanged;
 
-            // Load initial view
-            LoadTestsView();
+            // Load initial view as first tab
+            OpenTestsTab();
+
+            // Pre-load external tables
+            LoadExtTablesForNavigation();
+        }
+
+        // ================================================
+        // TAB MANAGEMENT
+        // ================================================
+
+        /// <summary>
+        /// Open or switch to a tab
+        /// </summary>
+        private void OpenOrSwitchToTab(string id, string title, string icon, Func<object> contentFactory)
+        {
+            // Check if tab already exists
+            var existingTab = _openTabs.FirstOrDefault(t => t.Id == id);
+            if (existingTab != null)
+            {
+                // Switch to existing tab
+                ContentTabControl.SelectedItem = existingTab.TabItem;
+                return;
+            }
+
+            // Create new tab
+            var content = contentFactory();
+            var tabItem = new TabItem
+            {
+                Header = title,
+                Content = content,
+                Tag = new { Icon = icon }
+            };
+
+            var tabInfo = new TabInfo
+            {
+                Id = id,
+                Title = title,
+                Icon = icon,
+                TabItem = tabItem,
+                Content = content
+            };
+
+            _openTabs.Add(tabInfo);
+            ContentTabControl.Items.Add(tabItem);
+            ContentTabControl.SelectedItem = tabItem;
+
+            UpdatePageTitle();
+        }
+
+        /// <summary>
+        /// Handle tab close button click
+        /// </summary>
+        private void TabCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                // Find the TabItem
+                var tabItem = FindParent<TabItem>(button);
+                if (tabItem != null)
+                {
+                    CloseTab(tabItem);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Close a tab
+        /// </summary>
+        private void CloseTab(TabItem tabItem)
+        {
+            var tabInfo = _openTabs.FirstOrDefault(t => t.TabItem == tabItem);
+            if (tabInfo != null)
+            {
+                _openTabs.Remove(tabInfo);
+                ContentTabControl.Items.Remove(tabItem);
+
+                // If no tabs left, open Tests by default
+                if (_openTabs.Count == 0)
+                {
+                    OpenTestsTab();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle tab selection changed
+        /// </summary>
+        private void ContentTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdatePageTitle();
+            UpdateRecordCount();
+        }
+
+        /// <summary>
+        /// Update page title based on active tab
+        /// </summary>
+        private void UpdatePageTitle()
+        {
+            if (ContentTabControl.SelectedItem is TabItem selectedTab)
+            {
+                var tabInfo = _openTabs.FirstOrDefault(t => t.TabItem == selectedTab);
+                if (tabInfo != null)
+                {
+                    PageTitle.Text = tabInfo.Title;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find parent of specific type
+        /// </summary>
+        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = System.Windows.Media.VisualTreeHelper.GetParent(child);
+
+            if (parentObject == null)
+                return null;
+
+            if (parentObject is T parent)
+                return parent;
+
+            return FindParent<T>(parentObject);
         }
 
         // ================================================
@@ -83,7 +239,6 @@ namespace TestAutomationManager
                 SystemStatusText = "Checking connection...";
                 SystemStatusColor = (System.Windows.Media.Brush)Application.Current.Resources["WarningBrush"];
 
-                // Test connection
                 bool isConnected = await System.Threading.Tasks.Task.Run(() =>
                     DbConnectionConfig.TestConnection()
                 );
@@ -110,6 +265,185 @@ namespace TestAutomationManager
         }
 
         // ================================================
+        // EXTTABLES NAVIGATION
+        // ================================================
+
+        /// <summary>
+        /// Load external tables for the navigation sidebar
+        /// </summary>
+        private async void LoadExtTablesForNavigation()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("📊 Loading external tables for navigation...");
+
+                var tables = await _repository.GetAllExternalTablesAsync();
+
+                _allExtTables.Clear();
+                ExtTablesList.Clear();
+
+                foreach (var table in tables)
+                {
+                    _allExtTables.Add(table);
+                    ExtTablesList.Add(table);
+                }
+
+                UpdateExtTablesCount();
+
+                System.Diagnostics.Debug.WriteLine($"✓ Loaded {ExtTablesList.Count} external tables for navigation");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading external tables for navigation: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handle ExtTables navigation click (expand/collapse)
+        /// </summary>
+        private void ExtTablesNav_Click(object sender, MouseButtonEventArgs e)
+        {
+            _isExtTablesExpanded = !_isExtTablesExpanded;
+
+            if (_isExtTablesExpanded)
+            {
+                ExtTablesChildren.Visibility = Visibility.Visible;
+                AnimateArrow(0, 90);
+                ExtTablesNavItem.Background = (System.Windows.Media.Brush)Application.Current.Resources["CardBackgroundBrush"];
+                ExtTablesText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"];
+                LoadExtTablesForNavigation();
+                ExtTablesSearchBox.Focus();
+            }
+            else
+            {
+                ExtTablesChildren.Visibility = Visibility.Collapsed;
+                AnimateArrow(90, 0);
+                ExtTablesNavItem.Background = System.Windows.Media.Brushes.Transparent;
+                ExtTablesText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"];
+                ExtTablesSearchBox.Text = "";
+            }
+        }
+
+        /// <summary>
+        /// Handle search within ExtTables navigation
+        /// </summary>
+        private void ExtTablesSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchQuery = ExtTablesSearchBox.Text?.Trim() ?? "";
+            FilterExtTablesInNavigation(searchQuery);
+            UpdateSearchPlaceholder();
+        }
+
+        /// <summary>
+        /// Handle search box focus
+        /// </summary>
+        private void ExtTablesSearchBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ExtTablesSearchPlaceholder.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Handle search box lost focus
+        /// </summary>
+        private void ExtTablesSearchBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            UpdateSearchPlaceholder();
+        }
+
+        /// <summary>
+        /// Update placeholder visibility based on text content
+        /// </summary>
+        private void UpdateSearchPlaceholder()
+        {
+            if (string.IsNullOrEmpty(ExtTablesSearchBox.Text))
+            {
+                ExtTablesSearchPlaceholder.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ExtTablesSearchPlaceholder.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Filter ExtTables in the navigation list
+        /// </summary>
+        private void FilterExtTablesInNavigation(string searchQuery)
+        {
+            ExtTablesList.Clear();
+
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                foreach (var table in _allExtTables)
+                {
+                    ExtTablesList.Add(table);
+                }
+            }
+            else
+            {
+                var filtered = _allExtTables.Where(t =>
+                    t.TableName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    t.TestName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    t.TestId.ToString().Contains(searchQuery) ||
+                    (t.Category?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false)
+                ).ToList();
+
+                foreach (var table in filtered)
+                {
+                    ExtTablesList.Add(table);
+                }
+            }
+
+            UpdateExtTablesCount();
+        }
+
+        /// <summary>
+        /// Update the count display in ExtTables navigation
+        /// </summary>
+        private void UpdateExtTablesCount()
+        {
+            ExtTablesCountRun.Text = ExtTablesList.Count.ToString();
+
+            if (ExtTablesList.Count == 0)
+            {
+                ExtTablesEmptyState.Visibility = Visibility.Visible;
+                ExtTablesItemsControl.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                ExtTablesEmptyState.Visibility = Visibility.Collapsed;
+                ExtTablesItemsControl.Visibility = Visibility.Visible;
+            }
+        }
+
+        /// <summary>
+        /// Animate the expand/collapse arrow
+        /// </summary>
+        private void AnimateArrow(double from, double to)
+        {
+            var animation = new DoubleAnimation
+            {
+                From = from,
+                To = to,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            ExtTablesArrowRotation.BeginAnimation(RotateTransform.AngleProperty, animation);
+        }
+
+        /// <summary>
+        /// Handle individual ExtTable item click
+        /// </summary>
+        private void ExtTableItem_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.Tag is string tableName)
+            {
+                OpenExtTableTab(tableName);
+            }
+        }
+
+        // ================================================
         // STATISTICS UPDATE HANDLER
         // ================================================
 
@@ -126,16 +460,27 @@ namespace TestAutomationManager
         /// </summary>
         private void UpdateRecordCount()
         {
-            if (_currentTestsView != null)
+            if (ContentTabControl.SelectedItem is TabItem selectedTab)
             {
-                // Tests View - show only test count
-                int testCount = _currentTestsView.GetTestCount();
-                RecordCountText = $"({testCount} {(testCount == 1 ? "test" : "tests")})";
+                if (selectedTab.Content is Views.TestsView testsView)
+                {
+                    int testCount = testsView.GetTestCount();
+                    RecordCountText = $"({testCount} {(testCount == 1 ? "test" : "tests")})";
+                }
+                else if (selectedTab.Content is Views.ExtTableDetailView extTableView)
+                {
+                    int rowCount = extTableView.GetRowCount();
+                    RecordCountText = $"({rowCount} {(rowCount == 1 ? "row" : "Iterations")})";
+                }
+                else
+                {
+                    RecordCountText = "";
+                }
             }
         }
 
         // ================================================
-        // NAVIGATION - Updated
+        // NAVIGATION - OPEN TABS
         // ================================================
 
         private void NavigationButton_Click(object sender, RoutedEventArgs e)
@@ -143,142 +488,317 @@ namespace TestAutomationManager
             if (sender is RadioButton radioButton)
             {
                 string tag = radioButton.Tag?.ToString() ?? "";
-                PageTitle.Text = tag;
-
-                // Clear search when changing views
-                SearchBox.Text = "";
 
                 switch (tag)
                 {
                     case "Tests":
-                        LoadTestsView();
+                        OpenTestsTab();
                         break;
                     case "Processes":
-                        LoadProcessesView();
+                        OpenProcessesTab();
                         break;
                     case "Functions":
-                        LoadFunctionsView();
+                        OpenFunctionsTab();
                         break;
                     case "Reports":
-                        LoadReportsView();
+                        OpenReportsTab();
                         break;
                     case "Settings":
-                        LoadSettingsView();
+                        OpenSettingsTab();
                         break;
                 }
             }
         }
 
-        private void LoadTestsView()
+        private void OpenTestsTab()
         {
-            _currentTestsView = new Views.TestsView();
-            _currentTestsView.DataLoaded += OnTestsViewDataLoaded;
-            ContentFrame.Content = _currentTestsView;
+            OpenOrSwitchToTab(
+                "tests",
+                "Tests",
+                "📝",
+                () =>
+                {
+                    var view = new Views.TestsView();
+                    view.DataLoaded += (s, e) => UpdateRecordCount();
+                    return view;
+                }
+            );
         }
 
-        private void OnTestsViewDataLoaded(object sender, EventArgs e)
+        private void OpenExtTableTab(string tableName)
         {
-            UpdateRecordCount();
+            OpenOrSwitchToTab(
+                $"exttable_{tableName}",
+                tableName,
+                "📊",
+                () =>
+                {
+                    var view = new Views.ExtTableDetailView(tableName);
+                    view.DataLoaded += (s, e) => UpdateRecordCount();
+                    return view;
+                }
+            );
         }
 
-        private void LoadProcessesView()
+        private void OpenProcessesTab()
         {
-            _currentTestsView = null;
-            var textBlock = new TextBlock
-            {
-                Text = "Processes View - Coming Soon",
-                FontSize = 24,
-                Foreground = System.Windows.Media.Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            ContentFrame.Content = textBlock;
-            RecordCountText = "(45 processes)";
+            OpenOrSwitchToTab(
+                "processes",
+                "Processes",
+                "⚙️",
+                () =>
+                {
+                    var textBlock = new TextBlock
+                    {
+                        Text = "Processes View - Coming Soon",
+                        FontSize = 24,
+                        Foreground = System.Windows.Media.Brushes.White,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    return textBlock;
+                }
+            );
         }
 
-        private void LoadFunctionsView()
+        private void OpenFunctionsTab()
         {
-            _currentTestsView = null;
-            var textBlock = new TextBlock
-            {
-                Text = "Functions View - Coming Soon",
-                FontSize = 24,
-                Foreground = System.Windows.Media.Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            ContentFrame.Content = textBlock;
-            RecordCountText = "(128 functions)";
+            OpenOrSwitchToTab(
+                "functions",
+                "Functions",
+                "⚡",
+                () =>
+                {
+                    var textBlock = new TextBlock
+                    {
+                        Text = "Functions View - Coming Soon",
+                        FontSize = 24,
+                        Foreground = System.Windows.Media.Brushes.White,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    return textBlock;
+                }
+            );
         }
 
-        private void LoadReportsView()
+        private void OpenReportsTab()
         {
-            _currentTestsView = null;
-            var textBlock = new TextBlock
-            {
-                Text = "Reports View - Coming Soon",
-                FontSize = 24,
-                Foreground = System.Windows.Media.Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            ContentFrame.Content = textBlock;
-            RecordCountText = "";
+            OpenOrSwitchToTab(
+                "reports",
+                "Reports",
+                "📈",
+                () =>
+                {
+                    var textBlock = new TextBlock
+                    {
+                        Text = "Reports View - Coming Soon",
+                        FontSize = 24,
+                        Foreground = System.Windows.Media.Brushes.White,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    return textBlock;
+                }
+            );
         }
 
-        private void LoadSettingsView()
+        private void OpenSettingsTab()
         {
-            _currentTestsView = null;
-            var textBlock = new TextBlock
-            {
-                Text = "Settings View - Coming Soon",
-                FontSize = 24,
-                Foreground = System.Windows.Media.Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            ContentFrame.Content = textBlock;
-            RecordCountText = "";
+            OpenOrSwitchToTab(
+                "settings",
+                "Settings",
+                "⚙️",
+                () =>
+                {
+                    var textBlock = new TextBlock
+                    {
+                        Text = "Settings View - Coming Soon",
+                        FontSize = 24,
+                        Foreground = System.Windows.Media.Brushes.White,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    return textBlock;
+                }
+            );
         }
 
         // ================================================
         // ACTIONS
         // ================================================
 
-        private void AddNew_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Add new item functionality will be implemented soon!",
-                           "Add New", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            // Clear search and refresh
-            SearchBox.Text = "";
-
-            if (TestsRadio.IsChecked == true)
+            // Refresh current tab
+            if (ContentTabControl.SelectedItem is TabItem selectedTab)
             {
-                LoadTestsView();
+                if (selectedTab.Content is Views.TestsView testsView)
+                {
+                    testsView.RefreshData();
+                }
+                else if (selectedTab.Content is Views.ExtTableDetailView extTableView)
+                {
+                    extTableView.RefreshData();
+                }
             }
 
-            // Re-check database connection
+            LoadExtTablesForNavigation();
             CheckDatabaseConnection();
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             // Only search in Tests view
-            if (_currentTestsView != null)
+            if (ContentTabControl.SelectedItem is TabItem selectedTab)
             {
-                string searchQuery = SearchBox.Text;
-                _currentTestsView.FilterTests(searchQuery);
-                UpdateRecordCount();
+                if (selectedTab.Content is Views.TestsView testsView)
+                {
+                    string searchQuery = SearchBox.Text;
+                    testsView.FilterTests(searchQuery);
+                    UpdateRecordCount();
+                }
             }
         }
 
         private void SystemStatus_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             CheckDatabaseConnection();
+            LoadExtTablesForNavigation();
+        }
+
+        // ================================================
+        // TAB DRAG AND DROP
+        // ================================================
+
+        /// <summary>
+        /// Handle middle mouse button click - close tab (like browsers)
+        /// </summary>
+        private void TabItem_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && e.ButtonState == MouseButtonState.Pressed)
+            {
+                if (sender is Border border)
+                {
+                    TabItem tabItem = FindParent<TabItem>(border);
+                    if (tabItem != null)
+                    {
+                        CloseTab(tabItem);
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse down on tab - start tracking for drag
+        /// </summary>
+        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                _dragStartPoint = e.GetPosition(null);
+                _draggedTab = FindParent<TabItem>(border);
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse move - initiate drag if moved far enough
+        /// </summary>
+        private void TabItem_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && !_isDragging && _draggedTab != null)
+            {
+                Point currentPosition = e.GetPosition(null);
+                Vector diff = _dragStartPoint - currentPosition;
+
+                // Check if moved far enough to start drag (threshold = 5 pixels)
+                if (Math.Abs(diff.X) > 5 || Math.Abs(diff.Y) > 5)
+                {
+                    _isDragging = true;
+
+                    // Start drag operation
+                    DataObject dragData = new DataObject("TabItem", _draggedTab);
+                    DragDrop.DoDragDrop(_draggedTab, dragData, DragDropEffects.Move);
+
+                    _isDragging = false;
+                    _draggedTab = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse up - cancel drag
+        /// </summary>
+        private void TabItem_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _isDragging = false;
+            _draggedTab = null;
+        }
+
+        /// <summary>
+        /// Handle drag over - allow drop
+        /// </summary>
+        private void TabItem_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("TabItem"))
+            {
+                e.Effects = DragDropEffects.Move;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Handle drop - reorder tabs
+        /// </summary>
+        private void TabItem_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("TabItem"))
+            {
+                TabItem droppedTab = e.Data.GetData("TabItem") as TabItem;
+                Border targetBorder = sender as Border;
+                TabItem targetTab = FindParent<TabItem>(targetBorder);
+
+                if (droppedTab != null && targetTab != null && droppedTab != targetTab)
+                {
+                    // Get indices
+                    int droppedIndex = ContentTabControl.Items.IndexOf(droppedTab);
+                    int targetIndex = ContentTabControl.Items.IndexOf(targetTab);
+
+                    if (droppedIndex >= 0 && targetIndex >= 0)
+                    {
+                        // Reorder in TabControl
+                        ContentTabControl.Items.Remove(droppedTab);
+                        ContentTabControl.Items.Insert(targetIndex, droppedTab);
+
+                        // Reorder in tracking list
+                        var droppedTabInfo = _openTabs.FirstOrDefault(t => t.TabItem == droppedTab);
+                        if (droppedTabInfo != null)
+                        {
+                            _openTabs.Remove(droppedTabInfo);
+
+                            // Recalculate target index in tracking list
+                            var targetTabInfo = _openTabs.FirstOrDefault(t => t.TabItem == targetTab);
+                            int newIndex = _openTabs.IndexOf(targetTabInfo);
+
+                            if (newIndex >= 0)
+                            {
+                                _openTabs.Insert(newIndex, droppedTabInfo);
+                            }
+                            else
+                            {
+                                _openTabs.Add(droppedTabInfo);
+                            }
+                        }
+
+                        // Keep the dragged tab selected
+                        ContentTabControl.SelectedItem = droppedTab;
+
+                        System.Diagnostics.Debug.WriteLine($"✓ Moved tab from position {droppedIndex} to {targetIndex}");
+                    }
+                }
+            }
         }
 
         // ================================================

@@ -1,0 +1,226 @@
+﻿<UserControl x:Class="TestAutomationManager.Views.ExtTableDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="{StaticResource PrimaryBackgroundBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 📊 TABLE INFO HEADER -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource SecondaryBackgroundBrush}"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{StaticResource BorderBrush}"
+                Padding="24,16"
+                Margin="24,16,24,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Table Icon & Info -->
+                <Border Grid.Column="0" 
+                       Width="56" Height="56"
+                       Background="{StaticResource PrimaryBlueBrush}"
+                       CornerRadius="8"
+                       Margin="0,0,16,0">
+                    <TextBlock Text="📊" 
+                             FontSize="32"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="TableNameText" 
+                             Text="ExtTable1" 
+                             FontSize="18" 
+                             FontWeight="SemiBold" 
+                             Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock x:Name="TestNameText" 
+                                 Text="Associated Test" 
+                                 FontSize="12" 
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 Margin="0,0,12,0"/>
+                        <Border Background="#9B59B6"
+                               CornerRadius="4"
+                               Padding="6,3">
+                            <TextBlock x:Name="CategoryText" 
+                                     Text="Category" 
+                                     FontSize="10" 
+                                     FontWeight="SemiBold"
+                                     Foreground="White"/>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Stats -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Border Background="{StaticResource CardBackgroundBrush}"
+                           BorderBrush="{StaticResource BorderBrush}"
+                           BorderThickness="1"
+                           CornerRadius="6"
+                           Padding="16,10"
+                           Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock Text="ROWS" 
+                                     FontSize="10" 
+                                     Foreground="{StaticResource TextTertiaryBrush}"
+                                     HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="RowCountText" 
+                                     Text="0" 
+                                     FontSize="20" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource PrimaryBlueBrush}"
+                                     HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{StaticResource CardBackgroundBrush}"
+                           BorderBrush="{StaticResource BorderBrush}"
+                           BorderThickness="1"
+                           CornerRadius="6"
+                           Padding="16,10">
+                        <StackPanel>
+                            <TextBlock Text="TEST ID" 
+                                     FontSize="10" 
+                                     Foreground="{StaticResource TextTertiaryBrush}"
+                                     HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="TestIdText" 
+                                     Text="0" 
+                                     FontSize="20" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource SuccessBrush}"
+                                     HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 📋 DATA GRID -->
+        <Border Grid.Row="1" Margin="24,16,24,24">
+            <Grid>
+                <!-- DataGrid with professional styling -->
+                <DataGrid x:Name="TableDataGrid"
+                         AutoGenerateColumns="True"
+                         IsReadOnly="True"
+                         Background="{StaticResource CardBackgroundBrush}"
+                         RowBackground="{StaticResource CardBackgroundBrush}"
+                         AlternatingRowBackground="{StaticResource SecondaryBackgroundBrush}"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1"
+                         GridLinesVisibility="Horizontal"
+                         HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                         HeadersVisibility="Column"
+                         CanUserAddRows="False"
+                         CanUserDeleteRows="False"
+                         SelectionMode="Single"
+                         SelectionUnit="FullRow">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Padding" Value="12,10"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
+
+                <!-- Loading Indicator -->
+                <Border x:Name="LoadingPanel"
+                       Background="{StaticResource SecondaryBackgroundBrush}"
+                       Opacity="0.95"
+                       Visibility="Collapsed">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="⏳" FontSize="48" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Loading table data..." 
+                                 FontSize="16" 
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Empty State -->
+                <StackPanel x:Name="EmptyState"
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Center"
+                           Visibility="Collapsed">
+                    <TextBlock Text="📭" FontSize="64" HorizontalAlignment="Center" Opacity="0.3"/>
+                    <TextBlock Text="No Data Found" 
+                             FontSize="18" 
+                             FontWeight="SemiBold" 
+                             Foreground="{StaticResource TextSecondaryBrush}"
+                             HorizontalAlignment="Center"
+                             Margin="0,16,0,8"/>
+                    <TextBlock Text="This table doesn't contain any rows yet" 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextTertiaryBrush}"
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Error State -->
+                <StackPanel x:Name="ErrorState"
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Center"
+                           Visibility="Collapsed">
+                    <TextBlock Text="⚠️" FontSize="64" HorizontalAlignment="Center" Opacity="0.5"/>
+                    <TextBlock Text="Error Loading Data" 
+                             FontSize="18" 
+                             FontWeight="SemiBold" 
+                             Foreground="{StaticResource ErrorBrush}"
+                             HorizontalAlignment="Center"
+                             Margin="0,16,0,8"/>
+                    <TextBlock x:Name="ErrorMessageText" 
+                             Text="An error occurred while loading the table data" 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextTertiaryBrush}"
+                             HorizontalAlignment="Center"
+                             TextWrapping="Wrap"
+                             MaxWidth="400"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

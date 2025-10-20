@@ -9,17 +9,16 @@ using TestAutomationManager.Models;
 namespace TestAutomationManager.Repositories
 {
     /// <summary>
-    /// Repository for Test data access operations
-    /// Handles all database operations for Tests, Processes, and Functions
+    /// Repository for Test CRUD operations
     /// </summary>
     public class TestRepository : ITestRepository
     {
         // ================================================
-        // READ OPERATIONS (Query)
+        // READ OPERATIONS
         // ================================================
 
         /// <summary>
-        /// Get all tests from database with all related data
+        /// Get all tests with their processes and functions
         /// </summary>
         public async Task<List<Test>> GetAllTestsAsync()
         {
@@ -27,7 +26,6 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    // Get all tests with their processes and functions
                     var tests = await context.Tests
                         .Include(t => t.Processes)
                             .ThenInclude(p => p.Functions)
@@ -46,135 +44,121 @@ namespace TestAutomationManager.Repositories
         }
 
         /// <summary>
-        /// Get single test by ID with all related data
+        /// Get test by ID
         /// </summary>
-        public async Task<Test> GetTestByIdAsync(int id)
+        public async Task<Test> GetTestByIdAsync(int testId)
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    // Get test with all related data
                     var test = await context.Tests
                         .Include(t => t.Processes)
                             .ThenInclude(p => p.Functions)
-                        .FirstOrDefaultAsync(t => t.Id == id);
-
-                    if (test != null)
-                        System.Diagnostics.Debug.WriteLine($"✓ Loaded test ID {id}");
-                    else
-                        System.Diagnostics.Debug.WriteLine($"⚠ Test ID {id} not found");
+                        .FirstOrDefaultAsync(t => t.Id == testId);
 
                     return test;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error loading test {id}: {ex.Message}");
-                throw new Exception($"Failed to load test {id} from database", ex);
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting test by ID: {ex.Message}");
+                throw new Exception("Failed to get test", ex);
             }
         }
 
         /// <summary>
-        /// Get tests by category
+        /// Get all external tables metadata
         /// </summary>
-        public async Task<List<Test>> GetTestsByCategoryAsync(string category)
+        public async Task<List<ExternalTableInfo>> GetAllExternalTablesAsync()
         {
             try
             {
+                var externalRepo = new ExternalTableRepository();
+                var tables = await externalRepo.GetAllExternalTablesAsync();
+
+                // Enrich with test names
                 using (var context = new TestAutomationDbContext())
                 {
-                    var tests = await context.Tests
-                        .Include(t => t.Processes)
-                            .ThenInclude(p => p.Functions)
-                        .Where(t => t.Category == category)
-                        .OrderBy(t => t.Id)
-                        .ToListAsync();
+                    foreach (var table in tables)
+                    {
+                        var test = await context.Tests
+                            .FirstOrDefaultAsync(t => t.Id == table.TestId);
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests in category '{category}'");
-                    return tests;
+                        if (test != null)
+                        {
+                            table.TestName = test.Name;
+                            table.Category = test.Category;
+                        }
+                        else
+                        {
+                            table.TestName = $"Test #{table.TestId} (Not Found)";
+                            table.Category = "Unknown";
+                        }
+                    }
                 }
+
+                return tables;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error loading tests by category: {ex.Message}");
-                throw new Exception($"Failed to load tests for category '{category}'", ex);
-            }
-        }
-
-        /// <summary>
-        /// Get only active tests
-        /// </summary>
-        public async Task<List<Test>> GetActiveTestsAsync()
-        {
-            try
-            {
-                using (var context = new TestAutomationDbContext())
-                {
-                    var tests = await context.Tests
-                        .Include(t => t.Processes)
-                            .ThenInclude(p => p.Functions)
-                        .Where(t => t.IsActive)
-                        .OrderBy(t => t.Id)
-                        .ToListAsync();
-
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} active tests");
-                    return tests;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"✗ Error loading active tests: {ex.Message}");
-                throw new Exception("Failed to load active tests from database", ex);
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading external tables: {ex.Message}");
+                throw new Exception("Failed to load external tables", ex);
             }
         }
 
         // ================================================
-        // WRITE OPERATIONS (Command)
+        // CREATE OPERATIONS
         // ================================================
 
         /// <summary>
-        /// Add new test to database
+        /// Insert new test into database
         /// </summary>
-        public async Task<Test> AddTestAsync(Test test)
+        public async Task InsertTestAsync(Test test)
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    // Add test to context
+                    // Check if ID already exists
+                    bool exists = await context.Tests.AnyAsync(t => t.Id == test.Id);
+                    if (exists)
+                    {
+                        throw new InvalidOperationException($"Test with ID {test.Id} already exists");
+                    }
+
+                    // Add test to database
                     context.Tests.Add(test);
-
-                    // Save changes
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Added test: {test.Name} (ID: {test.Id})");
-                    return test;
+                    System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} '{test.Name}' inserted successfully");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error adding test: {ex.Message}");
-                throw new Exception("Failed to add test to database", ex);
+                System.Diagnostics.Debug.WriteLine($"✗ Error inserting test: {ex.Message}");
+                throw new Exception("Failed to insert test", ex);
             }
         }
 
+        // ================================================
+        // UPDATE OPERATIONS
+        // ================================================
+
         /// <summary>
-        /// Update existing test
+        /// Update an existing test
         /// </summary>
-        public async Task<bool> UpdateTestAsync(Test test)
+        public async Task UpdateTestAsync(Test test)
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    // Find existing test
                     var existingTest = await context.Tests.FindAsync(test.Id);
 
                     if (existingTest == null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"⚠ Test ID {test.Id} not found for update");
-                        return false;
+                        throw new InvalidOperationException($"Test with ID {test.Id} not found");
                     }
 
                     // Update properties
@@ -185,102 +169,128 @@ namespace TestAutomationManager.Repositories
                     existingTest.Status = test.Status;
                     existingTest.LastRun = test.LastRun;
 
-                    // Save changes
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Updated test: {test.Name} (ID: {test.Id})");
-                    return true;
+                    System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} updated successfully");
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error updating test: {ex.Message}");
-                throw new Exception("Failed to update test in database", ex);
+                throw new Exception("Failed to update test", ex);
             }
         }
 
+        // ================================================
+        // DELETE OPERATIONS
+        // ================================================
+
         /// <summary>
-        /// Delete test by ID
+        /// Delete test from database (cascades to processes and functions)
         /// </summary>
-        public async Task<bool> DeleteTestAsync(int id)
+        public async Task DeleteTestAsync(int testId)
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    // Find test
-                    var test = await context.Tests.FindAsync(id);
+                    var test = await context.Tests
+                        .Include(t => t.Processes)
+                            .ThenInclude(p => p.Functions)
+                        .FirstOrDefaultAsync(t => t.Id == testId);
 
                     if (test == null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"⚠ Test ID {id} not found for deletion");
-                        return false;
+                        throw new InvalidOperationException($"Test with ID {testId} not found");
                     }
+
+                    int processCount = test.Processes?.Count ?? 0;
+                    int functionCount = test.Processes?.Sum(p => p.Functions?.Count ?? 0) ?? 0;
 
                     // Remove test (cascade delete will handle processes and functions)
                     context.Tests.Remove(test);
-
-                    // Save changes
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Deleted test ID {id}");
-                    return true;
+                    System.Diagnostics.Debug.WriteLine($"✓ Test #{testId} deleted successfully (including {processCount} processes and {functionCount} functions)");
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error deleting test: {ex.Message}");
-                throw new Exception($"Failed to delete test {id} from database", ex);
+                throw new Exception("Failed to delete test", ex);
             }
         }
 
         // ================================================
-        // STATISTICS OPERATIONS
+        // SMART ID OPERATIONS
         // ================================================
 
         /// <summary>
-        /// Get count of tests by status
+        /// Get next available test ID (finds gaps in sequence)
+        /// For example: if IDs are 1,2,4,5 -> returns 3
+        /// If no gaps, returns max + 1
         /// </summary>
-        public async Task<int> GetTestCountByStatusAsync(string status)
+        public async Task<int?> GetNextAvailableTestIdAsync()
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    int count = await context.Tests
-                        .Where(t => t.Status == status)
-                        .CountAsync();
+                    var existingIds = await context.Tests
+                        .OrderBy(t => t.Id)
+                        .Select(t => t.Id)
+                        .ToListAsync();
 
-                    return count;
+                    if (existingIds.Count == 0)
+                    {
+                        // No tests exist, start with ID 1
+                        System.Diagnostics.Debug.WriteLine("✓ No tests exist, suggesting ID: 1");
+                        return 1;
+                    }
+
+                    // Find first gap in sequence
+                    for (int i = 0; i < existingIds.Count; i++)
+                    {
+                        int expectedId = i + 1;
+                        if (existingIds[i] != expectedId)
+                        {
+                            // Found a gap!
+                            System.Diagnostics.Debug.WriteLine($"✓ Found gap in sequence, suggesting ID: {expectedId}");
+                            return expectedId;
+                        }
+                    }
+
+                    // No gaps found, return max + 1
+                    int nextId = existingIds.Max() + 1;
+                    System.Diagnostics.Debug.WriteLine($"✓ No gaps found, suggesting ID: {nextId}");
+                    return nextId;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error getting test count: {ex.Message}");
-                return 0;
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting next available test ID: {ex.Message}");
+                throw new Exception("Failed to get next available test ID", ex);
             }
         }
 
         /// <summary>
-        /// Get count of active tests
+        /// Check if test ID already exists
         /// </summary>
-        public async Task<int> GetActiveTestCountAsync()
+        public async Task<bool> TestIdExistsAsync(int testId)
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    int count = await context.Tests
-                        .Where(t => t.IsActive)
-                        .CountAsync();
-
-                    return count;
+                    bool exists = await context.Tests.AnyAsync(t => t.Id == testId);
+                    System.Diagnostics.Debug.WriteLine($"✓ Test ID {testId} exists: {exists}");
+                    return exists;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error getting active test count: {ex.Message}");
-                return 0;
+                System.Diagnostics.Debug.WriteLine($"✗ Error checking if test ID exists: {ex.Message}");
+                throw new Exception("Failed to check test ID", ex);
             }
         }
     }
