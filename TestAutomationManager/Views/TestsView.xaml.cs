@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using TestAutomationManager.Dialogs;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
 using TestAutomationManager.Services;
@@ -292,14 +293,26 @@ namespace TestAutomationManager.Views
         // CLEANUP
         // ================================================
 
-        /// <summary>
-        /// Stop database watcher when view is unloaded
-        /// </summary>
+        // Called when the view is shown (navigated to)
+        private void TestsView_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Make sure we subscribe exactly once
+            TestAutomationManager.Services.DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
+            TestAutomationManager.Services.DatabaseWatcherService.Instance.TestsUpdated += OnDatabaseTestsUpdated;
+
+            // Ensure watcher is running (idempotent)
+            if (!TestAutomationManager.Services.DatabaseWatcherService.Instance.IsWatching)
+                TestAutomationManager.Services.DatabaseWatcherService.Instance.StartWatching();
+
+            System.Diagnostics.Debug.WriteLine("✓ TestsView Loaded: subscribed & watcher ensured");
+        }
+
+        // Called when the view is hidden (navigated away) or removed
         private void TestsView_Unloaded(object sender, RoutedEventArgs e)
         {
-            DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
-            DatabaseWatcherService.Instance.StopWatching();
-            System.Diagnostics.Debug.WriteLine("✓ Database watcher stopped (view unloaded)");
+            // Only unsubscribe this view’s handler; DO NOT stop the global watcher here
+            TestAutomationManager.Services.DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
+            System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed (watcher left running)");
         }
 
         /// <summary>
@@ -362,13 +375,10 @@ namespace TestAutomationManager.Views
                     warningMessage += "This action cannot be undone!";
 
                     // Show confirmation dialog
-                    var result = MessageBox.Show(
+                    var result = ModernMessageDialog.ShowConfirmation(
                         warningMessage,
                         "Confirm Deletion",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Warning,
-                        MessageBoxResult.No
-                    );
+                        Window.GetWindow(this));
 
                     if (result == MessageBoxResult.Yes)
                     {
@@ -383,12 +393,10 @@ namespace TestAutomationManager.Views
                         System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} deleted successfully!");
 
                         // Show success message
-                        MessageBox.Show(
+                        ModernMessageDialog.ShowSuccess(
                             $"Test '{test.Name}' has been deleted successfully!",
                             "Test Deleted",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information
-                        );
+                            Window.GetWindow(this));
 
                         // Refresh data from database
                         // The DatabaseWatcherService will pick it up, but force immediate refresh
@@ -398,12 +406,10 @@ namespace TestAutomationManager.Views
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"✗ Error deleting test: {ex.Message}");
-                    MessageBox.Show(
+                    ModernMessageDialog.ShowError(
                         $"Failed to delete test.\n\nError: {ex.Message}",
                         "Delete Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error
-                    );
+                        Window.GetWindow(this));
 
                     // Re-enable button
                     if (sender is Button btn)
@@ -413,5 +419,42 @@ namespace TestAutomationManager.Views
                 }
             }
         }
+        public void FocusTest(int testId)
+        {
+            // Clear current filter so full list remains
+            _currentSearchQuery = "";
+            FilterTests("");   // repopulates 'Tests' from '_allTests'
+
+            // Find the test in the full dataset
+            var test = _allTests.FirstOrDefault(t => t.Id == testId);
+            if (test == null) return;
+
+            test.IsExpanded = true;
+
+            // Ensure containers are generated before BringIntoView
+            Dispatcher.InvokeAsync(() =>
+            {
+                // Force layout so the container can be generated
+                TestsItemsControl.UpdateLayout();
+
+                var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                if (container != null)
+                {
+                    container.BringIntoView();
+                }
+                else
+                {
+                    // In rare cases, generate again on next idle
+                    Dispatcher.InvokeAsync(() =>
+                    {
+                        TestsItemsControl.UpdateLayout();
+                        var c2 = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                        c2?.BringIntoView();
+                    }, System.Windows.Threading.DispatcherPriority.Background);
+                }
+            }, System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+
     }
 }

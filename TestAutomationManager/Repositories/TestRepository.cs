@@ -120,16 +120,19 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    // Check if ID already exists
                     bool exists = await context.Tests.AnyAsync(t => t.Id == test.Id);
                     if (exists)
-                    {
                         throw new InvalidOperationException($"Test with ID {test.Id} already exists");
-                    }
 
-                    // Add test to database
+                    await context.Database.OpenConnectionAsync();
+                    await using var transaction = await context.Database.BeginTransactionAsync();
+
+                    await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [dbo].[Tests] ON");
                     context.Tests.Add(test);
                     await context.SaveChangesAsync();
+                    await context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [dbo].[Tests] OFF");
+
+                    await transaction.CommitAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} '{test.Name}' inserted successfully");
                 }
@@ -140,6 +143,7 @@ namespace TestAutomationManager.Repositories
                 throw new Exception("Failed to insert test", ex);
             }
         }
+
 
         // ================================================
         // UPDATE OPERATIONS

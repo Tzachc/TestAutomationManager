@@ -628,7 +628,6 @@ namespace TestAutomationManager
         // ACTIONS
         // ================================================
 
-
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             // Refresh current tab
@@ -810,6 +809,72 @@ namespace TestAutomationManager
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Handle Add New Test button click
+        /// </summary>
+        private async void AddNewTest_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("➕ Opening Add New Test dialog...");
+
+                // Create and show the dialog
+                var dialog = new TestAutomationManager.Dialogs.AddTestDialog();
+                dialog.Owner = this; // Set owner for proper modal behavior
+
+                bool? result = dialog.ShowDialog();
+
+                if (result == true && dialog.IsSuccess)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✓ New test created: #{dialog.CreatedTest.Id} - {dialog.CreatedTest.Name}");
+
+                    // Ensure no active filter is applied
+                    SearchBox.Text = "";
+
+                    // If Tests tab is already open/selected, refresh and focus
+                    if (ContentTabControl.SelectedItem is TabItem selTab1 &&
+                        selTab1.Content is TestAutomationManager.Views.TestsView tv1)
+                    {
+                        tv1.RefreshData();
+                        tv1.FocusTest(dialog.CreatedTest.Id);
+                    }
+                    else
+                    {
+                        // Open Tests tab, wait for it to render, then focus the test
+                        OpenTestsTab();
+                        await System.Threading.Tasks.Task.Delay(400);
+
+                        if (ContentTabControl.SelectedItem is TabItem selTab2 &&
+                            selTab2.Content is TestAutomationManager.Views.TestsView tv2)
+                        {
+                            tv2.RefreshData();
+                            tv2.FocusTest(dialog.CreatedTest.Id);
+                        }
+                    }
+
+                    // Refresh ExtTables navigation and stats
+                    LoadExtTablesForNavigation();
+                    TestStatisticsService.Instance.ForceRefresh();
+
+                    System.Diagnostics.Debug.WriteLine("✓ UI refreshed to show new test");
+                }
+
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("ℹ Add New Test dialog cancelled");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error in Add New Test: {ex.Message}");
+                MessageBox.Show(
+                    $"An error occurred while opening the Add New Test dialog.\n\nError: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 }
