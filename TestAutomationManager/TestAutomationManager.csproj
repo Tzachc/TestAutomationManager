@@ -6,13 +6,22 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\deadpoolIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\deadpoolIcon.ico" />
     <None Remove="Assets\deadpoolIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Assets\deadpoolIcon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\deadpoolIcon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\deadpoolIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

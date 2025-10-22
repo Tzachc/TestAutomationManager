@@ -113,35 +113,46 @@
                                        Text="3"
                                        FontWeight="Bold"
                                        FontSize="16"
-                                       TextAlignment="Center"/>
+                                       TextAlignment="Center"
+                                       TextChanged="TestIdTextBox_TextChanged"/>
 
-                                <!-- Suggested ID Info -->
+                                <!-- Suggested ID Info with Gaps Button -->
                                 <Border x:Name="SuggestedIdInfo"
                                        Grid.Column="1"
                                        Background="#1A2F23"
                                        CornerRadius="4"
                                        Padding="10,8"
                                        Margin="8,0,0,0">
-                                    <TextBlock FontSize="11" 
-                                             Foreground="{StaticResource SuccessBrush}">
-                                        <Run Text="✓ Free:"/>
-                                        <Run x:Name="SuggestedIdRun" Text="3" FontWeight="Bold"/>
-                                        <Run Text="(gap found)"/>
-                                    </TextBlock>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" FontSize="11" 
+                                                 Foreground="{StaticResource SuccessBrush}"
+                                                 VerticalAlignment="Center">
+                                            <Run Text="✓ Free:"/>
+                                            <Run x:Name="SuggestedIdRun" Text="3" FontWeight="Bold"/>
+                                            <Run x:Name="GapFoundText" Text="(gap found)"/>
+                                        </TextBlock>
+                                    </Grid>
                                 </Border>
 
-                                <!-- Validation Message -->
+                                <!-- Real-time Validation Message -->
                                 <Border x:Name="ValidationMessage"
                                        Grid.Column="1"
-                                       Background="#2F1A1A"
+                                       Background="#3D1A1A"
                                        CornerRadius="4"
                                        Padding="10,8"
                                        Margin="8,0,0,0"
                                        Visibility="Collapsed">
-                                    <TextBlock x:Name="ValidationText"
-                                             FontSize="11" 
-                                             Foreground="{StaticResource ErrorBrush}"
-                                             Text="⚠ This ID already exists!"/>
+                                    <TextBlock x:Name="ValidationMessageText"
+                                             FontSize="11"
+                                             Foreground="{StaticResource ErrorBrush}">
+                                        <Run Text="✗"/>
+                                        <Run x:Name="ValidationTextRun" Text="Test ID already exists!"/>
+                                    </TextBlock>
                                 </Border>
                             </Grid>
                         </StackPanel>
@@ -173,20 +184,38 @@
                                    VerticalScrollBarVisibility="Auto"
                                    Margin="0,0,0,12"/>
 
-                            <!-- Category -->
-                            <TextBlock Text="Category" Style="{StaticResource InputLabel}"/>
-                            <ComboBox x:Name="CategoryComboBox"
-                                    Background="{StaticResource CardBackgroundBrush}"
-                                    Foreground="{StaticResource TextPrimaryBrush}"
+                            <!-- Category - Clickable Row -->
+                            <TextBlock Text="Category" FontSize="10" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,0,0,4"/>
+                            <Border Background="{StaticResource SecondaryBackgroundBrush}"
                                     BorderBrush="{StaticResource BorderBrush}"
-                                    IsEditable="True"
-                                    FontSize="13">
-                                <ComboBoxItem>Regression</ComboBoxItem>
-                                <ComboBoxItem>Smoke</ComboBoxItem>
-                                <ComboBoxItem>Integration</ComboBoxItem>
-                                <ComboBoxItem>Performance</ComboBoxItem>
-                                <ComboBoxItem>Security</ComboBoxItem>
-                            </ComboBox>
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Cursor="Hand"
+                                    MouseLeftButtonDown="CategoryBorder_MouseLeftButtonDown">
+                                <ComboBox x:Name="CategoryComboBox"
+                                        IsEditable="True"
+                                        FontSize="13"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="10,8">
+                                    <ComboBoxItem>Radzen</ComboBoxItem>
+                                    <ComboBoxItem>SCMM</ComboBoxItem>
+                                    <ComboBoxItem>SCMM Funds</ComboBoxItem>
+                                    <ComboBoxItem>WEB1</ComboBoxItem>
+                                    <ComboBoxItem>WEB2</ComboBoxItem>
+                                    <ComboBoxItem>Mobile1</ComboBoxItem>
+                                    <ComboBoxItem>Mobile2</ComboBoxItem>
+                                    <ComboBoxItem>Liquidation</ComboBoxItem>
+                                    <ComboBoxItem>Limits Monitor</ComboBoxItem>
+                                    <ComboBoxItem>Calculation</ComboBoxItem>
+                                    <ComboBoxItem>Payments1</ComboBoxItem>
+                                    <ComboBoxItem>Payments2</ComboBoxItem>
+                                    <ComboBoxItem>Compliance</ComboBoxItem>
+                                    <ComboBoxItem>API</ComboBoxItem>
+                                    <ComboBoxItem>Appium</ComboBoxItem>
+                                    <ComboBoxItem>IOS</ComboBoxItem>
+                                </ComboBox>
+                            </Border>
                         </StackPanel>
                     </Border>
 
@@ -380,5 +409,44 @@
                 </StackPanel>
             </Grid>
         </Border>
+        <!-- Gaps Popup -->
+        <Popup x:Name="GapsPopup"
+               PlacementTarget="{Binding ElementName=ShowGapsButton}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True">
+            <Border Background="{StaticResource CardBackgroundBrush}"
+                    BorderBrush="{StaticResource PrimaryBlueBrush}"
+                    BorderThickness="2"
+                    CornerRadius="8"
+                    Padding="12">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" 
+                                    Direction="270" 
+                                    ShadowDepth="4" 
+                                    BlurRadius="12" 
+                                    Opacity="0.3"/>
+                </Border.Effect>
+                <StackPanel MinWidth="200" MaxWidth="300">
+                    <TextBlock Text="📊 Available Gap IDs" 
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Margin="0,0,0,8"/>
+
+                    <TextBlock x:Name="GapsListText"
+                               FontSize="11"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,8"/>
+
+                    <TextBlock FontSize="10"
+                               Foreground="{StaticResource TextTertiaryBrush}"
+                               TextWrapping="Wrap"
+                               FontStyle="Italic"
+                               Text="💡 Click on any gap ID to use it"/>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

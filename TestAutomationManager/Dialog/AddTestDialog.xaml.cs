@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
@@ -28,6 +31,7 @@ namespace TestAutomationManager.Dialogs
         private int? _suggestedTestId;
         private string _selectedSourceTable = "ExtTable1"; // Default template
         private bool _isManualIdMode = false;
+        private List<int> _allExistingTestIds = new List<int>();
 
         // ================================================
         // PROPERTIES
@@ -83,6 +87,10 @@ namespace TestAutomationManager.Dialogs
                 StatusMessage.Text = "Loading...";
                 StatusMessage.Foreground = (Brush)Application.Current.Resources["TextTertiaryBrush"];
 
+                // Get all existing tests to track IDs
+                var allTests = await _testRepository.GetAllTestsAsync();
+                _allExistingTestIds = allTests.Select(t => t.Id).OrderBy(id => id).ToList();
+
                 // Get suggested test ID
                 _suggestedTestId = await _testRepository.GetNextAvailableTestIdAsync();
 
@@ -90,17 +98,6 @@ namespace TestAutomationManager.Dialogs
                 {
                     TestIdTextBox.Text = _suggestedTestId.Value.ToString();
                     SuggestedIdRun.Text = _suggestedTestId.Value.ToString();
-
-                    // Check if it's a gap or next sequential
-                    var allTests = await _testRepository.GetAllTestsAsync();
-                    if (allTests.Any() && _suggestedTestId.Value <= allTests.Max(t => t.Id))
-                    {
-                        SuggestedIdInfo.ToolTip = $"Found gap at position {_suggestedTestId.Value}";
-                    }
-                    else
-                    {
-                        SuggestedIdInfo.ToolTip = $"Next sequential ID after {allTests.Max(t => t.Id)}";
-                    }
                 }
 
                 // Load all ExtTables
@@ -167,8 +164,20 @@ namespace TestAutomationManager.Dialogs
 
                 SuggestedIdInfo.Visibility = Visibility.Collapsed;
 
-                // Validate current input
+                // Validate current input immediately
                 _ = ValidateTestIdAsync();
+            }
+        }
+
+        /// <summary>
+        /// Real-time validation when user types in Test ID
+        /// </summary>
+        private async void TestIdTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Only validate in manual mode
+            if (_isManualIdMode)
+            {
+                await ValidateTestIdAsync();
             }
         }
 
@@ -196,33 +205,17 @@ namespace TestAutomationManager.Dialogs
                 return false;
             }
 
-            // Check if ID already exists
+            // Check if ID already exists - REAL-TIME CHECK
             bool exists = await _testRepository.TestIdExistsAsync(testId);
             if (exists)
             {
-                ShowValidationError($"Test ID {testId} already exists!");
+                ShowValidationError($"Test {testId} already exists!");
                 return false;
             }
 
-            // Check if ExtTable already exists
-            bool extTableExists = await _extTableRepository.ExtTableExistsAsync($"ExtTable{testId}");
-            if (extTableExists)
-            {
-                ShowValidationError($"ExtTable{testId} already exists!");
-                return false;
-            }
-
+            // Valid ID
+            ValidationMessage.Visibility = Visibility.Collapsed;
             return true;
-        }
-
-        /// <summary>
-        /// Show validation error message
-        /// </summary>
-        private void ShowValidationError(string message)
-        {
-            ValidationText.Text = $"⚠ {message}";
-            ValidationMessage.Visibility = Visibility.Visible;
-            SuggestedIdInfo.Visibility = Visibility.Collapsed;
         }
 
         // ================================================
@@ -261,15 +254,85 @@ namespace TestAutomationManager.Dialogs
         }
 
         /// <summary>
-        /// Handle ExtTable selection
+        /// Show validation error message
+        /// </summary>
+        private void ShowValidationError(string message)
+        {
+            ValidationTextRun.Text = message;
+            ValidationMessage.Visibility = Visibility.Visible;
+        }
+
+        // ================================================
+        // GAPS FEATURE
+        // ================================================
+
+        /// <summary>
+        /// Get list of gap test IDs (only between existing tests, not beyond the last one)
+        /// </summary>
+        private List<int> GetGapTestIds()
+        {
+            var gaps = new List<int>();
+
+            if (!_allExistingTestIds.Any())
+                return gaps;
+
+            int maxId = _allExistingTestIds.Max();
+
+            // Find all gaps between 1 and maxId
+            for (int i = 1; i <= maxId; i++)
+            {
+                if (!_allExistingTestIds.Contains(i))
+                {
+                    gaps.Add(i);
+                }
+            }
+
+            return gaps;
+        }
+
+        // ================================================
+        // CATEGORY CLICKABLE ROW
+        // ================================================
+
+        /// <summary>
+        /// Open category dropdown when clicking anywhere on the row
+        /// </summary>
+        private void CategoryBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            CategoryComboBox.IsDropDownOpen = true;
+            CategoryComboBox.Focus();
+        }
+
+        // ================================================
+        // EXTTABLE HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle ExtTable mode change
+        /// </summary>
+        private void ExtTableMode_Changed(object sender, RoutedEventArgs e)
+        {
+            if (CopyFromPanel == null) return;
+
+            if (CopyExtRadio.IsChecked == true)
+            {
+                CopyFromPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                CopyFromPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
+        /// Handle ExtTable selection from list
         /// </summary>
         private void ExtTableSelection_Checked(object sender, RoutedEventArgs e)
         {
-            if (sender is RadioButton radio && radio.Tag is string tableName)
+            if (sender is RadioButton rb && rb.Tag is string tableName)
             {
                 _selectedSourceTable = tableName;
-                StatusMessage.Text = $"Selected: {tableName}";
-                StatusMessage.Foreground = (Brush)Application.Current.Resources["TextSecondaryBrush"];
+                System.Diagnostics.Debug.WriteLine($"Selected ExtTable: {tableName}");
             }
         }
 
