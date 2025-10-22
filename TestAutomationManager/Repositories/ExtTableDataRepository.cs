@@ -3,6 +3,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using TestAutomationManager.Data;
+using TestAutomationManager.Exceptions;
+using TestAutomationManager.Exceptions;
 
 namespace TestAutomationManager.Repositories
 {
@@ -24,56 +26,153 @@ namespace TestAutomationManager.Repositories
 
         /// <summary>
         /// Update a single cell value in an ExtTable
+        /// ⭐ FIXED: Better handling of text length limits
         /// </summary>
-        /// <param name="tableName">Name of the ExtTable (e.g., "ExtTable1")</param>
-        /// <param name="rowId">ID of the row to update</param>
-        /// <param name="columnName">Name of the column to update</param>
-        /// <param name="newValue">New value for the cell</param>
-        public async Task UpdateCellValueAsync(string tableName, int rowId, string columnName, object newValue)
+
+public async Task UpdateCellValueAsync(string tableName, int rowId, string columnName, object newValue)
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine($"💾 Updating {tableName}.{columnName} for row {rowId}...");
+
+            // Get column info to check constraints
+            var columnInfo = await GetColumnInfoAsync(tableName, columnName);
+
+            // ⭐ Check if value exceeds column length
+            if (newValue != null && columnInfo != null)
+            {
+                string valueStr = newValue.ToString();
+
+                if (columnInfo.MaxLength.HasValue &&
+                    columnInfo.MaxLength.Value > 0 &&
+                    valueStr.Length > columnInfo.MaxLength.Value)
+                {
+                    // ⭐ Throw custom exception with all the details
+                    throw new ColumnLengthExceededException(
+                        columnName,
+                        columnInfo.MaxLength.Value,
+                        valueStr.Length);
+                }
+            }
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                if (!IsValidColumnName(columnName))
+                {
+                    throw new ArgumentException($"Invalid column name: {columnName}");
+                }
+
+                string query = $@"
+                UPDATE [ext].[{tableName}]
+                SET [{columnName}] = @newValue
+                WHERE [Id] = @rowId";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@newValue", newValue ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@rowId", rowId);
+
+                    int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                    if (rowsAffected > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ Cell updated successfully");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠ No rows updated (row ID {rowId} not found)");
+                    }
+                }
+            }
+        }
+        catch (SqlException ex) when (ex.Message.Contains("would be truncated"))
+        {
+            // ⭐ Catch SQL truncation errors that slip through
+            System.Diagnostics.Debug.WriteLine($"✗ SQL truncation error: {ex.Message}");
+
+            // Try to extract column info and throw our custom exception
+            var columnInfo = await GetColumnInfoAsync(tableName, columnName);
+            if (columnInfo?.MaxLength != null)
+            {
+                throw new ColumnLengthExceededException(
+                    columnName,
+                    columnInfo.MaxLength.Value,
+                    newValue?.ToString()?.Length ?? 0);
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "The text you entered is too long for this column.\n\n" +
+                    "Please shorten your text or contact your administrator.");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"✗ Error updating cell: {ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// ⭐ NEW: Get column information including max length
+    /// </summary>
+    public async Task<ColumnInfo> GetColumnInfoAsync(string tableName, string columnName)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"💾 Updating {tableName}.{columnName} for row {rowId}...");
-
                 using (var connection = new SqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
 
-                    // Use parameterized query to prevent SQL injection
-                    // Note: Column name cannot be parameterized, so we validate it first
-                    if (!IsValidColumnName(columnName))
-                    {
-                        throw new ArgumentException($"Invalid column name: {columnName}");
-                    }
-
-                    string query = $@"
-                        UPDATE [ext].[{tableName}]
-                        SET [{columnName}] = @newValue
-                        WHERE [Id] = @rowId";
+                    string query = @"
+                SELECT 
+                    DATA_TYPE,
+                    CHARACTER_MAXIMUM_LENGTH,
+                    IS_NULLABLE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = 'ext'
+                  AND TABLE_NAME = @tableName
+                  AND COLUMN_NAME = @columnName";
 
                     using (var command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@newValue", newValue ?? DBNull.Value);
-                        command.Parameters.AddWithValue("@rowId", rowId);
+                        command.Parameters.AddWithValue("@tableName", tableName);
+                        command.Parameters.AddWithValue("@columnName", columnName);
 
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-
-                        if (rowsAffected > 0)
+                        using (var reader = await command.ExecuteReaderAsync())
                         {
-                            System.Diagnostics.Debug.WriteLine($"✓ Cell updated successfully");
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"⚠ No rows updated (row ID {rowId} not found)");
+                            if (await reader.ReadAsync())
+                            {
+                                return new ColumnInfo
+                                {
+                                    DataType = reader.GetString(0),
+                                    MaxLength = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1),
+                                    IsNullable = reader.GetString(2) == "YES"
+                                };
+                            }
                         }
                     }
                 }
+
+                return null;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error updating cell: {ex.Message}");
-                throw new Exception($"Failed to update cell in {tableName}", ex);
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting column info: {ex.Message}");
+                return null;
             }
+        }
+
+        /// <summary>
+        /// Helper class to store column information
+        /// </summary>
+        public class ColumnInfo
+        {
+            public string DataType { get; set; }
+            public int? MaxLength { get; set; }
+            public bool IsNullable { get; set; }
         }
 
         // ================================================
@@ -230,5 +329,65 @@ namespace TestAutomationManager.Repositories
                 return "unknown";
             }
         }
+
+        /// <summary>
+        /// Expand column size to accommodate longer text
+        /// </summary>
+        public async Task ExpandColumnSizeAsync(string tableName, string columnName, int newMaxLength)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"📏 Expanding {tableName}.{columnName} to {newMaxLength} characters...");
+
+                if (!IsValidColumnName(columnName))
+                {
+                    throw new ArgumentException($"Invalid column name: {columnName}");
+                }
+
+                // Get current column info
+                var columnInfo = await GetColumnInfoAsync(tableName, columnName);
+                if (columnInfo == null)
+                {
+                    throw new InvalidOperationException($"Column '{columnName}' not found");
+                }
+
+                string dataType = columnInfo.DataType.ToUpperInvariant();
+
+                // Only works for VARCHAR/NVARCHAR types
+                if (!dataType.Contains("VARCHAR"))
+                {
+                    throw new InvalidOperationException($"Cannot resize column of type {dataType}. Only VARCHAR/NVARCHAR columns can be resized.");
+                }
+
+                // Prevent shrinking
+                if (newMaxLength > 0 && columnInfo.MaxLength.HasValue && newMaxLength <= columnInfo.MaxLength.Value)
+                {
+                    throw new InvalidOperationException($"New length ({newMaxLength}) must be greater than current length ({columnInfo.MaxLength.Value})");
+                }
+
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string newSize = newMaxLength == -1 ? "MAX" : newMaxLength.ToString();
+
+                    string alterQuery = $@"
+                ALTER TABLE [ext].[{tableName}]
+                ALTER COLUMN [{columnName}] {dataType}({newSize})";
+
+                    using (var command = new SqlCommand(alterQuery, connection))
+                    {
+                        await command.ExecuteNonQueryAsync();
+                        System.Diagnostics.Debug.WriteLine($"✓ Column expanded successfully to {newSize} characters");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error expanding column: {ex.Message}");
+                throw new Exception($"Failed to expand column {columnName} in {tableName}", ex);
+            }
+        }
+
     }
 }

@@ -37,6 +37,7 @@ namespace TestAutomationManager
         private readonly ITestRepository _repository;
         public ObservableCollection<ExternalTableInfo> ExtTablesList { get; set; }
         private ObservableCollection<ExternalTableInfo> _allExtTables;
+        private Dialogs.SearchOverlay _currentSearchDialog = null;
 
         // Tab drag and drop
         private Point _dragStartPoint;
@@ -105,6 +106,9 @@ namespace TestAutomationManager
 
             // Pre-load external tables
             LoadExtTablesForNavigation();
+
+            this.PreviewKeyDown += MainWindow_PreviewKeyDown;
+
         }
 
         // ================================================
@@ -876,5 +880,121 @@ namespace TestAutomationManager
                     MessageBoxImage.Error);
             }
         }
+
+        //Handlers for the ctrl + F functionality
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Handle Ctrl+F for search
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.F)
+            {
+                e.Handled = true; // Mark as handled immediately to prevent propagation
+
+                // If search dialog is already open, bring it to focus instead of opening a new one
+                if (_currentSearchDialog != null)
+                {
+                    try
+                    {
+                        _currentSearchDialog.Activate();
+                        _currentSearchDialog.Focus();
+                        return;
+                    }
+                    catch
+                    {
+                        // Dialog might have been closed, continue to open a new one
+                        _currentSearchDialog = null;
+                    }
+                }
+
+                // Open search dialog
+                try
+                {
+                    var searchDialog = new Dialogs.SearchOverlay(this);
+                    _currentSearchDialog = searchDialog;
+
+                    // Subscribe to closing event to clear the reference
+                    searchDialog.Closed += (s, args) =>
+                    {
+                        _currentSearchDialog = null;
+                    };
+
+                    bool? result = searchDialog.ShowDialog();
+
+                    if (result == true)
+                    {
+                        string query = searchDialog.SearchQuery;
+                        bool exact = searchDialog.ExactMatch;
+
+                        // Ensure we have a valid query
+                        if (string.IsNullOrWhiteSpace(query))
+                        {
+                            return;
+                        }
+
+                        // Get the current tab content
+                        if (ContentTabControl.SelectedItem is TabItem selectedTab &&
+                            selectedTab.Content is FrameworkElement content)
+                        {
+                            // Clear previous highlights
+                            Services.VisualSearchHighlighter.ClearHighlights(content);
+
+                            // Perform the search and highlight matches
+                            var (matches, firstMatch) = Services.VisualSearchHighlighter.HighlightText(content, query, exact);
+
+                            if (matches == 0)
+                            {
+                                // No matches found - show info dialog
+                                Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    Dialogs.ModernMessageDialog.ShowInfo(
+                                        $"No matches found for \"{query}\"",
+                                        "Find Results",
+                                        this);
+                                }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                            }
+                            else
+                            {
+                                // Scroll to the first match
+                                if (firstMatch != null)
+                                {
+                                    // Use BeginInvoke to ensure the UI has updated before scrolling
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        Services.ViewportScroller.ScrollToElement(firstMatch);
+                                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                                }
+
+                                // Auto-clear highlights after 3 seconds
+                                var timer = new System.Windows.Threading.DispatcherTimer
+                                {
+                                    Interval = TimeSpan.FromSeconds(3)
+                                };
+                                timer.Tick += (s, args) =>
+                                {
+                                    timer.Stop();
+                                    Services.VisualSearchHighlighter.ClearHighlights(content);
+                                };
+                                timer.Start();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error opening search dialog: {ex.Message}");
+                    _currentSearchDialog = null;
+
+                    // Show error to user
+                    MessageBox.Show(
+                        $"An error occurred while opening the search dialog.\n\nError: {ex.Message}",
+                        "Search Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
+            }
+        }
+
+
+
+
     }
 }

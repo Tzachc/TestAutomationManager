@@ -1,12 +1,16 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using TestAutomationManager.Data;
 using TestAutomationManager.Dialogs;
+using TestAutomationManager.Exceptions;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
 
@@ -73,6 +77,9 @@ namespace TestAutomationManager.Views
                     TableDataGrid.ItemsSource = _currentDataTable.DefaultView;
                     TableDataGrid.AutoGeneratingColumn += OnAutoGeneratingColumn;
 
+                    // ⭐ Subscribe to MouseRightButtonUp for context menu
+                    TableDataGrid.PreviewMouseRightButtonUp += DataGrid_PreviewMouseRightButtonUp;
+
                     _rowCount = _currentDataTable.Rows.Count;
                     RowCountText.Text = _rowCount.ToString();
 
@@ -80,7 +87,7 @@ namespace TestAutomationManager.Views
                     TableDataGrid.Visibility = Visibility.Visible;
 
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {_rowCount} rows from {TableName}");
-                    StatusText.Text = "Ready - Double-click any cell to edit";
+                    StatusText.Text = "Ready - Double-click cells to edit, right-click column headers for options";
                 }
                 else
                 {
@@ -104,33 +111,24 @@ namespace TestAutomationManager.Views
             }
         }
 
-        /// <summary>
-        /// Configure columns for dynamic sizing based on content
-        /// ⭐ FIXED: Ensure column width accommodates both header text AND cell content
-        /// </summary>
         private void OnAutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
             string columnName = e.PropertyName;
 
-            // Make ID column read-only
             if (columnName.Equals("Id", StringComparison.OrdinalIgnoreCase))
             {
                 e.Column.IsReadOnly = true;
             }
 
-            // ⭐ FIXED: Use Auto instead of SizeToCells to include header width
             e.Column.Width = DataGridLength.Auto;
 
-            // Calculate minimum width based on header text length
-            // This ensures the header is never cut off
             int headerLength = columnName.Length;
-            double calculatedMinWidth = Math.Max(80, headerLength * 8 + 40); // 8px per char + 40px padding
+            double minWidth = Math.Max(80, headerLength * 8 + 40);
 
-            e.Column.MinWidth = calculatedMinWidth;
+            e.Column.MinWidth = minWidth;
             e.Column.MaxWidth = 500;
             e.Column.CanUserResize = true;
 
-            // Center alignment for all columns
             if (e.Column is DataGridTextColumn textColumn)
             {
                 var style = new Style(typeof(TextBlock));
@@ -139,6 +137,96 @@ namespace TestAutomationManager.Views
                 style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
 
                 textColumn.ElementStyle = style;
+            }
+        }
+
+        /// <summary>
+        /// ⭐ Handle right-click on DataGrid to show context menu for column headers
+        /// </summary>
+        private void DataGrid_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                // Find what was clicked
+                DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+                // Navigate up the visual tree to find if we clicked on a column header
+                while (dep != null && !(dep is DataGridColumnHeader))
+                {
+                    dep = VisualTreeHelper.GetParent(dep);
+                }
+
+                if (dep is DataGridColumnHeader header && header.Content != null)
+                {
+                    string columnName = header.Content.ToString();
+
+                    System.Diagnostics.Debug.WriteLine($"🖱️ Right-clicked on column: {columnName}");
+
+                    // Don't show context menu for ID column
+                    if (columnName.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                    {
+                        System.Diagnostics.Debug.WriteLine("⚠️ Skipping context menu for ID column");
+                        return;
+                    }
+
+                    // Create and show context menu
+                    ShowColumnContextMenu(header, columnName);
+
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling right-click: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// ⭐ Create and show context menu for column
+        /// </summary>
+        private void ShowColumnContextMenu(FrameworkElement target, string columnName)
+        {
+            try
+            {
+                // Create context menu
+                var contextMenu = new ContextMenu
+                {
+                    PlacementTarget = target,
+                    Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+                    Background = (System.Windows.Media.Brush)Application.Current.Resources["CardBackgroundBrush"],
+                    BorderBrush = (System.Windows.Media.Brush)Application.Current.Resources["BorderBrush"],
+                    BorderThickness = new Thickness(1, 1, 1, 1),
+                    Padding = new Thickness(4, 4, 4, 4)
+                };
+
+                // Edit Length menu item
+                var editLengthItem = new MenuItem
+                {
+                    Header = "📏 Edit Column Length",
+                    FontSize = 13,
+                    Height = 32,
+                    Padding = new Thickness(10, 0, 10, 0),
+                    Background = (System.Windows.Media.Brush)Application.Current.Resources["CardBackgroundBrush"],
+                    Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"]
+                };
+
+                // Handle click
+                editLengthItem.Click += (s, e) =>
+                {
+                    System.Diagnostics.Debug.WriteLine($"✓ Edit Length clicked for: {columnName}");
+                    EditColumnLength_Click(columnName);
+                };
+
+                contextMenu.Items.Add(editLengthItem);
+
+                // Show the context menu
+                contextMenu.IsOpen = true;
+
+                System.Diagnostics.Debug.WriteLine($"✓ Context menu shown for column: {columnName}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error showing context menu: {ex.Message}");
             }
         }
 
@@ -216,7 +304,7 @@ namespace TestAutomationManager.Views
                                 System.Diagnostics.Debug.WriteLine($"✓ Updated {TableName}.{columnName} for row {rowId}");
 
                                 await System.Threading.Tasks.Task.Delay(3000);
-                                StatusText.Text = "Ready - Double-click any cell to edit";
+                                StatusText.Text = "Ready - Double-click cells to edit, right-click column headers for options";
                                 StatusText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"];
                             }
                             else
@@ -227,11 +315,25 @@ namespace TestAutomationManager.Views
                         }
                     }
                 }
+                catch (ColumnLengthExceededException ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Column length exceeded: {ex.Message}");
+
+                    StatusText.Text = $"✗ Text too long for column '{ex.ColumnName}'";
+                    StatusText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["ErrorBrush"];
+
+                    ModernMessageDialog.ShowWarning(
+                        ex.GetDetailedMessage(),
+                        "Text Too Long",
+                        Window.GetWindow(this));
+
+                    RefreshData();
+                }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"✗ Error saving cell: {ex.Message}");
 
-                    StatusText.Text = $"✗ Error: {ex.Message}";
+                    StatusText.Text = $"✗ Error saving changes";
                     StatusText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["ErrorBrush"];
 
                     ModernMessageDialog.ShowError(
@@ -275,8 +377,7 @@ namespace TestAutomationManager.Views
 
             try
             {
-                // Show custom modern dialog
-                var dialog = new TestAutomationManager.Dialogs.RenameColumnDialog(currentColumnName);
+                var dialog = new RenameColumnDialog(currentColumnName);
                 dialog.Owner = Window.GetWindow(this);
 
                 bool? result = dialog.ShowDialog();
@@ -314,6 +415,67 @@ namespace TestAutomationManager.Views
                 ModernMessageDialog.ShowError(
                     $"Failed to rename column.\n\nError: {ex.Message}",
                     "Rename Failed",
+                    Window.GetWindow(this));
+            }
+        }
+
+        // ================================================
+        // COLUMN LENGTH EDITING
+        // ================================================
+
+        private async void EditColumnLength_Click(string columnName)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"📏 Opening edit length dialog for: {columnName}");
+
+                var columnInfo = await _dataRepository.GetColumnInfoAsync(TableName, columnName);
+
+                if (columnInfo == null || !columnInfo.MaxLength.HasValue)
+                {
+                    ModernMessageDialog.ShowWarning(
+                        $"Column '{columnName}' does not have a length limit, or is not a text column.",
+                        "Cannot Edit Length",
+                        Window.GetWindow(this));
+                    return;
+                }
+
+                var dialog = new EditColumnLengthDialog(columnName, columnInfo.MaxLength.Value);
+                dialog.Owner = Window.GetWindow(this);
+
+                bool? result = dialog.ShowDialog();
+
+                if (result == true)
+                {
+                    int newLength = dialog.NewLength;
+                    string lengthText = newLength == -1 ? "MAX" : $"{newLength} characters";
+
+                    StatusText.Text = $"Updating column '{columnName}' length to {lengthText}...";
+                    StatusText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["WarningBrush"];
+
+                    await _dataRepository.ExpandColumnSizeAsync(TableName, columnName, newLength);
+
+                    StatusText.Text = $"✓ Column length updated successfully!";
+                    StatusText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["SuccessBrush"];
+
+                    ModernMessageDialog.ShowSuccess(
+                        $"Column '{columnName}' has been expanded to {lengthText}.\n\nYou can now enter longer text in this column.",
+                        "Length Updated",
+                        Window.GetWindow(this));
+
+                    RefreshData();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error editing column length: {ex.Message}");
+
+                StatusText.Text = $"✗ Failed to update column length";
+                StatusText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["ErrorBrush"];
+
+                ModernMessageDialog.ShowError(
+                    $"Failed to update column length.\n\nError: {ex.Message}",
+                    "Update Failed",
                     Window.GetWindow(this));
             }
         }

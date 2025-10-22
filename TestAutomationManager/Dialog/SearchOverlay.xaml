@@ -1,0 +1,227 @@
+﻿<!-- Modern, Clean Search Overlay Design -->
+<Window x:Class="TestAutomationManager.Dialogs.SearchOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Width="440" 
+        Height="120"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Opacity="0.98">
+
+    <Window.Resources>
+        <!-- Modern button style -->
+        <Style x:Key="ModernButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.85"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Cancel button style -->
+        <Style x:Key="CancelButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+
+        <!-- Close button style -->
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#33FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Modern TextBox style -->
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                        Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main container -->
+    <Border CornerRadius="12"
+            Background="{DynamicResource CardBackgroundBrush}"
+            BorderBrush="{DynamicResource AccentBrush}"
+            BorderThickness="1"
+            MouseLeftButtonDown="Border_MouseLeftButtonDown" Margin="0,-11,0,-25">
+
+        <!-- Shadow effect -->
+        <Border.Effect>
+            <DropShadowEffect Color="Black" 
+                              BlurRadius="20" 
+                              ShadowDepth="4" 
+                              Opacity="0.4"/>
+        </Border.Effect>
+
+        <Grid Margin="16,12,16,14">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="8"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header with title and close button -->
+            <Grid Grid.Row="0" Cursor="SizeAll">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="106*"/>
+                    <ColumnDefinition Width="83*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Find in Page"
+                          FontSize="14"
+                          FontWeight="SemiBold"
+                          Foreground="{DynamicResource TextPrimaryBrush}"
+                          VerticalAlignment="Center" Grid.ColumnSpan="2"/>
+
+                <Button Grid.Column="2"
+                        Content="✕"
+                        Style="{StaticResource CloseButtonStyle}"
+                        Click="Close_Click"/>
+            </Grid>
+
+            <!-- Search box with icon -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Search icon -->
+                <TextBlock Text="🔍"
+                          FontSize="13"
+                          Margin="12,0,0,0"
+                          VerticalAlignment="Center"
+                          IsHitTestVisible="False"
+                          Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                <TextBox x:Name="SearchTextBox"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Padding="32,6,10,6"
+                         KeyDown="SearchTextBox_KeyDown"
+                         TextChanged="SearchTextBox_TextChanged"/>
+
+                <!-- Placeholder text -->
+                <TextBlock x:Name="PlaceholderText"
+                           Text="Type to search..."
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="13"
+                           Margin="34,0,0,0"
+                           VerticalAlignment="Center"
+                           IsHitTestVisible="False"
+                           Visibility="Visible"/>
+            </Grid>
+
+            <!-- Options and buttons -->
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Exact match checkbox -->
+                <CheckBox x:Name="ExactMatchCheckBox"
+                          Grid.Column="0"
+                          Content="Exact match"
+                          Foreground="{DynamicResource TextSecondaryBrush}"
+                          FontSize="12"
+                          VerticalAlignment="Center"/>
+
+                <!-- Status text -->
+                <TextBlock x:Name="StatusText"
+                           Grid.Column="1"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="11"
+                           VerticalAlignment="Center"
+                           Margin="12,0,8,0"
+                           FontStyle="Italic"/>
+
+                <!-- Cancel button -->
+                <Button Grid.Column="2"
+                        Content="Cancel"
+                        Style="{StaticResource CancelButtonStyle}"
+                        Click="Cancel_Click"
+                        MinWidth="65"
+                        Padding="16,6"/>
+
+                <!-- Find button -->
+                <Button Grid.Column="4"
+                        Content="Find"
+                        Style="{StaticResource ModernButtonStyle}"
+                        Click="Find_Click"
+                        MinWidth="65"
+                        Padding="16,6"
+                        IsDefault="True"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

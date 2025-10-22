@@ -237,38 +237,34 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Logo Section -->
-                        <Border Grid.Row="0"
-                                Width="48" 
-                                Height="48" 
-                                Background="{StaticResource PrimaryBlueBrush}"
-                                CornerRadius="12"
-                                HorizontalAlignment="Center">
-                            <Grid>
-                                <TextBlock Text="T" 
-                                         FontSize="24" 
-                                         FontWeight="Bold"
-                                         Foreground="#010409"
-                                         HorizontalAlignment="Center" 
-                                         VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
+                        <!-- Logo Section: only the image -->
+                        <Image Source="Assets/deadpoolIcon.png"
+       Width="64"
+       Height="62"
+       Stretch="Uniform"
+       HorizontalAlignment="Center"
+       VerticalAlignment="Center"/>
+
 
                         <!-- App Name -->
                         <StackPanel Grid.Row="1" Margin="0,16,0,0">
                             <TextBlock Text="Test Manager" 
-                                     FontSize="16" 
-                                     FontWeight="SemiBold" 
-                                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                       FontSize="16" 
+                       FontWeight="SemiBold" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource TextPrimaryBrush}"/>
                             <TextBlock Text="Automation Platform" 
-                                     FontSize="11"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                     Foreground="{StaticResource TextSecondaryBrush}" 
-                                     Margin="0,2,0,0"/>
+                       FontSize="11"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSecondaryBrush}" 
+                       Margin="0,2,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>
+
+
 
                 <!-- 🎯 NAVIGATION -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12,8">
