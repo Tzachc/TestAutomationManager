@@ -20,6 +20,38 @@
         TitleForeground="{StaticResource TextPrimaryBrush}"
         ResizeMode="CanResize">
 
+    <!-- Add Resources for ExtTables -->
+    <mah:MetroWindow.Resources>
+        <!-- Expandable Navigation Item Style -->
+        <Style x:Key="ExpandableNavItem" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,10"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#21262D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Child Navigation Item Style -->
+        <Style x:Key="ChildNavItem" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Margin" Value="32,1,0,1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#21262D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </mah:MetroWindow.Resources>
+
     <!-- 🎨 CUSTOM TITLE BAR -->
     <mah:MetroWindow.TitleTemplate>
         <DataTemplate>
@@ -205,38 +237,34 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Logo Section -->
-                        <Border Grid.Row="0"
-                                Width="48" 
-                                Height="48" 
-                                Background="{StaticResource PrimaryBlueBrush}"
-                                CornerRadius="12"
-                                HorizontalAlignment="Center">
-                            <Grid>
-                                <TextBlock Text="T" 
-                                         FontSize="24" 
-                                         FontWeight="Bold"
-                                         Foreground="#010409"
-                                         HorizontalAlignment="Center" 
-                                         VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
+                        <!-- Logo Section: only the image -->
+                        <Image Source="Assets/deadpoolIcon.png"
+       Width="64"
+       Height="62"
+       Stretch="Uniform"
+       HorizontalAlignment="Center"
+       VerticalAlignment="Center"/>
+
 
                         <!-- App Name -->
                         <StackPanel Grid.Row="1" Margin="0,16,0,0">
                             <TextBlock Text="Test Manager" 
-                                     FontSize="16" 
-                                     FontWeight="SemiBold" 
-                                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                       FontSize="16" 
+                       FontWeight="SemiBold" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource TextPrimaryBrush}"/>
                             <TextBlock Text="Automation Platform" 
-                                     FontSize="11"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                     Foreground="{StaticResource TextSecondaryBrush}" 
-                                     Margin="0,2,0,0"/>
+                       FontSize="11"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSecondaryBrush}" 
+                       Margin="0,2,0,0"/>
                         </StackPanel>
                     </Grid>
                 </Border>
+
+
 
                 <!-- 🎯 NAVIGATION -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12,8">
@@ -280,6 +308,155 @@
                             </StackPanel>
                         </RadioButton>
 
+                        <!-- ⭐ NEW: ExtTables Expandable Section -->
+                        <Border x:Name="ExtTablesNavItem"
+                                Style="{StaticResource ExpandableNavItem}"
+                                MouseLeftButtonDown="ExtTablesNav_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <TextBlock Text="📊" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="ExtTablesText" 
+                                             Text="ExtTables" 
+                                             FontSize="13" 
+                                             FontWeight="Medium" 
+                                             Foreground="{StaticResource TextSecondaryBrush}"
+                                             VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Expand/Collapse Arrow -->
+                                <TextBlock x:Name="ExtTablesArrow"
+                                         Grid.Column="1"
+                                         Text="▶" 
+                                         FontSize="10"
+                                         Foreground="{StaticResource TextTertiaryBrush}"
+                                         VerticalAlignment="Center"
+                                         RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform x:Name="ExtTablesArrowRotation" Angle="0"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+
+                        <!-- ExtTables Children (Collapsed by default) -->
+                        <StackPanel x:Name="ExtTablesChildren" Visibility="Collapsed">
+                            <!-- Search Box for Tables -->
+                            <Border Background="{StaticResource CardBackgroundBrush}"
+                                   BorderBrush="{StaticResource BorderBrush}"
+                                   BorderThickness="1"
+                                   CornerRadius="4"
+                                   Margin="32,4,8,4"
+                                   Padding="2">
+                                <Grid>
+                                    <TextBox x:Name="ExtTablesSearchBox"
+                                           Background="Transparent"
+                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                           BorderThickness="0"
+                                           FontSize="11"
+                                           Padding="6,4"
+                                           TextChanged="ExtTablesSearch_TextChanged"
+                                           GotFocus="ExtTablesSearchBox_GotFocus"
+                                           LostFocus="ExtTablesSearchBox_LostFocus"/>
+
+                                    <!-- Placeholder Text -->
+                                    <TextBlock x:Name="ExtTablesSearchPlaceholder"
+                                             Text="🔍 Search tables..."
+                                             Foreground="{StaticResource TextTertiaryBrush}"
+                                             FontSize="11"
+                                             Padding="6,4"
+                                             IsHitTestVisible="False"
+                                             Visibility="Visible"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Tables Count Badge -->
+                            <Border Background="{StaticResource SecondaryBackgroundBrush}"
+                                   BorderBrush="{StaticResource BorderBrush}"
+                                   BorderThickness="1"
+                                   CornerRadius="4"
+                                   Padding="8,4"
+                                   Margin="32,2,8,4">
+                                <TextBlock FontSize="10" 
+                                         Foreground="{StaticResource TextSecondaryBrush}"
+                                         HorizontalAlignment="Center">
+                                    <Run x:Name="ExtTablesCountRun" Text="0"/>
+                                    <Run Text=" tables found"/>
+                                </TextBlock>
+                            </Border>
+
+                            <!-- Scrollable Tables List -->
+                            <ScrollViewer MaxHeight="300" 
+                                        VerticalScrollBarVisibility="Auto"
+                                        HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="ExtTablesItemsControl">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource ChildNavItem}"
+                                                    MouseLeftButtonDown="ExtTableItem_Click"
+                                                    Tag="{Binding TableName}"
+                                                    ToolTip="{Binding TestName}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Test ID Badge -->
+                                                    <Border Grid.Column="0"
+                                                           Width="18" Height="18"
+                                                           Background="{StaticResource PrimaryBlueBrush}"
+                                                           CornerRadius="3"
+                                                           Margin="0,0,6,0">
+                                                        <TextBlock Text="{Binding TestId}" 
+                                                                 FontSize="9"
+                                                                 FontWeight="Bold"
+                                                                 Foreground="White"
+                                                                 HorizontalAlignment="Center"
+                                                                 VerticalAlignment="Center"/>
+                                                    </Border>
+
+                                                    <!-- Table Name -->
+                                                    <TextBlock Grid.Column="1"
+                                                             Text="{Binding TableName}" 
+                                                             FontSize="11"
+                                                             Foreground="{StaticResource TextSecondaryBrush}"
+                                                             VerticalAlignment="Center"
+                                                             TextTrimming="CharacterEllipsis"/>
+
+                                                    <!-- Row Count Badge -->
+                                                    <Border Grid.Column="2"
+                                                           Background="{StaticResource SecondaryBackgroundBrush}"
+                                                           CornerRadius="3"
+                                                           Padding="4,2"
+                                                           Margin="4,0,0,0">
+                                                        <TextBlock Text="{Binding RowCount}" 
+                                                                 FontSize="9"
+                                                                 FontWeight="SemiBold"
+                                                                 Foreground="{StaticResource TextTertiaryBrush}"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <!-- Empty State -->
+                            <TextBlock x:Name="ExtTablesEmptyState"
+                                     Text="No tables found"
+                                     FontSize="11"
+                                     Foreground="{StaticResource TextTertiaryBrush}"
+                                     HorizontalAlignment="Center"
+                                     Margin="32,8"
+                                     Visibility="Collapsed"/>
+                        </StackPanel>
+
                         <!-- Divider -->
                         <Border Height="1" 
                                Background="{StaticResource BorderBrush}" 
@@ -297,7 +474,7 @@
                                    Tag="Reports" 
                                    Click="NavigationButton_Click">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📊" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="📈" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Reports" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
                             </StackPanel>
                         </RadioButton>
@@ -315,7 +492,6 @@
                 </ScrollViewer>
 
                 <!-- 🟢 STATUS INDICATOR -->
-                <!-- 🟢 STATUS INDICATOR - LIVE DATABASE CONNECTION -->
                 <Border Grid.Row="2" 
        Margin="12,8,12,16"
        Background="{StaticResource CardBackgroundBrush}"
@@ -380,10 +556,10 @@
 
             <!-- 🔥 PROFESSIONAL TOOLBAR -->
             <Border Grid.Row="0" 
-                   Background="{StaticResource SecondaryBackgroundBrush}"
-                   BorderThickness="0,0,0,1"
-                   BorderBrush="{StaticResource BorderBrush}"
-                   Padding="24,16">
+       Background="{StaticResource SecondaryBackgroundBrush}"
+       BorderThickness="0,0,0,1"
+       BorderBrush="{StaticResource BorderBrush}"
+       Padding="20,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -394,19 +570,19 @@
                     <!-- Title Section -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock x:Name="PageTitle" 
-                                 Text="Tests" 
-                                 FontSize="20" 
-                                 FontWeight="SemiBold" 
-                                 Foreground="{StaticResource TextPrimaryBrush}" 
-                                 VerticalAlignment="Center"/>
+                     Text="Tests" 
+                     FontSize="20" 
+                     FontWeight="SemiBold" 
+                     Foreground="{StaticResource TextPrimaryBrush}" 
+                     VerticalAlignment="Center"/>
 
                         <Border Style="{StaticResource Badge}"
-                               Margin="12,0,0,0"
-                               VerticalAlignment="Center">
+                   Margin="12,0,0,0"
+                   VerticalAlignment="Center">
                             <TextBlock Text="{Binding RecordCountText}" 
-         FontSize="11" 
-         Foreground="{StaticResource TextSecondaryBrush}" 
-         FontWeight="SemiBold"/>
+     FontSize="11" 
+     Foreground="{StaticResource TextSecondaryBrush}" 
+     FontWeight="SemiBold"/>
                         </Border>
                     </StackPanel>
 
@@ -414,35 +590,136 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Search Box -->
                         <TextBox Width="260" 
-                               Style="{StaticResource ModernTextBox}"
-                               x:Name="SearchBox" 
-                               TextChanged="SearchBox_TextChanged"
-                               Margin="0,0,12,0"/>
+               Style="{StaticResource ModernTextBox}"
+               x:Name="SearchBox" 
+               TextChanged="SearchBox_TextChanged"
+               Margin="0,0,12,0"/>
+
+                        <!-- Add New Test Button -->
+                        <Button Style="{StaticResource PrimaryButton}" 
+              Padding="10,8"
+              Margin="0,0,8,0" 
+              Click="AddNewTest_Click"
+              ToolTip="Create a new test with ExtTable">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="➕" FontSize="14" Margin="0,0,6,0"/>
+                                <TextBlock Text="Add Test" FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
 
                         <!-- Refresh Button -->
                         <Button Style="{StaticResource SecondaryButton}" 
-                              Padding="10,8"
-                              Margin="0,0,8,0" 
-                              Click="Refresh_Click"
-                              ToolTip="Refresh">
+              Padding="10,8"
+              Margin="0,0,0,0" 
+              Click="Refresh_Click"
+              ToolTip="Refresh data from database">
                             <TextBlock Text="🔄" FontSize="14"/>
-                        </Button>
-
-                        <!-- Add New Button -->
-                        <Button Style="{StaticResource PrimaryButton}" 
-                              Click="AddNew_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="+" Margin="0,0,6,0" FontSize="16" FontWeight="Bold"/>
-                                <TextBlock Text="New Test" FontSize="13"/>
-                            </StackPanel>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- ✨ CONTENT FRAME -->
+            <!-- ✨ TABBED CONTENT AREA -->
             <Border Grid.Row="1" Background="{StaticResource PrimaryBackgroundBrush}">
-                <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden"/>
+                <TabControl x:Name="ContentTabControl"
+                           Background="Transparent"
+                           BorderThickness="0"
+                           Padding="0">
+                    <!-- Override MahApps TabItem Style Completely -->
+                    <TabControl.ItemContainerStyle>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="Height" Value="36"/>
+                            <Setter Property="AllowDrop" Value="True"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="SnapsToDevicePixels" Value="True"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Border x:Name="Border"
+                                               Background="{TemplateBinding Background}"
+                                               BorderBrush="{TemplateBinding BorderBrush}"
+                                               BorderThickness="{TemplateBinding BorderThickness}"
+                                               Padding="12,0"
+                                               MouseLeftButtonDown="TabItem_MouseLeftButtonDown"
+                                               MouseMove="TabItem_MouseMove"
+                                               MouseLeftButtonUp="TabItem_MouseLeftButtonUp"
+                                               MouseDown="TabItem_MouseDown"
+                                               Drop="TabItem_Drop"
+                                               DragOver="TabItem_DragOver">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Icon -->
+                                                <TextBlock Grid.Column="0"
+                                                         x:Name="TabIcon"
+                                                         Text="{Binding Tag.Icon, RelativeSource={RelativeSource TemplatedParent}}"
+                                                         FontSize="14"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,6,0"/>
+
+                                                <!-- Title -->
+                                                <TextBlock Grid.Column="1"
+                                                         Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
+                                                         FontSize="12"
+                                                         FontWeight="Medium"
+                                                         VerticalAlignment="Center"
+                                                         Foreground="{TemplateBinding Foreground}"
+                                                         TextTrimming="CharacterEllipsis"
+                                                         MaxWidth="180"/>
+
+                                                <!-- Close Button -->
+                                                <Button Grid.Column="2"
+                                                       x:Name="CloseButton"
+                                                       Width="20" Height="18"
+                                                       Margin="6,0,0,0"
+                                                       Background="Transparent"
+                                                       BorderThickness="0"
+                                                       Cursor="Hand"
+                                                       Click="TabCloseButton_Click"
+                                                       Visibility="Collapsed">
+                                                    <TextBlock Text="✕" 
+                                                             FontSize="11"
+                                                             Foreground="{StaticResource TextTertiaryBrush}"/>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <!-- Show close button on hover or when selected -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                                <Setter TargetName="CloseButton" Property="Visibility" Value="Visible"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource PrimaryBackgroundBrush}"/>
+                                                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                                <Setter TargetName="CloseButton" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="Border" Property="BorderThickness" Value="0,2,1,0"/>
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver" Value="True"/>
+                                                    <Condition Property="IsSelected" Value="False"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+                                            </MultiTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.ItemContainerStyle>
+                </TabControl>
             </Border>
         </Grid>
     </Grid>

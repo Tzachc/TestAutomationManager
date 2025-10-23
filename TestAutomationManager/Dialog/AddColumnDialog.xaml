@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="TestAutomationManager.Dialogs.AddColumnDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add New Column"
+        Width="480"
+        Height="264"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource PrimaryBackgroundBrush}"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <!-- Modern card border -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="20"/>
+        </Style>
+
+        <!-- Modern button style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Cancel button style -->
+        <Style x:Key="CancelButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Style="{StaticResource CardBorder}" Margin="20,20,20,-16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,0">
+                <TextBlock Text="➕ Add New Column"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                <TextBlock Text="Enter a name for the new column"
+                           FontSize="13"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Spacer -->
+            <Grid Grid.Row="1"/>
+
+            <!-- Input area -->
+            <StackPanel Grid.Row="2">
+                <TextBlock Text="Column Name:"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Margin="0,0,0,8"/>
+
+                <TextBox x:Name="ColumnNameTextBox"
+                         FontSize="14"
+                         Padding="12,10"
+                         Background="{StaticResource SecondaryBackgroundBrush}"
+                         Foreground="{StaticResource TextPrimaryBrush}"
+                         BorderBrush="{StaticResource PrimaryBlueBrush}"
+                         BorderThickness="2"
+                         TextChanged="ColumnNameTextBox_TextChanged">
+                    <TextBox.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+
+                <!-- Validation message -->
+                <TextBlock x:Name="ValidationMessage"
+                           FontSize="12"
+                           Foreground="{StaticResource ErrorBrush}"
+                           Margin="0,6,0,0"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"/>
+            </StackPanel>
+
+            <!-- Spacer for growth -->
+            <Grid Grid.Row="3"/>
+
+            <!-- Spacer -->
+            <Grid Grid.Row="4"/>
+
+            <!-- Buttons -->
+            <Grid Grid.Row="5" Margin="0,0,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Info text -->
+                <TextBlock Grid.Column="0"
+                           Text="💡 Tip: Column will be added as NVARCHAR(255) NULL"
+                           FontSize="11"
+                           Foreground="{StaticResource TextTertiaryBrush}"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+
+                <!-- Cancel Button -->
+                <Button Grid.Column="1"
+                        Content="Cancel"
+                        Style="{StaticResource CancelButton}"
+                        Click="CancelButton_Click"
+                        MinWidth="100"/>
+
+                <!-- Save Button -->
+                <Button Grid.Column="3"
+                        x:Name="SaveButton"
+                        Content="Add Column"
+                        Style="{StaticResource ModernButton}"
+                        Click="SaveButton_Click"
+                        IsEnabled="False"
+                        MinWidth="120"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

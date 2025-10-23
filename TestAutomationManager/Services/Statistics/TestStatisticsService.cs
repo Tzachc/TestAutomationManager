@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using TestAutomationManager.Models;
+using TestAutomationManager.Repositories;
 
 namespace TestAutomationManager.Services.Statistics
 {
@@ -49,6 +50,24 @@ namespace TestAutomationManager.Services.Statistics
                     _activeCount = value;
                     OnPropertyChanged();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Force refresh statistics from database
+        /// </summary>
+        public async void ForceRefresh()
+        {
+            try
+            {
+                var repository = new TestRepository();
+                var tests = await repository.GetAllTestsAsync();
+                UpdateStatistics(tests);
+                System.Diagnostics.Debug.WriteLine("✓ Statistics force refreshed");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error refreshing statistics: {ex.Message}");
             }
         }
 

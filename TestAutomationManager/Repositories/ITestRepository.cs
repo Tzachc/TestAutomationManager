@@ -5,81 +5,56 @@ using TestAutomationManager.Models;
 namespace TestAutomationManager.Repositories
 {
     /// <summary>
-    /// Interface for Test data access operations
-    /// Defines contract for all test-related database operations
+    /// Repository interface for Test operations
     /// </summary>
     public interface ITestRepository
     {
         // ================================================
-        // READ OPERATIONS (Query)
+        // EXISTING METHODS (keep your current ones)
         // ================================================
 
         /// <summary>
-        /// Get all tests from database
+        /// Get all tests with their processes and functions
         /// </summary>
-        /// <returns>List of all tests</returns>
         Task<List<Test>> GetAllTestsAsync();
 
         /// <summary>
-        /// Get test by ID with all related data (processes, functions)
+        /// Update an existing test
         /// </summary>
-        /// <param name="id">Test ID</param>
-        /// <returns>Test with related data or null if not found</returns>
-        Task<Test> GetTestByIdAsync(int id);
+        Task UpdateTestAsync(Test test);
 
         /// <summary>
-        /// Get tests by category
+        /// Get all external tables metadata
         /// </summary>
-        /// <param name="category">Category name</param>
-        /// <returns>List of tests in category</returns>
-        Task<List<Test>> GetTestsByCategoryAsync(string category);
-
-        /// <summary>
-        /// Get active tests only
-        /// </summary>
-        /// <returns>List of active tests</returns>
-        Task<List<Test>> GetActiveTestsAsync();
+        Task<List<ExternalTableInfo>> GetAllExternalTablesAsync();
 
         // ================================================
-        // WRITE OPERATIONS (Command)
+        // NEW METHODS FOR ADD/DELETE FUNCTIONALITY
         // ================================================
 
         /// <summary>
-        /// Add new test to database
+        /// Get next available test ID (finds gaps in sequence)
         /// </summary>
-        /// <param name="test">Test to add</param>
-        /// <returns>Added test with generated ID</returns>
-        Task<Test> AddTestAsync(Test test);
+        Task<int?> GetNextAvailableTestIdAsync();
 
         /// <summary>
-        /// Update existing test
+        /// Check if test ID already exists
         /// </summary>
-        /// <param name="test">Test with updated values</param>
-        /// <returns>True if update successful</returns>
-        Task<bool> UpdateTestAsync(Test test);
+        Task<bool> TestIdExistsAsync(int testId);
 
         /// <summary>
-        /// Delete test by ID
+        /// Insert new test into database
         /// </summary>
-        /// <param name="id">Test ID to delete</param>
-        /// <returns>True if delete successful</returns>
-        Task<bool> DeleteTestAsync(int id);
-
-        // ================================================
-        // STATISTICS OPERATIONS
-        // ================================================
+        Task InsertTestAsync(Test test);
 
         /// <summary>
-        /// Get count of tests by status
+        /// Delete test from database (cascades to processes and functions)
         /// </summary>
-        /// <param name="status">Status name (Passed, Failed, Running, etc.)</param>
-        /// <returns>Count of tests with status</returns>
-        Task<int> GetTestCountByStatusAsync(string status);
+        Task DeleteTestAsync(int testId);
 
         /// <summary>
-        /// Get count of active tests
+        /// Get test by ID
         /// </summary>
-        /// <returns>Count of active tests</returns>
-        Task<int> GetActiveTestCountAsync();
+        Task<Test> GetTestByIdAsync(int testId);
     }
 }
