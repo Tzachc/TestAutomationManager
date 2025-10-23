@@ -5,11 +5,22 @@
     <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#E5EAF1"/>
+    <LinearGradientBrush x:Key="SidebarGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#F8FAFF" Offset="0"/>
+        <GradientStop Color="#FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="HeroBackdropBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#F1F5FF" Offset="0"/>
+        <GradientStop Color="#FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
 
     <!-- Accent Colors -->
     <SolidColorBrush x:Key="PrimaryBlueBrush" Color="#2563EB"/>
     <SolidColorBrush x:Key="PrimaryBlueHoverBrush" Color="#1D4ED8"/>
     <SolidColorBrush x:Key="PrimaryRedBrush" Color="#DC2626"/>
+    <SolidColorBrush x:Key="AccentGlowBrush" Color="#E0EAFF"/>
+    <SolidColorBrush x:Key="AccentPillBrush" Color="#EEF2FF"/>
+    <SolidColorBrush x:Key="AccentPillBorderBrush" Color="#C7D2FE"/>
 
     <!-- Status Colors -->
     <SolidColorBrush x:Key="SuccessBrush" Color="#16A34A"/>
@@ -44,4 +55,8 @@
     <!-- Border Colors -->
     <SolidColorBrush x:Key="BorderBrush" Color="#D1D5DB"/>
     <SolidColorBrush x:Key="BorderHoverBrush" Color="#9CA3AF"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="#E5E7EB"/>
+
+    <!-- Shadow -->
+    <Color x:Key="CardShadowColor">#26000000</Color>
 </ResourceDictionary>
