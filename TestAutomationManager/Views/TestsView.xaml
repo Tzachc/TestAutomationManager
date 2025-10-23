@@ -66,6 +66,19 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- 🧭 TABLE HEADER TEXT -->
+        <Style x:Key="TableHeaderLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextOptions.TextFormattingMode" Value="Ideal"/>
+            <Setter Property="TextOptions.TextRenderingMode" Value="Auto"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Opacity" Value="0.82"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -75,12 +88,18 @@
         </Grid.RowDefinitions>
 
         <!-- 📊 TABLE HEADER -->
-        <Border Grid.Row="0" 
-                Background="{StaticResource SecondaryBackgroundBrush}"
-                BorderThickness="0,0,0,1"
-                BorderBrush="{StaticResource BorderBrush}"
-                Padding="24,12"
-                Margin="24,16,24,0">
+        <Border Grid.Row="0"
+                Margin="24,16,24,0"
+                Padding="24,14"
+                CornerRadius="12"
+                Background="{StaticResource SecondaryBackgroundBrush}">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="12"
+                                  ShadowDepth="2"
+                                  Direction="270"
+                                  Opacity="0.18"
+                                  Color="#22000000"/>
+            </Border.Effect>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="32"/>
@@ -93,43 +112,56 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="2" 
-                         Text="ID" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                <Rectangle RadiusX="12" RadiusY="12" IsHitTestVisible="False" Grid.ColumnSpan="8">
+                    <Rectangle.Fill>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#11FFFFFF" Offset="0"/>
+                            <GradientStop Color="#05FFFFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
 
-                <TextBlock Grid.Column="3" 
-                         Text="TEST NAME" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Opacity="0.75">
+                    <Rectangle Width="20" Height="2" Fill="{StaticResource PrimaryBlueBrush}" RadiusX="1" RadiusY="1"/>
+                </StackPanel>
 
-                <TextBlock Grid.Column="4" 
-                         Text="CATEGORY" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Grid.Column="2"
+                           Text="ID"
+                           Style="{StaticResource TableHeaderLabelStyle}"/>
 
-                <TextBlock Grid.Column="5" 
-                         Text="STATUS" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}"/>
+                <StackPanel Grid.Column="3"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="TEST NAME"
+                               Style="{StaticResource TableHeaderLabelStyle}"/>
+                    <Border Width="18" Height="18" Background="{StaticResource CardBackgroundBrush}" CornerRadius="9" Margin="6,0,0,0">
+                        <TextBlock Text="☆" FontSize="10" Foreground="{StaticResource TextTertiaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </StackPanel>
 
-                <TextBlock Grid.Column="6" 
-                         Text="LAST RUN" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Grid.Column="4"
+                           Text="CATEGORY"
+                           Style="{StaticResource TableHeaderLabelStyle}"/>
 
-                <TextBlock Grid.Column="7" 
-                         Text="ACTIONS" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}"
-                         HorizontalAlignment="Right"
-                         Margin="0,0,8,0"/>
+                <TextBlock Grid.Column="5"
+                           Text="STATUS"
+                           Style="{StaticResource TableHeaderLabelStyle}"/>
+
+                <TextBlock Grid.Column="6"
+                           Text="LAST RUN"
+                           Style="{StaticResource TableHeaderLabelStyle}"/>
+
+                <StackPanel Grid.Column="7"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="ACTIONS"
+                               Style="{StaticResource TableHeaderLabelStyle}"/>
+                    <Border Width="4" Height="4" Background="{StaticResource PrimaryBlueBrush}" CornerRadius="2" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                </StackPanel>
             </Grid>
         </Border>
 

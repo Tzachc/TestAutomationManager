@@ -628,83 +628,137 @@
                     <!-- Override MahApps TabItem Style Completely -->
                     <TabControl.ItemContainerStyle>
                         <Style TargetType="TabItem">
-                            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+                            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
                             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                            <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                             <Setter Property="Padding" Value="0"/>
                             <Setter Property="Margin" Value="0"/>
-                            <Setter Property="Height" Value="36"/>
+                            <Setter Property="Height" Value="42"/>
                             <Setter Property="AllowDrop" Value="True"/>
                             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                             <Setter Property="SnapsToDevicePixels" Value="True"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="TabItem">
-                                        <Border x:Name="Border"
-                                               Background="{TemplateBinding Background}"
-                                               BorderBrush="{TemplateBinding BorderBrush}"
-                                               BorderThickness="{TemplateBinding BorderThickness}"
-                                               Padding="12,0"
-                                               MouseLeftButtonDown="TabItem_MouseLeftButtonDown"
-                                               MouseMove="TabItem_MouseMove"
-                                               MouseLeftButtonUp="TabItem_MouseLeftButtonUp"
-                                               MouseDown="TabItem_MouseDown"
-                                               Drop="TabItem_Drop"
-                                               DragOver="TabItem_DragOver">
+                                        <Border Margin="4,8,4,0" Background="Transparent">
                                             <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                                                <Border x:Name="Accent"
+                                                        Height="3"
+                                                        CornerRadius="2"
+                                                        Background="{StaticResource PrimaryBlueBrush}"
+                                                        HorizontalAlignment="Stretch"
+                                                        VerticalAlignment="Top"
+                                                        Margin="16,0,16,0"
+                                                        Opacity="0"/>
 
-                                                <!-- Icon -->
-                                                <TextBlock Grid.Column="0"
-                                                         x:Name="TabIcon"
-                                                         Text="{Binding Tag.Icon, RelativeSource={RelativeSource TemplatedParent}}"
-                                                         FontSize="14"
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,6,0"/>
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="12"
+                                                        Padding="16,0"
+                                                        Height="36"
+                                                        VerticalAlignment="Center"
+                                                        MouseLeftButtonDown="TabItem_MouseLeftButtonDown"
+                                                        MouseMove="TabItem_MouseMove"
+                                                        MouseLeftButtonUp="TabItem_MouseLeftButtonUp"
+                                                        MouseDown="TabItem_MouseDown"
+                                                        Drop="TabItem_Drop"
+                                                        DragOver="TabItem_DragOver">
+                                                    <Border.Effect>
+                                                        <DropShadowEffect BlurRadius="14"
+                                                                          ShadowDepth="1"
+                                                                          Direction="270"
+                                                                          Opacity="0"
+                                                                          Color="#33000000"/>
+                                                    </Border.Effect>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
 
-                                                <!-- Title -->
-                                                <TextBlock Grid.Column="1"
-                                                         Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
-                                                         FontSize="12"
-                                                         FontWeight="Medium"
-                                                         VerticalAlignment="Center"
-                                                         Foreground="{TemplateBinding Foreground}"
-                                                         TextTrimming="CharacterEllipsis"
-                                                         MaxWidth="180"/>
+                                                        <!-- Icon -->
+                                                        <Border Grid.Column="0"
+                                                                Width="20"
+                                                                Height="20"
+                                                                CornerRadius="10"
+                                                                Background="{StaticResource HoverBackgroundBrush}"
+                                                                Margin="0,0,8,0">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Tag.Icon, RelativeSource={RelativeSource TemplatedParent}}" Value="">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Tag.Icon, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock x:Name="TabIcon"
+                                                                       Text="{Binding Tag.Icon, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                       FontSize="12"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"/>
+                                                        </Border>
 
-                                                <!-- Close Button -->
-                                                <Button Grid.Column="2"
-                                                       x:Name="CloseButton"
-                                                       Width="20" Height="18"
-                                                       Margin="6,0,0,0"
-                                                       Background="Transparent"
-                                                       BorderThickness="0"
-                                                       Cursor="Hand"
-                                                       Click="TabCloseButton_Click"
-                                                       Visibility="Collapsed">
-                                                    <TextBlock Text="✕" 
-                                                             FontSize="11"
-                                                             Foreground="{StaticResource TextTertiaryBrush}"/>
-                                                </Button>
+                                                        <!-- Title -->
+                                                        <TextBlock Grid.Column="1"
+                                                                 Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                 FontSize="12"
+                                                                 FontWeight="SemiBold"
+                                                                 VerticalAlignment="Center"
+                                                                 Foreground="{TemplateBinding Foreground}"
+                                                                 TextTrimming="CharacterEllipsis"
+                                                                 MaxWidth="180"/>
+
+                                                        <!-- Close Button -->
+                                                        <Button Grid.Column="2"
+                                                               x:Name="CloseButton"
+                                                               Width="22" Height="20"
+                                                               Margin="8,0,0,0"
+                                                               Background="Transparent"
+                                                               BorderThickness="0"
+                                                               Cursor="Hand"
+                                                               Click="TabCloseButton_Click"
+                                                               Visibility="Collapsed">
+                                                            <Border Background="{StaticResource HoverBackgroundBrush}"
+                                                                    CornerRadius="10"
+                                                                    Padding="4,1">
+                                                                <TextBlock Text="✕"
+                                                                           FontSize="11"
+                                                                           Foreground="{StaticResource TextTertiaryBrush}"/>
+                                                            </Border>
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
                                             </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <!-- Show close button on hover or when selected -->
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
                                                 <Setter TargetName="CloseButton" Property="Visibility" Value="Visible"/>
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
                                                 <Setter TargetName="Border" Property="Background" Value="{StaticResource PrimaryBackgroundBrush}"/>
                                                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                                                 <Setter TargetName="CloseButton" Property="Visibility" Value="Visible"/>
-                                                <Setter TargetName="Border" Property="BorderThickness" Value="0,2,1,0"/>
-                                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                                                <Setter TargetName="Border" Property="BorderThickness" Value="0"/>
+                                                <Setter TargetName="Accent" Property="Opacity" Value="1"/>
+                                                <Setter TargetName="Border" Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect BlurRadius="18"
+                                                                          ShadowDepth="2"
+                                                                          Direction="270"
+                                                                          Opacity="0.25"
+                                                                          Color="#44000000"/>
+                                                    </Setter.Value>
+                                                </Setter>
                                             </Trigger>
                                             <MultiTrigger>
                                                 <MultiTrigger.Conditions>
@@ -712,6 +766,9 @@
                                                     <Condition Property="IsSelected" Value="False"/>
                                                 </MultiTrigger.Conditions>
                                                 <Setter TargetName="Border" Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                                                <Setter TargetName="Border" Property="BorderThickness" Value="1"/>
+                                                <Setter TargetName="Accent" Property="Opacity" Value="0.4"/>
                                             </MultiTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
