@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TestAutomationManager.Views"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000"
-             Background="{StaticResource PrimaryBackgroundBrush}"
+             Background="{DynamicResource PrimaryBackgroundBrush}"
              Loaded="TestsView_Loaded"
              Unloaded="TestsView_Unloaded">
 
@@ -26,7 +26,7 @@
                                 CornerRadius="4">
                             <TextBlock x:Name="Arrow" 
                                      Text="+" 
-                                     Foreground="{StaticResource TextTertiaryBrush}" 
+                                     Foreground="{DynamicResource TextTertiaryBrush}" 
                                      FontSize="18"
                                      HorizontalAlignment="Center" 
                                      VerticalAlignment="Center"
@@ -58,8 +58,8 @@
                                 </Trigger.ExitActions>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-                                <Setter TargetName="Arrow" Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                <Setter TargetName="Arrow" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -76,9 +76,9 @@
 
         <!-- 📊 TABLE HEADER -->
         <Border Grid.Row="0" 
-                Background="{StaticResource SecondaryBackgroundBrush}"
+                Background="{DynamicResource SecondaryBackgroundBrush}"
                 BorderThickness="0,0,0,1"
-                BorderBrush="{StaticResource BorderBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
                 Padding="24,12"
                 Margin="24,16,24,0">
             <Grid>
@@ -97,37 +97,37 @@
                          Text="ID" 
                          FontSize="12" 
                          FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                         Foreground="{DynamicResource TextPrimaryBrush}" />
 
                 <TextBlock Grid.Column="3" 
                          Text="TEST NAME" 
                          FontSize="12" 
                          FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                         Foreground="{DynamicResource TextPrimaryBrush}" />
 
                 <TextBlock Grid.Column="4" 
                          Text="CATEGORY" 
                          FontSize="12" 
                          FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                         Foreground="{DynamicResource TextPrimaryBrush}" />
 
                 <TextBlock Grid.Column="5" 
                          Text="STATUS" 
                          FontSize="12" 
                          FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}"/>
+                         Foreground="{DynamicResource TextPrimaryBrush}"/>
 
                 <TextBlock Grid.Column="6" 
                          Text="LAST RUN" 
                          FontSize="12" 
                          FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}" />
+                         Foreground="{DynamicResource TextPrimaryBrush}" />
 
                 <TextBlock Grid.Column="7" 
                          Text="ACTIONS" 
                          FontSize="12" 
                          FontWeight="Bold" 
-                         Foreground="{StaticResource TextPrimaryBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
                          HorizontalAlignment="Right"
                          Margin="0,0,8,0"/>
             </Grid>
@@ -147,8 +147,8 @@
 
                                 <!-- ✨ TEST ROW -->
                                 <Border Grid.Row="0" 
-                                       Background="{StaticResource CardBackgroundBrush}"
-                                       BorderBrush="{StaticResource BorderBrush}"
+                                       Background="{DynamicResource CardBackgroundBrush}"
+                                       BorderBrush="{DynamicResource BorderBrush}"
                                        BorderThickness="1"
                                        CornerRadius="8"
                                        Padding="12,10">
@@ -181,16 +181,16 @@
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Status}" Value="Passed">
-                                                            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                                            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Failed">
-                                                            <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+                                                            <Setter Property="Background" Value="{DynamicResource ErrorBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Running">
-                                                            <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                                            <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Not Run">
-                                                            <Setter Property="Background" Value="{StaticResource TextTertiaryBrush}"/>
+                                                            <Setter Property="Background" Value="{DynamicResource TextTertiaryBrush}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -200,7 +200,7 @@
                                         <!-- ID -->
                                         <TextBlock Grid.Column="2" 
                                                  Text="{Binding Id, StringFormat='#{0}'}" 
-                                                 Foreground="{StaticResource TextSecondaryBrush}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12" 
                                                  FontWeight="SemiBold"
                                                  VerticalAlignment="Center"/>
@@ -208,21 +208,21 @@
                                         <!-- Test Name & Description -->
                                         <StackPanel Grid.Column="3" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Name}" 
-                                                     Foreground="{StaticResource TextPrimaryBrush}" 
+                                                     Foreground="{DynamicResource TextPrimaryBrush}" 
                                                      FontSize="13" 
                                                      FontWeight="Medium"/>
                                             <TextBlock Text="{Binding Description}" 
-                                                     Foreground="{StaticResource TextTertiaryBrush}" 
+                                                     Foreground="{DynamicResource TextTertiaryBrush}" 
                                                      FontSize="11" 
                                                      Margin="0,2,0,0"
                                                      TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
 
                                         <!-- Category -->
-                                        <Border Grid.Column="4" 
-                                               Background="#9B59B6"
-                                               CornerRadius="4" 
-                                               Padding="8,4" 
+                                        <Border Grid.Column="4"
+                                               Background="{DynamicResource PrimaryBlueBrush}"
+                                               CornerRadius="4"
+                                               Padding="8,4"
                                                HorizontalAlignment="Left"
                                                VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Category}" 
@@ -238,7 +238,7 @@
                                                 VerticalAlignment="Center"
                                                 HorizontalAlignment="Left">
                                             <TextBlock Text="Active" 
-                                                     Foreground="{StaticResource TextSecondaryBrush}" 
+                                                     Foreground="{DynamicResource TextSecondaryBrush}" 
                                                      FontSize="11" 
                                                      FontWeight="Medium"/>
                                         </CheckBox>
@@ -246,11 +246,11 @@
                                         <!-- Last Run -->
                                         <StackPanel Grid.Column="6" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding LastRun, StringFormat='{}{0:MMM dd, yyyy}'}" 
-                                                     Foreground="{StaticResource TextSecondaryBrush}" 
+                                                     Foreground="{DynamicResource TextSecondaryBrush}" 
                                                      FontSize="11" 
                                                      FontWeight="Medium"/>
                                             <TextBlock Text="{Binding LastRun, StringFormat='{}{0:HH:mm}'}" 
-                                                     Foreground="{StaticResource TextTertiaryBrush}" 
+                                                     Foreground="{DynamicResource TextTertiaryBrush}" 
                                                      FontSize="10" 
                                                      Margin="0,1,0,0"/>
                                         </StackPanel>
@@ -303,8 +303,8 @@
 
                                                         <!-- Process Row -->
                                                         <Border Grid.Row="0" 
-                                                               Background="{StaticResource SecondaryBackgroundBrush}"
-                                                               BorderBrush="{StaticResource BorderBrush}"
+                                                               Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                               BorderBrush="{DynamicResource BorderBrush}"
                                                                BorderThickness="1"
                                                                CornerRadius="6" 
                                                                Padding="12,8">
@@ -328,7 +328,7 @@
                                                                 <!-- Sequence -->
                                                                 <Border Grid.Column="1" 
                                                                       Width="24" Height="24" 
-                                                                      Background="{StaticResource PrimaryBlueBrush}"
+                                                                      Background="{DynamicResource PrimaryBlueBrush}"
                                                                       CornerRadius="6"
                                                                       Margin="0,0,10,0">
                                                                     <TextBlock Text="{Binding Sequence}" 
@@ -342,7 +342,7 @@
                                                                 <!-- Name -->
                                                                 <TextBlock Grid.Column="2" 
                                                                          Text="{Binding Name}" 
-                                                                         Foreground="{StaticResource TextPrimaryBrush}" 
+                                                                         Foreground="{DynamicResource TextPrimaryBrush}" 
                                                                          FontSize="12" 
                                                                          FontWeight="Medium"
                                                                          VerticalAlignment="Center"/>
@@ -350,7 +350,7 @@
                                                                 <!-- Critical Badge -->
                                                                 <Border Grid.Column="3" 
                                                                       Visibility="{Binding IsCritical, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                                      Background="{StaticResource ErrorBrush}"
+                                                                      Background="{DynamicResource ErrorBrush}"
                                                                       CornerRadius="4" 
                                                                       Padding="6,3" 
                                                                       Margin="0,0,10,0">
@@ -362,14 +362,14 @@
 
                                                                 <!-- Timeout -->
                                                                 <Border Grid.Column="4" 
-                                                                       Background="{StaticResource CardBackgroundBrush}"
-                                                                       BorderBrush="{StaticResource BorderBrush}"
+                                                                       Background="{DynamicResource CardBackgroundBrush}"
+                                                                       BorderBrush="{DynamicResource BorderBrush}"
                                                                        BorderThickness="1"
                                                                        CornerRadius="4" 
                                                                        Padding="8,4"
                                                                        Margin="0,0,10,0">
                                                                     <TextBlock Text="{Binding Timeout, StringFormat='⏱ {0}s'}" 
-                                                                             Foreground="{StaticResource TextSecondaryBrush}" 
+                                                                             Foreground="{DynamicResource TextSecondaryBrush}" 
                                                                              FontSize="10" 
                                                                              FontWeight="SemiBold"/>
                                                                 </Border>
@@ -399,11 +399,11 @@
                                                             <ItemsControl ItemsSource="{Binding Functions}">
                                                                 <ItemsControl.ItemTemplate>
                                                                     <DataTemplate>
-                                                                        <Border Background="#0F1117"
-                                                                               BorderBrush="#1E2433"
+                                                                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                               BorderBrush="{DynamicResource BorderBrush}"
                                                                                BorderThickness="1"
-                                                                               CornerRadius="4" 
-                                                                               Padding="10,6" 
+                                                                               CornerRadius="4"
+                                                                               Padding="10,6"
                                                                                Margin="0,0,0,4">
                                                                             <Grid>
                                                                                 <Grid.ColumnDefinitions>
@@ -414,10 +414,10 @@
                                                                                 </Grid.ColumnDefinitions>
 
                                                                                 <!-- Icon -->
-                                                                                <Border Grid.Column="0" 
-                                                                                      Width="18" Height="18" 
-                                                                                      Background="#9B59B6"
-                                                                                      CornerRadius="4" 
+                                                                                <Border Grid.Column="0"
+                                                                                      Width="18" Height="18"
+                                                                                      Background="{DynamicResource PrimaryBlueBrush}"
+                                                                                      CornerRadius="4"
                                                                                       Margin="0,0,8,0">
                                                                                     <TextBlock Text="ƒ" 
                                                                                              Foreground="White" 
@@ -430,7 +430,7 @@
                                                                                 <!-- Method Name -->
                                                                                 <TextBlock Grid.Column="1" 
                                                                                          Text="{Binding MethodName}" 
-                                                                                         Foreground="{StaticResource PrimaryBlueBrush}" 
+                                                                                         Foreground="{DynamicResource PrimaryBlueBrush}" 
                                                                                          FontFamily="Consolas" 
                                                                                          FontSize="11" 
                                                                                          FontWeight="Medium"
@@ -440,7 +440,7 @@
                                                                                 <!-- Parameters -->
                                                                                 <TextBlock Grid.Column="2" 
                                                                                          Text="{Binding Parameters}" 
-                                                                                         Foreground="{StaticResource TextTertiaryBrush}" 
+                                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
                                                                                          FontSize="10"
                                                                                          FontFamily="Consolas"
                                                                                          VerticalAlignment="Center"
@@ -450,7 +450,7 @@
                                                                                 <!-- Expected Result -->
                                                                                 <TextBlock Grid.Column="3" 
                                                                                          Text="{Binding ExpectedResult, StringFormat='→ {0}'}" 
-                                                                                         Foreground="{StaticResource TextTertiaryBrush}" 
+                                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
                                                                                          FontSize="10" 
                                                                                          FontStyle="Italic"
                                                                                          VerticalAlignment="Center"

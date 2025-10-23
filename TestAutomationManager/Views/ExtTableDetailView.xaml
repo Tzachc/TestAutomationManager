@@ -6,24 +6,24 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="1100"
-             Background="{StaticResource PrimaryBackgroundBrush}">
+             Background="{DynamicResource PrimaryBackgroundBrush}">
 
     <!-- Local styles just for this view -->
     <UserControl.Resources>
 
         <!-- Card container with rounded corners -->
         <Style x:Key="CardBorder" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
             <Setter Property="CornerRadius" Value="14"/>
             <Setter Property="Padding" Value="16"/>
-            <Setter Property="BorderBrush" Value="{StaticResource SecondaryBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBackgroundBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
         <!-- ⭐ ENHANCED: DataGrid with row and column resizing (no row headers) -->
         <Style x:Key="CleanDataGrid" TargetType="DataGrid">
-            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontFamily" Value="Segoe UI, Calibri, Arial"/>
             <Setter Property="MinRowHeight" Value="38"/>
@@ -39,11 +39,11 @@
             <Setter Property="CanUserResizeRows" Value="True"/>
             <Setter Property="IsReadOnly" Value="False"/>
             <Setter Property="GridLinesVisibility" Value="All"/>
-            <Setter Property="VerticalGridLinesBrush" Value="#35FFFFFF"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#20FFFFFF"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource DataGridVerticalGridBrush}"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource DataGridHorizontalGridBrush}"/>
             <Setter Property="AlternationCount" Value="2"/>
-            <Setter Property="AlternatingRowBackground" Value="#0AFFFFFF"/>
-            <Setter Property="BorderBrush" Value="{StaticResource SecondaryBackgroundBrush}"/>
+            <Setter Property="AlternatingRowBackground" Value="{DynamicResource DataGridAlternatingRowBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBackgroundBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="EnableRowVirtualization" Value="True"/>
@@ -56,9 +56,9 @@
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="Background" Value="#15FFFFFF"/>
-            <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource DataGridHeaderBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridHeaderBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,2"/>
             <Setter Property="Padding" Value="12,10,32,10"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -101,7 +101,7 @@
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#20FFFFFF"/>
+                                <Setter Property="Background" Value="{DynamicResource DataGridHeaderHoverBrush}"/>
                                 <Setter TargetName="EditColumnButton" Property="Visibility" Value="Visible"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -113,7 +113,7 @@
         <!-- Rows with better hover effect -->
         <Style TargetType="DataGridRow">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Margin" Value="0"/>
@@ -121,11 +121,11 @@
             <Setter Property="Height" Value="Auto"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1827A1FF"/>
+                    <Setter Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
                 </Trigger>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#28379BFF"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DataGridRowSelectedForegroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -133,9 +133,9 @@
         <!-- ⭐ ENHANCED: Cells with better padding for resizable rows -->
         <Style TargetType="DataGridCell">
             <Setter Property="Padding" Value="12,8,12,8"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="#30FFFFFF"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridCellBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
@@ -154,12 +154,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="CellBorder" Property="Background" Value="#28379BFF"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="CellBorder" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource DataGridRowSelectedForegroundBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEditing" Value="True">
-                                <Setter TargetName="CellBorder" Property="Background" Value="{StaticResource PrimaryBackgroundBrush}"/>
-                                <Setter TargetName="CellBorder" Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                                <Setter TargetName="CellBorder" Property="Background" Value="{DynamicResource PrimaryBackgroundBrush}"/>
+                                <Setter TargetName="CellBorder" Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                                 <Setter TargetName="CellBorder" Property="BorderThickness" Value="2"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -190,17 +190,17 @@
                         <TextBlock x:Name="TableNameText"
                                    FontSize="20"
                                    FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
                         <TextBlock Text="•"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                    Margin="8,0,0,0"/>
                         <TextBlock Text="Rows:"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                    Margin="8,0,4,0"/>
                         <TextBlock x:Name="RowCountText"
-                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
                         <!-- Editable indicator -->
-                        <Border Background="{StaticResource SuccessBrush}"
+                        <Border Background="{DynamicResource SuccessBrush}"
                                 CornerRadius="4"
                                 Padding="6,2"
                                 Margin="12,0,0,0">
@@ -211,7 +211,7 @@
                         </Border>
                         <!-- ⭐ NEW: Unsaved changes indicator -->
                         <Border x:Name="UnsavedChangesIndicator"
-                                Background="{StaticResource WarningBrush}"
+                                Background="{DynamicResource WarningBrush}"
                                 CornerRadius="4"
                                 Padding="6,2"
                                 Margin="6,0,0,0"
@@ -225,31 +225,31 @@
 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Test:"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock x:Name="TestNameText"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                    Margin="6,0,0,0"/>
                         <TextBlock Text="("
-                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                    Margin="8,0,0,0"/>
                         <TextBlock Text="ID"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock x:Name="TestIdText"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                    Margin="4,0,0,0"/>
                         <TextBlock Text=")"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock Text="•"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                    Margin="8,0,8,0"/>
                         <TextBlock Text="Category:"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
                         <TextBlock x:Name="CategoryText"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                    Margin="6,0,0,0"/>
                         <!-- Instructions -->
                         <TextBlock Text="💡 Tip: Double-click to edit • Drag column borders to resize • Drag ID cell bottom border to resize rows"
-                                   Foreground="{StaticResource TextTertiaryBrush}"
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
                                    FontSize="10"
                                    FontStyle="Italic"
                                    Margin="20,0,0,0"
@@ -266,7 +266,7 @@
                             Click="SaveLayoutButton_Click"
                             Visibility="Collapsed"
                             ToolTip="Save column widths and row heights for all users"
-                            Background="{StaticResource WarningBrush}"
+                            Background="{DynamicResource WarningBrush}"
                             Foreground="White"
                             FontWeight="SemiBold"/>
                     <!-- Reset sizes button -->
@@ -289,15 +289,15 @@
             <Grid>
                 <!-- Loading / Empty / Error states -->
                 <Grid x:Name="LoadingPanel" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="Loading…" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="Loading…" FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </Grid>
 
                 <Grid x:Name="EmptyState" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="No data in this table" FontSize="16" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBlock Text="No data in this table" FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </Grid>
 
                 <Grid x:Name="ErrorState" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock x:Name="ErrorMessageText" FontSize="16" Foreground="{StaticResource ErrorBrush}" TextWrapping="Wrap" TextAlignment="Center" Width="520"/>
+                    <TextBlock x:Name="ErrorMessageText" FontSize="16" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" TextAlignment="Center" Width="520"/>
                 </Grid>
 
                 <!-- ⭐ ENHANCED: THE DATAGRID - with row resizing in ID column -->
@@ -311,7 +311,7 @@
                     <DataGrid.Resources>
                         <!-- Centered TextBlock for cell content with wrapping -->
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                             <Setter Property="TextWrapping" Value="Wrap"/>
                             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
                             <Setter Property="TextAlignment" Value="Center"/>
@@ -323,9 +323,9 @@
 
                         <!-- Editing controls -->
                         <Style TargetType="TextBox">
-                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                            <Setter Property="Background" Value="{StaticResource PrimaryBackgroundBrush}"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            <Setter Property="Background" Value="{DynamicResource PrimaryBackgroundBrush}"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                             <Setter Property="BorderThickness" Value="2"/>
                             <Setter Property="TextWrapping" Value="Wrap"/>
                             <Setter Property="TextAlignment" Value="Center"/>
@@ -343,7 +343,7 @@
         <!-- STATUS LINE -->
         <TextBlock Grid.Row="2"
                    x:Name="StatusText"
-                   Foreground="{StaticResource TextSecondaryBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="12"
                    Opacity="0.9"
                    Margin="2,10,2,0"/>

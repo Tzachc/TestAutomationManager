@@ -44,7 +44,7 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource SecondaryBackgroundBrush}"
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
             BorderBrush="{Binding BorderColor, RelativeSource={RelativeSource AncestorType=Window}}"
             BorderThickness="1"
             CornerRadius="12">
@@ -64,9 +64,9 @@
 
             <!-- HEADER -->
             <Border Grid.Row="0"
-                    Background="{StaticResource CardBackgroundBrush}"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="12,12,0,0"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,0,0,1">
                 <Grid>
                     <StackPanel Orientation="Horizontal" 
@@ -88,10 +88,10 @@
                             <TextBlock x:Name="TitleText"
                                      FontSize="18"
                                      FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimaryBrush}"/>
+                                     Foreground="{DynamicResource TextPrimaryBrush}"/>
                             <TextBlock x:Name="SubtitleText"
                                      FontSize="11"
-                                     Foreground="{StaticResource TextSecondaryBrush}"
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
                                      Margin="0,2,0,0"
                                      Visibility="Collapsed"/>
                         </StackPanel>
@@ -108,7 +108,7 @@
                             Click="CloseButton_Click">
                         <TextBlock Text="✕" 
                                  FontSize="16" 
-                                 Foreground="{StaticResource TextSecondaryBrush}"/>
+                                 Foreground="{DynamicResource TextSecondaryBrush}"/>
                     </Button>
                 </Grid>
             </Border>
@@ -120,16 +120,16 @@
                          Margin="24,24,24,24">
                 <TextBlock x:Name="MessageText"
                          FontSize="14"
-                         Foreground="{StaticResource TextPrimaryBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
                          TextWrapping="Wrap"
                          LineHeight="22"/>
             </ScrollViewer>
 
             <!-- FOOTER -->
             <Border Grid.Row="2"
-                    Background="{StaticResource CardBackgroundBrush}"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="0,0,12,12"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="24,1,24,10">
                 <StackPanel x:Name="ButtonPanel"

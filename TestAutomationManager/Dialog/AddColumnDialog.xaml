@@ -7,13 +7,13 @@
         Height="264"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{StaticResource PrimaryBackgroundBrush}"
+        Background="{DynamicResource PrimaryBackgroundBrush}"
         ShowInTaskbar="False">
 
     <Window.Resources>
         <!-- Modern card border -->
         <Style x:Key="CardBorder" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="20"/>
             <Setter Property="Margin" Value="20"/>
@@ -21,7 +21,7 @@
 
         <!-- Modern button style -->
         <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="20,10"/>
@@ -52,7 +52,7 @@
 
         <!-- Cancel button style -->
         <Style x:Key="CancelButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <Setter Property="Background" Value="{StaticResource SecondaryBackgroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
         </Style>
     </Window.Resources>
 
@@ -72,10 +72,10 @@
                 <TextBlock Text="➕ Add New Column"
                            FontSize="22"
                            FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
                 <TextBlock Text="Enter a name for the new column"
                            FontSize="13"
-                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            Margin="0,4,0,0"/>
             </StackPanel>
 
@@ -87,15 +87,15 @@
                 <TextBlock Text="Column Name:"
                            FontSize="14"
                            FontWeight="SemiBold"
-                           Foreground="{StaticResource TextPrimaryBrush}"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
                            Margin="0,0,0,8"/>
 
                 <TextBox x:Name="ColumnNameTextBox"
                          FontSize="14"
                          Padding="12,10"
-                         Background="{StaticResource SecondaryBackgroundBrush}"
-                         Foreground="{StaticResource TextPrimaryBrush}"
-                         BorderBrush="{StaticResource PrimaryBlueBrush}"
+                         Background="{DynamicResource SecondaryBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource PrimaryBlueBrush}"
                          BorderThickness="2"
                          TextChanged="ColumnNameTextBox_TextChanged">
                     <TextBox.Resources>
@@ -108,7 +108,7 @@
                 <!-- Validation message -->
                 <TextBlock x:Name="ValidationMessage"
                            FontSize="12"
-                           Foreground="{StaticResource ErrorBrush}"
+                           Foreground="{DynamicResource ErrorBrush}"
                            Margin="0,6,0,0"
                            TextWrapping="Wrap"
                            Visibility="Collapsed"/>
@@ -133,7 +133,7 @@
                 <TextBlock Grid.Column="0"
                            Text="💡 Tip: Column will be added as NVARCHAR(255) NULL"
                            FontSize="11"
-                           Foreground="{StaticResource TextTertiaryBrush}"
+                           Foreground="{DynamicResource TextTertiaryBrush}"
                            VerticalAlignment="Center"
                            TextWrapping="Wrap"/>
 

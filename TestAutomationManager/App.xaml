@@ -8,44 +8,20 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Dark.Blue.xaml" />
+                <ResourceDictionary Source="Themes/DarkTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- 🎨 PROFESSIONAL COLOR PALETTE -->
-            <SolidColorBrush x:Key="PrimaryBackgroundBrush" Color="#0D1117"/>
-            <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="#161B22"/>
-            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1C2128"/>
-            <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#21262D"/>
-
-            <!-- Accent Colors -->
-            <SolidColorBrush x:Key="PrimaryBlueBrush" Color="#539BF5"/>
-            <SolidColorBrush x:Key="PrimaryBlueHoverBrush" Color="#6CB6FF"/>
-            <SolidColorBrush x:Key="PrimaryRedBrush" Color="#F85149"/>
-
-            <!-- Status Colors -->
-            <SolidColorBrush x:Key="SuccessBrush" Color="#3FB950"/>
-            <SolidColorBrush x:Key="WarningBrush" Color="#D29922"/>
-            <SolidColorBrush x:Key="ErrorBrush" Color="#F85149"/>
-
-            <!-- Text Colors -->
-            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E6EDF3"/>
-            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#7D8590"/>
-            <SolidColorBrush x:Key="TextTertiaryBrush" Color="#484F58"/>
-
-            <!-- Border Colors -->
-            <SolidColorBrush x:Key="BorderBrush" Color="#30363D"/>
-            <SolidColorBrush x:Key="BorderHoverBrush" Color="#484F58"/>
 
             <!-- 📦 MODERN CARD STYLE -->
             <Style x:Key="ModernCard" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="CornerRadius" Value="8"/>
             </Style>
 
             <!-- 🔘 SLEEK NAVIGATION BUTTON -->
             <Style x:Key="NavigationRadioButton" TargetType="RadioButton">
-                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Cursor" Value="Hand"/>
@@ -60,7 +36,7 @@
                                     Padding="10,10">
                                 <Grid>
                                     <Border x:Name="SelectedIndicator" 
-                                            Background="{StaticResource PrimaryBlueBrush}"
+                                            Background="{DynamicResource PrimaryBlueBrush}"
                                             CornerRadius="6"
                                             Opacity="0"/>
 
@@ -71,12 +47,12 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="MainBorder" Property="Background" Value="#1C2128"/>
+                                    <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
                                     <Setter TargetName="SelectedIndicator" Property="Opacity" Value="0.15"/>
-                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="MainBorder" Property="Background" Value="#21262D"/>
+                                    <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -86,7 +62,7 @@
 
             <!-- 🎯 PRIMARY BUTTON -->
             <Style x:Key="PrimaryButton" TargetType="Button">
-                <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
                 <Setter Property="Foreground" Value="#010409"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Padding" Value="16,8"/>
@@ -105,10 +81,10 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryBlueHoverBrush}"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryBlueHoverBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#4184E4"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryBlueHoverBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -119,8 +95,8 @@
             <!-- 🎯 SECONDARY BUTTON -->
             <Style x:Key="SecondaryButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="16,8"/>
                 <Setter Property="Cursor" Value="Hand"/>
@@ -140,12 +116,12 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#21262D"/>
-                                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource BorderHoverBrush}"/>
-                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#1C2128"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -156,7 +132,7 @@
             <!-- 💫 ICON BUTTON -->
             <Style x:Key="IconButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Width" Value="32"/>
                 <Setter Property="Height" Value="32"/>
@@ -172,11 +148,11 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
-                                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#1C2128"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -187,8 +163,8 @@
             <!-- 🔍 PROFESSIONAL SEARCH BOX WITH TYPING INDICATOR -->
             <Style x:Key="ModernTextBox" TargetType="TextBox">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="32,8,32,8"/>
                 <Setter Property="FontSize" Value="13"/>
@@ -205,7 +181,7 @@
                                     <TextBlock x:Name="SearchIcon"
                                  Text="🔍" 
                                  FontSize="14"
-                                 Foreground="{StaticResource TextTertiaryBrush}"
+                                 Foreground="{DynamicResource TextTertiaryBrush}"
                                  VerticalAlignment="Center"
                                  HorizontalAlignment="Left"
                                  Margin="10,0,0,0"
@@ -218,7 +194,7 @@
                                     <!-- Placeholder Text -->
                                     <TextBlock x:Name="Hint" 
                                  Text="Search tests..." 
-                                 Foreground="{StaticResource TextTertiaryBrush}"
+                                 Foreground="{DynamicResource TextTertiaryBrush}"
                                  Margin="32,8,32,8"
                                  VerticalAlignment="Center"
                                  IsHitTestVisible="False"
@@ -232,21 +208,21 @@
                                         <StackPanel Orientation="Horizontal">
                                             <!-- Animated Dots -->
                                             <Ellipse x:Name="Dot1" Width="4" Height="4" 
-                                        Fill="{StaticResource PrimaryBlueBrush}" 
+                                        Fill="{DynamicResource PrimaryBlueBrush}" 
                                         Margin="2,0">
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="Dot1Transform" Y="0"/>
                                                 </Ellipse.RenderTransform>
                                             </Ellipse>
                                             <Ellipse x:Name="Dot2" Width="4" Height="4" 
-                                        Fill="{StaticResource PrimaryBlueBrush}" 
+                                        Fill="{DynamicResource PrimaryBlueBrush}" 
                                         Margin="2,0">
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="Dot2Transform" Y="0"/>
                                                 </Ellipse.RenderTransform>
                                             </Ellipse>
                                             <Ellipse x:Name="Dot3" Width="4" Height="4" 
-                                        Fill="{StaticResource PrimaryBlueBrush}" 
+                                        Fill="{DynamicResource PrimaryBlueBrush}" 
                                         Margin="2,0">
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="Dot3Transform" Y="0"/>
@@ -285,9 +261,9 @@
 
                                 <!-- Focused state -->
                                 <Trigger Property="IsFocused" Value="True">
-                                    <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBlueBrush}"/>
-                                    <Setter TargetName="border" Property="Background" Value="#0D1117"/>
-                                    <Setter TargetName="SearchIcon" Property="Foreground" Value="{StaticResource PrimaryBlueBrush}"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                    <Setter TargetName="SearchIcon" Property="Foreground" Value="{DynamicResource PrimaryBlueBrush}"/>
                                     <Trigger.EnterActions>
                                         <BeginStoryboard>
                                             <Storyboard>
@@ -339,7 +315,7 @@
 
                                 <!-- Mouse over -->
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="#0D1117"/>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -357,14 +333,14 @@
                                 <Border x:Name="SwitchBorder" 
                                        Width="40" 
                                        Height="22" 
-                                       Background="{StaticResource BorderBrush}"
+                                       Background="{DynamicResource BorderBrush}"
                                        BorderThickness="0"
                                        CornerRadius="11"
                                        Margin="0,0,8,0">
-                                    <Border x:Name="SwitchThumb" 
-                                           Width="16" 
-                                           Height="16" 
-                                           Background="#E6EDF3"
+                                    <Border x:Name="SwitchThumb"
+                                           Width="16"
+                                           Height="16"
+                                           Background="{DynamicResource ToggleThumbBrush}"
                                            CornerRadius="8"
                                            HorizontalAlignment="Left"
                                            Margin="3,0,0,0"/>
@@ -373,7 +349,7 @@
                             </StackPanel>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="SwitchBorder" Property="Background" Value="{StaticResource PrimaryBlueBrush}"/>
+                                    <Setter TargetName="SwitchBorder" Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
                                     <Setter TargetName="SwitchThumb" Property="HorizontalAlignment" Value="Right"/>
                                     <Setter TargetName="SwitchThumb" Property="Margin" Value="0,0,3,0"/>
                                 </Trigger>
@@ -390,8 +366,8 @@
             <Style x:Key="Badge" TargetType="Border">
                 <Setter Property="CornerRadius" Value="12"/>
                 <Setter Property="Padding" Value="8,4"/>
-                <Setter Property="Background" Value="#1C2128"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
                 <Setter Property="BorderThickness" Value="1"/>
             </Style>
         </ResourceDictionary>

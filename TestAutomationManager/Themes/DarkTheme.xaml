@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Dark theme color palette -->
+    <SolidColorBrush x:Key="PrimaryBackgroundBrush" Color="#0D1117"/>
+    <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="#161B22"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1C2128"/>
+    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="#21262D"/>
+
+    <!-- Accent Colors -->
+    <SolidColorBrush x:Key="PrimaryBlueBrush" Color="#539BF5"/>
+    <SolidColorBrush x:Key="PrimaryBlueHoverBrush" Color="#6CB6FF"/>
+    <SolidColorBrush x:Key="PrimaryRedBrush" Color="#F85149"/>
+
+    <!-- Status Colors -->
+    <SolidColorBrush x:Key="SuccessBrush" Color="#3FB950"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="#D29922"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="#F85149"/>
+
+    <!-- Text Colors -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E6EDF3"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#7D8590"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#484F58"/>
+
+    <!-- Control Elements -->
+    <SolidColorBrush x:Key="ToggleThumbBrush" Color="#E6EDF3"/>
+
+    <!-- DataGrid Elements -->
+    <SolidColorBrush x:Key="DataGridVerticalGridBrush" Color="#35FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridHorizontalGridBrush" Color="#20FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridAlternatingRowBrush" Color="#0AFFFFFF"/>
+    <SolidColorBrush x:Key="DataGridHeaderBackgroundBrush" Color="#15FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridHeaderBorderBrush" Color="#40FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridHeaderHoverBrush" Color="#20FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridRowHoverBrush" Color="#1827A1FF"/>
+    <SolidColorBrush x:Key="DataGridRowSelectedBrush" Color="#28379BFF"/>
+    <SolidColorBrush x:Key="DataGridRowSelectedForegroundBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="DataGridCellBorderBrush" Color="#30FFFFFF"/>
+
+    <!-- Status Indicator -->
+    <SolidColorBrush x:Key="StatusDefaultBackgroundBrush" Color="#1A2F23"/>
+    <SolidColorBrush x:Key="StatusErrorBackgroundBrush" Color="#2F1A1A"/>
+    <SolidColorBrush x:Key="StatusPendingBackgroundBrush" Color="#2F2A1A"/>
+
+    <!-- Border Colors -->
+    <SolidColorBrush x:Key="BorderBrush" Color="#30363D"/>
+    <SolidColorBrush x:Key="BorderHoverBrush" Color="#484F58"/>
+</ResourceDictionary>

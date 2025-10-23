@@ -1,0 +1,273 @@
+<UserControl x:Class="TestAutomationManager.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="600"
+             d:DesignWidth="900"
+             Background="{DynamicResource PrimaryBackgroundBrush}">
+    <UserControl.Resources>
+        <Style x:Key="ThemeOptionRadioButton" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Container"
+                                Background="{DynamicResource CardBackgroundBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Padding="16"
+                                Margin="0">
+                            <StackPanel>
+                                <ContentPresenter/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Container" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                <Setter TargetName="Container" Property="BorderBrush" Value="{DynamicResource BorderHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Container" Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                <Setter TargetName="Container" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="Container" Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="32,24">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                <StackPanel>
+                    <TextBlock Text="Settings"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Fine tune Test Automation Manager to match your flow."
+                               FontSize="12"
+                               Margin="0,6,0,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Appearance Section -->
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="Appearance"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="Choose the color palette that feels right. Changes apply instantly."
+                           FontSize="12"
+                           Margin="0,4,0,16"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                <UniformGrid Columns="3" Margin="0,0,0,12" HorizontalAlignment="Stretch">
+                    <RadioButton x:Name="DarkThemeOption"
+                                 GroupName="ThemeOptions"
+                                 Style="{StaticResource ThemeOptionRadioButton}"
+                                 Tag="Dark"
+                                 Checked="ThemeOption_Checked">
+                        <StackPanel>
+                            <Border Height="72"
+                                    CornerRadius="6"
+                                    Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="#0D1117" CornerRadius="6,0,0,6"/>
+                                    <Border Grid.Column="1" Background="#161B22"/>
+                                    <Border Grid.Column="2" Width="40" Background="#539BF5" CornerRadius="0,6,6,0"/>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="Dark Mode"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="High contrast interface tailored for focus."
+                                       FontSize="12"
+                                       Margin="0,4,0,0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton x:Name="LightThemeOption"
+                                 GroupName="ThemeOptions"
+                                 Style="{StaticResource ThemeOptionRadioButton}"
+                                 Tag="Light"
+                                 Margin="16,0,16,0"
+                                 Checked="ThemeOption_Checked">
+                        <StackPanel>
+                            <Border Height="72"
+                                    CornerRadius="6"
+                                    Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="#F5F7FA" CornerRadius="6,0,0,6"/>
+                                    <Border Grid.Column="1" Background="#FFFFFF"/>
+                                    <Border Grid.Column="2" Width="40" Background="#2563EB" CornerRadius="0,6,6,0"/>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="Light Mode"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Bright surfaces with crisp typography."
+                                       FontSize="12"
+                                       Margin="0,4,0,0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton x:Name="RedThemeOption"
+                                 GroupName="ThemeOptions"
+                                 Style="{StaticResource ThemeOptionRadioButton}"
+                                 Tag="Red"
+                                 Checked="ThemeOption_Checked">
+                        <StackPanel>
+                            <Border Height="72"
+                                    CornerRadius="6"
+                                    Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="#1A0D0D" CornerRadius="6,0,0,6"/>
+                                    <Border Grid.Column="1" Background="#2A1212"/>
+                                    <Border Grid.Column="2" Width="40" Background="#FF4C4C" CornerRadius="0,6,6,0"/>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="Crimson Rush"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="A bold red accent for high-energy dashboards."
+                                       FontSize="12"
+                                       Margin="0,4,0,0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </RadioButton>
+                </UniformGrid>
+
+                <TextBlock Text="Tip: Themes sync instantly so you can preview the experience before settling in."
+                           FontSize="11"
+                           Foreground="{DynamicResource TextTertiaryBrush}"/>
+            </StackPanel>
+
+            <Border Height="1"
+                    Margin="0,12,0,24"
+                    Background="{DynamicResource BorderBrush}"/>
+
+            <!-- Productivity Section -->
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="Productivity"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="Optimize how updates reach you during high-pressure runs."
+                           FontSize="12"
+                           Margin="0,4,0,16"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                <Border Style="{StaticResource ModernCard}"
+                        Padding="20"
+                        Margin="0,0,0,12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Desktop notifications"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Keep the team informed whenever a test batch completes."
+                                       FontSize="12"
+                                       Margin="0,4,0,0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ModernToggle}"
+                                  IsChecked="True"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ModernCard}"
+                        Padding="20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Auto-refresh dashboards"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock Text="Pull fresh execution data every 5 minutes while the app stays open."
+                                       FontSize="12"
+                                       Margin="0,4,0,0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                        <CheckBox Grid.Column="1"
+                                  Style="{StaticResource ModernToggle}"
+                                  IsChecked="False"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <Border Height="1"
+                    Margin="0,12,0,24"
+                    Background="{DynamicResource BorderBrush}"/>
+
+            <!-- Data Preferences Section -->
+            <StackPanel>
+                <TextBlock Text="Data preferences"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="Control how much telemetry we retain locally."
+                           FontSize="12"
+                           Margin="0,4,0,16"
+                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                <Border Style="{StaticResource ModernCard}" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="History window"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Currently storing 90 days of execution logs."
+                                   FontSize="12"
+                                   Margin="0,6,0,16"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <Button Style="{StaticResource SecondaryButton}" Content="30 days" Padding="12,6" Margin="0,0,12,0"/>
+                            <Button Style="{StaticResource SecondaryButton}" Content="90 days" Padding="12,6" Margin="0,0,12,0"/>
+                            <Button Style="{StaticResource SecondaryButton}" Content="Forever" Padding="12,6"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
