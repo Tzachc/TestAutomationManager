@@ -44,8 +44,8 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource SecondaryBackgroundBrush}"
-            BorderBrush="{StaticResource PrimaryBlueBrush}"
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+            BorderBrush="{DynamicResource PrimaryBlueBrush}"
             BorderThickness="1"
             CornerRadius="12">
         <Border.Effect>
@@ -64,19 +64,19 @@
 
             <!-- HEADER -->
             <Border Grid.Row="0"
-                    Background="{StaticResource CardBackgroundBrush}"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="12,12,0,0"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,0,0,1">
                 <Grid>
                     <StackPanel VerticalAlignment="Center" Margin="24,0,0,0">
                         <TextBlock Text="Rename Column"
                                  FontSize="18"
                                  FontWeight="SemiBold"
-                                 Foreground="{StaticResource TextPrimaryBrush}"/>
+                                 Foreground="{DynamicResource TextPrimaryBrush}"/>
                         <TextBlock Text="Enter a new name for this column"
                                  FontSize="11"
-                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 Foreground="{DynamicResource TextSecondaryBrush}"
                                  Margin="0,4,0,0"/>
                     </StackPanel>
 
@@ -91,7 +91,7 @@
                             Click="CloseButton_Click">
                         <TextBlock Text="✕" 
                                  FontSize="16" 
-                                 Foreground="{StaticResource TextSecondaryBrush}"/>
+                                 Foreground="{DynamicResource TextSecondaryBrush}"/>
                     </Button>
                 </Grid>
             </Border>
@@ -106,11 +106,11 @@
                     <TextBlock Text="Current name:"
                              FontSize="12"
                              FontWeight="Medium"
-                             Foreground="{StaticResource TextSecondaryBrush}"
+                             Foreground="{DynamicResource TextSecondaryBrush}"
                              Margin="0,0,0,6"/>
 
-                    <Border Background="{StaticResource PrimaryBackgroundBrush}"
-                           BorderBrush="{StaticResource BorderBrush}"
+                    <Border Background="{DynamicResource PrimaryBackgroundBrush}"
+                           BorderBrush="{DynamicResource BorderBrush}"
                            BorderThickness="1"
                            CornerRadius="6"
                            Padding="12,10,12,10"
@@ -118,24 +118,24 @@
                         <TextBlock x:Name="CurrentNameText"
                                  FontSize="14"
                                  FontWeight="SemiBold"
-                                 Foreground="{StaticResource TextPrimaryBrush}"/>
+                                 Foreground="{DynamicResource TextPrimaryBrush}"/>
                     </Border>
 
                     <!-- New Name Section -->
                     <TextBlock Text="New name:"
                              FontSize="12"
                              FontWeight="Medium"
-                             Foreground="{StaticResource TextPrimaryBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
                              Margin="0,0,0,6"/>
 
-                    <Border Background="{StaticResource PrimaryBackgroundBrush}"
-                           BorderBrush="{StaticResource PrimaryBlueBrush}"
+                    <Border Background="{DynamicResource PrimaryBackgroundBrush}"
+                           BorderBrush="{DynamicResource PrimaryBlueBrush}"
                            BorderThickness="2"
                            CornerRadius="6"
                            Margin="0,0,0,0">
                         <TextBox x:Name="NewNameTextBox"
                                Background="Transparent"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
                                BorderThickness="0"
                                FontSize="14"
                                Padding="12,10,12,10"
@@ -144,7 +144,7 @@
                                KeyDown="NewNameTextBox_KeyDown">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
-                                    <Setter Property="CaretBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                                    <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
@@ -155,9 +155,9 @@
 
             <!-- FOOTER -->
             <Border Grid.Row="2"
-                    Background="{StaticResource CardBackgroundBrush}"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="0,0,12,12"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="24,1,24,10">
                 <StackPanel Orientation="Horizontal"
@@ -167,8 +167,8 @@
                     <Button Content="Cancel"
                           Style="{StaticResource ModernButton}"
                           Background="Transparent"
-                          Foreground="{StaticResource TextSecondaryBrush}"
-                          BorderBrush="{StaticResource BorderBrush}"
+                          Foreground="{DynamicResource TextSecondaryBrush}"
+                          BorderBrush="{DynamicResource BorderBrush}"
                           BorderThickness="1"
                           Margin="0,0,12,0"
                           Click="CancelButton_Click">
@@ -185,7 +185,7 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                        <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -196,7 +196,7 @@
                     <Button x:Name="SaveButton"
                           Content="💾 Save Changes"
                           Style="{StaticResource ModernButton}"
-                          Background="{StaticResource PrimaryBlueBrush}"
+                          Background="{DynamicResource PrimaryBlueBrush}"
                           Foreground="White"
                           Click="SaveButton_Click"
                           IsEnabled="False"/>

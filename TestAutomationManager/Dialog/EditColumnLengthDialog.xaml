@@ -44,8 +44,8 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="{StaticResource SecondaryBackgroundBrush}"
-            BorderBrush="{StaticResource PrimaryBlueBrush}"
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+            BorderBrush="{DynamicResource PrimaryBlueBrush}"
             BorderThickness="1"
             CornerRadius="12">
         <Border.Effect>
@@ -64,19 +64,19 @@
 
             <!-- HEADER -->
             <Border Grid.Row="0"
-                    Background="{StaticResource CardBackgroundBrush}"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="12,12,0,0"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,0,0,1">
                 <Grid>
                     <StackPanel VerticalAlignment="Center" Margin="24,0,0,0">
                         <TextBlock Text="Edit Column Length"
                                  FontSize="18"
                                  FontWeight="SemiBold"
-                                 Foreground="{StaticResource TextPrimaryBrush}"/>
+                                 Foreground="{DynamicResource TextPrimaryBrush}"/>
                         <TextBlock Text="Set the maximum character length for this column"
                                  FontSize="11"
-                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 Foreground="{DynamicResource TextSecondaryBrush}"
                                  Margin="0,4,0,0"/>
                     </StackPanel>
 
@@ -91,7 +91,7 @@
                             Click="CloseButton_Click">
                         <TextBlock Text="✕" 
                                  FontSize="16" 
-                                 Foreground="{StaticResource TextSecondaryBrush}"/>
+                                 Foreground="{DynamicResource TextSecondaryBrush}"/>
                     </Button>
                 </Grid>
             </Border>
@@ -103,8 +103,8 @@
                 <StackPanel Margin="24,24,24,24">
 
                     <!-- Column Info -->
-                    <Border Background="{StaticResource PrimaryBackgroundBrush}"
-                           BorderBrush="{StaticResource BorderBrush}"
+                    <Border Background="{DynamicResource PrimaryBackgroundBrush}"
+                           BorderBrush="{DynamicResource BorderBrush}"
                            BorderThickness="1"
                            CornerRadius="6"
                            Padding="12,10,12,10"
@@ -122,25 +122,25 @@
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                      Text="Column:"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextSecondaryBrush}"
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
                                      Margin="0,0,10,5"/>
                             <TextBlock Grid.Row="0" Grid.Column="1"
                                      x:Name="ColumnNameText"
                                      FontSize="12"
                                      FontWeight="SemiBold"
-                                     Foreground="{StaticResource TextPrimaryBrush}"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"
                                      Margin="0,0,0,5"/>
 
                             <TextBlock Grid.Row="1" Grid.Column="0"
                                      Text="Current limit:"
                                      FontSize="12"
-                                     Foreground="{StaticResource TextSecondaryBrush}"
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
                                      Margin="0,0,10,0"/>
                             <TextBlock Grid.Row="1" Grid.Column="1"
                                      x:Name="CurrentLengthText"
                                      FontSize="12"
                                      FontWeight="SemiBold"
-                                     Foreground="{StaticResource WarningBrush}"/>
+                                     Foreground="{DynamicResource WarningBrush}"/>
                         </Grid>
                     </Border>
 
@@ -148,17 +148,17 @@
                     <TextBlock Text="New maximum length:"
                              FontSize="12"
                              FontWeight="Medium"
-                             Foreground="{StaticResource TextPrimaryBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
                              Margin="0,0,0,6"/>
 
-                    <Border Background="{StaticResource PrimaryBackgroundBrush}"
-                           BorderBrush="{StaticResource PrimaryBlueBrush}"
+                    <Border Background="{DynamicResource PrimaryBackgroundBrush}"
+                           BorderBrush="{DynamicResource PrimaryBlueBrush}"
                            BorderThickness="2"
                            CornerRadius="6"
                            Margin="0,0,0,10">
                         <TextBox x:Name="NewLengthTextBox"
                                Background="Transparent"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
                                BorderThickness="0"
                                FontSize="14"
                                Padding="12,10,12,10"
@@ -167,7 +167,7 @@
                                KeyDown="NewLengthTextBox_KeyDown">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
-                                    <Setter Property="CaretBrush" Value="{StaticResource PrimaryBlueBrush}"/>
+                                    <Setter Property="CaretBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
@@ -177,15 +177,15 @@
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                         <TextBlock Text="💡 Suggestions:"
                                  FontSize="11"
-                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 Foreground="{DynamicResource TextSecondaryBrush}"
                                  Margin="0,0,10,0"/>
                         <Button Content="250"
                               Height="24"
                               Padding="10,0,10,0"
                               FontSize="11"
-                              Background="{StaticResource CardBackgroundBrush}"
-                              Foreground="{StaticResource TextSecondaryBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource CardBackgroundBrush}"
+                              Foreground="{DynamicResource TextSecondaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               BorderThickness="1"
                               Cursor="Hand"
                               Margin="0,0,5,0"
@@ -195,9 +195,9 @@
                               Height="24"
                               Padding="10,0,10,0"
                               FontSize="11"
-                              Background="{StaticResource CardBackgroundBrush}"
-                              Foreground="{StaticResource TextSecondaryBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource CardBackgroundBrush}"
+                              Foreground="{DynamicResource TextSecondaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               BorderThickness="1"
                               Cursor="Hand"
                               Margin="0,0,5,0"
@@ -207,9 +207,9 @@
                               Height="24"
                               Padding="10,0,10,0"
                               FontSize="11"
-                              Background="{StaticResource CardBackgroundBrush}"
-                              Foreground="{StaticResource TextSecondaryBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource CardBackgroundBrush}"
+                              Foreground="{DynamicResource TextSecondaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               BorderThickness="1"
                               Cursor="Hand"
                               Margin="0,0,5,0"
@@ -219,9 +219,9 @@
                               Height="24"
                               Padding="10,0,10,0"
                               FontSize="11"
-                              Background="{StaticResource CardBackgroundBrush}"
-                              Foreground="{StaticResource TextSecondaryBrush}"
-                              BorderBrush="{StaticResource BorderBrush}"
+                              Background="{DynamicResource CardBackgroundBrush}"
+                              Foreground="{DynamicResource TextSecondaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}"
                               BorderThickness="1"
                               Cursor="Hand"
                               Click="Suggestion_Click"
@@ -231,7 +231,7 @@
                     <!-- Validation Message -->
                     <TextBlock x:Name="ValidationMessage"
                              FontSize="11"
-                             Foreground="{StaticResource ErrorBrush}"
+                             Foreground="{DynamicResource ErrorBrush}"
                              Margin="0,10,0,0"
                              TextWrapping="Wrap"
                              Visibility="Collapsed"/>
@@ -241,9 +241,9 @@
 
             <!-- FOOTER -->
             <Border Grid.Row="2"
-                    Background="{StaticResource CardBackgroundBrush}"
+                    Background="{DynamicResource CardBackgroundBrush}"
                     CornerRadius="0,0,12,12"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="24,1,24,10">
                 <StackPanel Orientation="Horizontal"
@@ -253,8 +253,8 @@
                     <Button Content="Cancel"
                           Style="{StaticResource ModernButton}"
                           Background="Transparent"
-                          Foreground="{StaticResource TextSecondaryBrush}"
-                          BorderBrush="{StaticResource BorderBrush}"
+                          Foreground="{DynamicResource TextSecondaryBrush}"
+                          BorderBrush="{DynamicResource BorderBrush}"
                           BorderThickness="1"
                           Margin="0,0,12,0"
                           Click="CancelButton_Click">
@@ -271,7 +271,7 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="border" Property="Background" Value="{StaticResource HoverBackgroundBrush}"/>
+                                        <Setter TargetName="border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -282,7 +282,7 @@
                     <Button x:Name="SaveButton"
                           Content="📏 Update Length"
                           Style="{StaticResource ModernButton}"
-                          Background="{StaticResource PrimaryBlueBrush}"
+                          Background="{DynamicResource PrimaryBlueBrush}"
                           Foreground="White"
                           Click="SaveButton_Click"
                           IsEnabled="False"/>

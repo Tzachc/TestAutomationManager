@@ -615,15 +615,7 @@ namespace TestAutomationManager
                 "⚙️",
                 () =>
                 {
-                    var textBlock = new TextBlock
-                    {
-                        Text = "Settings View - Coming Soon",
-                        FontSize = 24,
-                        Foreground = System.Windows.Media.Brushes.White,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-                    return textBlock;
+                    return new Views.SettingsView();
                 }
             );
         }
@@ -649,6 +641,11 @@ namespace TestAutomationManager
 
             LoadExtTablesForNavigation();
             CheckDatabaseConnection();
+        }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenSettingsTab();
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
