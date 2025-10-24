@@ -179,9 +179,9 @@ namespace TestAutomationManager.Services
                 return string.Empty;
 
             // Create a simple hash from key properties
-            // Format: "Id:Name:IsActive:Status|Id:Name:IsActive:Status|..."
+            // Format: "TestID:TestName:IsActive:RunStatus|TestID:TestName:IsActive:RunStatus|..."
             var hashString = string.Join("|", tests.Select(t =>
-                $"{t.Id}:{t.Name}:{t.IsActive}:{t.Status}:{t.Processes.Count}"
+                $"{t.TestID}:{t.TestName}:{t.IsActive}:{t.RunStatus}:{t.Processes.Count}"
             ));
 
             // Return the hash string

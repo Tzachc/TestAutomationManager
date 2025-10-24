@@ -134,9 +134,9 @@ namespace TestAutomationManager.Services.Statistics
             ActiveCount = testList.Count(t => t.IsActive);
 
             // Count by status
-            PassedCount = testList.Count(t => t.Status?.Equals("Passed", StringComparison.OrdinalIgnoreCase) == true);
-            FailedCount = testList.Count(t => t.Status?.Equals("Failed", StringComparison.OrdinalIgnoreCase) == true);
-            RunningCount = testList.Count(t => t.Status?.Equals("Running", StringComparison.OrdinalIgnoreCase) == true);
+            PassedCount = testList.Count(t => t.RunStatus?.Equals("Passed", StringComparison.OrdinalIgnoreCase) == true);
+            FailedCount = testList.Count(t => t.RunStatus?.Equals("Failed", StringComparison.OrdinalIgnoreCase) == true);
+            RunningCount = testList.Count(t => t.RunStatus?.Equals("Running", StringComparison.OrdinalIgnoreCase) == true);
         }
 
         /// <summary>

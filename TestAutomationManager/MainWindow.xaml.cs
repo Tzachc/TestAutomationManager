@@ -829,7 +829,7 @@ namespace TestAutomationManager
 
                 if (result == true && dialog.IsSuccess)
                 {
-                    System.Diagnostics.Debug.WriteLine($"✓ New test created: #{dialog.CreatedTest.Id} - {dialog.CreatedTest.Name}");
+                    System.Diagnostics.Debug.WriteLine($"✓ New test created: #{dialog.CreatedTest.TestID} - {dialog.CreatedTest.TestName}");
 
                     // Ensure no active filter is applied
                     SearchBox.Text = "";
@@ -839,7 +839,7 @@ namespace TestAutomationManager
                         selTab1.Content is TestAutomationManager.Views.TestsView tv1)
                     {
                         tv1.RefreshData();
-                        tv1.FocusTest(dialog.CreatedTest.Id);
+                        tv1.FocusTest(dialog.CreatedTest.TestID);
                     }
                     else
                     {
@@ -851,7 +851,7 @@ namespace TestAutomationManager
                             selTab2.Content is TestAutomationManager.Views.TestsView tv2)
                         {
                             tv2.RefreshData();
-                            tv2.FocusTest(dialog.CreatedTest.Id);
+                            tv2.FocusTest(dialog.CreatedTest.TestID);
                         }
                     }
 
