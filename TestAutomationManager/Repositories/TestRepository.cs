@@ -37,8 +37,11 @@ namespace TestAutomationManager.Repositories
                     var uiSettingsService = TestAutomationManager.Services.TestUISettingsService.Instance;
                     foreach (var test in tests)
                     {
-                        test.IsActive = uiSettingsService.GetIsActive((int)test.TestID);
-                        test.Category = uiSettingsService.GetCategory((int)test.TestID);
+                        if (test.TestID.HasValue)
+                        {
+                            test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
+                            test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
+                        }
                     }
 
                     var schemaName = TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
@@ -196,8 +199,11 @@ namespace TestAutomationManager.Repositories
                     await context.SaveChangesAsync();
 
                     // Update UI-only settings separately
-                    await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)test.TestID, test.IsActive);
-                    await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)test.TestID, test.Category);
+                    if (test.TestID.HasValue)
+                    {
+                        await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)test.TestID.Value, test.IsActive);
+                        await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)test.TestID.Value, test.Category);
+                    }
 
                     System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} updated successfully");
                 }

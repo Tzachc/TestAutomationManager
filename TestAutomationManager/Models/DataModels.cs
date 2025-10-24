@@ -12,7 +12,7 @@ namespace TestAutomationManager.Models
     /// </summary>
     public class Test : INotifyPropertyChanged
     {
-        private double _testID;
+        private double? _testID;
         private string _testName;
         private string _bugs;
         private string _disableKillDriver;
@@ -40,8 +40,9 @@ namespace TestAutomationManager.Models
         /// <summary>
         /// TestID column (Primary Key)
         /// SQL Server float type maps to C# double
+        /// Nullable in DB but should never be null in practice
         /// </summary>
-        public double TestID
+        public double? TestID
         {
             get => _testID;
             set { _testID = value; OnPropertyChanged(); }
@@ -195,7 +196,10 @@ namespace TestAutomationManager.Models
         {
             try
             {
-                await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)TestID, _isActive);
+                if (TestID.HasValue)
+                {
+                    await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)TestID.Value, _isActive);
+                }
             }
             catch (Exception ex)
             {
@@ -231,7 +235,7 @@ namespace TestAutomationManager.Models
         /// </summary>
         public int Id
         {
-            get => (int)TestID;
+            get => TestID.HasValue ? (int)TestID.Value : 0;
             set => TestID = value;
         }
 
@@ -278,7 +282,10 @@ namespace TestAutomationManager.Models
         {
             try
             {
-                await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)TestID, _category);
+                if (TestID.HasValue)
+                {
+                    await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)TestID.Value, _category);
+                }
             }
             catch (Exception ex)
             {
@@ -335,13 +342,13 @@ namespace TestAutomationManager.Models
     /// </summary>
     public class Process : INotifyPropertyChanged
     {
-        private double _testID;
+        private double? _testID;
         private string _comments;
         private int? _index;
         private string _lastRunning;
         private string _module;
         private string _pass_Fail_WEB3Operator;
-        private double _processID;
+        private double? _processID;
         private string _processName;
         private double? _processPosition;
         private string _repeat;
@@ -366,7 +373,7 @@ namespace TestAutomationManager.Models
         // DATABASE COLUMNS (Process_WEB3 schema)
         // ================================================
 
-        public double TestID
+        public double? TestID
         {
             get => _testID;
             set { _testID = value; OnPropertyChanged(); }
@@ -402,7 +409,7 @@ namespace TestAutomationManager.Models
             set { _pass_Fail_WEB3Operator = value; OnPropertyChanged(); }
         }
 
-        public double ProcessID
+        public double? ProcessID
         {
             get => _processID;
             set { _processID = value; OnPropertyChanged(); }
@@ -516,13 +523,13 @@ namespace TestAutomationManager.Models
 
         public int Id
         {
-            get => (int)ProcessID;
+            get => ProcessID.HasValue ? (int)ProcessID.Value : 0;
             set => ProcessID = value;
         }
 
         public int TestId
         {
-            get => (int)TestID;
+            get => TestID.HasValue ? (int)TestID.Value : 0;
             set => TestID = value;
         }
 
@@ -574,7 +581,7 @@ namespace TestAutomationManager.Models
         private int? _functionPosition;
         private int? _index;
         private string _pass_Fail_WEB3Operator;
-        private double _processID;
+        private double? _processID;
         private string _web3Operator;
 
         // Parameters 1-30
@@ -634,7 +641,7 @@ namespace TestAutomationManager.Models
             set { _pass_Fail_WEB3Operator = value; OnPropertyChanged(); }
         }
 
-        public double ProcessID
+        public double? ProcessID
         {
             get => _processID;
             set { _processID = value; OnPropertyChanged(); }
@@ -690,7 +697,7 @@ namespace TestAutomationManager.Models
 
         public int ProcessId
         {
-            get => (int)ProcessID;
+            get => ProcessID.HasValue ? (int)ProcessID.Value : 0;
             set => ProcessID = value;
         }
 
