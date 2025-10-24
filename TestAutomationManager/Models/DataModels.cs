@@ -12,7 +12,7 @@ namespace TestAutomationManager.Models
     /// </summary>
     public class Test : INotifyPropertyChanged
     {
-        private int _testID;
+        private double _testID;
         private string _testName;
         private string _bugs;
         private string _disableKillDriver;
@@ -39,8 +39,9 @@ namespace TestAutomationManager.Models
 
         /// <summary>
         /// TestID column (Primary Key)
+        /// SQL Server float type maps to C# double
         /// </summary>
-        public int TestID
+        public double TestID
         {
             get => _testID;
             set { _testID = value; OnPropertyChanged(); }
@@ -194,7 +195,7 @@ namespace TestAutomationManager.Models
         {
             try
             {
-                await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync(TestID, _isActive);
+                await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)TestID, _isActive);
             }
             catch (Exception ex)
             {
@@ -226,10 +227,11 @@ namespace TestAutomationManager.Models
 
         /// <summary>
         /// Alias for TestID (backward compatibility)
+        /// Returns TestID as int for backward compatibility
         /// </summary>
         public int Id
         {
-            get => TestID;
+            get => (int)TestID;
             set => TestID = value;
         }
 
@@ -276,7 +278,7 @@ namespace TestAutomationManager.Models
         {
             try
             {
-                await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync(TestID, _category);
+                await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)TestID, _category);
             }
             catch (Exception ex)
             {
@@ -333,13 +335,13 @@ namespace TestAutomationManager.Models
     /// </summary>
     public class Process : INotifyPropertyChanged
     {
-        private int _testID;
+        private double _testID;
         private string _comments;
         private int? _index;
         private string _lastRunning;
         private string _module;
         private string _pass_Fail_WEB3Operator;
-        private int _processID;
+        private double _processID;
         private string _processName;
         private double? _processPosition;
         private string _repeat;
@@ -364,7 +366,7 @@ namespace TestAutomationManager.Models
         // DATABASE COLUMNS (Process_WEB3 schema)
         // ================================================
 
-        public int TestID
+        public double TestID
         {
             get => _testID;
             set { _testID = value; OnPropertyChanged(); }
@@ -400,7 +402,7 @@ namespace TestAutomationManager.Models
             set { _pass_Fail_WEB3Operator = value; OnPropertyChanged(); }
         }
 
-        public int ProcessID
+        public double ProcessID
         {
             get => _processID;
             set { _processID = value; OnPropertyChanged(); }
@@ -514,13 +516,13 @@ namespace TestAutomationManager.Models
 
         public int Id
         {
-            get => ProcessID;
+            get => (int)ProcessID;
             set => ProcessID = value;
         }
 
         public int TestId
         {
-            get => TestID;
+            get => (int)TestID;
             set => TestID = value;
         }
 
