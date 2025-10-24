@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using TestAutomationManager.Data;
+using TestAutomationManager.Data.Schema;
 
 namespace TestAutomationManager.Repositories
 {
@@ -70,11 +72,12 @@ namespace TestAutomationManager.Repositories
                     string query = @"
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLES
-                        WHERE TABLE_SCHEMA = 'ext'
+                        WHERE TABLE_SCHEMA = @schema
                           AND TABLE_NAME = @tableName";
 
                     using (var command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@schema", GetExternalSchema());
                         command.Parameters.AddWithValue("@tableName", tableName);
                         int count = (int)await command.ExecuteScalarAsync();
 
@@ -104,6 +107,8 @@ namespace TestAutomationManager.Repositories
             {
                 System.Diagnostics.Debug.WriteLine($"📊 Creating {newTableName} from template {sourceTableName}...");
 
+                string schemaName = GetExternalSchema();
+
                 // Validate input
                 if (string.IsNullOrWhiteSpace(newTableName))
                     throw new ArgumentException("New table name cannot be empty");
@@ -128,7 +133,7 @@ namespace TestAutomationManager.Repositories
                     await connection.OpenAsync();
 
                     // ⭐ STEP 1: Get column definitions from source table
-                    var columnDefinitions = await GetTableColumnDefinitionsAsync(connection, sourceTableName);
+                    var columnDefinitions = await GetTableColumnDefinitionsAsync(connection, schemaName, sourceTableName);
 
                     if (columnDefinitions.Count == 0)
                     {
@@ -143,7 +148,7 @@ namespace TestAutomationManager.Repositories
                         try
                         {
                             // ⭐ STEP 2: Create new table with proper column order (ID first)
-                            string createTableQuery = BuildCreateTableQuery(newTableName, columnDefinitions);
+                            string createTableQuery = BuildCreateTableQuery(schemaName, newTableName, columnDefinitions);
 
                             using (var command = new SqlCommand(createTableQuery, connection, transaction))
                             {
@@ -162,10 +167,10 @@ namespace TestAutomationManager.Repositories
                                 string columnList = string.Join(", ", dataColumns.Select(c => $"[{c}]"));
 
                                 string copyDataQuery = $@"
-                            INSERT INTO [ext].[{newTableName}] 
+                            INSERT INTO {BuildQualifiedTableName(schemaName, newTableName)}
                             ({columnList})
                             SELECT {columnList}
-                            FROM [ext].[{sourceTableName}]";
+                            FROM {BuildQualifiedTableName(schemaName, sourceTableName)}";
 
                                 using (var command = new SqlCommand(copyDataQuery, connection, transaction))
                                 {
@@ -197,26 +202,27 @@ namespace TestAutomationManager.Repositories
         /// <summary>
         /// ⭐ NEW: Get detailed column definitions from a table
         /// </summary>
-        private async Task<List<ColumnDefinition>> GetTableColumnDefinitionsAsync(SqlConnection connection, string tableName)
+        private async Task<List<ColumnDefinition>> GetTableColumnDefinitionsAsync(SqlConnection connection, string schemaName, string tableName)
         {
             var columns = new List<ColumnDefinition>();
 
             try
             {
                 string query = @"
-            SELECT 
+            SELECT
                 COLUMN_NAME,
                 DATA_TYPE,
                 CHARACTER_MAXIMUM_LENGTH,
                 IS_NULLABLE,
                 ORDINAL_POSITION
             FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = 'ext'
+            WHERE TABLE_SCHEMA = @schema
               AND TABLE_NAME = @tableName
             ORDER BY ORDINAL_POSITION";
 
                 using (var command = new SqlCommand(query, connection))
                 {
+                    command.Parameters.AddWithValue("@schema", schemaName);
                     command.Parameters.AddWithValue("@tableName", tableName);
 
                     using (var reader = await command.ExecuteReaderAsync())
@@ -246,7 +252,7 @@ namespace TestAutomationManager.Repositories
         /// <summary>
         /// ⭐ NEW: Build CREATE TABLE query with ID as first column
         /// </summary>
-        private string BuildCreateTableQuery(string tableName, List<ColumnDefinition> columns)
+        private string BuildCreateTableQuery(string schemaName, string tableName, List<ColumnDefinition> columns)
         {
             var columnDefinitions = new List<string>();
 
@@ -271,7 +277,7 @@ namespace TestAutomationManager.Repositories
             }
 
             string createTableQuery = $@"
-        CREATE TABLE [ext].[{tableName}] (
+        CREATE TABLE {BuildQualifiedTableName(schemaName, tableName)} (
             {string.Join(",\n            ", columnDefinitions)}
         )";
 
@@ -335,7 +341,7 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string dropQuery = $"DROP TABLE [ext].[{tableName}]";
+                    string dropQuery = $"DROP TABLE {BuildQualifiedTableName(GetExternalSchema(), tableName)}";
 
                     using (var command = new SqlCommand(dropQuery, connection))
                     {
@@ -366,7 +372,7 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string query = $"SELECT COUNT(*) FROM [ext].[{tableName}]";
+                    string query = $"SELECT COUNT(*) FROM {BuildQualifiedTableName(GetExternalSchema(), tableName)}";
 
                     using (var command = new SqlCommand(query, connection))
                     {
@@ -379,6 +385,19 @@ namespace TestAutomationManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"✗ Error getting row count: {ex.Message}");
                 return 0;
             }
+        }
+
+        private static string BuildQualifiedTableName(string schemaName, string tableName)
+        {
+            string safeSchema = string.IsNullOrWhiteSpace(schemaName) ? "dbo" : schemaName;
+            return $"[{safeSchema}].[{tableName}]";
+        }
+
+        private static string GetExternalSchema()
+        {
+            var definition = SchemaManager.Current;
+            var extSchema = definition.ExternalTables?.Schema;
+            return string.IsNullOrWhiteSpace(extSchema) ? definition.DatabaseSchema : extSchema!;
         }
 
     }

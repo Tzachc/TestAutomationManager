@@ -55,6 +55,6 @@ namespace TestAutomationManager.Repositories
         /// <summary>
         /// Get test by ID
         /// </summary>
-        Task<Test> GetTestByIdAsync(int testId);
+        Task<Test?> GetTestByIdAsync(int testId);
     }
 }

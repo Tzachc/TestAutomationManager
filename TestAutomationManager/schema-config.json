@@ -1,0 +1,89 @@
+{
+  "defaultSchema": "PRODUCTION_Selenium",
+  "schemas": [
+    {
+      "name": "PRODUCTION_Selenium",
+      "databaseSchema": "PRODUCTION_Selenium",
+      "tables": {
+        "tests": "Test_WEB3",
+        "processes": "Process_WEB3",
+        "functions": "Function_WEB3"
+      },
+      "externalTables": {
+        "schema": "PRODUCTION_Selenium",
+        "prefixes": ["ExtTest", "ExtTable"]
+      },
+      "columns": {
+        "tests": {
+          "Id": ["Id", "TestId", "TestID"],
+          "Name": ["Name", "TestName", "Test_Name"],
+          "Description": ["Description", "TestDescription", "Test_Description"],
+          "Category": ["Category", "TestCategory", "CategoryName"],
+          "IsActive": ["IsActive", "Active", "Is_Active"],
+          "Status": ["Status", "TestStatus", "ExecutionStatus"],
+          "LastRun": ["LastRun", "LastRunDate", "LastExecutionDate", "LastTimePassed"]
+        },
+        "processes": {
+          "Id": ["Id", "ProcessId", "ProcessID"],
+          "TestId": ["TestId", "ParentTestId", "Test_ID"],
+          "Name": ["Name", "ProcessName", "Process_Name"],
+          "Description": ["Description", "ProcessDescription", "Process_Description"],
+          "Sequence": ["Sequence", "ProcessOrder", "SequenceNumber"],
+          "IsCritical": ["IsCritical", "Critical", "Is_Critical"],
+          "Timeout": ["Timeout", "TimeoutSeconds", "TimeOut"]
+        },
+        "functions": {
+          "Id": ["Id", "FunctionId", "FunctionID"],
+          "ProcessId": ["ProcessId", "ParentProcessId", "Process_ID"],
+          "Name": ["Name", "FunctionName", "Function_Name"],
+          "MethodName": ["MethodName", "Method", "Method_Name"],
+          "Parameters": ["Parameters", "ParameterJson", "Params"],
+          "ExpectedResult": ["ExpectedResult", "Expected", "Expected_Result"],
+          "Sequence": ["Sequence", "StepOrder", "SequenceNumber"]
+        }
+      }
+    },
+    {
+      "name": "Default",
+      "databaseSchema": "dbo",
+      "tables": {
+        "tests": "Tests",
+        "processes": "Processes",
+        "functions": "Functions"
+      },
+      "externalTables": {
+        "schema": "ext",
+        "prefixes": ["ExtTable"]
+      },
+      "columns": {
+        "tests": {
+          "Id": ["Id"],
+          "Name": ["Name"],
+          "Description": ["Description"],
+          "Category": ["Category"],
+          "IsActive": ["IsActive"],
+          "Status": ["Status"],
+          "LastRun": ["LastRun"]
+        },
+        "processes": {
+          "Id": ["Id"],
+          "TestId": ["TestId"],
+          "Name": ["Name"],
+          "Description": ["Description"],
+          "Sequence": ["Sequence"],
+          "IsCritical": ["IsCritical"],
+          "Timeout": ["Timeout"]
+        },
+        "functions": {
+          "Id": ["Id"],
+          "ProcessId": ["ProcessId"],
+          "Name": ["Name"],
+          "MethodName": ["MethodName"],
+          "Parameters": ["Parameters"],
+          "ExpectedResult": ["ExpectedResult"],
+          "Sequence": ["Sequence"]
+        }
+      }
+    }
+  ]
+}
