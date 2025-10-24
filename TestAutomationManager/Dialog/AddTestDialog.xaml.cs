@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using TestAutomationManager.Data.Schema;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
 
@@ -28,8 +29,9 @@ namespace TestAutomationManager.Dialogs
         private ObservableCollection<ExternalTableInfo> _allExtTables;
         private ObservableCollection<ExternalTableInfo> _filteredExtTables;
 
+        private readonly string _extTablePrefix;
         private int? _suggestedTestId;
-        private string _selectedSourceTable = "ExtTable1"; // Default template
+        private string _selectedSourceTable;
         private bool _isManualIdMode = false;
         private List<int> _allExistingTestIds = new List<int>();
 
@@ -58,6 +60,10 @@ namespace TestAutomationManager.Dialogs
             // Initialize repositories
             _testRepository = new TestRepository();
             _extTableRepository = new ExtTableRepository();
+
+            var schema = SchemaManager.Current;
+            _extTablePrefix = schema.ExternalTables?.Prefixes?.FirstOrDefault() ?? "ExtTable";
+            _selectedSourceTable = $"{_extTablePrefix}1";
 
             // Initialize collections
             _allExtTables = new ObservableCollection<ExternalTableInfo>();
@@ -107,6 +113,15 @@ namespace TestAutomationManager.Dialogs
                 {
                     _allExtTables.Add(table);
                     _filteredExtTables.Add(table);
+                }
+
+                if (_allExtTables.Any())
+                {
+                    _selectedSourceTable = _allExtTables.First().TableName;
+                }
+                else
+                {
+                    _selectedSourceTable = $"{_extTablePrefix}1";
                 }
 
                 StatusMessage.Text = $"Ready • {_allExtTables.Count} ExtTables available";
@@ -231,7 +246,7 @@ namespace TestAutomationManager.Dialogs
             {
                 TemplateInfo.Visibility = Visibility.Visible;
                 CopyFromPanel.Visibility = Visibility.Collapsed;
-                _selectedSourceTable = "ExtTable1"; // Default template
+                _selectedSourceTable = $"{_extTablePrefix}1"; // Default template
             }
         }
 
@@ -246,7 +261,7 @@ namespace TestAutomationManager.Dialogs
                 CopyFromPanel.Visibility = Visibility.Visible;
 
                 // Reset selection if no table selected
-                if (string.IsNullOrEmpty(_selectedSourceTable) || _selectedSourceTable == "ExtTable1")
+                if (string.IsNullOrEmpty(_selectedSourceTable) || _selectedSourceTable == $"{_extTablePrefix}1")
                 {
                     _selectedSourceTable = null;
                 }
@@ -443,10 +458,10 @@ namespace TestAutomationManager.Dialogs
                 System.Diagnostics.Debug.WriteLine($"✓ Test #{testId} created in database");
 
                 // ========== CREATE EXTTABLE ==========
-                StatusMessage.Text = $"Creating ExtTable{testId}...";
+                StatusMessage.Text = $"Creating {_extTablePrefix}{testId}...";
 
-                string newTableName = $"ExtTable{testId}";
-                string sourceTable = _selectedSourceTable ?? "ExtTable1";
+                string newTableName = $"{_extTablePrefix}{testId}";
+                string sourceTable = _selectedSourceTable ?? $"{_extTablePrefix}1";
 
                 // Check if ExtTable already exists
                 bool extTableExists = await _extTableRepository.ExtTableExistsAsync(newTableName);

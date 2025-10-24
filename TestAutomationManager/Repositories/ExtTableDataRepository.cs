@@ -3,7 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using TestAutomationManager.Data;
-using TestAutomationManager.Exceptions;
+using TestAutomationManager.Data.Schema;
 using TestAutomationManager.Exceptions;
 
 namespace TestAutomationManager.Repositories
@@ -65,7 +65,7 @@ namespace TestAutomationManager.Repositories
                     }
 
                     string query = $@"
-                UPDATE [ext].[{tableName}]
+                UPDATE {BuildQualifiedTableName(GetExternalSchema(), tableName)}
                 SET [{columnName}] = @newValue
                 WHERE [Id] = @rowId";
 
@@ -127,17 +127,18 @@ namespace TestAutomationManager.Repositories
                     await connection.OpenAsync();
 
                     string query = @"
-                SELECT 
+                SELECT
                     DATA_TYPE,
                     CHARACTER_MAXIMUM_LENGTH,
                     IS_NULLABLE
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_SCHEMA = 'ext'
+                WHERE TABLE_SCHEMA = @schema
                   AND TABLE_NAME = @tableName
                   AND COLUMN_NAME = @columnName";
 
                     using (var command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@schema", GetExternalSchema());
                         command.Parameters.AddWithValue("@tableName", tableName);
                         command.Parameters.AddWithValue("@columnName", columnName);
 
@@ -208,7 +209,7 @@ namespace TestAutomationManager.Repositories
                     await connection.OpenAsync();
 
                     // Use sp_rename to rename the column
-                    string query = $"EXEC sp_rename '[ext].[{tableName}].[{oldColumnName}]', '{newColumnName}', 'COLUMN'";
+                    string query = $"EXEC sp_rename '{BuildQualifiedTableName(GetExternalSchema(), tableName)}.[{oldColumnName}]', '{newColumnName}', 'COLUMN'";
 
                     using (var command = new SqlCommand(query, connection))
                     {
@@ -242,12 +243,13 @@ namespace TestAutomationManager.Repositories
                     string query = @"
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.COLUMNS
-                        WHERE TABLE_SCHEMA = 'ext'
+                        WHERE TABLE_SCHEMA = @schema
                           AND TABLE_NAME = @tableName
                           AND COLUMN_NAME = @columnName";
 
                     using (var command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@schema", GetExternalSchema());
                         command.Parameters.AddWithValue("@tableName", tableName);
                         command.Parameters.AddWithValue("@columnName", columnName);
 
@@ -309,12 +311,13 @@ namespace TestAutomationManager.Repositories
                     string query = @"
                         SELECT DATA_TYPE
                         FROM INFORMATION_SCHEMA.COLUMNS
-                        WHERE TABLE_SCHEMA = 'ext'
+                        WHERE TABLE_SCHEMA = @schema
                           AND TABLE_NAME = @tableName
                           AND COLUMN_NAME = @columnName";
 
                     using (var command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@schema", GetExternalSchema());
                         command.Parameters.AddWithValue("@tableName", tableName);
                         command.Parameters.AddWithValue("@columnName", columnName);
 
@@ -372,7 +375,7 @@ namespace TestAutomationManager.Repositories
                     string newSize = newMaxLength == -1 ? "MAX" : newMaxLength.ToString();
 
                     string alterQuery = $@"
-                ALTER TABLE [ext].[{tableName}]
+                ALTER TABLE {BuildQualifiedTableName(GetExternalSchema(), tableName)}
                 ALTER COLUMN [{columnName}] {dataType}({newSize})";
 
                     using (var command = new SqlCommand(alterQuery, connection))
@@ -432,7 +435,7 @@ namespace TestAutomationManager.Repositories
                     // Build ALTER TABLE query
                     string nullable = isNullable ? "NULL" : "NOT NULL";
                     string alterQuery = $@"
-                        ALTER TABLE [ext].[{tableName}]
+                        ALTER TABLE {BuildQualifiedTableName(GetExternalSchema(), tableName)}
                         ADD [{columnName}] {dataType} {nullable}";
 
                     using (var command = new SqlCommand(alterQuery, connection))
@@ -447,6 +450,19 @@ namespace TestAutomationManager.Repositories
                 System.Diagnostics.Debug.WriteLine($"✗ Error adding column: {ex.Message}");
                 throw new Exception($"Failed to add column '{columnName}' to {tableName}", ex);
             }
+        }
+
+        private static string BuildQualifiedTableName(string schemaName, string tableName)
+        {
+            string safeSchema = string.IsNullOrWhiteSpace(schemaName) ? "dbo" : schemaName;
+            return $"[{safeSchema}].[{tableName}]";
+        }
+
+        private static string GetExternalSchema()
+        {
+            var definition = SchemaManager.Current;
+            var extSchema = definition.ExternalTables?.Schema;
+            return string.IsNullOrWhiteSpace(extSchema) ? definition.DatabaseSchema : extSchema!;
         }
 
     }

@@ -1,0 +1,89 @@
+{
+  "defaultSchema": "PRODUCTION_Selenium",
+  "schemas": [
+    {
+      "name": "PRODUCTION_Selenium",
+      "databaseSchema": "PRODUCTION_Selenium",
+      "tables": {
+        "tests": "Test_WEB3",
+        "processes": "Process_WEB3",
+        "functions": "Function_WEB3"
+      },
+      "externalTables": {
+        "schema": "PRODUCTION_Selenium",
+        "prefixes": ["ExtTest", "ExtTable"]
+      },
+      "columns": {
+        "tests": {
+          "Id": ["TestID", "TestId", "Id"],
+          "Name": ["TestName", "Name", "Test_Name"],
+          "Description": ["ExceptionMessage", "Bugs", "Description", "TestDescription", "Test_Description"],
+          "Category": ["Bugs", "RecipientsEmailsList", "Category", "TestCategory", "CategoryName"],
+          "IsActive": ["IsActive", "MarkIfRun", "Active", "Is_Active"],
+          "Status": ["RunStatus", "Status", "TestStatus", "ExecutionStatus"],
+          "LastRun": ["LastRunning", "LastTimePass", "LastRun", "LastRunDate", "LastExecutionDate", "LastTimePassed"]
+        },
+        "processes": {
+          "Id": ["ProcessID", "Index", "Id"],
+          "TestId": ["TestID", "TestId", "ParentTestId", "Test_ID"],
+          "Name": ["ProcessName", "Name", "Process_Name"],
+          "Description": ["Comments", "Description", "ProcessDescription", "Process_Description"],
+          "Sequence": ["ProcessPosition", "Index", "Sequence", "ProcessOrder", "SequenceNumber"],
+          "IsCritical": ["IsCritical", "Critical", "Is_Critical"],
+          "Timeout": ["Timeout", "TimeoutSeconds", "TimeOut", "Repeat"]
+        },
+        "functions": {
+          "Id": ["Index", "FunctionPosition", "FunctionId", "FunctionID", "Id"],
+          "ProcessId": ["ProcessID", "ProcessId", "ParentProcessId", "Process_ID"],
+          "Name": ["FunctionName", "Name", "Function_Name"],
+          "MethodName": ["WEB3Operator", "MethodName", "Method", "Method_Name"],
+          "Parameters": ["Param1", "Parameters", "ParameterJson", "Params"],
+          "ExpectedResult": ["ActualValue", "ExpectedResult", "Expected", "Expected_Result"],
+          "Sequence": ["FunctionPosition", "Index", "Sequence", "StepOrder", "SequenceNumber"]
+        }
+      }
+    },
+    {
+      "name": "Default",
+      "databaseSchema": "dbo",
+      "tables": {
+        "tests": "Tests",
+        "processes": "Processes",
+        "functions": "Functions"
+      },
+      "externalTables": {
+        "schema": "ext",
+        "prefixes": ["ExtTable"]
+      },
+      "columns": {
+        "tests": {
+          "Id": ["Id"],
+          "Name": ["Name"],
+          "Description": ["Description"],
+          "Category": ["Category"],
+          "IsActive": ["IsActive"],
+          "Status": ["Status"],
+          "LastRun": ["LastRun"]
+        },
+        "processes": {
+          "Id": ["Id"],
+          "TestId": ["TestId"],
+          "Name": ["Name"],
+          "Description": ["Description"],
+          "Sequence": ["Sequence"],
+          "IsCritical": ["IsCritical"],
+          "Timeout": ["Timeout"]
+        },
+        "functions": {
+          "Id": ["Id"],
+          "ProcessId": ["ProcessId"],
+          "Name": ["Name"],
+          "MethodName": ["MethodName"],
+          "Parameters": ["Parameters"],
+          "ExpectedResult": ["ExpectedResult"],
+          "Sequence": ["Sequence"]
+        }
+      }
+    }
+  ]
+}

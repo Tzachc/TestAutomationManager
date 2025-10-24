@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using TestAutomationManager.Models;
 using TestAutomationManager.Data;
+using TestAutomationManager.Data.Schema;
 
 namespace TestAutomationManager.Data
 {
@@ -61,105 +63,89 @@ namespace TestAutomationManager.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ================================================
-            // TEST ENTITY CONFIGURATION
-            // ================================================
-            modelBuilder.Entity<Test>(entity =>
+            var schema = SchemaManager.Current;
+
+            ConfigureTestEntity(modelBuilder, schema);
+            ConfigureProcessEntity(modelBuilder, schema);
+            ConfigureFunctionEntity(modelBuilder, schema);
+        }
+
+        private static void ConfigureTestEntity(ModelBuilder modelBuilder, SchemaDefinition schema)
+        {
+            var entity = modelBuilder.Entity<Test>();
+            entity.ToTable(schema.GetTableName("tests"), schema.DatabaseSchema);
+
+            entity.HasKey(e => e.Id);
+
+            var columns = schema.GetColumnCandidates("tests");
+
+            entity.Property(e => e.Id).HasColumnName(GetColumnName(columns, "Id", "Id"));
+            entity.Property(e => e.Name).HasColumnName(GetColumnName(columns, "Name", "Name")).HasMaxLength(200);
+            entity.Property(e => e.Description).HasColumnName(GetColumnName(columns, "Description", "Description")).HasMaxLength(500);
+            entity.Property(e => e.Category).HasColumnName(GetColumnName(columns, "Category", "Category")).HasMaxLength(100);
+            entity.Property(e => e.Status).HasColumnName(GetColumnName(columns, "Status", "Status")).HasMaxLength(50);
+            entity.Property(e => e.IsActive).HasColumnName(GetColumnName(columns, "IsActive", "IsActive")).HasDefaultValue(true);
+            entity.Property(e => e.LastRun).HasColumnName(GetColumnName(columns, "LastRun", "LastRun"));
+
+            entity.HasMany(t => t.Processes)
+                .WithOne()
+                .HasForeignKey(nameof(Process.TestId))
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Ignore(e => e.IsExpanded);
+        }
+
+        private static void ConfigureProcessEntity(ModelBuilder modelBuilder, SchemaDefinition schema)
+        {
+            var entity = modelBuilder.Entity<Process>();
+            entity.ToTable(schema.GetTableName("processes"), schema.DatabaseSchema);
+
+            entity.HasKey(e => e.Id);
+
+            var columns = schema.GetColumnCandidates("processes");
+
+            entity.Property(e => e.Id).HasColumnName(GetColumnName(columns, "Id", "Id"));
+            entity.Property(e => e.TestId).HasColumnName(GetColumnName(columns, "TestId", "TestId"));
+            entity.Property(e => e.Name).HasColumnName(GetColumnName(columns, "Name", "Name")).HasMaxLength(200);
+            entity.Property(e => e.Description).HasColumnName(GetColumnName(columns, "Description", "Description")).HasMaxLength(500);
+            entity.Property(e => e.Sequence).HasColumnName(GetColumnName(columns, "Sequence", "Sequence"));
+            entity.Property(e => e.IsCritical).HasColumnName(GetColumnName(columns, "IsCritical", "IsCritical")).HasDefaultValue(false);
+            entity.Property(e => e.Timeout).HasColumnName(GetColumnName(columns, "Timeout", "Timeout")).HasDefaultValue(30);
+
+            entity.HasMany(p => p.Functions)
+                .WithOne()
+                .HasForeignKey(nameof(Function.ProcessId))
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Ignore(e => e.IsExpanded);
+        }
+
+        private static void ConfigureFunctionEntity(ModelBuilder modelBuilder, SchemaDefinition schema)
+        {
+            var entity = modelBuilder.Entity<Function>();
+            entity.ToTable(schema.GetTableName("functions"), schema.DatabaseSchema);
+
+            entity.HasKey(e => e.Id);
+
+            var columns = schema.GetColumnCandidates("functions");
+
+            entity.Property(e => e.Id).HasColumnName(GetColumnName(columns, "Id", "Id"));
+            entity.Property(e => e.ProcessId).HasColumnName(GetColumnName(columns, "ProcessId", "ProcessId"));
+            entity.Property(e => e.Name).HasColumnName(GetColumnName(columns, "Name", "Name")).HasMaxLength(200);
+            entity.Property(e => e.MethodName).HasColumnName(GetColumnName(columns, "MethodName", "MethodName")).HasMaxLength(200);
+            entity.Property(e => e.Parameters).HasColumnName(GetColumnName(columns, "Parameters", "Parameters")).HasMaxLength(1000);
+            entity.Property(e => e.ExpectedResult).HasColumnName(GetColumnName(columns, "ExpectedResult", "ExpectedResult")).HasMaxLength(500);
+            entity.Property(e => e.Sequence).HasColumnName(GetColumnName(columns, "Sequence", "Sequence"));
+        }
+
+        private static string GetColumnName(Dictionary<string, List<string>> candidates, string property, string fallback)
+        {
+            if (candidates.TryGetValue(property, out var options) && options.Count > 0)
             {
-                // Table name
-                entity.ToTable("Tests");
+                return options[0];
+            }
 
-                // Primary key
-                entity.HasKey(e => e.Id);
-
-                // Properties
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Description)
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.Category)
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Status)
-                    .HasMaxLength(50);
-
-                entity.Property(e => e.IsActive)
-                    .HasDefaultValue(true);
-
-                // Relationships
-                entity.HasMany(t => t.Processes)
-                    .WithOne()
-                    .HasForeignKey("TestId")
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Ignore properties that don't exist in database
-                entity.Ignore(e => e.IsExpanded);
-            });
-
-            // ================================================
-            // PROCESS ENTITY CONFIGURATION
-            // ================================================
-            modelBuilder.Entity<Process>(entity =>
-            {
-                // Table name
-                entity.ToTable("Processes");
-
-                // Primary key
-                entity.HasKey(e => e.Id);
-
-                // Properties
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Description)
-                    .HasMaxLength(500);
-
-                entity.Property(e => e.IsCritical)
-                    .HasDefaultValue(false);
-
-                entity.Property(e => e.Timeout)
-                    .HasDefaultValue(30);
-
-                // Relationships
-                entity.HasMany(p => p.Functions)
-                    .WithOne()
-                    .HasForeignKey("ProcessId")
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Ignore properties that don't exist in database
-                entity.Ignore(e => e.IsExpanded);
-            });
-
-            // ================================================
-            // FUNCTION ENTITY CONFIGURATION
-            // ================================================
-            modelBuilder.Entity<Function>(entity =>
-            {
-                // Table name
-                entity.ToTable("Functions");
-
-                // Primary key
-                entity.HasKey(e => e.Id);
-
-                // Properties
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.MethodName)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Parameters)
-                    .HasMaxLength(1000);
-
-                entity.Property(e => e.ExpectedResult)
-                    .HasMaxLength(500);
-            });
+            return fallback;
         }
     }
 }
