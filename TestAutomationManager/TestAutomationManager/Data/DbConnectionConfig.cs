@@ -13,11 +13,11 @@ namespace TestAutomationManager.Data
         // ================================================
 
         /// <summary>
-        /// Default connection string for LocalDB
+        /// Default connection string for AutomationDB
         /// Change this when deploying to production
         /// </summary>
         private const string DEFAULT_CONNECTION_STRING =
-            @"Server=(localdb)\Local;Database=TestAutomationDB;Integrated Security=true;TrustServerCertificate=true;";
+            @"Server=(localdb)\Local;Database=AutomationDB;Integrated Security=true;TrustServerCertificate=true;";
 
         /// <summary>
         /// Get the connection string

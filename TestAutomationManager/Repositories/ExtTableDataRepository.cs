@@ -15,6 +15,11 @@ namespace TestAutomationManager.Repositories
     {
         private readonly string _connectionString;
 
+        /// <summary>
+        /// Get the current schema name from SchemaConfigService
+        /// </summary>
+        private string CurrentSchema => TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
+
         public ExtTableDataRepository()
         {
             _connectionString = DbConnectionConfig.GetConnectionString();
@@ -65,7 +70,7 @@ namespace TestAutomationManager.Repositories
                     }
 
                     string query = $@"
-                UPDATE [ext].[{tableName}]
+                UPDATE [{CurrentSchema}].[{tableName}]
                 SET [{columnName}] = @newValue
                 WHERE [Id] = @rowId";
 
@@ -208,7 +213,7 @@ namespace TestAutomationManager.Repositories
                     await connection.OpenAsync();
 
                     // Use sp_rename to rename the column
-                    string query = $"EXEC sp_rename '[ext].[{tableName}].[{oldColumnName}]', '{newColumnName}', 'COLUMN'";
+                    string query = $"EXEC sp_rename '[{CurrentSchema}].[{tableName}].[{oldColumnName}]', '{newColumnName}', 'COLUMN'";
 
                     using (var command = new SqlCommand(query, connection))
                     {
@@ -372,7 +377,7 @@ namespace TestAutomationManager.Repositories
                     string newSize = newMaxLength == -1 ? "MAX" : newMaxLength.ToString();
 
                     string alterQuery = $@"
-                ALTER TABLE [ext].[{tableName}]
+                ALTER TABLE [{CurrentSchema}].[{tableName}]
                 ALTER COLUMN [{columnName}] {dataType}({newSize})";
 
                     using (var command = new SqlCommand(alterQuery, connection))
@@ -432,7 +437,7 @@ namespace TestAutomationManager.Repositories
                     // Build ALTER TABLE query
                     string nullable = isNullable ? "NULL" : "NOT NULL";
                     string alterQuery = $@"
-                        ALTER TABLE [ext].[{tableName}]
+                        ALTER TABLE [{CurrentSchema}].[{tableName}]
                         ADD [{columnName}] {dataType} {nullable}";
 
                     using (var command = new SqlCommand(alterQuery, connection))

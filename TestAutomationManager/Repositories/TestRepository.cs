@@ -18,7 +18,8 @@ namespace TestAutomationManager.Repositories
         // ================================================
 
         /// <summary>
-        /// Get all tests with their processes and functions
+        /// Get all tests with their processes and functions from the current schema
+        /// Loads data from [PRODUCTION_Selenium].[Test_WEB3], [Process_WEB3], [Function_WEB3]
         /// </summary>
         public async Task<List<Test>> GetAllTestsAsync()
         {
@@ -29,10 +30,18 @@ namespace TestAutomationManager.Repositories
                     var tests = await context.Tests
                         .Include(t => t.Processes)
                             .ThenInclude(p => p.Functions)
-                        .OrderBy(t => t.Id)
+                        .OrderBy(t => t.TestID)
                         .ToListAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests from database");
+                    // Load UI-only settings (IsActive) from settings service
+                    var uiSettingsService = TestAutomationManager.Services.TestUISettingsService.Instance;
+                    foreach (var test in tests)
+                    {
+                        test.IsActive = uiSettingsService.GetIsActive(test.TestID);
+                    }
+
+                    var schemaName = TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests from schema '{schemaName}'");
                     return tests;
                 }
             }
