@@ -540,6 +540,8 @@ namespace TestAutomationManager.Repositories
 
             using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
+                var ordinals = BuildAliasLookup(reader);
+
                 while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     var test = new Test
@@ -547,19 +549,19 @@ namespace TestAutomationManager.Repositories
                         Processes = new ObservableCollection<Process>()
                     };
 
-                    if (TryGetValue(reader, "Id", out int id))
+                    if (TryGetValue(reader, ordinals, "Id", out int id))
                         test.Id = id;
-                    if (TryGetValue(reader, "Name", out string name))
+                    if (columns.ContainsKey("Name") && TryGetValue(reader, ordinals, "Name", out string name))
                         test.Name = name;
-                    if (TryGetValue(reader, "Description", out string description))
+                    if (columns.ContainsKey("Description") && TryGetValue(reader, ordinals, "Description", out string description))
                         test.Description = description;
-                    if (TryGetValue(reader, "Category", out string category))
+                    if (columns.ContainsKey("Category") && TryGetValue(reader, ordinals, "Category", out string category))
                         test.Category = category;
-                    if (TryGetValue(reader, "IsActive", out bool isActive))
+                    if (columns.ContainsKey("IsActive") && TryGetValue(reader, ordinals, "IsActive", out bool isActive))
                         test.IsActive = isActive;
-                    if (TryGetValue(reader, "Status", out string status))
+                    if (columns.ContainsKey("Status") && TryGetValue(reader, ordinals, "Status", out string status))
                         test.Status = status;
-                    if (TryGetValue(reader, "LastRun", out DateTime lastRun))
+                    if (columns.ContainsKey("LastRun") && TryGetValue(reader, ordinals, "LastRun", out DateTime lastRun))
                         test.LastRun = lastRun;
 
                     results.Add(test);
@@ -610,6 +612,8 @@ namespace TestAutomationManager.Repositories
 
             using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
+                var ordinals = BuildAliasLookup(reader);
+
                 while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     var process = new Process
@@ -617,19 +621,19 @@ namespace TestAutomationManager.Repositories
                         Functions = new ObservableCollection<Function>()
                     };
 
-                    if (TryGetValue(reader, "Id", out int id))
+                    if (TryGetValue(reader, ordinals, "Id", out int id))
                         process.Id = id;
-                    if (TryGetValue(reader, "TestId", out int testIdValue))
+                    if (TryGetValue(reader, ordinals, "TestId", out int testIdValue))
                         process.TestId = testIdValue;
-                    if (TryGetValue(reader, "Name", out string name))
+                    if (columns.ContainsKey("Name") && TryGetValue(reader, ordinals, "Name", out string name))
                         process.Name = name;
-                    if (TryGetValue(reader, "Description", out string description))
+                    if (columns.ContainsKey("Description") && TryGetValue(reader, ordinals, "Description", out string description))
                         process.Description = description;
-                    if (TryGetValue(reader, "Sequence", out int sequence))
+                    if (columns.ContainsKey("Sequence") && TryGetValue(reader, ordinals, "Sequence", out int sequence))
                         process.Sequence = sequence;
-                    if (TryGetValue(reader, "IsCritical", out bool isCritical))
+                    if (columns.ContainsKey("IsCritical") && TryGetValue(reader, ordinals, "IsCritical", out bool isCritical))
                         process.IsCritical = isCritical;
-                    if (TryGetValue(reader, "Timeout", out double timeout))
+                    if (columns.ContainsKey("Timeout") && TryGetValue(reader, ordinals, "Timeout", out double timeout))
                         process.Timeout = timeout;
 
                     results.Add(process);
@@ -679,23 +683,25 @@ namespace TestAutomationManager.Repositories
 
             using (var reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
             {
+                var ordinals = BuildAliasLookup(reader);
+
                 while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     var function = new Function();
 
-                    if (TryGetValue(reader, "Id", out int id))
+                    if (TryGetValue(reader, ordinals, "Id", out int id))
                         function.Id = id;
-                    if (TryGetValue(reader, "ProcessId", out int processId))
+                    if (TryGetValue(reader, ordinals, "ProcessId", out int processId))
                         function.ProcessId = processId;
-                    if (TryGetValue(reader, "Name", out string name))
+                    if (columns.ContainsKey("Name") && TryGetValue(reader, ordinals, "Name", out string name))
                         function.Name = name;
-                    if (TryGetValue(reader, "MethodName", out string methodName))
+                    if (columns.ContainsKey("MethodName") && TryGetValue(reader, ordinals, "MethodName", out string methodName))
                         function.MethodName = methodName;
-                    if (TryGetValue(reader, "Parameters", out string parametersValue))
+                    if (columns.ContainsKey("Parameters") && TryGetValue(reader, ordinals, "Parameters", out string parametersValue))
                         function.Parameters = parametersValue;
-                    if (TryGetValue(reader, "ExpectedResult", out string expected))
+                    if (columns.ContainsKey("ExpectedResult") && TryGetValue(reader, ordinals, "ExpectedResult", out string expected))
                         function.ExpectedResult = expected;
-                    if (TryGetValue(reader, "Sequence", out int sequence))
+                    if (columns.ContainsKey("Sequence") && TryGetValue(reader, ordinals, "Sequence", out int sequence))
                         function.Sequence = sequence;
 
                     results.Add(function);
@@ -746,16 +752,27 @@ namespace TestAutomationManager.Repositories
             return $"[{safeSchema}].[{table}]";
         }
 
-        private static bool TryGetValue<T>(SqlDataReader reader, string alias, out T value)
+        private static Dictionary<string, int> BuildAliasLookup(SqlDataReader reader)
+        {
+            var lookup = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                string name = reader.GetName(i);
+                if (!lookup.ContainsKey(name))
+                {
+                    lookup[name] = i;
+                }
+            }
+
+            return lookup;
+        }
+
+        private static bool TryGetValue<T>(SqlDataReader reader, Dictionary<string, int> ordinals, string alias, out T value)
         {
             value = default!;
 
-            int ordinal;
-            try
-            {
-                ordinal = reader.GetOrdinal(alias);
-            }
-            catch (IndexOutOfRangeException)
+            if (!ordinals.TryGetValue(alias, out int ordinal))
             {
                 return false;
             }

@@ -61,7 +61,7 @@ namespace TestAutomationManager.Data.Schema
             using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync().ConfigureAwait(false);
 
-            var command = new SqlCommand(@"
+            using var command = new SqlCommand(@"
                 SELECT COLUMN_NAME
                 FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE TABLE_SCHEMA = @schema
