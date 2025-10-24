@@ -75,7 +75,7 @@
         </Grid.RowDefinitions>
 
         <!-- 📊 TABLE HEADER -->
-        <Border Grid.Row="0" 
+        <Border Grid.Row="0"
                 Background="{DynamicResource SecondaryBackgroundBrush}"
                 BorderThickness="0,0,0,1"
                 BorderBrush="{DynamicResource BorderBrush}"
@@ -86,23 +86,25 @@
                     <ColumnDefinition Width="32"/>
                     <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="60"/>
-                    <ColumnDefinition Width="280"/>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="250"/>
                     <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="60"/>
                     <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="2" 
-                         Text="ID" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
+                <TextBlock Grid.Column="2"
+                         Text="ID"
+                         FontSize="12"
+                         FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}" />
 
-                <TextBlock Grid.Column="3" 
-                         Text="TEST NAME" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
+                <TextBlock Grid.Column="3"
+                         Text="TEST NAME"
+                         FontSize="12"
+                         FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}" />
 
                 <TextBlock Grid.Column="4"
@@ -117,16 +119,28 @@
                          FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}"/>
 
-                <TextBlock Grid.Column="6" 
-                         Text="LAST RUN" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
+                <TextBlock Grid.Column="6"
+                         Text="LAST RUNNING"
+                         FontSize="12"
+                         FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}" />
 
-                <TextBlock Grid.Column="7" 
-                         Text="ACTIONS" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
+                <TextBlock Grid.Column="7"
+                         Text="LAST PASSED"
+                         FontSize="12"
+                         FontWeight="Bold"
+                         Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                <TextBlock Grid.Column="8"
+                         Text="BUGS"
+                         FontSize="12"
+                         FontWeight="Bold"
+                         Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                <TextBlock Grid.Column="9"
+                         Text="ACTIONS"
+                         FontSize="12"
+                         FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}"
                          HorizontalAlignment="Right"
                          Margin="0,0,8,0"/>
@@ -146,7 +160,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- ✨ TEST ROW -->
-                                <Border Grid.Row="0" 
+                                <Border Grid.Row="0"
                                        Background="{DynamicResource CardBackgroundBrush}"
                                        BorderBrush="{DynamicResource BorderBrush}"
                                        BorderThickness="1"
@@ -157,15 +171,17 @@
                                             <ColumnDefinition Width="32"/>
                                             <ColumnDefinition Width="20"/>
                                             <ColumnDefinition Width="60"/>
-                                            <ColumnDefinition Width="280"/>
-                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="250"/>
                                             <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="60"/>
                                             <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="200"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Expand Toggle -->
-                                        <ToggleButton Grid.Column="0" 
+                                        <ToggleButton Grid.Column="0"
                                                     Style="{StaticResource ExpandToggle}"
                                                     IsChecked="{Binding IsExpanded}"
                                                     VerticalAlignment="Center"
@@ -206,17 +222,13 @@
                                                  VerticalAlignment="Center"/>
 
                                         <!-- Test Name -->
-                                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding TestName}"
-                                                     Foreground="{DynamicResource TextPrimaryBrush}"
-                                                     FontSize="13"
-                                                     FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding Bugs}"
-                                                     Foreground="{DynamicResource TextTertiaryBrush}"
-                                                     FontSize="11"
-                                                     Margin="0,2,0,0"
-                                                     TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
+                                        <TextBlock Grid.Column="3"
+                                                 Text="{Binding TestName}"
+                                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                                 FontSize="13"
+                                                 FontWeight="Medium"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"/>
 
                                         <!-- Run Status Badge -->
                                         <Border Grid.Column="4"
@@ -232,18 +244,13 @@
                                         </Border>
 
                                         <!-- Active Toggle -->
-                                        <CheckBox Grid.Column="5" 
-                                                IsChecked="{Binding IsActive}" 
+                                        <CheckBox Grid.Column="5"
+                                                IsChecked="{Binding IsActive}"
                                                 Style="{StaticResource ModernToggle}"
                                                 VerticalAlignment="Center"
-                                                HorizontalAlignment="Left">
-                                            <TextBlock Text="Active" 
-                                                     Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                     FontSize="11" 
-                                                     FontWeight="Medium"/>
-                                        </CheckBox>
+                                                HorizontalAlignment="Center"/>
 
-                                        <!-- Last Run -->
+                                        <!-- Last Running -->
                                         <StackPanel Grid.Column="6" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding LastRunning, StringFormat='{}{0:MMM dd, yyyy}'}"
                                                      Foreground="{DynamicResource TextSecondaryBrush}"
@@ -255,30 +262,50 @@
                                                      Margin="0,1,0,0"/>
                                         </StackPanel>
 
+                                        <!-- Last Passed -->
+                                        <StackPanel Grid.Column="7" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding LastTimePassed, StringFormat='{}{0:MMM dd, yyyy}'}"
+                                                     Foreground="{DynamicResource SuccessBrush}"
+                                                     FontSize="11"
+                                                     FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding LastTimePassed, StringFormat='{}{0:HH:mm}'}"
+                                                     Foreground="{DynamicResource TextTertiaryBrush}"
+                                                     FontSize="10"
+                                                     Margin="0,1,0,0"/>
+                                        </StackPanel>
+
+                                        <!-- Bugs -->
+                                        <TextBlock Grid.Column="8"
+                                                 Text="{Binding Bugs}"
+                                                 Foreground="{DynamicResource TextSecondaryBrush}"
+                                                 FontSize="11"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"/>
+
                                         <!-- Actions -->
-                                        <StackPanel Grid.Column="7" 
-          Orientation="Horizontal" 
+                                        <StackPanel Grid.Column="9"
+          Orientation="Horizontal"
           HorizontalAlignment="Right"
           VerticalAlignment="Center">
-                                            <Button Style="{StaticResource IconButton}" 
+                                            <Button Style="{StaticResource IconButton}"
           Width="28" Height="28"
-          ToolTip="Edit" 
+          ToolTip="Edit"
           Margin="2,0"
           Click="EditTest_Click"
           Tag="{Binding}">
                                                 <TextBlock Text="✏️" FontSize="12"/>
                                             </Button>
-                                            <Button Style="{StaticResource IconButton}" 
+                                            <Button Style="{StaticResource IconButton}"
           Width="28" Height="28"
-          ToolTip="Run" 
+          ToolTip="Run"
           Margin="2,0"
           Click="RunTest_Click"
           Tag="{Binding}">
                                                 <TextBlock Text="▶️" FontSize="12"/>
                                             </Button>
-                                            <Button Style="{StaticResource IconButton}" 
+                                            <Button Style="{StaticResource IconButton}"
           Width="28" Height="28"
-          ToolTip="Delete" 
+          ToolTip="Delete"
           Margin="2,0"
           Click="DeleteTest_Click"
           Tag="{Binding}">
