@@ -139,6 +139,9 @@ namespace TestAutomationManager.Data
                 entity.Ignore(e => e.Id); // Compatibility property
                 entity.Ignore(e => e.Name); // Compatibility property
                 entity.Ignore(e => e.Status); // Compatibility property
+                entity.Ignore(e => e.Category); // Compatibility property
+                entity.Ignore(e => e.Description); // Compatibility property
+                entity.Ignore(e => e.LastRun); // Compatibility property
             });
 
             // ================================================

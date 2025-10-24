@@ -94,6 +94,34 @@ namespace TestAutomationManager.Services
         }
 
         /// <summary>
+        /// Get Category for a test
+        /// </summary>
+        public string GetCategory(int testId)
+        {
+            if (_settings.ContainsKey(testId))
+            {
+                return _settings[testId].Category ?? "General";
+            }
+            return "General"; // Default category
+        }
+
+        /// <summary>
+        /// Set Category for a test
+        /// </summary>
+        public async Task SetCategoryAsync(int testId, string category)
+        {
+            if (!_settings.ContainsKey(testId))
+            {
+                _settings[testId] = new TestUISettings { TestId = testId };
+            }
+
+            _settings[testId].Category = category;
+            await SaveSettingsAsync();
+
+            System.Diagnostics.Debug.WriteLine($"✓ Test #{testId} Category set to {category}");
+        }
+
+        /// <summary>
         /// Remove settings for a test (when deleted)
         /// </summary>
         public async Task RemoveTestSettingsAsync(int testId)
@@ -173,5 +201,6 @@ namespace TestAutomationManager.Services
     {
         public int TestId { get; set; }
         public bool IsActive { get; set; } = true;
+        public string Category { get; set; } = "General";
     }
 }

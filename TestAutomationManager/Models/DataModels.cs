@@ -30,6 +30,7 @@ namespace TestAutomationManager.Models
         // UI-only properties (not in database)
         private bool _isActive;
         private bool _isExpanded;
+        private string _category;
         private ObservableCollection<Process> _processes;
 
         // ================================================
@@ -248,6 +249,70 @@ namespace TestAutomationManager.Models
         {
             get => RunStatus;
             set => RunStatus = value;
+        }
+
+        /// <summary>
+        /// Category - UI-only property (backward compatibility)
+        /// Stored in TestUISettingsService
+        /// </summary>
+        public string Category
+        {
+            get => _category ?? "General";
+            set
+            {
+                if (_category != value)
+                {
+                    _category = value;
+                    OnPropertyChanged();
+                    SaveCategoryToSettings();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Save Category to UI settings service
+        /// </summary>
+        private async void SaveCategoryToSettings()
+        {
+            try
+            {
+                await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync(TestID, _category);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to save Category for Test #{TestID}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Description - Maps to ExceptionMessage (backward compatibility)
+        /// </summary>
+        public string Description
+        {
+            get => ExceptionMessage ?? string.Empty;
+            set => ExceptionMessage = value;
+        }
+
+        /// <summary>
+        /// LastRun - Parsed from LastRunning string (backward compatibility)
+        /// </summary>
+        public DateTime LastRun
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(LastRunning))
+                {
+                    if (DateTime.TryParse(LastRunning, out DateTime result))
+                    {
+                        return result;
+                    }
+                }
+                return DateTime.MinValue;
+            }
+            set
+            {
+                LastRunning = value.ToString("yyyy-MM-dd HH:mm:ss");
+            }
         }
 
         // ================================================
