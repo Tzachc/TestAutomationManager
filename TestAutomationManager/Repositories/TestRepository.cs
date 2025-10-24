@@ -27,11 +27,55 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    var tests = await context.Tests
-                        .Include(t => t.Processes)
-                            .ThenInclude(p => p.Functions)
-                        .OrderBy(t => t.TestID)
-                        .ToListAsync();
+                    System.Diagnostics.Debug.WriteLine("⏳ Starting to load tests from database...");
+
+                    // First, try to load just the tests without relationships to isolate the issue
+                    List<Test> tests;
+                    try
+                    {
+                        tests = await context.Tests
+                            .OrderBy(t => t.TestID)
+                            .ToListAsync();
+
+                        System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests (without relationships)");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✗ Error loading tests: {ex.GetType().Name} - {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {ex.StackTrace}");
+
+                        // Try to get more diagnostic info
+                        var schemaConfig = TestAutomationManager.Services.SchemaConfigService.Instance;
+                        var tableName = schemaConfig.GetFullTableName(schemaConfig.TestTableName);
+                        System.Diagnostics.Debug.WriteLine($"✗ Attempting to query: {tableName}");
+
+                        throw new Exception($"Failed to load tests from {tableName}. Check if TestID column has NULL values.", ex);
+                    }
+
+                    // Now load processes and functions separately
+                    try
+                    {
+                        System.Diagnostics.Debug.WriteLine("⏳ Loading processes and functions...");
+                        foreach (var test in tests)
+                        {
+                            await context.Entry(test)
+                                .Collection(t => t.Processes)
+                                .LoadAsync();
+
+                            foreach (var process in test.Processes)
+                            {
+                                await context.Entry(process)
+                                    .Collection(p => p.Functions)
+                                    .LoadAsync();
+                            }
+                        }
+                        System.Diagnostics.Debug.WriteLine($"✓ Loaded processes and functions");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✗ Error loading processes/functions: {ex.GetType().Name} - {ex.Message}");
+                        // Continue even if relationships fail to load
+                    }
 
                     // Load UI-only settings (IsActive, Category) from settings service
                     var uiSettingsService = TestAutomationManager.Services.TestUISettingsService.Instance;
@@ -271,8 +315,9 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var existingIds = await context.Tests
+                        .Where(t => t.TestID.HasValue)
                         .OrderBy(t => t.TestID)
-                        .Select(t => (int)t.TestID)
+                        .Select(t => (int)t.TestID.Value)
                         .ToListAsync();
 
                     if (existingIds.Count == 0)

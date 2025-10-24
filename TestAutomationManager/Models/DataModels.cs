@@ -12,7 +12,7 @@ namespace TestAutomationManager.Models
     /// </summary>
     public class Test : INotifyPropertyChanged
     {
-        private double? _testID;
+        private double? _testID;  // Primary key - can be null if not set in database
         private string _testName;
         private string _bugs;
         private string _disableKillDriver;
@@ -40,7 +40,7 @@ namespace TestAutomationManager.Models
         /// <summary>
         /// TestID column (Primary Key)
         /// SQL Server float type maps to C# double
-        /// Nullable in DB but should never be null in practice
+        /// Nullable to handle potential NULL values in database
         /// </summary>
         public double? TestID
         {
@@ -342,13 +342,13 @@ namespace TestAutomationManager.Models
     /// </summary>
     public class Process : INotifyPropertyChanged
     {
-        private double? _testID;
+        private double? _testID;  // Foreign key - can be null
         private string _comments;
         private int? _index;
         private string _lastRunning;
         private string _module;
         private string _pass_Fail_WEB3Operator;
-        private double? _processID;
+        private double? _processID;  // Primary key - can be null if not set in database
         private string _processName;
         private double? _processPosition;
         private string _repeat;
