@@ -179,6 +179,7 @@ namespace TestAutomationManager.Repositories
                     existingTest.SnapshotMultipleFailure = test.SnapshotMultipleFailure;
                     existingTest.EmailOnFailureOnly = test.EmailOnFailureOnly;
                     existingTest.DisableKillDriver = test.DisableKillDriver;
+                    // Note: IsActive is UI-only, not stored in database
 
                     await context.SaveChangesAsync();
 

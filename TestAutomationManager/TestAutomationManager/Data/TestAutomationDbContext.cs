@@ -96,6 +96,7 @@ namespace TestAutomationManager.Data
 
                 // Ignore properties that don't exist in database
                 entity.Ignore(e => e.IsExpanded);
+                entity.Ignore(e => e.IsActive);
             });
 
             // ================================================

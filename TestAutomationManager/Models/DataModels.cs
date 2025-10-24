@@ -23,6 +23,7 @@ namespace TestAutomationManager.Models
         private bool _snapshotMultipleFailure;
         private bool _emailOnFailureOnly;
         private bool _disableKillDriver;
+        private bool _isActive;
 
         // UI-only properties
         private bool _isExpanded;
@@ -118,6 +119,20 @@ namespace TestAutomationManager.Models
         {
             get => _disableKillDriver;
             set { _disableKillDriver = value; OnPropertyChanged(); }
+        }
+
+        public bool IsActive
+        {
+            get => _isActive;
+            set
+            {
+                if (_isActive != value)
+                {
+                    _isActive = value;
+                    OnPropertyChanged();
+                    SaveToDatabase();
+                }
+            }
         }
 
         /// <summary>

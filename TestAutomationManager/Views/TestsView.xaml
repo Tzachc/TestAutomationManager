@@ -105,16 +105,16 @@
                          FontWeight="Bold" 
                          Foreground="{DynamicResource TextPrimaryBrush}" />
 
-                <TextBlock Grid.Column="4" 
-                         Text="CATEGORY" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
+                <TextBlock Grid.Column="4"
+                         Text="RUN STATUS"
+                         FontSize="12"
+                         FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}" />
 
-                <TextBlock Grid.Column="5" 
-                         Text="STATUS" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
+                <TextBlock Grid.Column="5"
+                         Text="ACTIVE"
+                         FontSize="12"
+                         FontWeight="Bold"
                          Foreground="{DynamicResource TextPrimaryBrush}"/>
 
                 <TextBlock Grid.Column="6" 
@@ -172,24 +172,24 @@
                                                     HorizontalAlignment="Center"/>
 
                                         <!-- Status Indicator -->
-                                        <Border Grid.Column="1" 
-                                               Width="8" Height="8" 
+                                        <Border Grid.Column="1"
+                                               Width="8" Height="8"
                                                CornerRadius="4"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Passed">
+                                                        <DataTrigger Binding="{Binding RunStatus}" Value="Passed">
                                                             <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Failed">
+                                                        <DataTrigger Binding="{Binding RunStatus}" Value="Failed">
                                                             <Setter Property="Background" Value="{DynamicResource ErrorBrush}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Running">
+                                                        <DataTrigger Binding="{Binding RunStatus}" Value="Running">
                                                             <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Not Run">
+                                                        <DataTrigger Binding="{Binding RunStatus}" Value="Not Run">
                                                             <Setter Property="Background" Value="{DynamicResource TextTertiaryBrush}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -198,36 +198,36 @@
                                         </Border>
 
                                         <!-- ID -->
-                                        <TextBlock Grid.Column="2" 
-                                                 Text="{Binding Id, StringFormat='#{0}'}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12" 
+                                        <TextBlock Grid.Column="2"
+                                                 Text="{Binding TestID, StringFormat='#{0}'}"
+                                                 Foreground="{DynamicResource TextSecondaryBrush}"
+                                                 FontSize="12"
                                                  FontWeight="SemiBold"
                                                  VerticalAlignment="Center"/>
 
-                                        <!-- Test Name & Description -->
+                                        <!-- Test Name -->
                                         <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" 
-                                                     Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                     FontSize="13" 
+                                            <TextBlock Text="{Binding TestName}"
+                                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                                     FontSize="13"
                                                      FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding Description}" 
-                                                     Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                     FontSize="11" 
+                                            <TextBlock Text="{Binding Bugs}"
+                                                     Foreground="{DynamicResource TextTertiaryBrush}"
+                                                     FontSize="11"
                                                      Margin="0,2,0,0"
                                                      TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
 
-                                        <!-- Category -->
+                                        <!-- Run Status Badge -->
                                         <Border Grid.Column="4"
                                                Background="{DynamicResource PrimaryBlueBrush}"
                                                CornerRadius="4"
                                                Padding="8,4"
                                                HorizontalAlignment="Left"
                                                VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Category}" 
-                                                     Foreground="White" 
-                                                     FontSize="10" 
+                                            <TextBlock Text="{Binding RunStatus}"
+                                                     Foreground="White"
+                                                     FontSize="10"
                                                      FontWeight="SemiBold"/>
                                         </Border>
 
@@ -245,13 +245,13 @@
 
                                         <!-- Last Run -->
                                         <StackPanel Grid.Column="6" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding LastRun, StringFormat='{}{0:MMM dd, yyyy}'}" 
-                                                     Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                     FontSize="11" 
+                                            <TextBlock Text="{Binding LastRunning, StringFormat='{}{0:MMM dd, yyyy}'}"
+                                                     Foreground="{DynamicResource TextSecondaryBrush}"
+                                                     FontSize="11"
                                                      FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding LastRun, StringFormat='{}{0:HH:mm}'}" 
-                                                     Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                     FontSize="10" 
+                                            <TextBlock Text="{Binding LastRunning, StringFormat='{}{0:HH:mm}'}"
+                                                     Foreground="{DynamicResource TextTertiaryBrush}"
+                                                     FontSize="10"
                                                      Margin="0,1,0,0"/>
                                         </StackPanel>
 
@@ -325,52 +325,51 @@
                                                                             VerticalAlignment="Center"
                                                                             HorizontalAlignment="Center"/>
 
-                                                                <!-- Sequence -->
-                                                                <Border Grid.Column="1" 
-                                                                      Width="24" Height="24" 
+                                                                <!-- Position -->
+                                                                <Border Grid.Column="1"
+                                                                      Width="24" Height="24"
                                                                       Background="{DynamicResource PrimaryBlueBrush}"
                                                                       CornerRadius="6"
                                                                       Margin="0,0,10,0">
-                                                                    <TextBlock Text="{Binding Sequence}" 
-                                                                             Foreground="White" 
-                                                                             FontWeight="Bold" 
+                                                                    <TextBlock Text="{Binding ProcessPosition}"
+                                                                             Foreground="White"
+                                                                             FontWeight="Bold"
                                                                              FontSize="11"
-                                                                             HorizontalAlignment="Center" 
+                                                                             HorizontalAlignment="Center"
                                                                              VerticalAlignment="Center"/>
                                                                 </Border>
 
                                                                 <!-- Name -->
-                                                                <TextBlock Grid.Column="2" 
-                                                                         Text="{Binding Name}" 
-                                                                         Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                                         FontSize="12" 
+                                                                <TextBlock Grid.Column="2"
+                                                                         Text="{Binding ProcessName}"
+                                                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                         FontSize="12"
                                                                          FontWeight="Medium"
                                                                          VerticalAlignment="Center"/>
 
-                                                                <!-- Critical Badge -->
-                                                                <Border Grid.Column="3" 
-                                                                      Visibility="{Binding IsCritical, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                <!-- Pass/Fail Badge -->
+                                                                <Border Grid.Column="3"
                                                                       Background="{DynamicResource ErrorBrush}"
-                                                                      CornerRadius="4" 
-                                                                      Padding="6,3" 
+                                                                      CornerRadius="4"
+                                                                      Padding="6,3"
                                                                       Margin="0,0,10,0">
-                                                                    <TextBlock Text="⚠ CRITICAL" 
-                                                                             Foreground="White" 
-                                                                             FontSize="9" 
+                                                                    <TextBlock Text="{Binding Pass_Fail}"
+                                                                             Foreground="White"
+                                                                             FontSize="9"
                                                                              FontWeight="Bold"/>
                                                                 </Border>
 
-                                                                <!-- Timeout -->
-                                                                <Border Grid.Column="4" 
+                                                                <!-- WEB3Operator -->
+                                                                <Border Grid.Column="4"
                                                                        Background="{DynamicResource CardBackgroundBrush}"
                                                                        BorderBrush="{DynamicResource BorderBrush}"
                                                                        BorderThickness="1"
-                                                                       CornerRadius="4" 
+                                                                       CornerRadius="4"
                                                                        Padding="8,4"
                                                                        Margin="0,0,10,0">
-                                                                    <TextBlock Text="{Binding Timeout, StringFormat='⏱ {0}s'}" 
-                                                                             Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                                             FontSize="10" 
+                                                                    <TextBlock Text="{Binding WEB3Operator}"
+                                                                             Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                             FontSize="10"
                                                                              FontWeight="SemiBold"/>
                                                                 </Border>
 
@@ -427,31 +426,31 @@
                                                                                              VerticalAlignment="Center"/>
                                                                                 </Border>
 
-                                                                                <!-- Method Name -->
-                                                                                <TextBlock Grid.Column="1" 
-                                                                                         Text="{Binding MethodName}" 
-                                                                                         Foreground="{DynamicResource PrimaryBlueBrush}" 
-                                                                                         FontFamily="Consolas" 
-                                                                                         FontSize="11" 
+                                                                                <!-- Function Name -->
+                                                                                <TextBlock Grid.Column="1"
+                                                                                         Text="{Binding FunctionName}"
+                                                                                         Foreground="{DynamicResource PrimaryBlueBrush}"
+                                                                                         FontFamily="Consolas"
+                                                                                         FontSize="11"
                                                                                          FontWeight="Medium"
                                                                                          VerticalAlignment="Center"
                                                                                          Margin="0,0,10,0"/>
 
-                                                                                <!-- Parameters -->
-                                                                                <TextBlock Grid.Column="2" 
-                                                                                         Text="{Binding Parameters}" 
-                                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
+                                                                                <!-- Description -->
+                                                                                <TextBlock Grid.Column="2"
+                                                                                         Text="{Binding FunctionDescription}"
+                                                                                         Foreground="{DynamicResource TextTertiaryBrush}"
                                                                                          FontSize="10"
                                                                                          FontFamily="Consolas"
                                                                                          VerticalAlignment="Center"
                                                                                          TextTrimming="CharacterEllipsis"
                                                                                          Margin="0,0,10,0"/>
 
-                                                                                <!-- Expected Result -->
-                                                                                <TextBlock Grid.Column="3" 
-                                                                                         Text="{Binding ExpectedResult, StringFormat='→ {0}'}" 
-                                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                                                         FontSize="10" 
+                                                                                <!-- Comments -->
+                                                                                <TextBlock Grid.Column="3"
+                                                                                         Text="{Binding Comments, StringFormat='→ {0}'}"
+                                                                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                                         FontSize="10"
                                                                                          FontStyle="Italic"
                                                                                          VerticalAlignment="Center"
                                                                                          TextTrimming="CharacterEllipsis"/>

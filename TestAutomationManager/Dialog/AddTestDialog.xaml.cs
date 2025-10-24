@@ -89,7 +89,7 @@ namespace TestAutomationManager.Dialogs
 
                 // Get all existing tests to track IDs
                 var allTests = await _testRepository.GetAllTestsAsync();
-                _allExistingTestIds = allTests.Select(t => t.Id).OrderBy(id => id).ToList();
+                _allExistingTestIds = allTests.Select(t => t.TestID).OrderBy(id => id).ToList();
 
                 // Get suggested test ID
                 _suggestedTestId = await _testRepository.GetNextAvailableTestIdAsync();
@@ -426,15 +426,11 @@ namespace TestAutomationManager.Dialogs
 
                 var newTest = new Test
                 {
-                    Id = testId,
-                    Name = TestNameTextBox.Text.Trim(),
-                    Description = DescriptionTextBox.Text?.Trim() ?? "",
-                    Category = (CategoryComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString()
-                              ?? CategoryComboBox.Text?.Trim()
-                              ?? "General",
+                    TestID = testId,
+                    TestName = TestNameTextBox.Text.Trim(),
+                    RunStatus = "Not Run",
+                    LastRunning = DateTime.Now,
                     IsActive = true,
-                    Status = "Not Run",
-                    LastRun = DateTime.Now,
                     Processes = new ObservableCollection<Process>()
                 };
 
@@ -500,7 +496,7 @@ namespace TestAutomationManager.Dialogs
 
                 // Show success message
                 ModernMessageDialog.ShowInfo(
-                    $"Test #{testId} '{newTest.Name}' has been created successfully!\n\n" +
+                    $"Test #{testId} '{newTest.TestName}' has been created successfully!\n\n" +
                     $"• Test added to database\n" +
                     $"• {newTableName} created from {sourceTable}\n\n" +
                     "The UI will refresh to show the new test.",
