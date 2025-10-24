@@ -574,7 +574,7 @@ namespace TestAutomationManager.Models
         private int? _functionPosition;
         private int? _index;
         private string _pass_Fail_WEB3Operator;
-        private int _processID;
+        private double _processID;
         private string _web3Operator;
 
         // Parameters 1-30
@@ -634,7 +634,7 @@ namespace TestAutomationManager.Models
             set { _pass_Fail_WEB3Operator = value; OnPropertyChanged(); }
         }
 
-        public int ProcessID
+        public double ProcessID
         {
             get => _processID;
             set { _processID = value; OnPropertyChanged(); }
@@ -690,7 +690,7 @@ namespace TestAutomationManager.Models
 
         public int ProcessId
         {
-            get => ProcessID;
+            get => (int)ProcessID;
             set => ProcessID = value;
         }
 
