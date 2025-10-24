@@ -29,7 +29,7 @@ namespace TestAutomationManager.Repositories
                     var tests = await context.Tests
                         .Include(t => t.Processes)
                             .ThenInclude(p => p.Functions)
-                        .OrderBy(t => t.Id)
+                        .OrderBy(t => t.TestID)
                         .ToListAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests from database");
@@ -55,7 +55,7 @@ namespace TestAutomationManager.Repositories
                     var test = await context.Tests
                         .Include(t => t.Processes)
                             .ThenInclude(p => p.Functions)
-                        .FirstOrDefaultAsync(t => t.Id == testId);
+                        .FirstOrDefaultAsync(t => t.TestID == testId);
 
                     return test;
                 }
@@ -83,12 +83,12 @@ namespace TestAutomationManager.Repositories
                     foreach (var table in tables)
                     {
                         var test = await context.Tests
-                            .FirstOrDefaultAsync(t => t.Id == table.TestId);
+                            .FirstOrDefaultAsync(t => t.TestID == table.TestId);
 
                         if (test != null)
                         {
-                            table.TestName = test.Name;
-                            table.Category = test.Category;
+                            table.TestName = test.TestName;
+                            table.Category = "N/A"; // Category no longer exists in new schema
                         }
                         else
                         {
@@ -120,9 +120,9 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    bool exists = await context.Tests.AnyAsync(t => t.Id == test.Id);
+                    bool exists = await context.Tests.AnyAsync(t => t.TestID == test.TestID);
                     if (exists)
-                        throw new InvalidOperationException($"Test with ID {test.Id} already exists");
+                        throw new InvalidOperationException($"Test with ID {test.TestID} already exists");
 
                     await context.Database.OpenConnectionAsync();
                     await using var transaction = await context.Database.BeginTransactionAsync();
@@ -134,7 +134,7 @@ namespace TestAutomationManager.Repositories
 
                     await transaction.CommitAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} '{test.Name}' inserted successfully");
+                    System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} '{test.TestName}' inserted successfully");
                 }
             }
             catch (Exception ex)
@@ -158,24 +158,31 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    var existingTest = await context.Tests.FindAsync(test.Id);
+                    var existingTest = await context.Tests.FindAsync(test.TestID);
 
                     if (existingTest == null)
                     {
-                        throw new InvalidOperationException($"Test with ID {test.Id} not found");
+                        throw new InvalidOperationException($"Test with ID {test.TestID} not found");
                     }
 
                     // Update properties
-                    existingTest.Name = test.Name;
-                    existingTest.Description = test.Description;
-                    existingTest.Category = test.Category;
-                    existingTest.IsActive = test.IsActive;
-                    existingTest.Status = test.Status;
-                    existingTest.LastRun = test.LastRun;
+                    existingTest.TestName = test.TestName;
+                    existingTest.RunStatus = test.RunStatus;
+                    existingTest.LastRunning = test.LastRunning;
+                    existingTest.LastTimePassed = test.LastTimePassed;
+                    existingTest.Bugs = test.Bugs;
+                    existingTest.RecipientsEmailsList = test.RecipientsEmailsList;
+                    existingTest.ExceptionMessage = test.ExceptionMessage;
+                    existingTest.SendEmailReport = test.SendEmailReport;
+                    existingTest.ExitTestOnFailure = test.ExitTestOnFailure;
+                    existingTest.TestRunAgainTimes = test.TestRunAgainTimes;
+                    existingTest.SnapshotMultipleFailure = test.SnapshotMultipleFailure;
+                    existingTest.EmailOnFailureOnly = test.EmailOnFailureOnly;
+                    existingTest.DisableKillDriver = test.DisableKillDriver;
 
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} updated successfully");
+                    System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} updated successfully");
                 }
             }
             catch (Exception ex)
@@ -201,7 +208,7 @@ namespace TestAutomationManager.Repositories
                     var test = await context.Tests
                         .Include(t => t.Processes)
                             .ThenInclude(p => p.Functions)
-                        .FirstOrDefaultAsync(t => t.Id == testId);
+                        .FirstOrDefaultAsync(t => t.TestID == testId);
 
                     if (test == null)
                     {
@@ -241,8 +248,8 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var existingIds = await context.Tests
-                        .OrderBy(t => t.Id)
-                        .Select(t => t.Id)
+                        .OrderBy(t => t.TestID)
+                        .Select(t => t.TestID)
                         .ToListAsync();
 
                     if (existingIds.Count == 0)
@@ -286,7 +293,7 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    bool exists = await context.Tests.AnyAsync(t => t.Id == testId);
+                    bool exists = await context.Tests.AnyAsync(t => t.TestID == testId);
                     System.Diagnostics.Debug.WriteLine($"✓ Test ID {testId} exists: {exists}");
                     return exists;
                 }

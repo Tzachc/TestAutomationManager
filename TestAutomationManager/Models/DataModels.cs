@@ -8,76 +8,116 @@ namespace TestAutomationManager.Models
 {
     public class Test : INotifyPropertyChanged
     {
-        private int _id;
-        private string _name;
-        private string _description;
-        private string _category;
-        private bool _isActive;
-        private DateTime _lastRun;
-        private string _status;
+        // Database columns
+        private int _testID;
+        private DateTime? _lastRunning;
+        private DateTime? _lastTimePassed;
+        private string _runStatus;
+        private string _bugs;
+        private string _testName;
+        private string _recipientsEmailsList;
+        private string _exceptionMessage;
+        private bool _sendEmailReport;
+        private bool _exitTestOnFailure;
+        private int _testRunAgainTimes;
+        private bool _snapshotMultipleFailure;
+        private bool _emailOnFailureOnly;
+        private bool _disableKillDriver;
+
+        // UI-only properties
         private bool _isExpanded;
         private ObservableCollection<Process> _processes;
 
-        public int Id
+        public int TestID
         {
-            get => _id;
-            set { _id = value; OnPropertyChanged(); }
+            get => _testID;
+            set { _testID = value; OnPropertyChanged(); }
         }
 
-        public string Name
+        public DateTime? LastRunning
         {
-            get => _name;
-            set { _name = value; OnPropertyChanged(); }
+            get => _lastRunning;
+            set { _lastRunning = value; OnPropertyChanged(); }
         }
 
-        public string Description
+        public DateTime? LastTimePassed
         {
-            get => _description;
-            set { _description = value; OnPropertyChanged(); }
+            get => _lastTimePassed;
+            set { _lastTimePassed = value; OnPropertyChanged(); }
         }
 
-        public string Category
+        public string RunStatus
         {
-            get => _category;
-            set { _category = value; OnPropertyChanged(); }
-        }
-
-        public bool IsActive
-        {
-            get => _isActive;
+            get => _runStatus;
             set
             {
-                if (_isActive != value)
+                if (_runStatus != value)
                 {
-                    _isActive = value;
+                    _runStatus = value;
                     OnPropertyChanged();
-
-                    // ⭐ AUTO-SAVE TO DATABASE (removed increment/decrement - will be recalculated from data)
                     SaveToDatabase();
                 }
             }
         }
 
-        public DateTime LastRun
+        public string Bugs
         {
-            get => _lastRun;
-            set { _lastRun = value; OnPropertyChanged(); }
+            get => _bugs;
+            set { _bugs = value; OnPropertyChanged(); }
         }
 
-        public string Status
+        public string TestName
         {
-            get => _status;
-            set
-            {
-                if (_status != value)
-                {
-                    _status = value;
-                    OnPropertyChanged();
+            get => _testName;
+            set { _testName = value; OnPropertyChanged(); }
+        }
 
-                    // ⭐ AUTO-SAVE TO DATABASE (removed UpdateStatusCount - will be recalculated from data)
-                    SaveToDatabase();
-                }
-            }
+        public string RecipientsEmailsList
+        {
+            get => _recipientsEmailsList;
+            set { _recipientsEmailsList = value; OnPropertyChanged(); }
+        }
+
+        public string ExceptionMessage
+        {
+            get => _exceptionMessage;
+            set { _exceptionMessage = value; OnPropertyChanged(); }
+        }
+
+        public bool SendEmailReport
+        {
+            get => _sendEmailReport;
+            set { _sendEmailReport = value; OnPropertyChanged(); }
+        }
+
+        public bool ExitTestOnFailure
+        {
+            get => _exitTestOnFailure;
+            set { _exitTestOnFailure = value; OnPropertyChanged(); }
+        }
+
+        public int TestRunAgainTimes
+        {
+            get => _testRunAgainTimes;
+            set { _testRunAgainTimes = value; OnPropertyChanged(); }
+        }
+
+        public bool SnapshotMultipleFailure
+        {
+            get => _snapshotMultipleFailure;
+            set { _snapshotMultipleFailure = value; OnPropertyChanged(); }
+        }
+
+        public bool EmailOnFailureOnly
+        {
+            get => _emailOnFailureOnly;
+            set { _emailOnFailureOnly = value; OnPropertyChanged(); }
+        }
+
+        public bool DisableKillDriver
+        {
+            get => _disableKillDriver;
+            set { _disableKillDriver = value; OnPropertyChanged(); }
         }
 
         /// <summary>
@@ -90,7 +130,7 @@ namespace TestAutomationManager.Models
             {
                 var repository = new TestAutomationManager.Repositories.TestRepository();
                 await repository.UpdateTestAsync(this);
-                System.Diagnostics.Debug.WriteLine($"✓ Auto-saved Test #{Id} to database");
+                System.Diagnostics.Debug.WriteLine($"✓ Auto-saved Test #{TestID} to database");
 
                 // ⭐ Force immediate check to update hash (prevents unnecessary reload)
                 // This tells the watcher "yes, data changed, but I already know about it"
@@ -98,10 +138,11 @@ namespace TestAutomationManager.Models
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Failed to auto-save Test #{Id}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to auto-save Test #{TestID}: {ex.Message}");
             }
         }
 
+        // UI-only property
         public bool IsExpanded
         {
             get => _isExpanded;
@@ -124,58 +165,114 @@ namespace TestAutomationManager.Models
 
     public class Process : INotifyPropertyChanged
     {
-        private int _id;
-        private int _testId;
-        private string _name;
-        private string _description;
-        private int _sequence;
-        private bool _isCritical;
-        private double _timeout;
+        // Database columns
+        private int _testID;
+        private int _processID;
+        private string _web3Operator;
+        private string _pass_Fail;
+        private DateTime? _lastRunning;
+        private int _processPosition;
+        private string _processName;
+
+        // Parameters 1-40
+        private string _param1; private string _param2; private string _param3; private string _param4; private string _param5;
+        private string _param6; private string _param7; private string _param8; private string _param9; private string _param10;
+        private string _param11; private string _param12; private string _param13; private string _param14; private string _param15;
+        private string _param16; private string _param17; private string _param18; private string _param19; private string _param20;
+        private string _param21; private string _param22; private string _param23; private string _param24; private string _param25;
+        private string _param26; private string _param27; private string _param28; private string _param29; private string _param30;
+        private string _param31; private string _param32; private string _param33; private string _param34; private string _param35;
+        private string _param36; private string _param37; private string _param38; private string _param39; private string _param40;
+
+        // UI-only properties
         private bool _isExpanded;
         private ObservableCollection<Function> _functions;
 
-        public int Id
+        public int TestID
         {
-            get => _id;
-            set { _id = value; OnPropertyChanged(); }
+            get => _testID;
+            set { _testID = value; OnPropertyChanged(); }
         }
 
-        public int TestId
+        public int ProcessID
         {
-            get => _testId;
-            set { _testId = value; OnPropertyChanged(); }
+            get => _processID;
+            set { _processID = value; OnPropertyChanged(); }
         }
 
-        public string Name
+        public string WEB3Operator
         {
-            get => _name;
-            set { _name = value; OnPropertyChanged(); }
+            get => _web3Operator;
+            set { _web3Operator = value; OnPropertyChanged(); }
         }
 
-        public string Description
+        public string Pass_Fail
         {
-            get => _description;
-            set { _description = value; OnPropertyChanged(); }
+            get => _pass_Fail;
+            set { _pass_Fail = value; OnPropertyChanged(); }
         }
 
-        public int Sequence
+        public DateTime? LastRunning
         {
-            get => _sequence;
-            set { _sequence = value; OnPropertyChanged(); }
+            get => _lastRunning;
+            set { _lastRunning = value; OnPropertyChanged(); }
         }
 
-        public bool IsCritical
+        public int ProcessPosition
         {
-            get => _isCritical;
-            set { _isCritical = value; OnPropertyChanged(); }
+            get => _processPosition;
+            set { _processPosition = value; OnPropertyChanged(); }
         }
 
-        public double Timeout
+        public string ProcessName
         {
-            get => _timeout;
-            set { _timeout = value; OnPropertyChanged(); }
+            get => _processName;
+            set { _processName = value; OnPropertyChanged(); }
         }
 
+        // Parameters 1-40
+        public string Param1 { get => _param1; set { _param1 = value; OnPropertyChanged(); } }
+        public string Param2 { get => _param2; set { _param2 = value; OnPropertyChanged(); } }
+        public string Param3 { get => _param3; set { _param3 = value; OnPropertyChanged(); } }
+        public string Param4 { get => _param4; set { _param4 = value; OnPropertyChanged(); } }
+        public string Param5 { get => _param5; set { _param5 = value; OnPropertyChanged(); } }
+        public string Param6 { get => _param6; set { _param6 = value; OnPropertyChanged(); } }
+        public string Param7 { get => _param7; set { _param7 = value; OnPropertyChanged(); } }
+        public string Param8 { get => _param8; set { _param8 = value; OnPropertyChanged(); } }
+        public string Param9 { get => _param9; set { _param9 = value; OnPropertyChanged(); } }
+        public string Param10 { get => _param10; set { _param10 = value; OnPropertyChanged(); } }
+        public string Param11 { get => _param11; set { _param11 = value; OnPropertyChanged(); } }
+        public string Param12 { get => _param12; set { _param12 = value; OnPropertyChanged(); } }
+        public string Param13 { get => _param13; set { _param13 = value; OnPropertyChanged(); } }
+        public string Param14 { get => _param14; set { _param14 = value; OnPropertyChanged(); } }
+        public string Param15 { get => _param15; set { _param15 = value; OnPropertyChanged(); } }
+        public string Param16 { get => _param16; set { _param16 = value; OnPropertyChanged(); } }
+        public string Param17 { get => _param17; set { _param17 = value; OnPropertyChanged(); } }
+        public string Param18 { get => _param18; set { _param18 = value; OnPropertyChanged(); } }
+        public string Param19 { get => _param19; set { _param19 = value; OnPropertyChanged(); } }
+        public string Param20 { get => _param20; set { _param20 = value; OnPropertyChanged(); } }
+        public string Param21 { get => _param21; set { _param21 = value; OnPropertyChanged(); } }
+        public string Param22 { get => _param22; set { _param22 = value; OnPropertyChanged(); } }
+        public string Param23 { get => _param23; set { _param23 = value; OnPropertyChanged(); } }
+        public string Param24 { get => _param24; set { _param24 = value; OnPropertyChanged(); } }
+        public string Param25 { get => _param25; set { _param25 = value; OnPropertyChanged(); } }
+        public string Param26 { get => _param26; set { _param26 = value; OnPropertyChanged(); } }
+        public string Param27 { get => _param27; set { _param27 = value; OnPropertyChanged(); } }
+        public string Param28 { get => _param28; set { _param28 = value; OnPropertyChanged(); } }
+        public string Param29 { get => _param29; set { _param29 = value; OnPropertyChanged(); } }
+        public string Param30 { get => _param30; set { _param30 = value; OnPropertyChanged(); } }
+        public string Param31 { get => _param31; set { _param31 = value; OnPropertyChanged(); } }
+        public string Param32 { get => _param32; set { _param32 = value; OnPropertyChanged(); } }
+        public string Param33 { get => _param33; set { _param33 = value; OnPropertyChanged(); } }
+        public string Param34 { get => _param34; set { _param34 = value; OnPropertyChanged(); } }
+        public string Param35 { get => _param35; set { _param35 = value; OnPropertyChanged(); } }
+        public string Param36 { get => _param36; set { _param36 = value; OnPropertyChanged(); } }
+        public string Param37 { get => _param37; set { _param37 = value; OnPropertyChanged(); } }
+        public string Param38 { get => _param38; set { _param38 = value; OnPropertyChanged(); } }
+        public string Param39 { get => _param39; set { _param39 = value; OnPropertyChanged(); } }
+        public string Param40 { get => _param40; set { _param40 = value; OnPropertyChanged(); } }
+
+        // UI-only property
         public bool IsExpanded
         {
             get => _isExpanded;
@@ -198,55 +295,96 @@ namespace TestAutomationManager.Models
 
     public class Function : INotifyPropertyChanged
     {
-        private int _id;
-        private int _processId;
-        private string _name;
-        private string _methodName;
-        private string _parameters;
-        private string _expectedResult;
-        private int _sequence;
+        // Database columns
+        private int _processID;
+        private string _web3Operator;
+        private string _pass_Fail;
+        private string _comments;
+        private int _functionPosition;
+        private string _functionDescription;
+        private string _functionName;
 
-        public int Id
+        // Parameters 1-30
+        private string _param1; private string _param2; private string _param3; private string _param4; private string _param5;
+        private string _param6; private string _param7; private string _param8; private string _param9; private string _param10;
+        private string _param11; private string _param12; private string _param13; private string _param14; private string _param15;
+        private string _param16; private string _param17; private string _param18; private string _param19; private string _param20;
+        private string _param21; private string _param22; private string _param23; private string _param24; private string _param25;
+        private string _param26; private string _param27; private string _param28; private string _param29; private string _param30;
+
+        public int ProcessID
         {
-            get => _id;
-            set { _id = value; OnPropertyChanged(); }
+            get => _processID;
+            set { _processID = value; OnPropertyChanged(); }
         }
 
-        public int ProcessId
+        public string WEB3Operator
         {
-            get => _processId;
-            set { _processId = value; OnPropertyChanged(); }
+            get => _web3Operator;
+            set { _web3Operator = value; OnPropertyChanged(); }
         }
 
-        public string Name
+        public string Pass_Fail
         {
-            get => _name;
-            set { _name = value; OnPropertyChanged(); }
+            get => _pass_Fail;
+            set { _pass_Fail = value; OnPropertyChanged(); }
         }
 
-        public string MethodName
+        public string Comments
         {
-            get => _methodName;
-            set { _methodName = value; OnPropertyChanged(); }
+            get => _comments;
+            set { _comments = value; OnPropertyChanged(); }
         }
 
-        public string Parameters
+        public int FunctionPosition
         {
-            get => _parameters;
-            set { _parameters = value; OnPropertyChanged(); }
+            get => _functionPosition;
+            set { _functionPosition = value; OnPropertyChanged(); }
         }
 
-        public string ExpectedResult
+        public string FunctionDescription
         {
-            get => _expectedResult;
-            set { _expectedResult = value; OnPropertyChanged(); }
+            get => _functionDescription;
+            set { _functionDescription = value; OnPropertyChanged(); }
         }
 
-        public int Sequence
+        public string FunctionName
         {
-            get => _sequence;
-            set { _sequence = value; OnPropertyChanged(); }
+            get => _functionName;
+            set { _functionName = value; OnPropertyChanged(); }
         }
+
+        // Parameters 1-30
+        public string Param1 { get => _param1; set { _param1 = value; OnPropertyChanged(); } }
+        public string Param2 { get => _param2; set { _param2 = value; OnPropertyChanged(); } }
+        public string Param3 { get => _param3; set { _param3 = value; OnPropertyChanged(); } }
+        public string Param4 { get => _param4; set { _param4 = value; OnPropertyChanged(); } }
+        public string Param5 { get => _param5; set { _param5 = value; OnPropertyChanged(); } }
+        public string Param6 { get => _param6; set { _param6 = value; OnPropertyChanged(); } }
+        public string Param7 { get => _param7; set { _param7 = value; OnPropertyChanged(); } }
+        public string Param8 { get => _param8; set { _param8 = value; OnPropertyChanged(); } }
+        public string Param9 { get => _param9; set { _param9 = value; OnPropertyChanged(); } }
+        public string Param10 { get => _param10; set { _param10 = value; OnPropertyChanged(); } }
+        public string Param11 { get => _param11; set { _param11 = value; OnPropertyChanged(); } }
+        public string Param12 { get => _param12; set { _param12 = value; OnPropertyChanged(); } }
+        public string Param13 { get => _param13; set { _param13 = value; OnPropertyChanged(); } }
+        public string Param14 { get => _param14; set { _param14 = value; OnPropertyChanged(); } }
+        public string Param15 { get => _param15; set { _param15 = value; OnPropertyChanged(); } }
+        public string Param16 { get => _param16; set { _param16 = value; OnPropertyChanged(); } }
+        public string Param17 { get => _param17; set { _param17 = value; OnPropertyChanged(); } }
+        public string Param18 { get => _param18; set { _param18 = value; OnPropertyChanged(); } }
+        public string Param19 { get => _param19; set { _param19 = value; OnPropertyChanged(); } }
+        public string Param20 { get => _param20; set { _param20 = value; OnPropertyChanged(); } }
+        public string Param21 { get => _param21; set { _param21 = value; OnPropertyChanged(); } }
+        public string Param22 { get => _param22; set { _param22 = value; OnPropertyChanged(); } }
+        public string Param23 { get => _param23; set { _param23 = value; OnPropertyChanged(); } }
+        public string Param24 { get => _param24; set { _param24 = value; OnPropertyChanged(); } }
+        public string Param25 { get => _param25; set { _param25 = value; OnPropertyChanged(); } }
+        public string Param26 { get => _param26; set { _param26 = value; OnPropertyChanged(); } }
+        public string Param27 { get => _param27; set { _param27 = value; OnPropertyChanged(); } }
+        public string Param28 { get => _param28; set { _param28 = value; OnPropertyChanged(); } }
+        public string Param29 { get => _param29; set { _param29 = value; OnPropertyChanged(); } }
+        public string Param30 { get => _param30; set { _param30 = value; OnPropertyChanged(); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

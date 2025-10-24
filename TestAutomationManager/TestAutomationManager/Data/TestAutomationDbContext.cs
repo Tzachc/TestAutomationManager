@@ -70,29 +70,28 @@ namespace TestAutomationManager.Data
                 entity.ToTable("Tests");
 
                 // Primary key
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.TestID);
 
                 // Properties
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Description)
+                entity.Property(e => e.TestName)
                     .HasMaxLength(500);
 
-                entity.Property(e => e.Category)
-                    .HasMaxLength(100);
-
-                entity.Property(e => e.Status)
+                entity.Property(e => e.RunStatus)
                     .HasMaxLength(50);
 
-                entity.Property(e => e.IsActive)
-                    .HasDefaultValue(true);
+                entity.Property(e => e.Bugs)
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.RecipientsEmailsList)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.ExceptionMessage)
+                    .HasMaxLength(4000);
 
                 // Relationships
                 entity.HasMany(t => t.Processes)
                     .WithOne()
-                    .HasForeignKey("TestId")
+                    .HasForeignKey("TestID")
                     .OnDelete(DeleteBehavior.Cascade);
 
                 // Ignore properties that don't exist in database
@@ -108,26 +107,22 @@ namespace TestAutomationManager.Data
                 entity.ToTable("Processes");
 
                 // Primary key
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.ProcessID);
 
                 // Properties
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Description)
+                entity.Property(e => e.ProcessName)
                     .HasMaxLength(500);
 
-                entity.Property(e => e.IsCritical)
-                    .HasDefaultValue(false);
+                entity.Property(e => e.WEB3Operator)
+                    .HasMaxLength(200);
 
-                entity.Property(e => e.Timeout)
-                    .HasDefaultValue(30);
+                entity.Property(e => e.Pass_Fail)
+                    .HasMaxLength(50);
 
                 // Relationships
                 entity.HasMany(p => p.Functions)
                     .WithOne()
-                    .HasForeignKey("ProcessId")
+                    .HasForeignKey("ProcessID")
                     .OnDelete(DeleteBehavior.Cascade);
 
                 // Ignore properties that don't exist in database
@@ -142,23 +137,25 @@ namespace TestAutomationManager.Data
                 // Table name
                 entity.ToTable("Functions");
 
-                // Primary key
-                entity.HasKey(e => e.Id);
+                // Composite primary key or unique index (ProcessID + FunctionPosition)
+                // Note: If your database has a different primary key setup, adjust accordingly
+                entity.HasKey(e => new { e.ProcessID, e.FunctionPosition });
 
                 // Properties
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
+                entity.Property(e => e.FunctionName)
+                    .HasMaxLength(500);
 
-                entity.Property(e => e.MethodName)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                entity.Property(e => e.Parameters)
+                entity.Property(e => e.FunctionDescription)
                     .HasMaxLength(1000);
 
-                entity.Property(e => e.ExpectedResult)
-                    .HasMaxLength(500);
+                entity.Property(e => e.WEB3Operator)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Pass_Fail)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Comments)
+                    .HasMaxLength(2000);
             });
         }
     }

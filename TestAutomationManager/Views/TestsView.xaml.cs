@@ -96,7 +96,7 @@ namespace TestAutomationManager.Views
 
             // ⭐ STEP 1: Save current UI state (which items are expanded)
             var expandedTestIds = new HashSet<int>(
-                _allTests.Where(t => t.IsExpanded).Select(t => t.Id)
+                _allTests.Where(t => t.IsExpanded).Select(t => t.TestID)
             );
 
             var expandedProcessIds = new HashSet<int>();
@@ -104,7 +104,7 @@ namespace TestAutomationManager.Views
             {
                 foreach (var process in test.Processes.Where(p => p.IsExpanded))
                 {
-                    expandedProcessIds.Add(process.Id);
+                    expandedProcessIds.Add(process.ProcessID);
                 }
             }
 
@@ -113,7 +113,7 @@ namespace TestAutomationManager.Views
             foreach (var test in updatedTests)
             {
                 // Restore IsExpanded state for tests
-                if (expandedTestIds.Contains(test.Id))
+                if (expandedTestIds.Contains(test.TestID))
                 {
                     test.IsExpanded = true;
                 }
@@ -121,7 +121,7 @@ namespace TestAutomationManager.Views
                 // Restore IsExpanded state for processes
                 foreach (var process in test.Processes)
                 {
-                    if (expandedProcessIds.Contains(process.Id))
+                    if (expandedProcessIds.Contains(process.ProcessID))
                     {
                         process.IsExpanded = true;
                     }
@@ -216,11 +216,10 @@ namespace TestAutomationManager.Views
 
             // Filter tests using fuzzy matching (including ID search)
             var filtered = _allTests.Where(test =>
-                SearchHelper.MatchesId(test.Id, searchQuery) ||
-                SearchHelper.Matches(test.Name, searchQuery) ||
-                SearchHelper.Matches(test.Description, searchQuery) ||
-                SearchHelper.Matches(test.Category, searchQuery) ||
-                SearchHelper.Matches(test.Status, searchQuery)
+                SearchHelper.MatchesId(test.TestID, searchQuery) ||
+                SearchHelper.Matches(test.TestName, searchQuery) ||
+                SearchHelper.Matches(test.RunStatus, searchQuery) ||
+                SearchHelper.Matches(test.Bugs, searchQuery)
             ).ToList();
 
             foreach (var test in filtered)
@@ -323,7 +322,7 @@ namespace TestAutomationManager.Views
             if (sender is Button button && button.Tag is Test test)
             {
                 MessageBox.Show(
-                    $"Edit functionality for Test #{test.Id} '{test.Name}' is coming soon!",
+                    $"Edit functionality for Test #{test.TestID} '{test.TestName}' is coming soon!",
                     "Coming Soon",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information
@@ -339,7 +338,7 @@ namespace TestAutomationManager.Views
             if (sender is Button button && button.Tag is Test test)
             {
                 MessageBox.Show(
-                    $"Run functionality for Test #{test.Id} '{test.Name}' is coming soon!\n\nThis will execute the test automation.",
+                    $"Run functionality for Test #{test.TestID} '{test.TestName}' is coming soon!\n\nThis will execute the test automation.",
                     "Coming Soon",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information
@@ -362,8 +361,7 @@ namespace TestAutomationManager.Views
 
                     // Build warning message
                     string warningMessage = $"Are you sure you want to delete this test?\n\n" +
-                                          $"Test: {test.Name} (ID #{test.Id})\n" +
-                                          $"Category: {test.Category}\n\n";
+                                          $"Test: {test.TestName} (ID #{test.TestID})\n\n";
 
                     if (processCount > 0)
                     {
@@ -385,16 +383,16 @@ namespace TestAutomationManager.Views
                         // Disable button to prevent double-click
                         button.IsEnabled = false;
 
-                        System.Diagnostics.Debug.WriteLine($"🗑️ Deleting test #{test.Id}...");
+                        System.Diagnostics.Debug.WriteLine($"🗑️ Deleting test #{test.TestID}...");
 
                         // Delete from database
-                        await _repository.DeleteTestAsync(test.Id);
+                        await _repository.DeleteTestAsync(test.TestID);
 
-                        System.Diagnostics.Debug.WriteLine($"✓ Test #{test.Id} deleted successfully!");
+                        System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} deleted successfully!");
 
                         // Show success message
                         ModernMessageDialog.ShowSuccess(
-                            $"Test '{test.Name}' has been deleted successfully!",
+                            $"Test '{test.TestName}' has been deleted successfully!",
                             "Test Deleted",
                             Window.GetWindow(this));
 
@@ -426,7 +424,7 @@ namespace TestAutomationManager.Views
             FilterTests("");   // repopulates 'Tests' from '_allTests'
 
             // Find the test in the full dataset
-            var test = _allTests.FirstOrDefault(t => t.Id == testId);
+            var test = _allTests.FirstOrDefault(t => t.TestID == testId);
             if (test == null) return;
 
             test.IsExpanded = true;
