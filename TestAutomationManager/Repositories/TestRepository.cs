@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -772,23 +773,167 @@ namespace TestAutomationManager.Repositories
         private static object ConvertValue(object value, Type targetType)
         {
             if (targetType == typeof(string))
+            {
                 return value?.ToString() ?? string.Empty;
-            if (targetType == typeof(int))
-                return Convert.ToInt32(value);
-            if (targetType == typeof(long))
-                return Convert.ToInt64(value);
-            if (targetType == typeof(bool))
-                return Convert.ToBoolean(value);
-            if (targetType == typeof(double))
-                return Convert.ToDouble(value);
-            if (targetType == typeof(float))
-                return Convert.ToSingle(value);
-            if (targetType == typeof(decimal))
-                return Convert.ToDecimal(value);
-            if (targetType == typeof(DateTime))
-                return Convert.ToDateTime(value);
+            }
 
-            return Convert.ChangeType(value, targetType);
+            if (targetType == typeof(int))
+            {
+                if (value is int intValue)
+                    return intValue;
+                if (value is long longValue)
+                    return Convert.ToInt32(longValue);
+                if (value is double doubleValue)
+                    return Convert.ToInt32(doubleValue);
+                if (value is decimal decimalValue)
+                    return Convert.ToInt32(decimalValue);
+
+                var stringValue = value?.ToString();
+                if (!string.IsNullOrWhiteSpace(stringValue))
+                {
+                    if (int.TryParse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedInt))
+                        return parsedInt;
+                    if (double.TryParse(stringValue, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedDouble))
+                        return Convert.ToInt32(parsedDouble);
+                }
+
+                return 0;
+            }
+
+            if (targetType == typeof(long))
+            {
+                if (value is long longValue)
+                    return longValue;
+                if (value is int intValue)
+                    return (long)intValue;
+                if (value is double doubleValue)
+                    return Convert.ToInt64(doubleValue);
+                if (value is decimal decimalValue)
+                    return Convert.ToInt64(decimalValue);
+
+                var stringValue = value?.ToString();
+                if (!string.IsNullOrWhiteSpace(stringValue) &&
+                    long.TryParse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedLong))
+                {
+                    return parsedLong;
+                }
+
+                return 0L;
+            }
+
+            if (targetType == typeof(bool))
+            {
+                switch (value)
+                {
+                    case bool boolValue:
+                        return boolValue;
+                    case int intValue:
+                        return intValue != 0;
+                    case long longValue:
+                        return longValue != 0;
+                    case double doubleValue:
+                        return Math.Abs(doubleValue) > double.Epsilon;
+                    case decimal decimalValue:
+                        return decimalValue != 0m;
+                    case string stringValue:
+                        {
+                            string trimmed = stringValue.Trim();
+                            if (bool.TryParse(trimmed, out var parsedBool))
+                                return parsedBool;
+                            if (int.TryParse(trimmed, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedInt))
+                                return parsedInt != 0;
+
+                            string lower = trimmed.ToLowerInvariant();
+                            if (lower is "y" or "yes" or "on" or "true" or "1")
+                                return true;
+                            if (lower is "n" or "no" or "off" or "false" or "0")
+                                return false;
+
+                            return false;
+                        }
+                }
+
+                if (value is IConvertible convertible)
+                {
+                    try
+                    {
+                        return convertible.ToInt32(CultureInfo.InvariantCulture) != 0;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+
+                return false;
+            }
+
+            if (targetType == typeof(double))
+            {
+                if (value is double doubleValue)
+                    return doubleValue;
+                if (value is float floatValue)
+                    return (double)floatValue;
+                if (value is decimal decimalValue)
+                    return (double)decimalValue;
+                if (value is int intValue)
+                    return (double)intValue;
+                if (value is long longValue)
+                    return (double)longValue;
+
+                var stringValue = value?.ToString();
+                if (!string.IsNullOrWhiteSpace(stringValue) &&
+                    double.TryParse(stringValue, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out var parsedDouble))
+                {
+                    return parsedDouble;
+                }
+
+                return 0d;
+            }
+
+            if (targetType == typeof(float))
+            {
+                if (value is float floatValue)
+                    return floatValue;
+                var doubleValue = (double)ConvertValue(value, typeof(double));
+                return (float)doubleValue;
+            }
+
+            if (targetType == typeof(decimal))
+            {
+                if (value is decimal decimalValue)
+                    return decimalValue;
+                var doubleValue = (double)ConvertValue(value, typeof(double));
+                return Convert.ToDecimal(doubleValue);
+            }
+
+            if (targetType == typeof(DateTime))
+            {
+                if (value is DateTime dateTimeValue)
+                    return dateTimeValue;
+
+                if (value is string stringValue &&
+                    DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsedDate))
+                {
+                    return parsedDate;
+                }
+
+                if (value is double oaDate)
+                {
+                    try
+                    {
+                        return DateTime.FromOADate(oaDate);
+                    }
+                    catch
+                    {
+                        return DateTime.MinValue;
+                    }
+                }
+
+                return DateTime.MinValue;
+            }
+
+            return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
         }
 
         private static string BuildInClause(string columnName, string parameterPrefix, IList<int> values, out List<SqlParameter> parameters)

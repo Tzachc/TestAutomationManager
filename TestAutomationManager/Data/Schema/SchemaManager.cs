@@ -115,19 +115,23 @@ namespace TestAutomationManager.Data.Schema
                 if (_configuration != null && _currentSchema != null)
                     return;
 
-                _configuration = LoadConfiguration();
+                var configuration = LoadConfiguration();
 
-                if (_configuration.Schemas == null || _configuration.Schemas.Count == 0)
+                if (configuration.Schemas == null || configuration.Schemas.Count == 0)
                 {
                     throw new InvalidOperationException("Schema configuration does not contain any schema definitions.");
                 }
 
-                // Determine the default schema name.
-                string defaultSchemaName = string.IsNullOrWhiteSpace(_configuration.DefaultSchema)
-                    ? _configuration.Schemas.First().Name
-                    : _configuration.DefaultSchema;
+                _configuration = configuration;
 
-                var schema = GetSchema(defaultSchemaName) ?? _configuration.Schemas.First();
+                // Determine the default schema name.
+                string defaultSchemaName = string.IsNullOrWhiteSpace(configuration.DefaultSchema)
+                    ? configuration.Schemas.First().Name
+                    : configuration.DefaultSchema;
+
+                var schema = configuration.Schemas
+                    .FirstOrDefault(s => string.Equals(s.Name, defaultSchemaName, StringComparison.OrdinalIgnoreCase))
+                    ?? configuration.Schemas.First();
 
                 _currentSchema = schema;
                 _currentSchemaName = schema.Name;

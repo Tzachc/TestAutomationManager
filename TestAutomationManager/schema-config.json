@@ -15,31 +15,31 @@
       },
       "columns": {
         "tests": {
-          "Id": ["Id", "TestId", "TestID"],
-          "Name": ["Name", "TestName", "Test_Name"],
-          "Description": ["Description", "TestDescription", "Test_Description"],
-          "Category": ["Category", "TestCategory", "CategoryName"],
-          "IsActive": ["IsActive", "Active", "Is_Active"],
-          "Status": ["Status", "TestStatus", "ExecutionStatus"],
-          "LastRun": ["LastRun", "LastRunDate", "LastExecutionDate", "LastTimePassed"]
+          "Id": ["TestID", "TestId", "Id"],
+          "Name": ["TestName", "Name", "Test_Name"],
+          "Description": ["ExceptionMessage", "Bugs", "Description", "TestDescription", "Test_Description"],
+          "Category": ["Bugs", "RecipientsEmailsList", "Category", "TestCategory", "CategoryName"],
+          "IsActive": ["IsActive", "MarkIfRun", "Active", "Is_Active"],
+          "Status": ["RunStatus", "Status", "TestStatus", "ExecutionStatus"],
+          "LastRun": ["LastRunning", "LastTimePass", "LastRun", "LastRunDate", "LastExecutionDate", "LastTimePassed"]
         },
         "processes": {
-          "Id": ["Id", "ProcessId", "ProcessID"],
-          "TestId": ["TestId", "ParentTestId", "Test_ID"],
-          "Name": ["Name", "ProcessName", "Process_Name"],
-          "Description": ["Description", "ProcessDescription", "Process_Description"],
-          "Sequence": ["Sequence", "ProcessOrder", "SequenceNumber"],
+          "Id": ["ProcessID", "Index", "Id"],
+          "TestId": ["TestID", "TestId", "ParentTestId", "Test_ID"],
+          "Name": ["ProcessName", "Name", "Process_Name"],
+          "Description": ["Comments", "Description", "ProcessDescription", "Process_Description"],
+          "Sequence": ["ProcessPosition", "Index", "Sequence", "ProcessOrder", "SequenceNumber"],
           "IsCritical": ["IsCritical", "Critical", "Is_Critical"],
-          "Timeout": ["Timeout", "TimeoutSeconds", "TimeOut"]
+          "Timeout": ["Timeout", "TimeoutSeconds", "TimeOut", "Repeat"]
         },
         "functions": {
-          "Id": ["Id", "FunctionId", "FunctionID"],
-          "ProcessId": ["ProcessId", "ParentProcessId", "Process_ID"],
-          "Name": ["Name", "FunctionName", "Function_Name"],
-          "MethodName": ["MethodName", "Method", "Method_Name"],
-          "Parameters": ["Parameters", "ParameterJson", "Params"],
-          "ExpectedResult": ["ExpectedResult", "Expected", "Expected_Result"],
-          "Sequence": ["Sequence", "StepOrder", "SequenceNumber"]
+          "Id": ["Index", "FunctionPosition", "FunctionId", "FunctionID", "Id"],
+          "ProcessId": ["ProcessID", "ProcessId", "ParentProcessId", "Process_ID"],
+          "Name": ["FunctionName", "Name", "Function_Name"],
+          "MethodName": ["WEB3Operator", "MethodName", "Method", "Method_Name"],
+          "Parameters": ["Param1", "Parameters", "ParameterJson", "Params"],
+          "ExpectedResult": ["ActualValue", "ExpectedResult", "Expected", "Expected_Result"],
+          "Sequence": ["FunctionPosition", "Index", "Sequence", "StepOrder", "SequenceNumber"]
         }
       }
     },
