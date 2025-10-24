@@ -37,8 +37,8 @@ namespace TestAutomationManager.Repositories
                     var uiSettingsService = TestAutomationManager.Services.TestUISettingsService.Instance;
                     foreach (var test in tests)
                     {
-                        test.IsActive = uiSettingsService.GetIsActive(test.TestID);
-                        test.Category = uiSettingsService.GetCategory(test.TestID);
+                        test.IsActive = uiSettingsService.GetIsActive((int)test.TestID);
+                        test.Category = uiSettingsService.GetCategory((int)test.TestID);
                     }
 
                     var schemaName = TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
