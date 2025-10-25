@@ -187,10 +187,10 @@ namespace TestAutomationManager.Repositories
                     var schemaConfig = TestAutomationManager.Services.SchemaConfigService.Instance;
                     string fullTableName = schemaConfig.GetFullTableName(schemaConfig.TestTableName);
 
-                    await context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT {fullTableName} ON");
+                    //await context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT {fullTableName} ON");
                     context.Tests.Add(test);
                     await context.SaveChangesAsync();
-                    await context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT {fullTableName} OFF");
+                   // await context.Database.ExecuteSqlRawAsync($"SET IDENTITY_INSERT {fullTableName} OFF");
 
                     await transaction.CommitAsync();
 

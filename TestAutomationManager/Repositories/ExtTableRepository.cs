@@ -76,11 +76,11 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string query = @"
+                    string query = $@"
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLES
-                        WHERE TABLE_SCHEMA = 'ext'
-                          AND TABLE_NAME = @tableName";
+                        WHERE TABLE_SCHEMA = '{CurrentSchema}'
+                          AND TABLE_NAME = '{tableName}'";
 
                     using (var command = new SqlCommand(query, connection))
                     {
@@ -212,7 +212,7 @@ namespace TestAutomationManager.Repositories
 
             try
             {
-                string query = @"
+                string query = $@"
             SELECT 
                 COLUMN_NAME,
                 DATA_TYPE,
@@ -220,8 +220,8 @@ namespace TestAutomationManager.Repositories
                 IS_NULLABLE,
                 ORDINAL_POSITION
             FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = 'ext'
-              AND TABLE_NAME = @tableName
+            WHERE TABLE_SCHEMA = '{CurrentSchema}'
+              AND TABLE_NAME = '{@tableName}'
             ORDER BY ORDINAL_POSITION";
 
                 using (var command = new SqlCommand(query, connection))

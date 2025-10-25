@@ -4,13 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TestAutomationManager.Views"
+             xmlns:converters="clr-namespace:TestAutomationManager.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000"
+             d:DesignHeight="600" d:DesignWidth="1600"
              Background="{DynamicResource PrimaryBackgroundBrush}"
              Loaded="TestsView_Loaded"
              Unloaded="TestsView_Unloaded">
 
     <UserControl.Resources>
+        <!-- Converters -->
+        <converters:RunStatusToColorConverter x:Key="RunStatusToColorConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
         <!-- 🎯 EXPAND TOGGLE -->
         <Style x:Key="ExpandToggle" TargetType="ToggleButton">
             <Setter Property="Width" Value="24"/>
@@ -66,412 +71,782 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- 🎨 MODERN SCROLLBAR STYLE -->
+        <Style x:Key="ModernScrollBar" TargetType="{x:Type ScrollBar}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Track -->
+                            <Border Background="{DynamicResource SecondaryBackgroundBrush}" 
+                                    CornerRadius="4"
+                                    Margin="4,0">
+                                <Track x:Name="PART_Track" 
+                                       IsDirectionReversed="True"
+                                       Grid.Row="0">
+                                    <Track.Thumb>
+                                        <Thumb>
+                                            <Thumb.Style>
+                                                <Style TargetType="{x:Type Thumb}">
+                                                    <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
+                                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                                <Border Background="{TemplateBinding Background}"
+                                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                                        BorderThickness="0"
+                                                                        CornerRadius="4"
+                                                                        Height="8">
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsDragging" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource TextPrimaryBrush}"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Thumb.Style>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                </Track>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Vertical">
+                    <Setter Property="Width" Value="12"/>
+                    <Setter Property="Height" Value="Auto"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Modern ScrollViewer Style (Vertical Only) -->
+        <Style x:Key="ModernScrollViewerVerticalOnly" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ScrollContentPresenter Grid.Column="0"/>
+
+                            <!-- Vertical ScrollBar Only -->
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                      Style="{StaticResource ModernScrollBar}"
+                                      Orientation="Vertical"
+                                      Grid.Column="1"
+                                      Width="12"
+                                      Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                      Value="{TemplateBinding VerticalOffset}"
+                                      Maximum="{TemplateBinding ScrollableHeight}"
+                                      ViewportSize="{TemplateBinding ViewportHeight}"
+                                      Margin="4,0,0,0"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern ScrollViewer Style -->
+        <Style x:Key="ModernScrollViewer" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+
+                            <!-- Horizontal ScrollBar -->
+                            <ScrollBar x:Name="PART_HorizontalScrollBar"
+                                      Style="{StaticResource ModernScrollBar}"
+                                      Orientation="Horizontal"
+                                      Grid.Row="1"
+                                      Grid.Column="0"
+                                      Height="12"
+                                      Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
+                                      Value="{TemplateBinding HorizontalOffset}"
+                                      Maximum="{TemplateBinding ScrollableWidth}"
+                                      ViewportSize="{TemplateBinding ViewportWidth}"
+                                      Margin="0,4,0,0"/>
+
+                            <!-- Vertical ScrollBar -->
+                            <ScrollBar x:Name="PART_VerticalScrollBar"
+                                      Style="{StaticResource ModernScrollBar}"
+                                      Orientation="Vertical"
+                                      Grid.Row="0"
+                                      Grid.Column="1"
+                                      Width="12"
+                                      Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                      Value="{TemplateBinding VerticalOffset}"
+                                      Maximum="{TemplateBinding ScrollableHeight}"
+                                      ViewportSize="{TemplateBinding ViewportHeight}"
+                                      Margin="4,0,0,0"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 📊 TABLE HEADER -->
-        <Border Grid.Row="0" 
-                Background="{DynamicResource SecondaryBackgroundBrush}"
-                BorderThickness="0,0,0,1"
-                BorderBrush="{DynamicResource BorderBrush}"
-                Padding="24,12"
-                Margin="24,16,24,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="32"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="60"/>
-                    <ColumnDefinition Width="280"/>
-                    <ColumnDefinition Width="120"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="140"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+        <!-- 📋 MAIN CONTENT (Header + Body in one ScrollViewer) -->
+        <ScrollViewer Grid.Row="0"
+                      x:Name="MainScrollViewer"
+                      Margin="0"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      ScrollChanged="MainScrollViewer_ScrollChanged">
+            <Grid MinWidth="2000" Margin="20,10,24,24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <TextBlock Grid.Column="2" 
-                         Text="ID" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{DynamicResource TextPrimaryBrush}" />
+                <!-- 📊 TABLE HEADER -->
+                <Border Grid.Row="0"
+                        Background="{DynamicResource SecondaryBackgroundBrush}"
+                        BorderThickness="0,0,0,1"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        Padding="24,12">
+                    <Grid MinWidth="2000">
+                        <Grid.ColumnDefinitions>
+                            <!-- Checkbox -->
+                            <ColumnDefinition Width="32"/>
+                            <!-- Status Indicator -->
+                            <ColumnDefinition Width="16"/>
+                            <!-- Expand Toggle -->
+                            <ColumnDefinition Width="20"/>
+                            <!-- TestID -->
+                            <ColumnDefinition Width="50"/>
+                            <!-- TestName - ADJUST THIS WIDTH TO CHANGE COLUMN SIZE -->
+                            <ColumnDefinition Width="500"/>
+                            <!-- LastRunning -->
+                            <ColumnDefinition Width="130"/>
+                            <!-- LastTimePassed -->
+                            <ColumnDefinition Width="130"/>
+                            <!-- RunStatus -->
+                            <ColumnDefinition Width="80"/>
+                            <!-- Bugs -->
+                            <ColumnDefinition Width="100"/>
+                            <!-- RecipientsEmailsList -->
+                            <ColumnDefinition Width="180"/>
+                            <!-- ExceptionMessage -->
+                            <ColumnDefinition Width="180"/>
+                            <!-- SendEmailReport -->
+                            <ColumnDefinition Width="120"/>
+                            <!-- ExitTestOnFailure -->
+                            <ColumnDefinition Width="120"/>
+                            <!-- TestRunAgainTimes -->
+                            <ColumnDefinition Width="130"/>
+                            <!-- SnapshotMultipleFailure -->
+                            <ColumnDefinition Width="160"/>
+                            <!-- EmailOnFailureOnly -->
+                            <ColumnDefinition Width="140"/>
+                            <!-- DisableKillDriver -->
+                            <ColumnDefinition Width="130"/>
+                            <!-- Actions -->
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="3" 
-                         Text="TEST NAME" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <!-- ACTIVE Header -->
+                        <TextBlock Grid.Column="0" 
+                             Text="✓" 
+                             FontSize="14" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"
+                             ToolTip="Active"/>
 
-                <TextBlock Grid.Column="4" 
-                         Text="CATEGORY" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Grid.Column="3" 
+                             Text="TEST ID" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-                <TextBlock Grid.Column="5" 
-                         Text="STATUS" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Grid.Column="4" 
+                             Text="TEST NAME" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-                <TextBlock Grid.Column="6" 
-                         Text="LAST RUN" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Grid.Column="5" 
+                             Text="LAST RUNNING" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-                <TextBlock Grid.Column="7" 
-                         Text="ACTIONS" 
-                         FontSize="12" 
-                         FontWeight="Bold" 
-                         Foreground="{DynamicResource TextPrimaryBrush}"
-                         HorizontalAlignment="Right"
-                         Margin="0,0,8,0"/>
-            </Grid>
-        </Border>
+                        <TextBlock Grid.Column="6" 
+                             Text="LAST TIME PASSED" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-        <!-- 📋 TEST LIST -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl x:Name="TestsItemsControl" Margin="24,8,24,24">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Margin="0,0,0,2">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="7" 
+                             Text="STATUS" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-                                <!-- ✨ TEST ROW -->
-                                <Border Grid.Row="0" 
-                                       Background="{DynamicResource CardBackgroundBrush}"
-                                       BorderBrush="{DynamicResource BorderBrush}"
-                                       BorderThickness="1"
-                                       CornerRadius="8"
-                                       Padding="12,10">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="32"/>
-                                            <ColumnDefinition Width="20"/>
-                                            <ColumnDefinition Width="60"/>
-                                            <ColumnDefinition Width="280"/>
-                                            <ColumnDefinition Width="120"/>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="140"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="8" 
+                             Text="BUGS" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-                                        <!-- Expand Toggle -->
-                                        <ToggleButton Grid.Column="0" 
-                                                    Style="{StaticResource ExpandToggle}"
-                                                    IsChecked="{Binding IsExpanded}"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="9" 
+                             Text="RECIPIENTS EMAIL" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
 
-                                        <!-- Status Indicator -->
-                                        <Border Grid.Column="1" 
-                                               Width="8" Height="8" 
-                                               CornerRadius="4"
+                        <TextBlock Grid.Column="10" 
+                             Text="EXCEPTION MESSAGE" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="11" 
+                             Text="SEND EMAIL" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="12" 
+                             Text="EXIT ON FAILURE" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="13" 
+                             Text="RUN AGAIN TIMES" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="14" 
+                             Text="SNAPSHOT MULTIPLE" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="15" 
+                             Text="EMAIL ON FAIL ONLY" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="16" 
+                             Text="DISABLE KILL DRIVER" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+
+                        <TextBlock Grid.Column="17" 
+                             Text="ACTIONS" 
+                             FontSize="12" 
+                             FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             HorizontalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- 📋 TABLE BODY -->
+                <ItemsControl Grid.Row="1" x:Name="TestsItemsControl" Margin="0,0,0,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                               BorderBrush="{DynamicResource BorderBrush}"
+                               BorderThickness="1"
+                               CornerRadius="8"
+                               Margin="0,0,0,6"
+                               Padding="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 🧪 TEST ROW -->
+                                    <Border Grid.Row="0" 
+                                       Padding="24,10"
+                                       Background="Transparent"
+                                       CornerRadius="8,8,0,0">
+                                        <Grid MinWidth="2000">
+                                            <Grid.ColumnDefinitions>
+                                                <!-- Checkbox -->
+                                                <ColumnDefinition Width="32"/>
+                                                <!-- Status Indicator -->
+                                                <ColumnDefinition Width="16"/>
+                                                <!-- Expand Toggle -->
+                                                <ColumnDefinition Width="20"/>
+                                                <!-- TestID -->
+                                                <ColumnDefinition Width="50"/>
+                                                <!-- TestName - ADJUST THIS WIDTH TO CHANGE COLUMN SIZE -->
+                                                <ColumnDefinition Width="500"/>
+                                                <!-- LastRunning -->
+                                                <ColumnDefinition Width="130"/>
+                                                <!-- LastTimePassed -->
+                                                <ColumnDefinition Width="130"/>
+                                                <!-- RunStatus -->
+                                                <ColumnDefinition Width="80"/>
+                                                <!-- Bugs -->
+                                                <ColumnDefinition Width="100"/>
+                                                <!-- RecipientsEmailsList -->
+                                                <ColumnDefinition Width="180"/>
+                                                <!-- ExceptionMessage -->
+                                                <ColumnDefinition Width="180"/>
+                                                <!-- SendEmailReport -->
+                                                <ColumnDefinition Width="120"/>
+                                                <!-- ExitTestOnFailure -->
+                                                <ColumnDefinition Width="120"/>
+                                                <!-- TestRunAgainTimes -->
+                                                <ColumnDefinition Width="130"/>
+                                                <!-- SnapshotMultipleFailure -->
+                                                <ColumnDefinition Width="160"/>
+                                                <!-- EmailOnFailureOnly -->
+                                                <ColumnDefinition Width="140"/>
+                                                <!-- DisableKillDriver -->
+                                                <ColumnDefinition Width="130"/>
+                                                <!-- Actions -->
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Checkbox -->
+                                            <CheckBox Grid.Column="0"
+                                                IsChecked="{Binding IsActive, Mode=TwoWay}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"/>
+
+                                            <!-- Status Indicator (Colored Circle) -->
+                                            <Ellipse Grid.Column="1"
+                                               Width="10" 
+                                               Height="10"
+                                               Fill="{Binding RunStatus, Converter={StaticResource RunStatusToColorConverter}}"
                                                VerticalAlignment="Center"
-                                               HorizontalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Passed">
-                                                            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Failed">
-                                                            <Setter Property="Background" Value="{DynamicResource ErrorBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Running">
-                                                            <Setter Property="Background" Value="{DynamicResource WarningBrush}"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Status}" Value="Not Run">
-                                                            <Setter Property="Background" Value="{DynamicResource TextTertiaryBrush}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                        </Border>
+                                               Margin="0,0,6,0"
+                                               ToolTip="{Binding RunStatus}"/>
 
-                                        <!-- ID -->
-                                        <TextBlock Grid.Column="2" 
-                                                 Text="{Binding Id, StringFormat='#{0}'}" 
+                                            <!-- Expand Toggle -->
+                                            <ToggleButton Grid.Column="2" 
+                                                    Style="{StaticResource ExpandToggle}"
+                                                    IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                    VerticalAlignment="Center"/>
+
+                                            <!-- TestID -->
+                                            <TextBlock Grid.Column="3" 
+                                                 Text="{Binding TestID}" 
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12" 
-                                                 FontWeight="SemiBold"
+                                                 FontSize="12"
                                                  VerticalAlignment="Center"/>
 
-                                        <!-- Test Name & Description -->
-                                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" 
+                                            <!-- TestName -->
+                                            <TextBlock Grid.Column="4" 
+                                                 Text="{Binding TestName}" 
+                                                 Foreground="{DynamicResource TextPrimaryBrush}" 
+                                                 FontSize="13" 
+                                                 FontWeight="SemiBold"
+                                                 VerticalAlignment="Center"
+                                                 TextWrapping="Wrap"
+                                                 ToolTip="{Binding TestName}"/>
+
+                                            <!-- LastRunning -->
+                                            <TextBlock Grid.Column="5" 
+                                                 Text="{Binding LastRunning}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding LastRunning}"/>
+
+                                            <!-- LastTimePass -->
+                                            <TextBlock Grid.Column="6" 
+                                                 Text="{Binding LastTimePass}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding LastTimePass}"/>
+
+                                            <!-- RunStatus -->
+                                            <Border Grid.Column="7"
+                                              Background="{DynamicResource SecondaryBackgroundBrush}"
+                                              BorderBrush="{DynamicResource BorderBrush}"
+                                              BorderThickness="1"
+                                              CornerRadius="4"
+                                              Padding="8,4"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding RunStatus}" 
                                                      Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                     FontSize="13" 
-                                                     FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding Description}" 
-                                                     Foreground="{DynamicResource TextTertiaryBrush}" 
                                                      FontSize="11" 
-                                                     Margin="0,2,0,0"
-                                                     TextTrimming="CharacterEllipsis"/>
-                                        </StackPanel>
-
-                                        <!-- Category -->
-                                        <Border Grid.Column="4"
-                                               Background="{DynamicResource PrimaryBlueBrush}"
-                                               CornerRadius="4"
-                                               Padding="8,4"
-                                               HorizontalAlignment="Left"
-                                               VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Category}" 
-                                                     Foreground="White" 
-                                                     FontSize="10" 
                                                      FontWeight="SemiBold"/>
-                                        </Border>
+                                            </Border>
 
-                                        <!-- Active Toggle -->
-                                        <CheckBox Grid.Column="5" 
-                                                IsChecked="{Binding IsActive}" 
-                                                Style="{StaticResource ModernToggle}"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Left">
-                                            <TextBlock Text="Active" 
-                                                     Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                     FontSize="11" 
-                                                     FontWeight="Medium"/>
-                                        </CheckBox>
+                                            <!-- Bugs -->
+                                            <TextBlock Grid.Column="8" 
+                                                 Text="{Binding Bugs}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding Bugs}"/>
 
-                                        <!-- Last Run -->
-                                        <StackPanel Grid.Column="6" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding LastRun, StringFormat='{}{0:MMM dd, yyyy}'}" 
-                                                     Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                     FontSize="11" 
-                                                     FontWeight="Medium"/>
-                                            <TextBlock Text="{Binding LastRun, StringFormat='{}{0:HH:mm}'}" 
-                                                     Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                     FontSize="10" 
-                                                     Margin="0,1,0,0"/>
-                                        </StackPanel>
+                                            <!-- RecipientsEmailsList -->
+                                            <TextBlock Grid.Column="9" 
+                                                 Text="{Binding RecipientsEmailsList}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding RecipientsEmailsList}"/>
 
-                                        <!-- Actions -->
-                                        <StackPanel Grid.Column="7" 
-          Orientation="Horizontal" 
-          HorizontalAlignment="Right"
-          VerticalAlignment="Center">
-                                            <Button Style="{StaticResource IconButton}" 
-          Width="28" Height="28"
-          ToolTip="Edit" 
-          Margin="2,0"
-          Click="EditTest_Click"
-          Tag="{Binding}">
-                                                <TextBlock Text="✏️" FontSize="12"/>
-                                            </Button>
-                                            <Button Style="{StaticResource IconButton}" 
-          Width="28" Height="28"
-          ToolTip="Run" 
-          Margin="2,0"
-          Click="RunTest_Click"
-          Tag="{Binding}">
-                                                <TextBlock Text="▶️" FontSize="12"/>
-                                            </Button>
-                                            <Button Style="{StaticResource IconButton}" 
-          Width="28" Height="28"
-          ToolTip="Delete" 
-          Margin="2,0"
-          Click="DeleteTest_Click"
-          Tag="{Binding}">
-                                                <TextBlock Text="🗑️" FontSize="12"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
+                                            <!-- ExceptionMessage -->
+                                            <TextBlock Grid.Column="10" 
+                                                 Text="{Binding ExceptionMessage}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding ExceptionMessage}"/>
 
-                                <!-- 📦 PROCESSES (Expanded) -->
-                                <Border Grid.Row="1" Margin="56,8,0,0"
-                                      Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <ItemsControl ItemsSource="{Binding Processes}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Margin="0,0,0,6">
-                                                    <Grid>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
+                                            <!-- SendEmailReport -->
+                                            <TextBlock Grid.Column="11" 
+                                                 Text="{Binding SendEmailReport}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding SendEmailReport}"/>
 
-                                                        <!-- Process Row -->
-                                                        <Border Grid.Row="0" 
-                                                               Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                               BorderBrush="{DynamicResource BorderBrush}"
-                                                               BorderThickness="1"
-                                                               CornerRadius="6" 
-                                                               Padding="12,8">
-                                                            <Grid>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="28"/>
-                                                                    <ColumnDefinition Width="36"/>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                    <ColumnDefinition Width="80"/>
-                                                                    <ColumnDefinition Width="Auto"/>
-                                                                </Grid.ColumnDefinitions>
+                                            <!-- ExitTestOnFailure -->
+                                            <TextBlock Grid.Column="12" 
+                                                 Text="{Binding ExitTestOnFailure}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding ExitTestOnFailure}"/>
 
-                                                                <!-- Expand Toggle -->
-                                                                <ToggleButton Grid.Column="0" 
+                                            <!-- TestRunAgainTimes -->
+                                            <TextBlock Grid.Column="13" 
+                                                 Text="{Binding TestRunAgainTimes}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding TestRunAgainTimes}"/>
+
+                                            <!-- SnapshotMultipleFailure -->
+                                            <TextBlock Grid.Column="14" 
+                                                 Text="{Binding SnapshotMultipleFailure}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding SnapshotMultipleFailure}"/>
+
+                                            <!-- EmailOnFailureOnly -->
+                                            <TextBlock Grid.Column="15" 
+                                                 Text="{Binding EmailOnFailureOnly}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding EmailOnFailureOnly}"/>
+
+                                            <!-- DisableKillDriver -->
+                                            <TextBlock Grid.Column="16" 
+                                                 Text="{Binding DisableKillDriver}" 
+                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                 FontSize="12"
+                                                 VerticalAlignment="Center"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 ToolTip="{Binding DisableKillDriver}"/>
+
+                                            <!-- Actions -->
+                                            <StackPanel Grid.Column="17" 
+                                                  Orientation="Horizontal"
+                                                  VerticalAlignment="Center">
+                                                <Button Style="{StaticResource IconButton}" 
+                                                  Width="28" 
+                                                  Height="28"
+                                                  ToolTip="Edit"
+                                                  Tag="{Binding}"
+                                                  Click="EditTest_Click"
+                                                  Margin="2,0">
+                                                    <TextBlock Text="✏️" FontSize="12"/>
+                                                </Button>
+                                                <Button Style="{StaticResource IconButton}" 
+                                                  Width="28" 
+                                                  Height="28"
+                                                  ToolTip="Run Test"
+                                                  Tag="{Binding}"
+                                                  Click="RunTest_Click"
+                                                  Margin="2,0">
+                                                    <TextBlock Text="▶️" FontSize="12"/>
+                                                </Button>
+                                                <Button Style="{StaticResource IconButton}" 
+                                                  Width="28" 
+                                                  Height="28"
+                                                  ToolTip="Delete"
+                                                  Tag="{Binding}"
+                                                  Click="DeleteTest_Click"
+                                                  Margin="2,0">
+                                                    <TextBlock Text="🗑️" FontSize="12"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 🔧 PROCESSES (Nested) -->
+                                    <Border Grid.Row="1" 
+                                       Padding="24,0,24,16"
+                                       Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ItemsControl ItemsSource="{Binding Processes}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                       BorderBrush="{DynamicResource BorderBrush}"
+                                                       BorderThickness="1"
+                                                       CornerRadius="6"
+                                                       Padding="16,12"
+                                                       Margin="42,0,0,8">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto"/>
+                                                                <RowDefinition Height="Auto"/>
+                                                            </Grid.RowDefinitions>
+
+                                                            <!-- Process Row -->
+                                                            <Border Grid.Row="0" 
+                                                               Background="Transparent" 
+                                                               Padding="0">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="24"/>
+                                                                        <ColumnDefinition Width="50"/>
+                                                                        <ColumnDefinition Width="300"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="120"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <!-- Expand Toggle -->
+                                                                    <ToggleButton Grid.Column="0" 
                                                                             Style="{StaticResource ExpandToggle}"
-                                                                            IsChecked="{Binding IsExpanded}"
-                                                                            VerticalAlignment="Center"
-                                                                            HorizontalAlignment="Center"/>
+                                                                            IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                                            Width="20" Height="20"
+                                                                            VerticalAlignment="Center"/>
 
-                                                                <!-- Sequence -->
-                                                                <Border Grid.Column="1" 
-                                                                      Width="24" Height="24" 
-                                                                      Background="{DynamicResource PrimaryBlueBrush}"
-                                                                      CornerRadius="6"
-                                                                      Margin="0,0,10,0">
-                                                                    <TextBlock Text="{Binding Sequence}" 
-                                                                             Foreground="White" 
-                                                                             FontWeight="Bold" 
-                                                                             FontSize="11"
+                                                                    <!-- Process Icon -->
+                                                                    <Border Grid.Column="1"
+                                                                       Width="28" Height="28"
+                                                                       Background="{DynamicResource PrimaryBlueBrush}"
+                                                                       CornerRadius="6"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="0,0,10,0">
+                                                                        <TextBlock Text="⚙️" 
+                                                                             FontSize="14"
                                                                              HorizontalAlignment="Center" 
                                                                              VerticalAlignment="Center"/>
-                                                                </Border>
+                                                                    </Border>
 
-                                                                <!-- Name -->
-                                                                <TextBlock Grid.Column="2" 
-                                                                         Text="{Binding Name}" 
+                                                                    <!-- Process Name -->
+                                                                    <TextBlock Grid.Column="2" 
+                                                                         Text="{Binding ProcessName}" 
                                                                          Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                                         FontSize="12" 
-                                                                         FontWeight="Medium"
-                                                                         VerticalAlignment="Center"/>
+                                                                         FontSize="13" 
+                                                                         FontWeight="SemiBold"
+                                                                         VerticalAlignment="Center"
+                                                                         TextTrimming="CharacterEllipsis"
+                                                                         ToolTip="{Binding ProcessName}"/>
 
-                                                                <!-- Critical Badge -->
-                                                                <Border Grid.Column="3" 
-                                                                      Visibility="{Binding IsCritical, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                                      Background="{DynamicResource ErrorBrush}"
-                                                                      CornerRadius="4" 
-                                                                      Padding="6,3" 
-                                                                      Margin="0,0,10,0">
-                                                                    <TextBlock Text="⚠ CRITICAL" 
-                                                                             Foreground="White" 
-                                                                             FontSize="9" 
-                                                                             FontWeight="Bold"/>
-                                                                </Border>
+                                                                    <!-- Description -->
+                                                                    <TextBlock Grid.Column="3" 
+                                                                         Text="{Binding Comments}" 
+                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
+                                                                         FontSize="11" 
+                                                                         FontStyle="Italic"
+                                                                         VerticalAlignment="Center"
+                                                                         TextTrimming="CharacterEllipsis"
+                                                                         ToolTip="{Binding Comments}"
+                                                                         Margin="0,0,10,0"/>
 
-                                                                <!-- Timeout -->
-                                                                <Border Grid.Column="4" 
+                                                                    <!-- Sequence Badge -->
+                                                                    <Border Grid.Column="4"
                                                                        Background="{DynamicResource CardBackgroundBrush}"
                                                                        BorderBrush="{DynamicResource BorderBrush}"
                                                                        BorderThickness="1"
                                                                        CornerRadius="4" 
                                                                        Padding="8,4"
+                                                                       VerticalAlignment="Center"
                                                                        Margin="0,0,10,0">
-                                                                    <TextBlock Text="{Binding Timeout, StringFormat='⏱ {0}s'}" 
+                                                                        <TextBlock Text="{Binding ProcessPosition, StringFormat='Seq: {0}'}" 
                                                                              Foreground="{DynamicResource TextSecondaryBrush}" 
                                                                              FontSize="10" 
                                                                              FontWeight="SemiBold"/>
-                                                                </Border>
+                                                                    </Border>
 
-                                                                <!-- Actions -->
-                                                                <StackPanel Grid.Column="5" 
+                                                                    <!-- Actions -->
+                                                                    <StackPanel Grid.Column="5" 
                                                                           Orientation="Horizontal">
-                                                                    <Button Style="{StaticResource IconButton}" 
+                                                                        <Button Style="{StaticResource IconButton}" 
                                                                           Width="26" Height="26"
                                                                           ToolTip="Edit" 
                                                                           Margin="2,0">
-                                                                        <TextBlock Text="✏️" FontSize="11"/>
-                                                                    </Button>
-                                                                    <Button Style="{StaticResource IconButton}" 
+                                                                            <TextBlock Text="✏️" FontSize="11"/>
+                                                                        </Button>
+                                                                        <Button Style="{StaticResource IconButton}" 
                                                                           Width="26" Height="26"
                                                                           ToolTip="Delete" 
                                                                           Margin="2,0">
-                                                                        <TextBlock Text="🗑️" FontSize="11"/>
-                                                                    </Button>
-                                                                </StackPanel>
-                                                            </Grid>
-                                                        </Border>
+                                                                            <TextBlock Text="🗑️" FontSize="11"/>
+                                                                        </Button>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </Border>
 
-                                                        <!-- ⚡ FUNCTIONS (Nested) -->
-                                                        <Border Grid.Row="1" Margin="42,6,0,0"
+                                                            <!-- ⚡ FUNCTIONS (Nested) -->
+                                                            <Border Grid.Row="1" Margin="42,6,0,0"
                                                               Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                            <ItemsControl ItemsSource="{Binding Functions}">
-                                                                <ItemsControl.ItemTemplate>
-                                                                    <DataTemplate>
-                                                                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                <ItemsControl ItemsSource="{Binding Functions}">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <Border Background="{DynamicResource CardBackgroundBrush}"
                                                                                BorderBrush="{DynamicResource BorderBrush}"
                                                                                BorderThickness="1"
                                                                                CornerRadius="4"
                                                                                Padding="10,6"
                                                                                Margin="0,0,0,4">
-                                                                            <Grid>
-                                                                                <Grid.ColumnDefinitions>
-                                                                                    <ColumnDefinition Width="24"/>
-                                                                                    <ColumnDefinition Width="200"/>
-                                                                                    <ColumnDefinition Width="*"/>
-                                                                                    <ColumnDefinition Width="160"/>
-                                                                                </Grid.ColumnDefinitions>
+                                                                                <Grid>
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="24"/>
+                                                                                        <ColumnDefinition Width="200"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                        <ColumnDefinition Width="160"/>
+                                                                                    </Grid.ColumnDefinitions>
 
-                                                                                <!-- Icon -->
-                                                                                <Border Grid.Column="0"
+                                                                                    <!-- Icon -->
+                                                                                    <Border Grid.Column="0"
                                                                                       Width="18" Height="18"
                                                                                       Background="{DynamicResource PrimaryBlueBrush}"
                                                                                       CornerRadius="4"
                                                                                       Margin="0,0,8,0">
-                                                                                    <TextBlock Text="ƒ" 
+                                                                                        <TextBlock Text="ƒ" 
                                                                                              Foreground="White" 
                                                                                              FontWeight="Bold" 
                                                                                              FontSize="10"
                                                                                              HorizontalAlignment="Center" 
                                                                                              VerticalAlignment="Center"/>
-                                                                                </Border>
+                                                                                    </Border>
 
-                                                                                <!-- Method Name -->
-                                                                                <TextBlock Grid.Column="1" 
-                                                                                         Text="{Binding MethodName}" 
+                                                                                    <!-- Function Name -->
+                                                                                    <TextBlock Grid.Column="1" 
+                                                                                         Text="{Binding FunctionName}" 
                                                                                          Foreground="{DynamicResource PrimaryBlueBrush}" 
                                                                                          FontFamily="Consolas" 
                                                                                          FontSize="11" 
                                                                                          FontWeight="Medium"
                                                                                          VerticalAlignment="Center"
-                                                                                         Margin="0,0,10,0"/>
+                                                                                         Margin="0,0,10,0"
+                                                                                         TextTrimming="CharacterEllipsis"
+                                                                                         ToolTip="{Binding FunctionName}"/>
 
-                                                                                <!-- Parameters -->
-                                                                                <TextBlock Grid.Column="2" 
-                                                                                         Text="{Binding Parameters}" 
+                                                                                    <!-- Description -->
+                                                                                    <TextBlock Grid.Column="2" 
+                                                                                         Text="{Binding FunctionDescription}" 
                                                                                          Foreground="{DynamicResource TextTertiaryBrush}" 
                                                                                          FontSize="10"
-                                                                                         FontFamily="Consolas"
                                                                                          VerticalAlignment="Center"
                                                                                          TextTrimming="CharacterEllipsis"
+                                                                                         ToolTip="{Binding FunctionDescription}"
                                                                                          Margin="0,0,10,0"/>
 
-                                                                                <!-- Expected Result -->
-                                                                                <TextBlock Grid.Column="3" 
-                                                                                         Text="{Binding ExpectedResult, StringFormat='→ {0}'}" 
+                                                                                    <!-- Position -->
+                                                                                    <TextBlock Grid.Column="3" 
+                                                                                         Text="{Binding FunctionPosition, StringFormat='Pos: {0}'}" 
                                                                                          Foreground="{DynamicResource TextTertiaryBrush}" 
                                                                                          FontSize="10" 
                                                                                          FontStyle="Italic"
                                                                                          VerticalAlignment="Center"
                                                                                          TextTrimming="CharacterEllipsis"/>
-                                                                            </Grid>
-                                                                        </Border>
-                                                                    </DataTemplate>
-                                                                </ItemsControl.ItemTemplate>
-                                                            </ItemsControl>
-                                                        </Border>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Border>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                                                                </Grid>
+                                                                            </Border>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
         </ScrollViewer>
+
+        <!-- 🎯 HORIZONTAL SCROLLBAR (at bottom of entire view) -->
+        <ScrollBar Grid.Row="1"
+                   x:Name="HorizontalScrollBar"
+                   Style="{StaticResource ModernScrollBar}"
+                   Orientation="Horizontal"
+                   Height="16"
+                   Margin="24,4,24,16"
+                   Minimum="0"
+                   Maximum="{Binding ElementName=MainScrollViewer, Path=ScrollableWidth}"
+                   ViewportSize="{Binding ElementName=MainScrollViewer, Path=ViewportWidth}"
+                   Value="{Binding ElementName=MainScrollViewer, Path=HorizontalOffset, Mode=OneWay}"
+                   Visibility="{Binding ElementName=MainScrollViewer, Path=ComputedHorizontalScrollBarVisibility}"
+                   Scroll="HorizontalScrollBar_Scroll"/>
     </Grid>
 </UserControl>
