@@ -1270,7 +1270,7 @@ namespace TestAutomationManager.Views
 
                         if (rowView != null)
                         {
-                            int rowId = Convert.ToInt32(rowView["Id"]);
+                            int rowId = Convert.ToInt32(rowView["Index"]);
                             string oldValue = rowView[columnName]?.ToString() ?? "";
 
                             if (newValue != oldValue)

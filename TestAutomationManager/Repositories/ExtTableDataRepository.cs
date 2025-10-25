@@ -72,7 +72,7 @@ namespace TestAutomationManager.Repositories
                     string query = $@"
                 UPDATE [{CurrentSchema}].[{tableName}]
                 SET [{columnName}] = @newValue
-                WHERE [Id] = @rowId";
+                WHERE [Index] = @rowId";
 
                     using (var command = new SqlCommand(query, connection))
                     {

@@ -152,8 +152,12 @@ namespace TestAutomationManager.Data
                 // Map to schema and table (e.g., [PRODUCTION_Selenium].[Process_WEB3])
                 entity.ToTable(processTableName, currentSchema);
 
-                // Primary key
-                entity.HasKey(e => e.ProcessID);
+                // Primary key - Index is the unique identifier for each process record
+                entity.HasKey(e => e.Index);
+
+                // Alternate key - ProcessID is used for Function relationships
+                // Multiple processes can share the same ProcessID (it's a template/definition ID)
+                entity.HasAlternateKey(e => e.ProcessID);
 
                 // Properties - map actual column names
                 entity.Property(e => e.TestID).HasColumnName("TestID");
@@ -169,11 +173,7 @@ namespace TestAutomationManager.Data
                 entity.Property(e => e.TempParam).HasColumnName("TempParam");
                 entity.Property(e => e.WEB3Operator).HasColumnName("WEB3Operator");
 
-                // Map Param columns
-                for (int i = 1; i <= 46; i++)
-                {
-                    entity.Property($"Param{i}").HasColumnName($"Param{i}");
-                }
+                // Param columns (Param1-Param46) are mapped automatically by convention
 
                 // Map TempParam columns
                 entity.Property(e => e.TempParam1).HasColumnName("TempParam1");
@@ -184,9 +184,11 @@ namespace TestAutomationManager.Data
                 entity.Property(e => e.TempParam111111).HasColumnName("TempParam111111");
 
                 // Relationships
+                // Functions link to Process via ProcessID (not via the primary key Index)
                 entity.HasMany(p => p.Functions)
                     .WithOne()
                     .HasForeignKey(f => f.ProcessID)
+                    .HasPrincipalKey(p => p.ProcessID)  // Explicitly use ProcessID, not Index
                     .OnDelete(DeleteBehavior.Cascade);
 
                 // Ignore UI-only and compatibility properties
@@ -223,11 +225,7 @@ namespace TestAutomationManager.Data
                 entity.Property(e => e.ProcessID).HasColumnName("ProcessID");
                 entity.Property(e => e.WEB3Operator).HasColumnName("WEB3Operator");
 
-                // Map Param columns
-                for (int i = 1; i <= 30; i++)
-                {
-                    entity.Property($"Param{i}").HasColumnName($"Param{i}");
-                }
+                // Param columns (Param1-Param30) are mapped automatically by convention
 
                 // Ignore compatibility properties
                 entity.Ignore(e => e.Id);
