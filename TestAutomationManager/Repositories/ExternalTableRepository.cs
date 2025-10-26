@@ -26,8 +26,8 @@ namespace TestAutomationManager.Repositories
         // ================================================
 
         /// <summary>
-        /// Get list of all ExtTable tables that exist in database
-        /// Scans ext schema for tables matching ExtTable pattern
+        /// Get list of all ExtTest tables that exist in database
+        /// Scans current schema for tables matching ExtTest pattern
         /// </summary>
         public async Task<List<ExternalTableInfo>> GetAllExternalTablesAsync()
         {
@@ -35,24 +35,31 @@ namespace TestAutomationManager.Repositories
 
             try
             {
+                var schemaConfig = TestAutomationManager.Services.SchemaConfigService.Instance;
+                string currentSchema = schemaConfig.CurrentSchema;
+                string extTablePrefix = schemaConfig.ExtTestTablePrefix;
+
                 using (var connection = new SqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
 
-                    // Query to find all ExtTable tables in ext schema
-                    string query = @"
-                        SELECT 
+                    // Query to find all ExtTest tables in current schema
+                    string query = $@"
+                        SELECT
                             t.name AS TableName,
-                            -- Extract test ID from table name (ExtTable1 -> 1)
-                            CAST(REPLACE(t.name, 'ExtTable', '') AS INT) AS TestId
+                            -- Extract test ID from table name (ExtTest1 -> 1)
+                            CAST(REPLACE(t.name, '{extTablePrefix}', '') AS INT) AS TestId
                         FROM sys.tables t
                         INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
-                        WHERE s.name = 'ext'
-                          AND t.name LIKE 'ExtTable%'
+                        WHERE s.name = @SchemaName
+                          AND t.name LIKE @TablePattern
                         ORDER BY TestId";
 
                     using (var command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@SchemaName", currentSchema);
+                        command.Parameters.AddWithValue("@TablePattern", $"{extTablePrefix}%");
+
                         using (var reader = await command.ExecuteReaderAsync())
                         {
                             while (await reader.ReadAsync())
@@ -61,7 +68,7 @@ namespace TestAutomationManager.Repositories
                                 int testId = reader.GetInt32(1);
 
                                 // Get row count for this table
-                                int rowCount = await GetRowCountAsync(tableName);
+                                int rowCount = await GetRowCountAsync(tableName, currentSchema);
 
                                 tables.Add(new ExternalTableInfo
                                 {
@@ -75,7 +82,7 @@ namespace TestAutomationManager.Repositories
                     }
                 }
 
-                System.Diagnostics.Debug.WriteLine($"✓ Discovered {tables.Count} external tables");
+                System.Diagnostics.Debug.WriteLine($"✓ Discovered {tables.Count} external tables in schema '{currentSchema}'");
                 return tables;
             }
             catch (Exception ex)
@@ -86,9 +93,9 @@ namespace TestAutomationManager.Repositories
         }
 
         /// <summary>
-        /// Get row count for a specific ExtTable
+        /// Get row count for a specific ExtTable in the given schema
         /// </summary>
-        private async Task<int> GetRowCountAsync(string tableName)
+        private async Task<int> GetRowCountAsync(string tableName, string schemaName)
         {
             try
             {
@@ -96,7 +103,7 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string query = $"SELECT COUNT(*) FROM ext.{tableName}";
+                    string query = $"SELECT COUNT(*) FROM [{schemaName}].[{tableName}]";
 
                     using (var command = new SqlCommand(query, connection))
                     {
@@ -106,7 +113,7 @@ namespace TestAutomationManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error getting row count for {tableName}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting row count for {schemaName}.{tableName}: {ex.Message}");
                 return 0;
             }
         }

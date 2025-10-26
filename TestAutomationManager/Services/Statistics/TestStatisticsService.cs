@@ -134,9 +134,9 @@ namespace TestAutomationManager.Services.Statistics
             ActiveCount = testList.Count(t => t.IsActive);
 
             // Count by status
-            PassedCount = testList.Count(t => t.Status?.Equals("Passed", StringComparison.OrdinalIgnoreCase) == true);
-            FailedCount = testList.Count(t => t.Status?.Equals("Failed", StringComparison.OrdinalIgnoreCase) == true);
-            RunningCount = testList.Count(t => t.Status?.Equals("Running", StringComparison.OrdinalIgnoreCase) == true);
+            PassedCount = testList.Count(t => t.Status?.Equals("Pass", StringComparison.OrdinalIgnoreCase) == true);
+            FailedCount = testList.Count(t => t.Status?.Equals("Fail", StringComparison.OrdinalIgnoreCase) == true);
+            RunningCount = testList.Count(t => t.Status?.Equals("Not Run", StringComparison.OrdinalIgnoreCase) == true);
         }
 
         /// <summary>
@@ -164,22 +164,22 @@ namespace TestAutomationManager.Services.Statistics
             // Decrement old status
             if (!string.IsNullOrEmpty(oldStatus))
             {
-                if (oldStatus.Equals("Passed", StringComparison.OrdinalIgnoreCase) && PassedCount > 0)
+                if (oldStatus.Equals("Pass", StringComparison.OrdinalIgnoreCase) && PassedCount > 0)
                     PassedCount--;
-                else if (oldStatus.Equals("Failed", StringComparison.OrdinalIgnoreCase) && FailedCount > 0)
+                else if (oldStatus.Equals("Fail", StringComparison.OrdinalIgnoreCase) && FailedCount > 0)
                     FailedCount--;
-                else if (oldStatus.Equals("Running", StringComparison.OrdinalIgnoreCase) && RunningCount > 0)
+                else if (oldStatus.Equals("Not Run", StringComparison.OrdinalIgnoreCase) && RunningCount > 0)
                     RunningCount--;
             }
 
             // Increment new status
             if (!string.IsNullOrEmpty(newStatus))
             {
-                if (newStatus.Equals("Passed", StringComparison.OrdinalIgnoreCase))
+                if (newStatus.Equals("Pass", StringComparison.OrdinalIgnoreCase))
                     PassedCount++;
-                else if (newStatus.Equals("Failed", StringComparison.OrdinalIgnoreCase))
+                else if (newStatus.Equals("Fail", StringComparison.OrdinalIgnoreCase))
                     FailedCount++;
-                else if (newStatus.Equals("Running", StringComparison.OrdinalIgnoreCase))
+                else if (newStatus.Equals("Not Run", StringComparison.OrdinalIgnoreCase))
                     RunningCount++;
             }
         }

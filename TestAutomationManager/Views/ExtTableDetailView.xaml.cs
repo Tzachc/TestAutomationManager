@@ -159,7 +159,7 @@ namespace TestAutomationManager.Views
                     using (var connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
-                        string query = $"SELECT * FROM [ext].[{tableName}]";
+                        string query = $"SELECT * FROM [PRODUCTION_Selenium].[{tableName}]";
 
                         using (var command = new SqlCommand(query, connection))
                         {
@@ -347,6 +347,7 @@ namespace TestAutomationManager.Views
         /// <summary>
         /// Add row resize grip to all cells when rows are loaded
         /// </summary>
+        /*
         private void TableDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             try
@@ -380,7 +381,7 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"✗ Error in LoadingRow: {ex.Message}");
             }
         }
-
+        */
         /// <summary>
         /// ⭐ ENHANCED: Track column width changes for save functionality
         /// </summary>
@@ -1269,7 +1270,7 @@ namespace TestAutomationManager.Views
 
                         if (rowView != null)
                         {
-                            int rowId = Convert.ToInt32(rowView["Id"]);
+                            int rowId = Convert.ToInt32(rowView["Index"]);
                             string oldValue = rowView[columnName]?.ToString() ?? "";
 
                             if (newValue != oldValue)

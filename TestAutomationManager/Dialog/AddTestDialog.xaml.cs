@@ -29,7 +29,7 @@ namespace TestAutomationManager.Dialogs
         private ObservableCollection<ExternalTableInfo> _filteredExtTables;
 
         private int? _suggestedTestId;
-        private string _selectedSourceTable = "ExtTable1"; // Default template
+        private string _selectedSourceTable = "ExtTest1"; // Default template
         private bool _isManualIdMode = false;
         private List<int> _allExistingTestIds = new List<int>();
 
@@ -231,7 +231,7 @@ namespace TestAutomationManager.Dialogs
             {
                 TemplateInfo.Visibility = Visibility.Visible;
                 CopyFromPanel.Visibility = Visibility.Collapsed;
-                _selectedSourceTable = "ExtTable1"; // Default template
+                _selectedSourceTable = "ExtTest1"; // Default template
             }
         }
 
@@ -246,7 +246,7 @@ namespace TestAutomationManager.Dialogs
                 CopyFromPanel.Visibility = Visibility.Visible;
 
                 // Reset selection if no table selected
-                if (string.IsNullOrEmpty(_selectedSourceTable) || _selectedSourceTable == "ExtTable1")
+                if (string.IsNullOrEmpty(_selectedSourceTable) || _selectedSourceTable == "ExtTest1")
                 {
                     _selectedSourceTable = null;
                 }
@@ -445,8 +445,8 @@ namespace TestAutomationManager.Dialogs
                 // ========== CREATE EXTTABLE ==========
                 StatusMessage.Text = $"Creating ExtTable{testId}...";
 
-                string newTableName = $"ExtTable{testId}";
-                string sourceTable = _selectedSourceTable ?? "ExtTable1";
+                string newTableName = $"ExtTest{testId}";
+                string sourceTable = _selectedSourceTable ?? "ExtTest1";
 
                 // Check if ExtTable already exists
                 bool extTableExists = await _extTableRepository.ExtTableExistsAsync(newTableName);

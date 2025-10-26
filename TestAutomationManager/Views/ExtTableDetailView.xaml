@@ -306,8 +306,8 @@
                           Visibility="Collapsed"
                           ColumnWidth="SizeToCells"
                           CellEditEnding="TableDataGrid_CellEditEnding"
-                          BeginningEdit="TableDataGrid_BeginningEdit"
-                          LoadingRow="TableDataGrid_LoadingRow">
+                          BeginningEdit="TableDataGrid_BeginningEdit">
+                    <!--LoadingRow="TableDataGrid_LoadingRow"> -->
                     <DataGrid.Resources>
                         <!-- Centered TextBlock for cell content with wrapping -->
                         <Style TargetType="TextBlock">

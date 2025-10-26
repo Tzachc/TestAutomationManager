@@ -1,0 +1,375 @@
+==============================================================================
+          WPF TEST AUTOMATION MANAGER - ARCHITECTURE OVERVIEW
+==============================================================================
+
+PRESENTATION LAYER (WPF)
++-----------------------------------+-----------------------------------+
+|           MainWindow              |           SettingsView            |
+|        (Tab Navigation)           |        (Theme Switching)          |
++-----------------------------------+-----------------------------------+
+         |                                         |
+         |                                         |
++--------+---------+-----------------------------+---------+
+|                  |                                       |
+v                  v                                       v
+TestsView      ExtTableDetailView                   Other Views
+(Hierarchical  (DataGrid Editor)
+Tree Display)
+    |
+    ├─-> ItemsControl (Tests)
+    |    ├─-> ToggleButton (Expand)
+    |    ├─-> TextBlock (ID, Name)
+    |    |
+    |    └─-> ItemsControl (Processes) [Nested]
+    |         ├─-> TextBlock (Sequence, Name)
+    |         ├─-> CheckBox (Critical)
+    |         |
+    |         └─-> ItemsControl (Functions) [Double Nested]
+    |              └─-> TextBlock (MethodName, Parameters)
+    |
+    └─-> ObservableCollection<Test> (Two-Way Binding)
+         └─-> INotifyPropertyChanged Events
+
+
+==============================================================================
+BUSINESS LOGIC LAYER (Repositories & Services)
+==============================================================================
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         REPOSITORY PATTERN                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ITestRepository (Interface)                                           │
+│  ├─→ TestRepository                                                    │
+│  │   ├─ GetAllTestsAsync()        [EF Core Include/ThenInclude]       │
+│  │   ├─ GetTestByIdAsync()                                             │
+│  │   ├─ InsertTestAsync()         [SET IDENTITY_INSERT]               │
+│  │   ├─ UpdateTestAsync()         [Called by Test.SaveToDatabase()]   │
+│  │   ├─ DeleteTestAsync()         [Cascade delete]                    │
+│  │   ├─ GetNextAvailableTestIdAsync()  [Smart gap finder]             │
+│  │   └─ TestIdExistsAsync()                                            │
+│  │                                                                      │
+│  ├─→ ExtTableRepository                                               │
+│  │   ├─ ExtTableExistsAsync()     [INFORMATION_SCHEMA query]          │
+│  │   ├─ CreateExtTableFromTemplateAsync()  [Transaction-based]        │
+│  │   ├─ DeleteExtTableAsync()                                          │
+│  │   └─ GetExtTableRowCountAsync()                                     │
+│  │                                                                      │
+│  ├─→ ExtTableDataRepository                                           │
+│  │   ├─ UpdateCellValueAsync()    [Validates column length]           │
+│  │   ├─ AddColumnAsync()          [SQL injection prevention]          │
+│  │   ├─ RenameColumnAsync()       [sp_rename]                         │
+│  │   ├─ ExpandColumnSizeAsync()   [ALTER COLUMN]                      │
+│  │   └─ GetColumnInfoAsync()      [Metadata query]                    │
+│  │                                                                      │
+│  ├─→ ExternalTableRepository                                          │
+│  │   └─ GetAllExternalTablesAsync()  [Discover ext.* tables]          │
+│  │                                                                      │
+│  └─→ ExtTableLayoutRepository                                         │
+│      ├─ SaveLayoutAsync()         [JSON serialization]                │
+│      ├─ GetLayoutAsync()          [JSON deserialization]              │
+│      └─ DeleteLayoutAsync()                                            │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         SERVICE LAYER                                  │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  DatabaseWatcherService (Singleton)                                   │
+│  ├─ StartWatching()        [Timer polling every 3 seconds]            │
+│  ├─ StopWatching()                                                     │
+│  ├─ ForceCheckAsync()      [Manual check]                             │
+│  └─ TestsUpdated Event     [Fires on data change]                     │
+│      └─ MD5 Hash Comparison [Only reload if changed]                  │
+│                                                                         │
+│  TestStatisticsService (Singleton)                                    │
+│  ├─ UpdateStatistics()     [Calculate counts & status breakdown]      │
+│  └─ Publish to Title Bar   [Global app statistics]                    │
+│                                                                         │
+│  ThemeService                                                          │
+│  └─ ApplyTheme()           [Dark/Light/Red themes]                    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+==============================================================================
+DATA LAYER (Models & Database)
+==============================================================================
+
+┌─────────────────────────────────┐
+│   DATA MODELS                   │
+├─────────────────────────────────┤
+│                                 │
+│  Test                           │
+│  ├─ Id (int)                    │
+│  ├─ Name (string)               │
+│  ├─ Description (string)        │
+│  ├─ Category (string)           │
+│  ├─ IsActive (bool)             │
+│  ├─ Status (string)             │
+│  ├─ LastRun (DateTime)          │
+│  ├─ IsExpanded (bool) [UI Only] │
+│  └─ Processes (Collection)      │
+│     └─ Process                  │
+│        ├─ Id (int)              │
+│        ├─ TestId (FK)           │
+│        ├─ Name (string)         │
+│        ├─ Sequence (int)        │
+│        ├─ IsCritical (bool)     │
+│        ├─ Timeout (double)      │
+│        ├─ IsExpanded [UI Only]  │
+│        └─ Functions (Collection)│
+│           └─ Function           │
+│              ├─ Id (int)        │
+│              ├─ ProcessId (FK)  │
+│              ├─ Name (string)   │
+│              ├─ MethodName      │
+│              ├─ Parameters      │
+│              ├─ ExpectedResult  │
+│              └─ Sequence        │
+│                                 │
+│  ExternalTableInfo              │
+│  ├─ TestId (int)                │
+│  ├─ TableName (string)          │
+│  ├─ TestName (string)           │
+│  ├─ RowCount (int)              │
+│  └─ Category (string)           │
+│                                 │
+│  ExtTableLayout                 │
+│  ├─ TableName (string) [PK]     │
+│  ├─ ColumnWidths (Dictionary)   │
+│  ├─ RowHeights (Dictionary)     │
+│  ├─ LastModified (DateTime)     │
+│  └─ ModifiedBy (string)         │
+│                                 │
+└─────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                    ENTITY FRAMEWORK CORE                             │
+│              (TestAutomationDbContext)                               │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  DbSets:                                                             │
+│  ├─ Tests (DbSet<Test>)                                             │
+│  │  └─ Relationships: 1:N with Processes (Cascade Delete)           │
+│  │                                                                   │
+│  ├─ Processes (DbSet<Process>)                                      │
+│  │  └─ Relationships: 1:N with Functions (Cascade Delete)           │
+│  │                                                                   │
+│  └─ Functions (DbSet<Function>)                                     │
+│                                                                      │
+│  Connection String (LocalDB):                                       │
+│  "Server=(localdb)\Local;Database=TestAutomationDB;..."             │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                   SQL SERVER DATABASE                                │
+│             TestAutomationDB (LocalDB)                               │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  Tables:                                                             │
+│  ├─ dbo.Tests (Id, Name, Description, Category, IsActive,          │
+│  │             Status, LastRun)                                      │
+│  │                                                                   │
+│  ├─ dbo.Processes (Id, TestId, Name, Description, Sequence,        │
+│  │                 IsCritical, Timeout)                             │
+│  │                                                                   │
+│  ├─ dbo.Functions (Id, ProcessId, Name, MethodName,                │
+│  │                 Parameters, ExpectedResult, Sequence)            │
+│  │                                                                   │
+│  ├─ dbo.ExtTableLayouts (TableName, ColumnWidthsJson,              │
+│  │                       RowHeightsJson, LastModified, ModifiedBy)  │
+│  │                                                                   │
+│  └─ ext.ExtTable1, ext.ExtTable2, ... (Dynamic)                    │
+│     └─ Created by CreateExtTableFromTemplateAsync()                 │
+│        Structure: Id (PK, IDENTITY), + dynamic columns              │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+
+
+==============================================================================
+DATA FLOW DIAGRAM
+==============================================================================
+
+1. INITIAL LOAD:
+   ┌──────────────┐
+   │ TestsView    │
+   │ Constructor  │
+   └──────┬───────┘
+          │
+          ├─→ Create TestRepository
+          │
+          ├─→ Subscribe to DatabaseWatcherService.TestsUpdated
+          │
+          └─→ LoadTestsFromDatabase()
+                    │
+                    └─→ TestRepository.GetAllTestsAsync()
+                            │
+                            ├─→ EF Core DbContext.Tests
+                            │          .Include(t => t.Processes)
+                            │          .ThenInclude(p => p.Functions)
+                            │
+                            └─→ Return List<Test>
+                                    │
+                                    └─→ foreach (test in tests)
+                                           Tests.Add(test)  [ObservableCollection]
+                                                   │
+                                                   └─→ WPF Data Binding
+                                                       ItemsControl updates
+
+
+2. USER EDITS TEST:
+   ┌──────────────────────────┐
+   │ User clicks IsActive     │
+   │ CheckBox                 │
+   └──────┬───────────────────┘
+          │
+          └─→ Test.IsActive = !Test.IsActive  [Property Setter]
+                    │
+                    ├─→ _isActive = value
+                    │
+                    ├─→ OnPropertyChanged()  [INotifyPropertyChanged]
+                    │
+                    └─→ SaveToDatabase()  [async fire-and-forget]
+                            │
+                            └─→ TestRepository.UpdateTestAsync(this)
+                                    │
+                                    └─→ EF Core DbContext.SaveChangesAsync()
+                                            │
+                                            └─→ UPDATE [dbo].[Tests] SET IsActive = ...
+                                                    │
+                                                    └─→ DatabaseWatcherService
+                                                        .ForceCheckAsync()  [Update hash]
+
+
+3. EXTERNAL TABLE EDITING:
+   ┌──────────────────────────┐
+   │ User clicks ExtTable     │
+   │ in sidebar               │
+   └──────┬───────────────────┘
+          │
+          └─→ MainWindow opens ExtTableDetailView(tableName)
+                    │
+                    ├─→ Constructor calls LoadTableData()
+                    │        │
+                    │        ├─→ ExternalTableRepository
+                    │        │   .GetAllExternalTablesAsync()
+                    │        │    [Queries ext schema]
+                    │        │
+                    │        └─→ LoadTableDataFromDatabase(tableName)
+                    │            [Uses SqlCommand directly]
+                    │                 │
+                    │                 └─→ Creates DataTable
+                    │                     │
+                    │                     └─→ Displays in DataGrid
+                    │
+                    └─→ User edits cell
+                            │
+                            └─→ DataGrid_CellEditEnding
+                                    │
+                                    ├─→ Validate data
+                                    │   [Check column length]
+                                    │
+                                    └─→ ExtTableDataRepository
+                                        .UpdateCellValueAsync()
+                                                │
+                                                └─→ UPDATE [ext].[TableName]
+                                                    SET [Column] = @value
+                                                    WHERE [Id] = @rowId
+
+
+4. LIVE DATABASE SYNC:
+   ┌────────────────────────────────────────┐
+   │ DatabaseWatcherService starts          │
+   │ (Singleton - runs continuously)        │
+   └──────┬─────────────────────────────────┘
+          │
+          └─→ Timer fires every 3 seconds
+                    │
+                    └─→ CheckForChangesAsync()
+                            │
+                            ├─→ Load all tests from database
+                            │
+                            ├─→ Calculate MD5 hash of data
+                            │
+                            ├─→ Compare with _lastDataHash
+                            │   │
+                            │   ├─ If SAME: Do nothing
+                            │   │
+                            │   └─ If DIFFERENT:
+                            │       │
+                            │       └─→ Fire TestsUpdated event
+                            │               with new tests
+                            │
+                            └─→ Watcher.OnDatabaseTestsUpdated()
+                                    │
+                                    ├─→ Save UI state (IsExpanded)
+                                    │
+                                    ├─→ Update _allTests
+                                    │
+                                    ├─→ Restore UI state
+                                    │
+                                    └─→ Re-apply search filter
+                                        & refresh statistics
+
+
+==============================================================================
+DATA BINDING FLOW (WPF)
+==============================================================================
+
+XAML:
+  <ItemsControl ItemsSource="{Binding Tests}">
+    
+    Each Test:
+      <ToggleButton IsChecked="{Binding IsExpanded}" />
+      <TextBlock Text="{Binding Name}" />
+      <CheckBox IsChecked="{Binding IsActive}" />
+      
+      ItemsSource="{Binding Processes}"
+        Each Process:
+          <ItemsControl ItemsSource="{Binding Functions}">
+            Each Function:
+              <TextBlock Text="{Binding MethodName}" />
+
+
+CODE-BEHIND:
+  public ObservableCollection<Test> Tests { get; set; }
+  
+  // Initialization
+  Tests = new ObservableCollection<Test>();
+  TestsItemsControl.ItemsSource = Tests;
+  
+  // Add data
+  foreach (var test in testsFromDb)
+      Tests.Add(test);  ← Triggers ItemsControl to render
+
+
+BINDING:
+  Tests (ObservableCollection) ←→ ItemsControl
+         │                              │
+         │ CollectionChanged Event      │ BoundItem
+         │                              │
+         ├─→ UI updates                 ├─→ Test.INotifyPropertyChanged
+         │   automatically              │
+         │                              ├─→ UI element updates
+         │                              │   (TextBlock, CheckBox, etc.)
+         │                              │
+         │                              └─→ Two-way binding for Input
+         │                                  (CheckBox, TextBox, etc.)
+         │
+         └─→ When Test.IsActive changes
+             │
+             └─→ SaveToDatabase() async
+                     │
+                     └─→ DatabaseWatcherService.ForceCheckAsync()
+                         [Prevent reload loop]
+
+
+==============================================================================
+END DIAGRAM
+==============================================================================

@@ -69,6 +69,28 @@ namespace TestAutomationManager.Views
         }
 
         // ================================================
+        // SCROLL SYNCHRONIZATION
+        // ================================================
+
+        /// <summary>
+        /// Synchronize scrollbar with main scroll viewer
+        /// </summary>
+        private void MainScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            // Update horizontal scrollbar position when content scrolls
+            // (OneWay binding handles this automatically, but we keep this for any future needs)
+        }
+
+        /// <summary>
+        /// Handle horizontal scrollbar interaction
+        /// </summary>
+        private void HorizontalScrollBar_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+            // When user drags the scrollbar, scroll the main content
+            MainScrollViewer.ScrollToHorizontalOffset(e.NewValue);
+        }
+
+        // ================================================
         // LIVE UPDATES
         // ================================================
 
@@ -210,37 +232,41 @@ namespace TestAutomationManager.Views
                 {
                     Tests.Add(test);
                 }
-                UpdateStatistics();
-                return;
             }
-
-            // Filter tests using fuzzy matching (including ID search)
-            var filtered = _allTests.Where(test =>
-                SearchHelper.MatchesId(test.Id, searchQuery) ||
-                SearchHelper.Matches(test.Name, searchQuery) ||
-                SearchHelper.Matches(test.Description, searchQuery) ||
-                SearchHelper.Matches(test.Category, searchQuery) ||
-                SearchHelper.Matches(test.Status, searchQuery)
-            ).ToList();
-
-            foreach (var test in filtered)
+            else
             {
-                Tests.Add(test);
+                // Filter by test name, ID, or category
+                var filtered = _allTests.Where(t =>
+                    (t.TestName?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.TestID?.ToString().Contains(searchQuery) ?? false) ||
+                    (t.Category?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (t.RunStatus?.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ?? false)
+                );
+
+                foreach (var test in filtered)
+                {
+                    Tests.Add(test);
+                }
             }
 
+            // Update statistics based on filtered results
             UpdateStatistics();
         }
 
+        // ================================================
+        // GETTERS (for dashboard statistics)
+        // ================================================
+
         /// <summary>
-        /// Get count of filtered tests
+        /// Get total test count (across all tests, not just visible)
         /// </summary>
         public int GetTestCount()
         {
-            return Tests.Count;
+            return _allTests.Count;
         }
 
         /// <summary>
-        /// Get total count of processes across all tests
+        /// Get total process count (across all tests)
         /// </summary>
         public int GetProcessCount()
         {
@@ -248,7 +274,7 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Get total count of functions across all processes
+        /// Get total function count (across all processes)
         /// </summary>
         public int GetFunctionCount()
         {
@@ -310,7 +336,7 @@ namespace TestAutomationManager.Views
         // Called when the view is hidden (navigated away) or removed
         private void TestsView_Unloaded(object sender, RoutedEventArgs e)
         {
-            // Only unsubscribe this view’s handler; DO NOT stop the global watcher here
+            // Only unsubscribe this view's handler; DO NOT stop the global watcher here
             TestAutomationManager.Services.DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
             System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed (watcher left running)");
         }
@@ -419,6 +445,7 @@ namespace TestAutomationManager.Views
                 }
             }
         }
+
         public void FocusTest(int testId)
         {
             // Clear current filter so full list remains
@@ -454,7 +481,5 @@ namespace TestAutomationManager.Views
                 }
             }, System.Windows.Threading.DispatcherPriority.Background);
         }
-
-
     }
 }

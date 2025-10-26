@@ -44,6 +44,15 @@ namespace TestAutomationManager.Repositories
         private readonly string _connectionString;
 
         // ================================================
+        // PROPERTIES
+        // ================================================
+
+        /// <summary>
+        /// Get the current schema name from SchemaConfigService
+        /// </summary>
+        private string CurrentSchema => TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
+
+        // ================================================
         // CONSTRUCTOR
         // ================================================
 
@@ -67,11 +76,11 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string query = @"
+                    string query = $@"
                         SELECT COUNT(*)
                         FROM INFORMATION_SCHEMA.TABLES
-                        WHERE TABLE_SCHEMA = 'ext'
-                          AND TABLE_NAME = @tableName";
+                        WHERE TABLE_SCHEMA = '{CurrentSchema}'
+                          AND TABLE_NAME = '{tableName}'";
 
                     using (var command = new SqlCommand(query, connection))
                     {
@@ -162,10 +171,10 @@ namespace TestAutomationManager.Repositories
                                 string columnList = string.Join(", ", dataColumns.Select(c => $"[{c}]"));
 
                                 string copyDataQuery = $@"
-                            INSERT INTO [ext].[{newTableName}] 
+                            INSERT INTO [{CurrentSchema}].[{newTableName}] 
                             ({columnList})
                             SELECT {columnList}
-                            FROM [ext].[{sourceTableName}]";
+                            FROM [{CurrentSchema}].[{sourceTableName}]";
 
                                 using (var command = new SqlCommand(copyDataQuery, connection, transaction))
                                 {
@@ -203,7 +212,7 @@ namespace TestAutomationManager.Repositories
 
             try
             {
-                string query = @"
+                string query = $@"
             SELECT 
                 COLUMN_NAME,
                 DATA_TYPE,
@@ -211,8 +220,8 @@ namespace TestAutomationManager.Repositories
                 IS_NULLABLE,
                 ORDINAL_POSITION
             FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = 'ext'
-              AND TABLE_NAME = @tableName
+            WHERE TABLE_SCHEMA = '{CurrentSchema}'
+              AND TABLE_NAME = '{@tableName}'
             ORDER BY ORDINAL_POSITION";
 
                 using (var command = new SqlCommand(query, connection))
@@ -271,7 +280,7 @@ namespace TestAutomationManager.Repositories
             }
 
             string createTableQuery = $@"
-        CREATE TABLE [ext].[{tableName}] (
+        CREATE TABLE [{CurrentSchema}].[{tableName}] (
             {string.Join(",\n            ", columnDefinitions)}
         )";
 
@@ -335,7 +344,7 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string dropQuery = $"DROP TABLE [ext].[{tableName}]";
+                    string dropQuery = $"DROP TABLE [{CurrentSchema}].[{tableName}]";
 
                     using (var command = new SqlCommand(dropQuery, connection))
                     {
@@ -366,7 +375,7 @@ namespace TestAutomationManager.Repositories
                 {
                     await connection.OpenAsync();
 
-                    string query = $"SELECT COUNT(*) FROM [ext].[{tableName}]";
+                    string query = $"SELECT COUNT(*) FROM [{CurrentSchema}].[{tableName}]";
 
                     using (var command = new SqlCommand(query, connection))
                     {

@@ -560,7 +560,7 @@
        Background="{DynamicResource SecondaryBackgroundBrush}"
        BorderThickness="0,0,0,1"
        BorderBrush="{DynamicResource BorderBrush}"
-       Padding="20,12">
+       Padding="20,4">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -635,7 +635,7 @@
                             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
                             <Setter Property="Padding" Value="0"/>
                             <Setter Property="Margin" Value="0"/>
-                            <Setter Property="Height" Value="36"/>
+                            <Setter Property="Height" Value="30"/>
                             <Setter Property="AllowDrop" Value="True"/>
                             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                             <Setter Property="SnapsToDevicePixels" Value="True"/>
