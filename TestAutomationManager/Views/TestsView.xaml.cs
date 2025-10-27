@@ -98,9 +98,9 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void MainScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (HeaderTranslateTransform != null)
+            if (HeaderScrollViewer != null)
             {
-                HeaderTranslateTransform.Y = e.VerticalOffset;
+                HeaderScrollViewer.ScrollToHorizontalOffset(e.HorizontalOffset);
             }
         }
 

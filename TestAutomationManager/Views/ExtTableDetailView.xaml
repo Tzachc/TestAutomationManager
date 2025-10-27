@@ -168,7 +168,7 @@
             </Setter>
         </Style>
 
-        <!-- 🎨 Modern scrollbar styling borrowed from TestsView for consistency -->
+        <!-- 🎨 Modern scrollbar styling reused from TestsView for consistency -->
         <Style x:Key="ModernScrollBar" TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -228,34 +228,6 @@
                                 <Setter Property="Height" Value="14"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="ModernScrollViewerVerticalOnly" TargetType="{x:Type ScrollViewer}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <ScrollContentPresenter Grid.Column="0"/>
-
-                            <ScrollBar x:Name="PART_VerticalScrollBar"
-                                       Style="{StaticResource ModernScrollBar}"
-                                       Orientation="Vertical"
-                                       Grid.Column="1"
-                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                                       Value="{TemplateBinding VerticalOffset}"
-                                       Minimum="0"
-                                       Maximum="{TemplateBinding ScrollableHeight}"
-                                       ViewportSize="{TemplateBinding ViewportHeight}"
-                                       Margin="4,0,0,0"/>
-                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -442,13 +414,14 @@
                 <DataGrid x:Name="TableDataGrid"
                           Style="{StaticResource CleanDataGrid}"
                           Visibility="Collapsed"
-                          ScrollViewer.Style="{StaticResource ModernScrollViewer}"
-                          ScrollViewer.PanningMode="Both"
                           ColumnWidth="SizeToCells"
                           CellEditEnding="TableDataGrid_CellEditEnding"
                           BeginningEdit="TableDataGrid_BeginningEdit">
                     <!--LoadingRow="TableDataGrid_LoadingRow"> -->
                     <DataGrid.Resources>
+                        <Style TargetType="ScrollViewer" BasedOn="{StaticResource ModernScrollViewer}"/>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}"/>
+
                         <!-- Centered TextBlock for cell content with wrapping -->
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
