@@ -188,7 +188,7 @@
                                  IsHitTestVisible="False"/>
 
                                     <ScrollViewer x:Name="PART_ContentHost" 
-                                    Margin="{TemplateBinding Padding}"
+                                    Margin="10,8,0,0"
                                     VerticalAlignment="Center"/>
 
                                     <!-- Placeholder Text -->
