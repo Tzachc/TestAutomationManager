@@ -30,12 +30,12 @@
                                 Background="{TemplateBinding Background}" 
                                 CornerRadius="4">
                             <TextBlock x:Name="Arrow" 
-                                     Text="+" 
-                                     Foreground="{DynamicResource TextTertiaryBrush}" 
-                                     FontSize="25"
-                                     HorizontalAlignment="Center" 
-                                     VerticalAlignment="Center"
-                                     RenderTransformOrigin="0.5,0.5">
+                                       Text="+" 
+                                       Foreground="{DynamicResource TextTertiaryBrush}" 
+                                       FontSize="25"
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"
+                                       RenderTransformOrigin="0.5,0.5">
                                 <TextBlock.RenderTransform>
                                     <RotateTransform Angle="0"/>
                                 </TextBlock.RenderTransform>
@@ -47,8 +47,8 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="Arrow" 
-                                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                           To="90" Duration="0:0:0.15"/>
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             To="90" Duration="0:0:0.15"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.EnterActions>
@@ -56,8 +56,8 @@
                                     <BeginStoryboard>
                                         <Storyboard>
                                             <DoubleAnimation Storyboard.TargetName="Arrow" 
-                                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                                           To="0" Duration="0:0:0.15"/>
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             To="0" Duration="0:0:0.15"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </Trigger.ExitActions>
@@ -81,20 +81,18 @@
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
                         <Grid>
                             <Border Background="{DynamicResource SecondaryBackgroundBrush}" 
-                            CornerRadius="4"
-                            Margin="4">
-                                <!-- Do NOT hardcode IsDirectionReversed here -->
+                                    CornerRadius="4"
+                                    Margin="4">
                                 <Track x:Name="PART_Track"
-                               Orientation="{TemplateBinding Orientation}"
-                               Minimum="{TemplateBinding Minimum}"
-                               Maximum="{TemplateBinding Maximum}"
-                               Value="{TemplateBinding Value}"
-                               ViewportSize="{TemplateBinding ViewportSize}">
+                                       Orientation="{TemplateBinding Orientation}"
+                                       Minimum="{TemplateBinding Minimum}"
+                                       Maximum="{TemplateBinding Maximum}"
+                                       Value="{TemplateBinding Value}"
+                                       ViewportSize="{TemplateBinding ViewportSize}">
                                     <Track.Thumb>
                                         <Thumb>
                                             <Thumb.Style>
                                                 <Style TargetType="{x:Type Thumb}">
-                                                    <!-- larger, easier to grab -->
                                                     <Setter Property="MinWidth" Value="14"/>
                                                     <Setter Property="MinHeight" Value="14"/>
                                                     <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
@@ -103,9 +101,9 @@
                                                         <Setter.Value>
                                                             <ControlTemplate TargetType="{x:Type Thumb}">
                                                                 <Border Background="{TemplateBinding Background}"
-                                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                                BorderThickness="0"
-                                                                CornerRadius="4"/>
+                                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                                        BorderThickness="0"
+                                                                        CornerRadius="4"/>
                                                             </ControlTemplate>
                                                         </Setter.Value>
                                                     </Setter>
@@ -223,34 +221,28 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid>
+    <!-- =========================
+         LAYOUT: Sticky header + scrollable body
+         ========================= -->
+    <Grid Grid.IsSharedSizeScope="True" Margin="0">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- sticky header -->
             <RowDefinition Height="*"/>
-            <!-- ❌ removed extra bottom horizontal scrollbar row -->
+            <!-- scrollable body -->
         </Grid.RowDefinitions>
 
-        <!-- 📋 MAIN CONTENT (Header + Body in one ScrollViewer) -->
-        <ScrollViewer Grid.Row="0"
-                      x:Name="MainScrollViewer"
-                      Margin="0"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Auto"
-                      ScrollChanged="MainScrollViewer_ScrollChanged"
-                      Style="{StaticResource ModernScrollViewer}"
-                      FlowDirection="LeftToRight">
-            <!-- Shared sizing scope ensures header & body grids share identical column widths -->
-            <Grid MinWidth="2000" Margin="10,5,24,24" Grid.IsSharedSizeScope="True">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <!-- 📊 TABLE HEADER -->
-                <Border Grid.Row="0"
-                        Background="{DynamicResource SecondaryBackgroundBrush}"
-                        BorderThickness="0,0,0,1"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        Padding="24,8">
+        <!-- 📊 TABLE HEADER (STICKY) -->
+        <!-- Wrap header in a horizontal-only ScrollViewer so we can sync H-offset in code-behind -->
+        <Border Grid.Row="0"
+        Background="{DynamicResource SecondaryBackgroundBrush}"
+        BorderThickness="0,0,0,1"
+        BorderBrush="{DynamicResource BorderBrush}">
+            <ScrollViewer x:Name="HeaderScrollViewer"
+                  HorizontalScrollBarVisibility="Hidden"
+                  VerticalScrollBarVisibility="Disabled">
+                <!-- ✅ Padding belongs on Border, not Grid -->
+                <Border Padding="24,8">
                     <Grid MinWidth="2000">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="32"  SharedSizeGroup="cActive"/>
@@ -273,498 +265,528 @@
                             <ColumnDefinition Width="120" SharedSizeGroup="cActions"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0"  Text="✓"                    FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" ToolTip="Active"/>
-                        <TextBlock Grid.Column="3"  Text="TEST ID"              FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="4"  Text="TEST NAME"            FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="5"  Text="LAST RUNNING"         FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="6"  Text="LAST TIME PASSED"     FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="7"  Text="STATUS"               FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="8"  Text="BUGS"                 FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="9"  Text="RECIPIENTS EMAIL"     FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="10" Text="EXCEPTION MESSAGE"    FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="11" Text="SEND EMAIL"           FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="12" Text="EXIT ON FAILURE"      FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="13" Text="RUN AGAIN TIMES"      FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="14" Text="SNAPSHOT MULTIPLE"    FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="15" Text="EMAIL ON FAIL ONLY"   FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="16" Text="DISABLE KILL DRIVER"  FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="17" Text="ACTIONS"              FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <!-- Explicit Foreground so text is visible -->
+                        <TextBlock Grid.Column="0"  Text="✓"                    FontSize="14" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" ToolTip="Active"/>
+                        <TextBlock Grid.Column="3"  Text="TEST ID"              FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="4"  Text="TEST NAME"            FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="5"  Text="LAST RUNNING"         FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="6"  Text="LAST TIME PASSED"     FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="7"  Text="STATUS"               FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="8"  Text="BUGS"                 FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="9"  Text="RECIPIENTS EMAIL"     FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="10" Text="EXCEPTION MESSAGE"    FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="11" Text="SEND EMAIL"           FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="12" Text="EXIT ON FAILURE"      FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="13" Text="RUN AGAIN TIMES"      FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="14" Text="SNAPSHOT MULTIPLE"    FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="15" Text="EMAIL ON FAIL ONLY"   FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="16" Text="DISABLE KILL DRIVER"  FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="17" Text="ACTIONS"              FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
                     </Grid>
                 </Border>
+            </ScrollViewer>
+        </Border>
 
-                <!-- 📋 TABLE BODY -->
-                <ItemsControl Grid.Row="1" x:Name="TestsItemsControl" Margin="0,0,0,0">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background="{DynamicResource CardBackgroundBrush}"
-                               BorderBrush="{DynamicResource BorderBrush}"
-                               BorderThickness="1"
-                               CornerRadius="8"
-                               Margin="0,0,0,6"
-                               Padding="0">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
 
-                                    <!-- 🧪 TEST ROW -->
-                                    <Border Grid.Row="0" 
-                                       Padding="24,5"
-                                       Background="Transparent"
-                                       CornerRadius="8,8,0,0">
-                                        <Grid MinWidth="2000">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cActive"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cStatusDot"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cExpand"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cTestID"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cTestName"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cLastRunning"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cLastTimePass"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cRunStatus"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cBugs"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cRecipients"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cExceptionMessage"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cSendEmailReport"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cExitOnFailure"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cRunAgainTimes"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cSnapshotMultiple"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cEmailOnFailOnly"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cDisableKillDriver"/>
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cActions"/>
-                                            </Grid.ColumnDefinitions>
 
-                                            <!-- Checkbox -->
-                                            <CheckBox Grid.Column="0"
-                                                IsChecked="{Binding IsActive, Mode=TwoWay}"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Center"/>
+        <!-- 📋 TABLE BODY (SCROLLABLE) -->
+        <ScrollViewer Grid.Row="1"
+                      x:Name="MainScrollViewer"
+                      Margin="0"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto"
+                      ScrollChanged="MainScrollViewer_ScrollChanged"
+                      PreviewMouseDown="MainScrollViewer_PreviewMouseDown"
+                      PreviewMouseMove="MainScrollViewer_PreviewMouseMove"
+                      PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
+                      MouseLeave="MainScrollViewer_MouseLeave"
+                      Style="{StaticResource ModernScrollViewer}"
+                      FlowDirection="LeftToRight">
+            <ItemsControl Grid.Row="1" x:Name="TestsItemsControl" Margin="10,5,24,24">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Margin="0,0,0,6"
+                                Padding="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                            <!-- Status Indicator (Colored Circle) -->
-                                            <Ellipse Grid.Column="1"
-                                               Width="10" 
-                                               Height="10"
-                                               Fill="{Binding RunStatus, Converter={StaticResource RunStatusToColorConverter}}"
-                                               VerticalAlignment="Center"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,6,0"
-                                               ToolTip="{Binding RunStatus}"/>
+                                <!-- 🧪 TEST ROW -->
+                                <Border Grid.Row="0" 
+                                        Padding="24,5"
+                                        Background="Transparent"
+                                        CornerRadius="8,8,0,0">
+                                    <Grid MinWidth="2000">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cActive"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cStatusDot"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cExpand"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cTestID"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cTestName"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cLastRunning"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cLastTimePass"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cRunStatus"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cBugs"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cRecipients"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cExceptionMessage"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cSendEmailReport"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cExitOnFailure"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cRunAgainTimes"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cSnapshotMultiple"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cEmailOnFailOnly"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cDisableKillDriver"/>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="cActions"/>
+                                        </Grid.ColumnDefinitions>
 
-                                            <!-- Expand Toggle -->
-                                            <ToggleButton Grid.Column="2" 
-                                                    Style="{StaticResource ExpandToggle}"
-                                                    IsChecked="{Binding IsExpanded, Mode=TwoWay}"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Center"
-                                                    Margin="0,0,-10,4"/>
-
-                                            <!-- TestID -->
-                                            <TextBlock Grid.Column="3" 
-                                                 Text="{Binding TestID}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"/>
-
-                                            <!-- TestName -->
-                                            <TextBlock Grid.Column="4" 
-                                                 Text="{Binding TestName}" 
-                                                 Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                 FontSize="13" 
-                                                 FontWeight="SemiBold"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Left"
-                                                 TextAlignment="Left"
-                                                 TextWrapping="Wrap"
-                                                 ToolTip="{Binding TestName}"/>
-
-                                            <!-- LastRunning -->
-                                            <TextBlock Grid.Column="5" 
-                                                 Text="{Binding LastRunning}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 TextWrapping="Wrap"
-                                                 ToolTip="{Binding LastRunning}"/>
-
-                                            <!-- LastTimePass -->
-                                            <TextBlock Grid.Column="6" 
-                                                 Text="{Binding LastTimePass}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextWrapping="Wrap"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding LastTimePass}"/>
-
-                                            <!-- RunStatus -->
-                                            <Border Grid.Column="7"
-                                              Background="{DynamicResource SecondaryBackgroundBrush}"
-                                              BorderBrush="{DynamicResource BorderBrush}"
-                                              BorderThickness="1"
-                                              CornerRadius="4"
-                                              Padding="8,4"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding RunStatus}" 
-                                                     Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                     FontSize="11" 
-                                                     FontWeight="SemiBold"
-                                                     HorizontalAlignment="Center"
-                                                     TextAlignment="Center"/>
-                                            </Border>
-
-                                            <!-- Bugs -->
-                                            <TextBlock Grid.Column="8" 
-                                                 Text="{Binding Bugs}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding Bugs}"/>
-
-                                            <!-- RecipientsEmailsList -->
-                                            <TextBlock Grid.Column="9" 
-                                                 Text="{Binding RecipientsEmailsList}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 TextWrapping="Wrap"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding RecipientsEmailsList}"/>
-
-                                            <!-- ExceptionMessage -->
-                                            <TextBlock Grid.Column="10" 
-                                                 Text="{Binding ExceptionMessage}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding ExceptionMessage}"/>
-
-                                            <!-- SendEmailReport -->
-                                            <TextBlock Grid.Column="11" 
-                                                 Text="{Binding SendEmailReport}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding SendEmailReport}"/>
-
-                                            <!-- ExitTestOnFailure -->
-                                            <TextBlock Grid.Column="12" 
-                                                 Text="{Binding ExitTestOnFailure}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding ExitTestOnFailure}"/>
-
-                                            <!-- TestRunAgainTimes -->
-                                            <TextBlock Grid.Column="13" 
-                                                 Text="{Binding TestRunAgainTimes}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding TestRunAgainTimes}"/>
-
-                                            <!-- SnapshotMultipleFailure -->
-                                            <TextBlock Grid.Column="14" 
-                                                 Text="{Binding SnapshotMultipleFailure}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding SnapshotMultipleFailure}"/>
-
-                                            <!-- EmailOnFailureOnly -->
-                                            <TextBlock Grid.Column="15" 
-                                                 Text="{Binding EmailOnFailureOnly}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding EmailOnFailureOnly}"/>
-
-                                            <!-- DisableKillDriver -->
-                                            <TextBlock Grid.Column="16" 
-                                                 Text="{Binding DisableKillDriver}" 
-                                                 Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                 FontSize="12"
-                                                 VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"
-                                                 TextAlignment="Center"
-                                                 TextTrimming="CharacterEllipsis"
-                                                 ToolTip="{Binding DisableKillDriver}"/>
-
-                                            <!-- Actions -->
-                                            <StackPanel Grid.Column="17" 
-                                                  Orientation="Horizontal"
+                                        <!-- Checkbox -->
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding IsActive, Mode=TwoWay}"
                                                   VerticalAlignment="Center"
-                                                  HorizontalAlignment="Center">
-                                                <Button Style="{StaticResource IconButton}" 
-                                                  Width="28" 
-                                                  Height="28"
-                                                  ToolTip="Edit"
-                                                  Tag="{Binding}"
-                                                  Click="EditTest_Click"
-                                                  Margin="2,0">
-                                                    <TextBlock Text="✏️" FontSize="12"/>
-                                                </Button>
-                                                <Button Style="{StaticResource IconButton}" 
-                                                  Width="28" 
-                                                  Height="28"
-                                                  ToolTip="Run Test"
-                                                  Tag="{Binding}"
-                                                  Click="RunTest_Click"
-                                                  Margin="2,0">
-                                                    <TextBlock Text="▶️" FontSize="12"/>
-                                                </Button>
-                                                <Button Style="{StaticResource IconButton}" 
-                                                  Width="28" 
-                                                  Height="28"
-                                                  ToolTip="Delete"
-                                                  Tag="{Binding}"
-                                                  Click="DeleteTest_Click"
-                                                  Margin="2,0">
-                                                    <TextBlock Text="🗑️" FontSize="12"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
+                                                  HorizontalAlignment="Center"/>
 
-                                    <!-- 🔧 PROCESSES (Nested) -->
-                                    <Border Grid.Row="1" 
-                                       Padding="24,0,24,16"
-                                       Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <ItemsControl ItemsSource="{Binding Processes}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                                                       BorderBrush="{DynamicResource BorderBrush}"
-                                                       BorderThickness="1"
-                                                       CornerRadius="6"
-                                                       Padding="16,12"
-                                                       Margin="42,0,0,8">
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                            </Grid.RowDefinitions>
+                                        <!-- Status Indicator (Colored Circle) -->
+                                        <Ellipse Grid.Column="1"
+                                                 Width="10" 
+                                                 Height="10"
+                                                 Fill="{Binding RunStatus, Converter={StaticResource RunStatusToColorConverter}}"
+                                                 VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,0,6,0"
+                                                 ToolTip="{Binding RunStatus}"/>
 
-                                                            <!-- Process Row -->
-                                                            <Border Grid.Row="0" 
-                                                               Background="Transparent" 
-                                                               Padding="0">
-                                                                <Grid>
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="24"/>
-                                                                        <ColumnDefinition Width="50"/>
-                                                                        <ColumnDefinition Width="300"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="120"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                    </Grid.ColumnDefinitions>
+                                        <!-- Expand Toggle -->
+                                        <ToggleButton Grid.Column="2" 
+                                                      Style="{StaticResource ExpandToggle}"
+                                                      IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"
+                                                      Margin="0,0,-10,4"/>
 
-                                                                    <!-- Expand Toggle -->
-                                                                    <ToggleButton Grid.Column="0" 
-                                                                            Style="{StaticResource ExpandToggle}"
-                                                                            IsChecked="{Binding IsExpanded, Mode=TwoWay}"
-                                                                            Width="20" Height="20"
-                                                                            VerticalAlignment="Center"
-                                                                            HorizontalAlignment="Center"/>
+                                        <!-- TestID -->
+                                        <TextBlock Grid.Column="3" 
+                                                   Text="{Binding TestID}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"/>
 
-                                                                    <!-- Process Icon -->
-                                                                    <Border Grid.Column="1"
-                                                                       Width="28" Height="28"
-                                                                       Background="{DynamicResource PrimaryBlueBrush}"
-                                                                       CornerRadius="6"
-                                                                       VerticalAlignment="Center"
-                                                                       HorizontalAlignment="Center"
-                                                                       Margin="0,0,10,0">
-                                                                        <TextBlock Text="⚙️" 
-                                                                             FontSize="14"
-                                                                             HorizontalAlignment="Center" 
-                                                                             VerticalAlignment="Center"/>
-                                                                    </Border>
+                                        <!-- TestName -->
+                                        <TextBlock Grid.Column="4" 
+                                                   Text="{Binding TestName}" 
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" 
+                                                   FontSize="13" 
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Left"
+                                                   TextAlignment="Left"
+                                                   TextWrapping="Wrap"
+                                                   ToolTip="{Binding TestName}"/>
 
-                                                                    <!-- Process Name -->
-                                                                    <TextBlock Grid.Column="2" 
-                                                                         Text="{Binding ProcessName}" 
-                                                                         Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                                         FontSize="13" 
-                                                                         FontWeight="SemiBold"
-                                                                         VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center"
-                                                                         TextAlignment="Center"
-                                                                         TextTrimming="CharacterEllipsis"
-                                                                         ToolTip="{Binding ProcessName}"/>
+                                        <!-- LastRunning -->
+                                        <TextBlock Grid.Column="5" 
+                                                   Text="{Binding LastRunning}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   TextWrapping="Wrap"
+                                                   ToolTip="{Binding LastRunning}"/>
 
-                                                                    <!-- Description -->
-                                                                    <TextBlock Grid.Column="3" 
-                                                                         Text="{Binding Comments}" 
-                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                                         FontSize="11" 
-                                                                         FontStyle="Italic"
-                                                                         VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center"
-                                                                         TextAlignment="Center"
-                                                                         TextTrimming="CharacterEllipsis"
-                                                                         ToolTip="{Binding Comments}"
-                                                                         Margin="0,0,10,0"/>
+                                        <!-- LastTimePass -->
+                                        <TextBlock Grid.Column="6" 
+                                                   Text="{Binding LastTimePass}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextWrapping="Wrap"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding LastTimePass}"/>
 
-                                                                    <!-- Sequence Badge -->
-                                                                    <Border Grid.Column="4"
-                                                                       Background="{DynamicResource CardBackgroundBrush}"
-                                                                       BorderBrush="{DynamicResource BorderBrush}"
-                                                                       BorderThickness="1"
-                                                                       CornerRadius="4" 
-                                                                       Padding="8,4"
-                                                                       VerticalAlignment="Center"
-                                                                       HorizontalAlignment="Center"
-                                                                       Margin="0,0,10,0">
-                                                                        <TextBlock Text="{Binding ProcessPosition, StringFormat='Seq: {0}'}" 
-                                                                             Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                                             FontSize="10" 
-                                                                             FontWeight="SemiBold"
-                                                                             HorizontalAlignment="Center"
-                                                                             TextAlignment="Center"/>
-                                                                    </Border>
+                                        <!-- RunStatus -->
+                                        <Border Grid.Column="7"
+                                                Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="4"
+                                                Padding="8,4"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding RunStatus}" 
+                                                       Foreground="{DynamicResource TextPrimaryBrush}" 
+                                                       FontSize="11" 
+                                                       FontWeight="SemiBold"
+                                                       HorizontalAlignment="Center"
+                                                       TextAlignment="Center"/>
+                                        </Border>
 
-                                                                    <!-- Actions -->
-                                                                    <StackPanel Grid.Column="5" 
-                                                                          Orientation="Horizontal"
-                                                                          HorizontalAlignment="Center">
-                                                                        <Button Style="{StaticResource IconButton}" 
-                                                                          Width="26" Height="26"
-                                                                          ToolTip="Edit" 
-                                                                          Margin="2,0">
-                                                                            <TextBlock Text="✏️" FontSize="11"/>
-                                                                        </Button>
-                                                                        <Button Style="{StaticResource IconButton}" 
-                                                                          Width="26" Height="26"
-                                                                          ToolTip="Delete" 
-                                                                          Margin="2,0">
-                                                                            <TextBlock Text="🗑️" FontSize="11"/>
-                                                                        </Button>
-                                                                    </StackPanel>
-                                                                </Grid>
-                                                            </Border>
+                                        <!-- Bugs -->
+                                        <TextBlock Grid.Column="8" 
+                                                   Text="{Binding Bugs}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding Bugs}"/>
 
-                                                            <!-- ⚡ FUNCTIONS (Nested) -->
-                                                            <Border Grid.Row="1" Margin="42,6,0,0"
-                                                              Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                                <ItemsControl ItemsSource="{Binding Functions}">
-                                                                    <ItemsControl.ItemTemplate>
-                                                                        <DataTemplate>
-                                                                            <Border Background="{DynamicResource CardBackgroundBrush}"
-                                                                               BorderBrush="{DynamicResource BorderBrush}"
-                                                                               BorderThickness="1"
-                                                                               CornerRadius="4"
-                                                                               Padding="10,6"
-                                                                               Margin="0,0,0,4">
-                                                                                <Grid>
-                                                                                    <Grid.ColumnDefinitions>
-                                                                                        <ColumnDefinition Width="24"/>
-                                                                                        <ColumnDefinition Width="200"/>
-                                                                                        <ColumnDefinition Width="*"/>
-                                                                                        <ColumnDefinition Width="160"/>
-                                                                                    </Grid.ColumnDefinitions>
+                                        <!-- RecipientsEmailsList -->
+                                        <TextBlock Grid.Column="9" 
+                                                   Text="{Binding RecipientsEmailsList}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding RecipientsEmailsList}"/>
 
-                                                                                    <!-- Icon -->
-                                                                                    <Border Grid.Column="0"
-                                                                                      Width="18" Height="18"
-                                                                                      Background="{DynamicResource PrimaryBlueBrush}"
-                                                                                      CornerRadius="4"
-                                                                                      Margin="0,0,8,0">
-                                                                                        <TextBlock Text="ƒ" 
-                                                                                             Foreground="White" 
-                                                                                             FontWeight="Bold" 
-                                                                                             FontSize="10"
-                                                                                             HorizontalAlignment="Center" 
-                                                                                             VerticalAlignment="Center"/>
-                                                                                    </Border>
+                                        <!-- ExceptionMessage -->
+                                        <TextBlock Grid.Column="10" 
+                                                   Text="{Binding ExceptionMessage}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding ExceptionMessage}"/>
 
-                                                                                    <!-- Function Name -->
-                                                                                    <TextBlock Grid.Column="1" 
-                                                                                         Text="{Binding FunctionName}" 
-                                                                                         Foreground="{DynamicResource PrimaryBlueBrush}" 
-                                                                                         FontFamily="Consolas" 
-                                                                                         FontSize="11" 
-                                                                                         FontWeight="Medium"
-                                                                                         VerticalAlignment="Center"
-                                                                                         HorizontalAlignment="Center"
-                                                                                         TextAlignment="Center"
-                                                                                         Margin="0,0,10,0"
-                                                                                         TextTrimming="CharacterEllipsis"
-                                                                                         ToolTip="{Binding FunctionName}"/>
+                                        <!-- SendEmailReport -->
+                                        <TextBlock Grid.Column="11" 
+                                                   Text="{Binding SendEmailReport}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding SendEmailReport}"/>
 
-                                                                                    <!-- Description -->
-                                                                                    <TextBlock Grid.Column="2" 
-                                                                                         Text="{Binding FunctionDescription}" 
-                                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                                                         FontSize="10"
-                                                                                         VerticalAlignment="Center"
-                                                                                         HorizontalAlignment="Center"
-                                                                                         TextAlignment="Center"
-                                                                                         TextTrimming="CharacterEllipsis"
-                                                                                         ToolTip="{Binding FunctionDescription}"
-                                                                                         Margin="0,0,10,0"/>
+                                        <!-- ExitTestOnFailure -->
+                                        <TextBlock Grid.Column="12" 
+                                                   Text="{Binding ExitTestOnFailure}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding ExitTestOnFailure}"/>
 
-                                                                                    <!-- Position -->
-                                                                                    <TextBlock Grid.Column="3" 
-                                                                                         Text="{Binding FunctionPosition, StringFormat='Pos: {0}'}" 
-                                                                                         Foreground="{DynamicResource TextTertiaryBrush}" 
-                                                                                         FontSize="10" 
-                                                                                         FontStyle="Italic"
-                                                                                         VerticalAlignment="Center"
-                                                                                         HorizontalAlignment="Center"
-                                                                                         TextAlignment="Center"
-                                                                                         TextTrimming="CharacterEllipsis"/>
-                                                                                </Grid>
-                                                                            </Border>
-                                                                        </DataTemplate>
-                                                                    </ItemsControl.ItemTemplate>
-                                                                </ItemsControl>
-                                                            </Border>
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </Border>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Grid>
+                                        <!-- TestRunAgainTimes -->
+                                        <TextBlock Grid.Column="13" 
+                                                   Text="{Binding TestRunAgainTimes}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding TestRunAgainTimes}"/>
+
+                                        <!-- SnapshotMultipleFailure -->
+                                        <TextBlock Grid.Column="14" 
+                                                   Text="{Binding SnapshotMultipleFailure}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding SnapshotMultipleFailure}"/>
+
+                                        <!-- EmailOnFailureOnly -->
+                                        <TextBlock Grid.Column="15" 
+                                                   Text="{Binding EmailOnFailureOnly}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding EmailOnFailureOnly}"/>
+
+                                        <!-- DisableKillDriver -->
+                                        <TextBlock Grid.Column="16" 
+                                                   Text="{Binding DisableKillDriver}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding DisableKillDriver}"/>
+
+                                        <!-- Actions -->
+                                        <StackPanel Grid.Column="17" 
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center">
+                                            <Button Style="{StaticResource IconButton}" 
+                                                    Width="28" 
+                                                    Height="28"
+                                                    ToolTip="Edit"
+                                                    Tag="{Binding}"
+                                                    Click="EditTest_Click"
+                                                    Margin="2,0">
+                                                <TextBlock Text="✏️" FontSize="12"/>
+                                            </Button>
+                                            <Button Style="{StaticResource IconButton}" 
+                                                    Width="28" 
+                                                    Height="28"
+                                                    ToolTip="Run Test"
+                                                    Tag="{Binding}"
+                                                    Click="RunTest_Click"
+                                                    Margin="2,0">
+                                                <TextBlock Text="▶️" FontSize="12"/>
+                                            </Button>
+                                            <Button Style="{StaticResource IconButton}" 
+                                                    Width="28" 
+                                                    Height="28"
+                                                    ToolTip="Delete"
+                                                    Tag="{Binding}"
+                                                    Click="DeleteTest_Click"
+                                                    Margin="2,0">
+                                                <TextBlock Text="🗑️" FontSize="12"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- 🔧 PROCESSES (Nested) -->
+                                <Border Grid.Row="1" 
+                                        Padding="24,0,24,16"
+                                        Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ItemsControl ItemsSource="{Binding Processes}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource BorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6"
+                                                        Padding="16,12"
+                                                        Margin="42,0,0,8">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <!-- Process Row -->
+                                                        <Border Grid.Row="0" 
+                                                                Background="Transparent" 
+                                                                Padding="0">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="24"/>
+                                                                    <ColumnDefinition Width="50"/>
+                                                                    <ColumnDefinition Width="300"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="120"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <!-- Expand Toggle -->
+                                                                <ToggleButton Grid.Column="0" 
+                                                                              Style="{StaticResource ExpandToggle}"
+                                                                              IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                                              Width="20" Height="20"
+                                                                              VerticalAlignment="Center"
+                                                                              HorizontalAlignment="Center"/>
+
+                                                                <!-- Process Icon -->
+                                                                <Border Grid.Column="1"
+                                                                        Width="28" Height="28"
+                                                                        Background="{DynamicResource PrimaryBlueBrush}"
+                                                                        CornerRadius="6"
+                                                                        VerticalAlignment="Center"
+                                                                        HorizontalAlignment="Center"
+                                                                        Margin="0,0,10,0">
+                                                                    <TextBlock Text="⚙️" 
+                                                                               FontSize="14"
+                                                                               HorizontalAlignment="Center" 
+                                                                               VerticalAlignment="Center"/>
+                                                                </Border>
+
+                                                                <!-- Process Name -->
+                                                                <TextBlock Grid.Column="2" 
+                                                                           Text="{Binding ProcessName}" 
+                                                                           Foreground="{DynamicResource TextPrimaryBrush}" 
+                                                                           FontSize="13" 
+                                                                           FontWeight="SemiBold"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Center"
+                                                                           TextAlignment="Center"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           ToolTip="{Binding ProcessName}"/>
+
+                                                                <!-- Description -->
+                                                                <TextBlock Grid.Column="3" 
+                                                                           Text="{Binding Comments}" 
+                                                                           Foreground="{DynamicResource TextTertiaryBrush}" 
+                                                                           FontSize="11" 
+                                                                           FontStyle="Italic"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Center"
+                                                                           TextAlignment="Center"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           ToolTip="{Binding Comments}"
+                                                                           Margin="0,0,10,0"/>
+
+                                                                <!-- Sequence Badge -->
+                                                                <Border Grid.Column="4"
+                                                                        Background="{DynamicResource CardBackgroundBrush}"
+                                                                        BorderBrush="{DynamicResource BorderBrush}"
+                                                                        BorderThickness="1"
+                                                                        CornerRadius="4" 
+                                                                        Padding="8,4"
+                                                                        VerticalAlignment="Center"
+                                                                        HorizontalAlignment="Center"
+                                                                        Margin="0,0,10,0">
+                                                                    <TextBlock Text="{Binding ProcessPosition, StringFormat='Seq: {0}'}" 
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}" 
+                                                                               FontSize="10" 
+                                                                               FontWeight="SemiBold"
+                                                                               HorizontalAlignment="Center"
+                                                                               TextAlignment="Center"/>
+                                                                </Border>
+
+                                                                <!-- Actions -->
+                                                                <StackPanel Grid.Column="5" 
+                                                                            Orientation="Horizontal"
+                                                                            HorizontalAlignment="Center">
+                                                                    <Button Style="{StaticResource IconButton}" 
+                                                                            Width="26" Height="26"
+                                                                            ToolTip="Edit" 
+                                                                            Margin="2,0">
+                                                                        <TextBlock Text="✏️" FontSize="11"/>
+                                                                    </Button>
+                                                                    <Button Style="{StaticResource IconButton}" 
+                                                                            Width="26" Height="26"
+                                                                            ToolTip="Delete" 
+                                                                            Margin="2,0">
+                                                                        <TextBlock Text="🗑️" FontSize="11"/>
+                                                                    </Button>
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Border>
+
+                                                        <!-- ⚡ FUNCTIONS (Nested) -->
+                                                        <Border Grid.Row="1" Margin="42,6,0,0"
+                                                                Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <ItemsControl ItemsSource="{Binding Functions}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="4"
+                                                                                Padding="10,6"
+                                                                                Margin="0,0,0,4">
+                                                                            <Grid>
+                                                                                <Grid.ColumnDefinitions>
+                                                                                    <ColumnDefinition Width="24"/>
+                                                                                    <ColumnDefinition Width="200"/>
+                                                                                    <ColumnDefinition Width="*"/>
+                                                                                    <ColumnDefinition Width="160"/>
+                                                                                </Grid.ColumnDefinitions>
+
+                                                                                <!-- Icon -->
+                                                                                <Border Grid.Column="0"
+                                                                                        Width="18" Height="18"
+                                                                                        Background="{DynamicResource PrimaryBlueBrush}"
+                                                                                        CornerRadius="4"
+                                                                                        Margin="0,0,8,0">
+                                                                                    <TextBlock Text="ƒ" 
+                                                                                               Foreground="White" 
+                                                                                               FontWeight="Bold" 
+                                                                                               FontSize="10"
+                                                                                               HorizontalAlignment="Center" 
+                                                                                               VerticalAlignment="Center"/>
+                                                                                </Border>
+
+                                                                                <!-- Function Name -->
+                                                                                <TextBlock Grid.Column="1" 
+                                                                                           Text="{Binding FunctionName}" 
+                                                                                           Foreground="{DynamicResource PrimaryBlueBrush}" 
+                                                                                           FontFamily="Consolas" 
+                                                                                           FontSize="11" 
+                                                                                           FontWeight="Medium"
+                                                                                           VerticalAlignment="Center"
+                                                                                           HorizontalAlignment="Center"
+                                                                                           TextAlignment="Center"
+                                                                                           Margin="0,0,10,0"
+                                                                                           TextTrimming="CharacterEllipsis"
+                                                                                           ToolTip="{Binding FunctionName}"/>
+
+                                                                                <!-- Description -->
+                                                                                <TextBlock Grid.Column="2" 
+                                                                                           Text="{Binding FunctionDescription}" 
+                                                                                           Foreground="{DynamicResource TextTertiaryBrush}" 
+                                                                                           FontSize="10"
+                                                                                           VerticalAlignment="Center"
+                                                                                           HorizontalAlignment="Center"
+                                                                                           TextAlignment="Center"
+                                                                                           TextTrimming="CharacterEllipsis"
+                                                                                           ToolTip="{Binding FunctionDescription}"
+                                                                                           Margin="0,0,10,0"/>
+
+                                                                                <!-- Position -->
+                                                                                <TextBlock Grid.Column="3" 
+                                                                                           Text="{Binding FunctionPosition, StringFormat='Pos: {0}'}" 
+                                                                                           Foreground="{DynamicResource TextTertiaryBrush}" 
+                                                                                           FontSize="10" 
+                                                                                           FontStyle="Italic"
+                                                                                           VerticalAlignment="Center"
+                                                                                           HorizontalAlignment="Center"
+                                                                                           TextAlignment="Center"
+                                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                            </Grid>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
-
-        <!-- ❌ Removed extra bottom horizontal ScrollBar to avoid duplicates -->
     </Grid>
 </UserControl>
