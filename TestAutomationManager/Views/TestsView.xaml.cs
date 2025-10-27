@@ -481,5 +481,6 @@ namespace TestAutomationManager.Views
                 }
             }, System.Windows.Threading.DispatcherPriority.Background);
         }
+
     }
 }

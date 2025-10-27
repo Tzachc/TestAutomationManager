@@ -32,7 +32,7 @@
                             <TextBlock x:Name="Arrow" 
                                      Text="+" 
                                      Foreground="{DynamicResource TextTertiaryBrush}" 
-                                     FontSize="18"
+                                     FontSize="25"
                                      HorizontalAlignment="Center" 
                                      VerticalAlignment="Center"
                                      RenderTransformOrigin="0.5,0.5">
@@ -72,7 +72,7 @@
             </Setter>
         </Style>
 
-        <!-- 🎨 MODERN SCROLLBAR STYLE -->
+        <!-- 🎨 MODERN SCROLLBAR STYLE (correct directions + bigger thumb) -->
         <Style x:Key="ModernScrollBar" TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -80,32 +80,32 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
                         <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Track -->
                             <Border Background="{DynamicResource SecondaryBackgroundBrush}" 
-                                    CornerRadius="4"
-                                    Margin="4,0">
-                                <Track x:Name="PART_Track" 
-                                       IsDirectionReversed="True"
-                                       Grid.Row="0">
+                            CornerRadius="4"
+                            Margin="4">
+                                <!-- Do NOT hardcode IsDirectionReversed here -->
+                                <Track x:Name="PART_Track"
+                               Orientation="{TemplateBinding Orientation}"
+                               Minimum="{TemplateBinding Minimum}"
+                               Maximum="{TemplateBinding Maximum}"
+                               Value="{TemplateBinding Value}"
+                               ViewportSize="{TemplateBinding ViewportSize}">
                                     <Track.Thumb>
                                         <Thumb>
                                             <Thumb.Style>
                                                 <Style TargetType="{x:Type Thumb}">
+                                                    <!-- larger, easier to grab -->
+                                                    <Setter Property="MinWidth" Value="14"/>
+                                                    <Setter Property="MinHeight" Value="14"/>
                                                     <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
                                                     <Setter Property="BorderBrush" Value="Transparent"/>
                                                     <Setter Property="Template">
                                                         <Setter.Value>
                                                             <ControlTemplate TargetType="{x:Type Thumb}">
                                                                 <Border Background="{TemplateBinding Background}"
-                                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                                        BorderThickness="0"
-                                                                        CornerRadius="4"
-                                                                        Height="8">
-                                                                </Border>
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="0"
+                                                                CornerRadius="4"/>
                                                             </ControlTemplate>
                                                         </Setter.Value>
                                                     </Setter>
@@ -124,15 +124,24 @@
                                 </Track>
                             </Border>
                         </Grid>
+
+                        <!-- 🔁 Direction & size per orientation -->
+                        <ControlTemplate.Triggers>
+                            <!-- Vertical: reversed so value increases when moving DOWN -->
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
+                                <Setter Property="Width" Value="14"/>
+                            </Trigger>
+
+                            <!-- Horizontal: natural (left->right increases) -->
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
+                                <Setter Property="Height" Value="14"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <Trigger Property="Orientation" Value="Vertical">
-                    <Setter Property="Width" Value="12"/>
-                    <Setter Property="Height" Value="Auto"/>
-                </Trigger>
-            </Style.Triggers>
         </Style>
 
         <!-- Modern ScrollViewer Style (Vertical Only) -->
@@ -150,22 +159,22 @@
 
                             <!-- Vertical ScrollBar Only -->
                             <ScrollBar x:Name="PART_VerticalScrollBar"
-                                      Style="{StaticResource ModernScrollBar}"
-                                      Orientation="Vertical"
-                                      Grid.Column="1"
-                                      Width="12"
-                                      Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                                      Value="{TemplateBinding VerticalOffset}"
-                                      Maximum="{TemplateBinding ScrollableHeight}"
-                                      ViewportSize="{TemplateBinding ViewportHeight}"
-                                      Margin="4,0,0,0"/>
+                                       Style="{StaticResource ModernScrollBar}"
+                                       Orientation="Vertical"
+                                       Grid.Column="1"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                       Value="{TemplateBinding VerticalOffset}"
+                                       Minimum="0"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Margin="4,0,0,0"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- Modern ScrollViewer Style -->
+        <!-- Modern ScrollViewer Style (Horizontal + Vertical) -->
         <Style x:Key="ModernScrollViewer" TargetType="{x:Type ScrollViewer}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -184,29 +193,29 @@
 
                             <!-- Horizontal ScrollBar -->
                             <ScrollBar x:Name="PART_HorizontalScrollBar"
-                                      Style="{StaticResource ModernScrollBar}"
-                                      Orientation="Horizontal"
-                                      Grid.Row="1"
-                                      Grid.Column="0"
-                                      Height="12"
-                                      Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
-                                      Value="{TemplateBinding HorizontalOffset}"
-                                      Maximum="{TemplateBinding ScrollableWidth}"
-                                      ViewportSize="{TemplateBinding ViewportWidth}"
-                                      Margin="0,4,0,0"/>
+                                       Style="{StaticResource ModernScrollBar}"
+                                       Orientation="Horizontal"
+                                       Grid.Row="1"
+                                       Grid.Column="0"
+                                       Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
+                                       Value="{TemplateBinding HorizontalOffset}"
+                                       Minimum="0"
+                                       Maximum="{TemplateBinding ScrollableWidth}"
+                                       ViewportSize="{TemplateBinding ViewportWidth}"
+                                       Margin="0,4,0,0"/>
 
                             <!-- Vertical ScrollBar -->
                             <ScrollBar x:Name="PART_VerticalScrollBar"
-                                      Style="{StaticResource ModernScrollBar}"
-                                      Orientation="Vertical"
-                                      Grid.Row="0"
-                                      Grid.Column="1"
-                                      Width="12"
-                                      Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                                      Value="{TemplateBinding VerticalOffset}"
-                                      Maximum="{TemplateBinding ScrollableHeight}"
-                                      ViewportSize="{TemplateBinding ViewportHeight}"
-                                      Margin="4,0,0,0"/>
+                                       Style="{StaticResource ModernScrollBar}"
+                                       Orientation="Vertical"
+                                       Grid.Row="0"
+                                       Grid.Column="1"
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                       Value="{TemplateBinding VerticalOffset}"
+                                       Minimum="0"
+                                       Maximum="{TemplateBinding ScrollableHeight}"
+                                       ViewportSize="{TemplateBinding ViewportHeight}"
+                                       Margin="4,0,0,0"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
@@ -217,7 +226,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <!-- ❌ removed extra bottom horizontal scrollbar row -->
         </Grid.RowDefinitions>
 
         <!-- 📋 MAIN CONTENT (Header + Body in one ScrollViewer) -->
@@ -226,8 +235,11 @@
                       Margin="0"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
-                      ScrollChanged="MainScrollViewer_ScrollChanged">
-            <Grid MinWidth="2000" Margin="20,10,24,24">
+                      ScrollChanged="MainScrollViewer_ScrollChanged"
+                      Style="{StaticResource ModernScrollViewer}"
+                      FlowDirection="LeftToRight">
+            <!-- Shared sizing scope ensures header & body grids share identical column widths -->
+            <Grid MinWidth="2000" Margin="10,5,24,24" Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -238,160 +250,45 @@
                         Background="{DynamicResource SecondaryBackgroundBrush}"
                         BorderThickness="0,0,0,1"
                         BorderBrush="{DynamicResource BorderBrush}"
-                        Padding="24,12">
+                        Padding="24,8">
                     <Grid MinWidth="2000">
                         <Grid.ColumnDefinitions>
-                            <!-- Checkbox -->
-                            <ColumnDefinition Width="32"/>
-                            <!-- Status Indicator -->
-                            <ColumnDefinition Width="16"/>
-                            <!-- Expand Toggle -->
-                            <ColumnDefinition Width="20"/>
-                            <!-- TestID -->
-                            <ColumnDefinition Width="50"/>
-                            <!-- TestName - ADJUST THIS WIDTH TO CHANGE COLUMN SIZE -->
-                            <ColumnDefinition Width="500"/>
-                            <!-- LastRunning -->
-                            <ColumnDefinition Width="130"/>
-                            <!-- LastTimePassed -->
-                            <ColumnDefinition Width="130"/>
-                            <!-- RunStatus -->
-                            <ColumnDefinition Width="80"/>
-                            <!-- Bugs -->
-                            <ColumnDefinition Width="100"/>
-                            <!-- RecipientsEmailsList -->
-                            <ColumnDefinition Width="180"/>
-                            <!-- ExceptionMessage -->
-                            <ColumnDefinition Width="180"/>
-                            <!-- SendEmailReport -->
-                            <ColumnDefinition Width="120"/>
-                            <!-- ExitTestOnFailure -->
-                            <ColumnDefinition Width="120"/>
-                            <!-- TestRunAgainTimes -->
-                            <ColumnDefinition Width="130"/>
-                            <!-- SnapshotMultipleFailure -->
-                            <ColumnDefinition Width="160"/>
-                            <!-- EmailOnFailureOnly -->
-                            <ColumnDefinition Width="140"/>
-                            <!-- DisableKillDriver -->
-                            <ColumnDefinition Width="130"/>
-                            <!-- Actions -->
-                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="32"  SharedSizeGroup="cActive"/>
+                            <ColumnDefinition Width="16"  SharedSizeGroup="cStatusDot"/>
+                            <ColumnDefinition Width="20"  SharedSizeGroup="cExpand"/>
+                            <ColumnDefinition Width="50"  SharedSizeGroup="cTestID"/>
+                            <ColumnDefinition Width="500" SharedSizeGroup="cTestName"/>
+                            <ColumnDefinition Width="130" SharedSizeGroup="cLastRunning"/>
+                            <ColumnDefinition Width="130" SharedSizeGroup="cLastTimePass"/>
+                            <ColumnDefinition Width="150" SharedSizeGroup="cRunStatus"/>
+                            <ColumnDefinition Width="100" SharedSizeGroup="cBugs"/>
+                            <ColumnDefinition Width="700" SharedSizeGroup="cRecipients"/>
+                            <ColumnDefinition Width="300" SharedSizeGroup="cExceptionMessage"/>
+                            <ColumnDefinition Width="120" SharedSizeGroup="cSendEmailReport"/>
+                            <ColumnDefinition Width="120" SharedSizeGroup="cExitOnFailure"/>
+                            <ColumnDefinition Width="130" SharedSizeGroup="cRunAgainTimes"/>
+                            <ColumnDefinition Width="160" SharedSizeGroup="cSnapshotMultiple"/>
+                            <ColumnDefinition Width="140" SharedSizeGroup="cEmailOnFailOnly"/>
+                            <ColumnDefinition Width="130" SharedSizeGroup="cDisableKillDriver"/>
+                            <ColumnDefinition Width="120" SharedSizeGroup="cActions"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- ACTIVE Header -->
-                        <TextBlock Grid.Column="0" 
-                             Text="✓" 
-                             FontSize="14" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"
-                             ToolTip="Active"/>
-
-                        <TextBlock Grid.Column="3" 
-                             Text="TEST ID" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="4" 
-                             Text="TEST NAME" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="5" 
-                             Text="LAST RUNNING" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="6" 
-                             Text="LAST TIME PASSED" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="7" 
-                             Text="STATUS" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="8" 
-                             Text="BUGS" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="9" 
-                             Text="RECIPIENTS EMAIL" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="10" 
-                             Text="EXCEPTION MESSAGE" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="11" 
-                             Text="SEND EMAIL" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="12" 
-                             Text="EXIT ON FAILURE" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="13" 
-                             Text="RUN AGAIN TIMES" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="14" 
-                             Text="SNAPSHOT MULTIPLE" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="15" 
-                             Text="EMAIL ON FAIL ONLY" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="16" 
-                             Text="DISABLE KILL DRIVER" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="17" 
-                             Text="ACTIONS" 
-                             FontSize="12" 
-                             FontWeight="Bold" 
-                             Foreground="{DynamicResource TextPrimaryBrush}"
-                             HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="0"  Text="✓"                    FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" ToolTip="Active"/>
+                        <TextBlock Grid.Column="3"  Text="TEST ID"              FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="4"  Text="TEST NAME"            FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="5"  Text="LAST RUNNING"         FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="6"  Text="LAST TIME PASSED"     FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="7"  Text="STATUS"               FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="8"  Text="BUGS"                 FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="9"  Text="RECIPIENTS EMAIL"     FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="10" Text="EXCEPTION MESSAGE"    FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="11" Text="SEND EMAIL"           FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="12" Text="EXIT ON FAILURE"      FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="13" Text="RUN AGAIN TIMES"      FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="14" Text="SNAPSHOT MULTIPLE"    FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="15" Text="EMAIL ON FAIL ONLY"   FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="16" Text="DISABLE KILL DRIVER"  FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="17" Text="ACTIONS"              FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
                     </Grid>
                 </Border>
 
@@ -413,47 +310,29 @@
 
                                     <!-- 🧪 TEST ROW -->
                                     <Border Grid.Row="0" 
-                                       Padding="24,10"
+                                       Padding="24,5"
                                        Background="Transparent"
                                        CornerRadius="8,8,0,0">
                                         <Grid MinWidth="2000">
                                             <Grid.ColumnDefinitions>
-                                                <!-- Checkbox -->
-                                                <ColumnDefinition Width="32"/>
-                                                <!-- Status Indicator -->
-                                                <ColumnDefinition Width="16"/>
-                                                <!-- Expand Toggle -->
-                                                <ColumnDefinition Width="20"/>
-                                                <!-- TestID -->
-                                                <ColumnDefinition Width="50"/>
-                                                <!-- TestName - ADJUST THIS WIDTH TO CHANGE COLUMN SIZE -->
-                                                <ColumnDefinition Width="500"/>
-                                                <!-- LastRunning -->
-                                                <ColumnDefinition Width="130"/>
-                                                <!-- LastTimePassed -->
-                                                <ColumnDefinition Width="130"/>
-                                                <!-- RunStatus -->
-                                                <ColumnDefinition Width="80"/>
-                                                <!-- Bugs -->
-                                                <ColumnDefinition Width="100"/>
-                                                <!-- RecipientsEmailsList -->
-                                                <ColumnDefinition Width="180"/>
-                                                <!-- ExceptionMessage -->
-                                                <ColumnDefinition Width="180"/>
-                                                <!-- SendEmailReport -->
-                                                <ColumnDefinition Width="120"/>
-                                                <!-- ExitTestOnFailure -->
-                                                <ColumnDefinition Width="120"/>
-                                                <!-- TestRunAgainTimes -->
-                                                <ColumnDefinition Width="130"/>
-                                                <!-- SnapshotMultipleFailure -->
-                                                <ColumnDefinition Width="160"/>
-                                                <!-- EmailOnFailureOnly -->
-                                                <ColumnDefinition Width="140"/>
-                                                <!-- DisableKillDriver -->
-                                                <ColumnDefinition Width="130"/>
-                                                <!-- Actions -->
-                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cActive"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cStatusDot"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cExpand"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cTestID"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cTestName"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cLastRunning"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cLastTimePass"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cRunStatus"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cBugs"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cRecipients"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cExceptionMessage"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cSendEmailReport"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cExitOnFailure"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cRunAgainTimes"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cSnapshotMultiple"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cEmailOnFailOnly"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cDisableKillDriver"/>
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="cActions"/>
                                             </Grid.ColumnDefinitions>
 
                                             <!-- Checkbox -->
@@ -468,6 +347,7 @@
                                                Height="10"
                                                Fill="{Binding RunStatus, Converter={StaticResource RunStatusToColorConverter}}"
                                                VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"
                                                Margin="0,0,6,0"
                                                ToolTip="{Binding RunStatus}"/>
 
@@ -475,14 +355,18 @@
                                             <ToggleButton Grid.Column="2" 
                                                     Style="{StaticResource ExpandToggle}"
                                                     IsChecked="{Binding IsExpanded, Mode=TwoWay}"
-                                                    VerticalAlignment="Center"/>
+                                                    VerticalAlignment="Center"
+                                                    HorizontalAlignment="Center"
+                                                    Margin="0,0,-10,4"/>
 
                                             <!-- TestID -->
                                             <TextBlock Grid.Column="3" 
                                                  Text="{Binding TestID}" 
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
-                                                 VerticalAlignment="Center"/>
+                                                 VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"/>
 
                                             <!-- TestName -->
                                             <TextBlock Grid.Column="4" 
@@ -491,6 +375,8 @@
                                                  FontSize="13" 
                                                  FontWeight="SemiBold"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Left"
+                                                 TextAlignment="Left"
                                                  TextWrapping="Wrap"
                                                  ToolTip="{Binding TestName}"/>
 
@@ -500,7 +386,10 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
+                                                 TextWrapping="Wrap"
                                                  ToolTip="{Binding LastRunning}"/>
 
                                             <!-- LastTimePass -->
@@ -509,6 +398,9 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
+                                                 TextWrapping="Wrap"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding LastTimePass}"/>
 
@@ -519,12 +411,14 @@
                                               BorderThickness="1"
                                               CornerRadius="4"
                                               Padding="8,4"
-                                              HorizontalAlignment="Left"
+                                              HorizontalAlignment="Center"
                                               VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding RunStatus}" 
                                                      Foreground="{DynamicResource TextPrimaryBrush}" 
                                                      FontSize="11" 
-                                                     FontWeight="SemiBold"/>
+                                                     FontWeight="SemiBold"
+                                                     HorizontalAlignment="Center"
+                                                     TextAlignment="Center"/>
                                             </Border>
 
                                             <!-- Bugs -->
@@ -533,6 +427,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding Bugs}"/>
 
@@ -541,7 +437,10 @@
                                                  Text="{Binding RecipientsEmailsList}" 
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
+                                                 TextWrapping="Wrap"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding RecipientsEmailsList}"/>
 
@@ -551,6 +450,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding ExceptionMessage}"/>
 
@@ -560,6 +461,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding SendEmailReport}"/>
 
@@ -569,6 +472,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding ExitTestOnFailure}"/>
 
@@ -578,6 +483,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding TestRunAgainTimes}"/>
 
@@ -587,6 +494,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding SnapshotMultipleFailure}"/>
 
@@ -596,6 +505,8 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding EmailOnFailureOnly}"/>
 
@@ -605,13 +516,16 @@
                                                  Foreground="{DynamicResource TextSecondaryBrush}" 
                                                  FontSize="12"
                                                  VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center"
+                                                 TextAlignment="Center"
                                                  TextTrimming="CharacterEllipsis"
                                                  ToolTip="{Binding DisableKillDriver}"/>
 
                                             <!-- Actions -->
                                             <StackPanel Grid.Column="17" 
                                                   Orientation="Horizontal"
-                                                  VerticalAlignment="Center">
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Center">
                                                 <Button Style="{StaticResource IconButton}" 
                                                   Width="28" 
                                                   Height="28"
@@ -681,7 +595,8 @@
                                                                             Style="{StaticResource ExpandToggle}"
                                                                             IsChecked="{Binding IsExpanded, Mode=TwoWay}"
                                                                             Width="20" Height="20"
-                                                                            VerticalAlignment="Center"/>
+                                                                            VerticalAlignment="Center"
+                                                                            HorizontalAlignment="Center"/>
 
                                                                     <!-- Process Icon -->
                                                                     <Border Grid.Column="1"
@@ -689,6 +604,7 @@
                                                                        Background="{DynamicResource PrimaryBlueBrush}"
                                                                        CornerRadius="6"
                                                                        VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"
                                                                        Margin="0,0,10,0">
                                                                         <TextBlock Text="⚙️" 
                                                                              FontSize="14"
@@ -703,6 +619,8 @@
                                                                          FontSize="13" 
                                                                          FontWeight="SemiBold"
                                                                          VerticalAlignment="Center"
+                                                                         HorizontalAlignment="Center"
+                                                                         TextAlignment="Center"
                                                                          TextTrimming="CharacterEllipsis"
                                                                          ToolTip="{Binding ProcessName}"/>
 
@@ -713,6 +631,8 @@
                                                                          FontSize="11" 
                                                                          FontStyle="Italic"
                                                                          VerticalAlignment="Center"
+                                                                         HorizontalAlignment="Center"
+                                                                         TextAlignment="Center"
                                                                          TextTrimming="CharacterEllipsis"
                                                                          ToolTip="{Binding Comments}"
                                                                          Margin="0,0,10,0"/>
@@ -725,16 +645,20 @@
                                                                        CornerRadius="4" 
                                                                        Padding="8,4"
                                                                        VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"
                                                                        Margin="0,0,10,0">
                                                                         <TextBlock Text="{Binding ProcessPosition, StringFormat='Seq: {0}'}" 
                                                                              Foreground="{DynamicResource TextSecondaryBrush}" 
                                                                              FontSize="10" 
-                                                                             FontWeight="SemiBold"/>
+                                                                             FontWeight="SemiBold"
+                                                                             HorizontalAlignment="Center"
+                                                                             TextAlignment="Center"/>
                                                                     </Border>
 
                                                                     <!-- Actions -->
                                                                     <StackPanel Grid.Column="5" 
-                                                                          Orientation="Horizontal">
+                                                                          Orientation="Horizontal"
+                                                                          HorizontalAlignment="Center">
                                                                         <Button Style="{StaticResource IconButton}" 
                                                                           Width="26" Height="26"
                                                                           ToolTip="Edit" 
@@ -793,6 +717,8 @@
                                                                                          FontSize="11" 
                                                                                          FontWeight="Medium"
                                                                                          VerticalAlignment="Center"
+                                                                                         HorizontalAlignment="Center"
+                                                                                         TextAlignment="Center"
                                                                                          Margin="0,0,10,0"
                                                                                          TextTrimming="CharacterEllipsis"
                                                                                          ToolTip="{Binding FunctionName}"/>
@@ -803,6 +729,8 @@
                                                                                          Foreground="{DynamicResource TextTertiaryBrush}" 
                                                                                          FontSize="10"
                                                                                          VerticalAlignment="Center"
+                                                                                         HorizontalAlignment="Center"
+                                                                                         TextAlignment="Center"
                                                                                          TextTrimming="CharacterEllipsis"
                                                                                          ToolTip="{Binding FunctionDescription}"
                                                                                          Margin="0,0,10,0"/>
@@ -814,6 +742,8 @@
                                                                                          FontSize="10" 
                                                                                          FontStyle="Italic"
                                                                                          VerticalAlignment="Center"
+                                                                                         HorizontalAlignment="Center"
+                                                                                         TextAlignment="Center"
                                                                                          TextTrimming="CharacterEllipsis"/>
                                                                                 </Grid>
                                                                             </Border>
@@ -835,18 +765,6 @@
             </Grid>
         </ScrollViewer>
 
-        <!-- 🎯 HORIZONTAL SCROLLBAR (at bottom of entire view) -->
-        <ScrollBar Grid.Row="1"
-                   x:Name="HorizontalScrollBar"
-                   Style="{StaticResource ModernScrollBar}"
-                   Orientation="Horizontal"
-                   Height="16"
-                   Margin="24,4,24,16"
-                   Minimum="0"
-                   Maximum="{Binding ElementName=MainScrollViewer, Path=ScrollableWidth}"
-                   ViewportSize="{Binding ElementName=MainScrollViewer, Path=ViewportWidth}"
-                   Value="{Binding ElementName=MainScrollViewer, Path=HorizontalOffset, Mode=OneWay}"
-                   Visibility="{Binding ElementName=MainScrollViewer, Path=ComputedHorizontalScrollBarVisibility}"
-                   Scroll="HorizontalScrollBar_Scroll"/>
+        <!-- ❌ Removed extra bottom horizontal ScrollBar to avoid duplicates -->
     </Grid>
 </UserControl>
