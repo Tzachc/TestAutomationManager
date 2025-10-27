@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using TestAutomationManager.Dialogs;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
@@ -37,6 +38,26 @@ namespace TestAutomationManager.Views
         /// Current search query for re-filtering after updates
         /// </summary>
         private string _currentSearchQuery = "";
+
+        /// <summary>
+        /// Tracks whether the middle mouse button is currently panning the content
+        /// </summary>
+        private bool _isMiddleMousePanning;
+
+        /// <summary>
+        /// Mouse position when the middle mouse panning started
+        /// </summary>
+        private Point _middleMouseStartPoint;
+
+        /// <summary>
+        /// Horizontal offset captured when middle mouse panning started
+        /// </summary>
+        private double _startHorizontalOffset;
+
+        /// <summary>
+        /// Vertical offset captured when middle mouse panning started
+        /// </summary>
+        private double _startVerticalOffset;
 
         /// <summary>
         /// Event fired when data is loaded
@@ -77,8 +98,91 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void MainScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            // Update horizontal scrollbar position when content scrolls
-            // (OneWay binding handles this automatically, but we keep this for any future needs)
+            if (HeaderTranslateTransform != null)
+            {
+                HeaderTranslateTransform.Y = e.VerticalOffset;
+            }
+        }
+
+        /// <summary>
+        /// Initiate middle-mouse panning so dragging the wheel scrolls horizontally/vertically
+        /// </summary>
+        private void MainScrollViewer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Middle && MainScrollViewer != null)
+            {
+                _isMiddleMousePanning = true;
+                _middleMouseStartPoint = e.GetPosition(MainScrollViewer);
+                _startHorizontalOffset = MainScrollViewer.HorizontalOffset;
+                _startVerticalOffset = MainScrollViewer.VerticalOffset;
+                MainScrollViewer.CaptureMouse();
+                MainScrollViewer.Cursor = Cursors.ScrollAll;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Update scroll offsets while the middle mouse button is being dragged
+        /// </summary>
+        private void MainScrollViewer_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isMiddleMousePanning && MainScrollViewer != null)
+            {
+                var currentPosition = e.GetPosition(MainScrollViewer);
+                var delta = _middleMouseStartPoint - currentPosition;
+
+                var targetHorizontal = _startHorizontalOffset + delta.X;
+                var targetVertical = _startVerticalOffset + delta.Y;
+
+                targetHorizontal = Math.Max(0, Math.Min(targetHorizontal, MainScrollViewer.ScrollableWidth));
+                targetVertical = Math.Max(0, Math.Min(targetVertical, MainScrollViewer.ScrollableHeight));
+
+                MainScrollViewer.ScrollToHorizontalOffset(targetHorizontal);
+                MainScrollViewer.ScrollToVerticalOffset(targetVertical);
+
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// End middle-mouse panning when the wheel is released
+        /// </summary>
+        private void MainScrollViewer_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isMiddleMousePanning && e.ChangedButton == MouseButton.Middle)
+            {
+                EndMiddleMousePan();
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Ensure panning stops if the cursor leaves the scroll area
+        /// </summary>
+        private void MainScrollViewer_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (_isMiddleMousePanning)
+            {
+                EndMiddleMousePan();
+            }
+        }
+
+        /// <summary>
+        /// Helper to release mouse capture and reset cursor when middle-mouse panning ends
+        /// </summary>
+        private void EndMiddleMousePan()
+        {
+            _isMiddleMousePanning = false;
+
+            if (MainScrollViewer != null)
+            {
+                if (MainScrollViewer.IsMouseCaptured)
+                {
+                    MainScrollViewer.ReleaseMouseCapture();
+                }
+
+                MainScrollViewer.Cursor = Cursors.Arrow;
+            }
         }
 
         /// <summary>
@@ -336,6 +440,8 @@ namespace TestAutomationManager.Views
         // Called when the view is hidden (navigated away) or removed
         private void TestsView_Unloaded(object sender, RoutedEventArgs e)
         {
+            EndMiddleMousePan();
+
             // Only unsubscribe this view's handler; DO NOT stop the global watcher here
             TestAutomationManager.Services.DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
             System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed (watcher left running)");

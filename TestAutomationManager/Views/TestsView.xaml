@@ -236,6 +236,11 @@
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
                       ScrollChanged="MainScrollViewer_ScrollChanged"
+                      PreviewMouseDown="MainScrollViewer_PreviewMouseDown"
+                      PreviewMouseMove="MainScrollViewer_PreviewMouseMove"
+                      PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
+                      MouseLeave="MainScrollViewer_MouseLeave"
+                      PanningMode="Both"
                       Style="{StaticResource ModernScrollViewer}"
                       FlowDirection="LeftToRight">
             <!-- Shared sizing scope ensures header & body grids share identical column widths -->
@@ -246,11 +251,16 @@
                 </Grid.RowDefinitions>
 
                 <!-- 📊 TABLE HEADER -->
-                <Border Grid.Row="0"
+                <Border x:Name="HeaderContainer"
+                        Grid.Row="0"
                         Background="{DynamicResource SecondaryBackgroundBrush}"
                         BorderThickness="0,0,0,1"
                         BorderBrush="{DynamicResource BorderBrush}"
-                        Padding="24,8">
+                        Padding="24,8"
+                        Panel.ZIndex="1">
+                    <Border.RenderTransform>
+                        <TranslateTransform x:Name="HeaderTranslateTransform"/>
+                    </Border.RenderTransform>
                     <Grid MinWidth="2000">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="32"  SharedSizeGroup="cActive"/>
