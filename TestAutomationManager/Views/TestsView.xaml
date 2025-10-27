@@ -311,6 +311,7 @@
                       Margin="0"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
+                      SizeChanged="MainScrollViewer_SizeChanged"
                       ScrollChanged="MainScrollViewer_ScrollChanged"
                       PreviewMouseDown="MainScrollViewer_PreviewMouseDown"
                       PreviewMouseMove="MainScrollViewer_PreviewMouseMove"
@@ -586,7 +587,8 @@
                                 <Border Grid.Row="1"
                                         Padding="24,0,24,16"
                                         Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <Grid Grid.IsSharedSizeScope="True">
+                                    <Grid Grid.IsSharedSizeScope="True"
+                                          Tag="ProcessContainer">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
@@ -597,16 +599,23 @@
                                                 Background="{DynamicResource SecondaryBackgroundBrush}"
                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                 BorderThickness="0,0,0,1"
-                                                Padding="42,8,16,8"
-                                                Margin="42,4,0,12">
+                                                Padding="16,8"
+                                                Margin="42,4,0,12"
+                                                Panel.ZIndex="1"
+                                                RenderTransformOrigin="0,0"
+                                                Loaded="ProcessHeader_Loaded"
+                                                Unloaded="ProcessHeader_Unloaded">
+                                            <Border.RenderTransform>
+                                                <TranslateTransform/>
+                                            </Border.RenderTransform>
                                             <Grid MinWidth="6600">
                                                 <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="36" SharedSizeGroup="procExpand"/>
                                             <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
-                                            <ColumnDefinition Width="240" SharedSizeGroup="procName"/>
                                             <ColumnDefinition Width="200" SharedSizeGroup="procWeb3Operator"/>
-                                            <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
+                                            <ColumnDefinition Width="320" SharedSizeGroup="procName"/>
                                             <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
+                                            <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
                                             <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
                                             <ColumnDefinition Width="120" SharedSizeGroup="procParam01"/>
                                             <ColumnDefinition Width="120" SharedSizeGroup="procParam02"/>
@@ -658,19 +667,19 @@
                                                 <TextBlock Grid.Column="0" Text=""
                                                            FontSize="11" FontWeight="Bold"
                                                            HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="POSITION" FontSize="11" FontWeight="Bold"
+                                                <TextBlock Grid.Column="1" Text="POSITION" FontSize="11" FontWeight="Bold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="2" Text="PROCESS NAME" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Grid.Column="2" Text="WEB3 OPERATOR" FontSize="11" FontWeight="Bold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="3" Text="WEB3 OPERATOR" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Grid.Column="3" Text="PROCESS NAME" FontSize="11" FontWeight="Bold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="4" Text="PROCESS ID" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Grid.Column="4" Text="PASS/FAIL" FontSize="11" FontWeight="Bold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="5" Text="PASS/FAIL OPERATOR" FontSize="11" FontWeight="Bold"
+                                            <TextBlock Grid.Column="5" Text="PROCESS ID" FontSize="11" FontWeight="Bold"
                                                        Foreground="{DynamicResource TextPrimaryBrush}"
                                                        HorizontalAlignment="Center" TextAlignment="Center"/>
                                             <TextBlock Grid.Column="6" Text="LAST RUNNING" FontSize="11" FontWeight="Bold"
@@ -837,10 +846,10 @@
                                                                 <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="36" SharedSizeGroup="procExpand"/>
                                             <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
-                                            <ColumnDefinition Width="240" SharedSizeGroup="procName"/>
                                             <ColumnDefinition Width="200" SharedSizeGroup="procWeb3Operator"/>
-                                            <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
+                                            <ColumnDefinition Width="320" SharedSizeGroup="procName"/>
                                             <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
+                                            <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
                                             <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
                                             <ColumnDefinition Width="120" SharedSizeGroup="procParam01"/>
                                             <ColumnDefinition Width="120" SharedSizeGroup="procParam02"/>
@@ -901,26 +910,26 @@
                                                        VerticalAlignment="Center" HorizontalAlignment="Center"
                                                        TextAlignment="Center" TextTrimming="CharacterEllipsis"
                                                        ToolTip="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding ProcessName}"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding ProcessName}"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding WEB3Operator}"
+                                            <TextBlock Grid.Column="2" Text="{Binding WEB3Operator}"
                                                        Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                                                        VerticalAlignment="Center" HorizontalAlignment="Center"
                                                        TextAlignment="Center" TextTrimming="CharacterEllipsis"
                                                        ToolTip="{Binding WEB3Operator}"/>
-                                            <TextBlock Grid.Column="4" Text="{Binding ProcessID, StringFormat='{}{0:0.##}'}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                            <TextBlock Grid.Column="3" Text="{Binding ProcessName}"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"
                                                        VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding ProcessID, StringFormat='{}{0:0.##}'}"/>
-                                            <TextBlock Grid.Column="5" Text="{Binding Pass_Fail_WEB3Operator}"
+                                                       TextAlignment="Center" TextWrapping="Wrap"
+                                                       ToolTip="{Binding ProcessName}"/>
+                                            <TextBlock Grid.Column="4" Text="{Binding Pass_Fail_WEB3Operator}"
                                                        Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                                                        VerticalAlignment="Center" HorizontalAlignment="Center"
                                                        TextAlignment="Center" TextTrimming="CharacterEllipsis"
                                                        ToolTip="{Binding Pass_Fail_WEB3Operator}"/>
+                                            <TextBlock Grid.Column="5" Text="{Binding ProcessID, StringFormat='{}{0:0.##}'}"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding ProcessID, StringFormat='{}{0:0.##}'}"/>
                                             <TextBlock Grid.Column="6" Text="{Binding LastRunning}"
                                                        Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                                                        VerticalAlignment="Center" HorizontalAlignment="Center"
