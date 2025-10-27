@@ -53,6 +53,21 @@ namespace TestAutomationManager.Repositories
 
                         // Ensure null lists are initialized for UI binding
                         test.Processes ??= new ObservableCollection<Process>();
+
+                        if (test.Processes.Count > 0)
+                        {
+                            var orderedProcesses = test.Processes
+                                .OrderBy(p => p.ProcessPosition ?? double.MaxValue)
+                                .ThenBy(p => p.ProcessID ?? double.MaxValue)
+                                .ThenBy(p => p.ProcessName)
+                                .ToList();
+
+                            if (!(test.Processes is ObservableCollection<Process> existingCollection && existingCollection.SequenceEqual(orderedProcesses)))
+                            {
+                                test.Processes = new ObservableCollection<Process>(orderedProcesses);
+                            }
+                        }
+
                         foreach (var process in test.Processes)
                         {
                             System.Diagnostics.Debug.WriteLine($"   ↳ Process {process.Id}: {process.Functions?.Count ?? 0} functions");
