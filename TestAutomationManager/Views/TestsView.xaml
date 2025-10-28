@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TestAutomationManager.Views"
              xmlns:converters="clr-namespace:TestAutomationManager.Converters"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1600"
@@ -16,6 +17,15 @@
         <!-- Converters -->
         <converters:RunStatusToColorConverter x:Key="RunStatusToColorConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- Shared function column sizing -->
+        <sys:Double x:Key="FunctionPositionColumnMinWidth">70</sys:Double>
+        <sys:Double x:Key="FunctionWeb3OperatorColumnMinWidth">60</sys:Double>
+        <sys:Double x:Key="FunctionPassFailColumnMinWidth">120</sys:Double>
+        <sys:Double x:Key="FunctionDescriptionColumnMinWidth">420</sys:Double>
+        <sys:Double x:Key="FunctionNameColumnMinWidth">380</sys:Double>
+        <sys:Double x:Key="FunctionCommentsColumnMinWidth">280</sys:Double>
+        <sys:Double x:Key="FunctionParameterColumnMinWidth">160</sys:Double>
 
         <!-- Expand Toggle -->
         <Style x:Key="ExpandToggle" TargetType="ToggleButton">
@@ -812,42 +822,42 @@
                                                                                 Margin="0,0,0,6">
                                                                             <Grid Grid.IsSharedSizeScope="True" MinWidth="6200">
                                                                                 <Grid.ColumnDefinitions>
-                                                                                    <ColumnDefinition Width="100" SharedSizeGroup="funcPosition"/>
-                                                                                    <ColumnDefinition Width="80" SharedSizeGroup="funcWeb3Operator"/>
-                                                                                    <ColumnDefinition Width="140" SharedSizeGroup="funcPassFail"/>
-                                                                                    <ColumnDefinition Width="420" SharedSizeGroup="funcDescription"/>
-                                                                                    <ColumnDefinition Width="320" SharedSizeGroup="funcName"/>
-                                                                                    <ColumnDefinition Width="280" SharedSizeGroup="funcComments"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam01"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam02"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam03"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam04"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam05"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam06"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam07"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam08"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam09"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam10"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam11"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam12"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam13"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam14"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam15"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam16"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam17"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam18"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam19"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam20"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam21"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam22"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam23"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam24"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam25"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam26"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam27"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam28"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam29"/>
-                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam30"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPositionColumnMinWidth}" SharedSizeGroup="funcPosition"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionWeb3OperatorColumnMinWidth}" SharedSizeGroup="funcWeb3Operator"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPassFailColumnMinWidth}" SharedSizeGroup="funcPassFail"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionDescriptionColumnMinWidth}" SharedSizeGroup="funcDescription"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionNameColumnMinWidth}" SharedSizeGroup="funcName"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionCommentsColumnMinWidth}" SharedSizeGroup="funcComments"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam01"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam02"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam03"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam04"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam05"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam06"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam07"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam08"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam09"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam10"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam11"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam12"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam13"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam14"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam15"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam16"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam17"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam18"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam19"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam20"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam21"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam22"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam23"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam24"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam25"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam26"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam27"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam28"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam29"/>
+                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam30"/>
                                                                                 </Grid.ColumnDefinitions>
 
                                                                                 <TextBlock Grid.Column="0" Text="FUNCTION POSITION" FontSize="11" FontWeight="Bold"
@@ -931,42 +941,42 @@
                                                                                                 Margin="0,0,0,8">
                                                                                             <Grid Grid.IsSharedSizeScope="True" MinWidth="6200">
                                                                                                 <Grid.ColumnDefinitions>
-                                                                                                    <ColumnDefinition Width="100" SharedSizeGroup="funcPosition"/>
-                                                                                                    <ColumnDefinition Width="80" SharedSizeGroup="funcWeb3Operator"/>
-                                                                                                    <ColumnDefinition Width="140" SharedSizeGroup="funcPassFail"/>
-                                                                                                    <ColumnDefinition Width="420" SharedSizeGroup="funcDescription"/>
-                                                                                                    <ColumnDefinition Width="320" SharedSizeGroup="funcName"/>
-                                                                                                    <ColumnDefinition Width="280" SharedSizeGroup="funcComments"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam01"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam02"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam03"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam04"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam05"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam06"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam07"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam08"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam09"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam10"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam11"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam12"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam13"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam14"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam15"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam16"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam17"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam18"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam19"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam20"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam21"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam22"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam23"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam24"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam25"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam26"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam27"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam28"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam29"/>
-                                                                                                    <ColumnDefinition Width="160" SharedSizeGroup="funcParam30"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPositionColumnMinWidth}" SharedSizeGroup="funcPosition"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionWeb3OperatorColumnMinWidth}" SharedSizeGroup="funcWeb3Operator"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPassFailColumnMinWidth}" SharedSizeGroup="funcPassFail"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionDescriptionColumnMinWidth}" SharedSizeGroup="funcDescription"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionNameColumnMinWidth}" SharedSizeGroup="funcName"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionCommentsColumnMinWidth}" SharedSizeGroup="funcComments"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam01"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam02"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam03"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam04"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam05"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam06"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam07"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam08"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam09"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam10"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam11"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam12"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam13"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam14"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam15"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam16"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam17"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam18"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam19"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam20"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam21"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam22"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam23"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam24"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam25"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam26"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam27"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam28"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam29"/>
+                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam30"/>
                                                                                                 </Grid.ColumnDefinitions>
 
                                                                                                 <TextBlock Grid.Column="0"
