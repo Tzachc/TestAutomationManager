@@ -970,15 +970,19 @@
                                                                                                 </Grid.ColumnDefinitions>
 
                                                                                                 <TextBlock Grid.Column="0"
-                                                                                                           Text="{Binding FunctionPosition, StringFormat='{}{0}'}"
-                                                                                                           TargetNullValue=""
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="11"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Center"
                                                                                                            TextAlignment="Center"
                                                                                                            TextTrimming="CharacterEllipsis"
-                                                                                                           ToolTip="{Binding FunctionPosition, StringFormat='{}{0}'}"/>
+                                                                                                           ToolTip="{Binding FunctionPosition, StringFormat='{}{0}'}">
+                                                                                                    <TextBlock.Text>
+                                                                                                        <Binding Path="FunctionPosition"
+                                                                                                                 StringFormat="{}{0}"
+                                                                                                                 TargetNullValue=""/>
+                                                                                                    </TextBlock.Text>
+                                                                                                </TextBlock>
 
                                                                                                 <TextBlock Grid.Column="1"
                                                                                                            Text="{Binding WEB3Operator}"
