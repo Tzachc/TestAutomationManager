@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using TestAutomationManager.Dialogs;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
@@ -38,6 +39,10 @@ namespace TestAutomationManager.Views
         /// Current search query for re-filtering after updates
         /// </summary>
         private string _currentSearchQuery = "";
+
+        private readonly List<ProcessHeaderRegistration> _processHeaders = new();
+
+        private const string ProcessContainerTag = "ProcessContainer";
 
         /// <summary>
         /// Event fired when data is loaded
@@ -86,6 +91,7 @@ namespace TestAutomationManager.Views
         {
             // Keep header aligned horizontally with body
             SyncHeaderToBody();
+            UpdateProcessHeaderPositions();
         }
 
         /// <summary>
@@ -104,6 +110,171 @@ namespace TestAutomationManager.Views
         {
             if (HeaderScrollViewer == null || MainScrollViewer == null) return;
             HeaderScrollViewer.ScrollToHorizontalOffset(MainScrollViewer.HorizontalOffset);
+        }
+
+        private void MainScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateProcessHeaderPositions();
+        }
+
+        private void ProcessHeader_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Border header)
+                return;
+
+            var container = FindAncestor<FrameworkElement>(header, element => Equals(element.Tag, ProcessContainerTag));
+            if (container == null)
+                return;
+
+            if (header.RenderTransform is not TranslateTransform transform)
+            {
+                transform = new TranslateTransform();
+                header.RenderTransform = transform;
+            }
+
+            if (_processHeaders.Any(registration => ReferenceEquals(registration.Header, header)))
+                return;
+
+            var registration = new ProcessHeaderRegistration(header, container, transform);
+            _processHeaders.Add(registration);
+
+            container.SizeChanged += ProcessContainer_SizeChanged;
+            header.SizeChanged += ProcessHeader_SizeChanged;
+
+            UpdateProcessHeaderPositions(registration);
+        }
+
+        private void ProcessHeader_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Border header)
+                return;
+
+            var index = _processHeaders.FindIndex(registration => ReferenceEquals(registration.Header, header));
+            if (index < 0)
+                return;
+
+            var registration = _processHeaders[index];
+            registration.Container.SizeChanged -= ProcessContainer_SizeChanged;
+            registration.Header.SizeChanged -= ProcessHeader_SizeChanged;
+            registration.Transform.Y = 0;
+
+            _processHeaders.RemoveAt(index);
+        }
+
+        private void ProcessContainer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is not FrameworkElement container)
+                return;
+
+            foreach (var registration in _processHeaders.Where(r => ReferenceEquals(r.Container, container)))
+            {
+                UpdateProcessHeaderPositions(registration);
+            }
+        }
+
+        private void ProcessHeader_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is not Border header)
+                return;
+
+            var registration = _processHeaders.FirstOrDefault(r => ReferenceEquals(r.Header, header));
+            if (registration != null)
+            {
+                UpdateProcessHeaderPositions(registration);
+            }
+        }
+
+        private void UpdateProcessHeaderPositions()
+        {
+            if (_processHeaders.Count == 0)
+                return;
+
+            foreach (var registration in _processHeaders.ToList())
+            {
+                UpdateProcessHeaderPositions(registration);
+            }
+        }
+
+        private void UpdateProcessHeaderPositions(ProcessHeaderRegistration registration)
+        {
+            if (MainScrollViewer == null)
+                return;
+
+            if (registration.Header == null || registration.Container == null)
+                return;
+
+            if (!registration.Header.IsLoaded || !registration.Container.IsLoaded)
+                return;
+
+            registration.Transform.Y = 0;
+
+            registration.Header.UpdateLayout();
+
+            GeneralTransform headerTransform;
+            try
+            {
+                headerTransform = registration.Header.TransformToAncestor(MainScrollViewer);
+            }
+            catch (InvalidOperationException)
+            {
+                return;
+            }
+
+            GeneralTransform containerTransform;
+            try
+            {
+                containerTransform = registration.Container.TransformToAncestor(MainScrollViewer);
+            }
+            catch (InvalidOperationException)
+            {
+                return;
+            }
+
+            var headerTopLeft = headerTransform.Transform(new Point(0, 0));
+            var containerBottom = containerTransform.Transform(new Point(0, registration.Container.ActualHeight)).Y;
+            var stickyTop = 0d;
+
+            var desiredOffset = 0d;
+
+            if (headerTopLeft.Y < stickyTop)
+            {
+                desiredOffset = stickyTop - headerTopLeft.Y;
+                var maxOffset = containerBottom - stickyTop - registration.Header.ActualHeight;
+                if (desiredOffset > maxOffset)
+                {
+                    desiredOffset = maxOffset;
+                }
+            }
+
+            registration.Transform.Y = desiredOffset;
+        }
+
+        private static T FindAncestor<T>(DependencyObject current, Predicate<T> predicate = null)
+            where T : DependencyObject
+        {
+            while (current != null)
+            {
+                if (current is T target && (predicate == null || predicate(target)))
+                    return target;
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return null;
+        }
+
+        private sealed class ProcessHeaderRegistration
+        {
+            public ProcessHeaderRegistration(Border header, FrameworkElement container, TranslateTransform transform)
+            {
+                Header = header;
+                Container = container;
+                Transform = transform;
+            }
+
+            public Border Header { get; }
+            public FrameworkElement Container { get; }
+            public TranslateTransform Transform { get; }
         }
 
         // ================================================
@@ -376,6 +547,7 @@ namespace TestAutomationManager.Views
 
             // Ensure header/body sync is correct at load
             SyncHeaderToBody();
+            UpdateProcessHeaderPositions();
 
             System.Diagnostics.Debug.WriteLine("✓ TestsView Loaded: subscribed & watcher ensured");
         }
@@ -392,6 +564,15 @@ namespace TestAutomationManager.Views
                 _isPanning = false;
                 MainScrollViewer.ReleaseMouseCapture();
             }
+
+            foreach (var registration in _processHeaders.ToList())
+            {
+                registration.Container.SizeChanged -= ProcessContainer_SizeChanged;
+                registration.Header.SizeChanged -= ProcessHeader_SizeChanged;
+                registration.Transform.Y = 0;
+            }
+
+            _processHeaders.Clear();
         }
 
         // ================================================
@@ -514,5 +695,21 @@ namespace TestAutomationManager.Views
                 }
             }, System.Windows.Threading.DispatcherPriority.Background);
         }
+
+        private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // allow inner ScrollViewer to consume the wheel if it can scroll
+            if (sender is ScrollViewer sv)
+            {
+                var delta = e.Delta;
+                if ((delta < 0 && sv.VerticalOffset < sv.ScrollableHeight) ||
+                    (delta > 0 && sv.VerticalOffset > 0))
+                {
+                    e.Handled = true;
+                    sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
+                }
+            }
+        }
+
     }
 }
