@@ -514,5 +514,21 @@ namespace TestAutomationManager.Views
                 }
             }, System.Windows.Threading.DispatcherPriority.Background);
         }
+
+        private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            // allow inner ScrollViewer to consume the wheel if it can scroll
+            if (sender is ScrollViewer sv)
+            {
+                var delta = e.Delta;
+                if ((delta < 0 && sv.VerticalOffset < sv.ScrollableHeight) ||
+                    (delta > 0 && sv.VerticalOffset > 0))
+                {
+                    e.Handled = true;
+                    sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
+                }
+            }
+        }
+
     }
 }

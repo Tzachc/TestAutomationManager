@@ -16,7 +16,7 @@
         <converters:RunStatusToColorConverter x:Key="RunStatusToColorConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
-        <!-- 🎯 EXPAND TOGGLE -->
+        <!-- Expand Toggle -->
         <Style x:Key="ExpandToggle" TargetType="ToggleButton">
             <Setter Property="Width" Value="24"/>
             <Setter Property="Height" Value="24"/>
@@ -26,10 +26,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}" 
-                                CornerRadius="4">
-                            <TextBlock x:Name="Arrow" 
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
+                            <TextBlock x:Name="Arrow"
                                        Text="+" 
                                        Foreground="{DynamicResource TextTertiaryBrush}" 
                                        FontSize="25"
@@ -72,7 +70,7 @@
             </Setter>
         </Style>
 
-        <!-- 🎨 MODERN SCROLLBAR STYLE (correct directions + bigger thumb) -->
+        <!-- ScrollBar -->
         <Style x:Key="ModernScrollBar" TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -80,9 +78,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
                         <Grid>
-                            <Border Background="{DynamicResource SecondaryBackgroundBrush}" 
-                                    CornerRadius="4"
-                                    Margin="4">
+                            <Border Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="4" Margin="4">
                                 <Track x:Name="PART_Track"
                                        Orientation="{TemplateBinding Orientation}"
                                        Minimum="{TemplateBinding Minimum}"
@@ -122,16 +118,11 @@
                                 </Track>
                             </Border>
                         </Grid>
-
-                        <!-- 🔁 Direction & size per orientation -->
                         <ControlTemplate.Triggers>
-                            <!-- Vertical: reversed so value increases when moving DOWN -->
                             <Trigger Property="Orientation" Value="Vertical">
                                 <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
                                 <Setter Property="Width" Value="14"/>
                             </Trigger>
-
-                            <!-- Horizontal: natural (left->right increases) -->
                             <Trigger Property="Orientation" Value="Horizontal">
                                 <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
                                 <Setter Property="Height" Value="14"/>
@@ -142,7 +133,7 @@
             </Setter>
         </Style>
 
-        <!-- Modern ScrollViewer Style (Vertical Only) -->
+        <!-- ScrollViewer templates -->
         <Style x:Key="ModernScrollViewerVerticalOnly" TargetType="{x:Type ScrollViewer}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -152,10 +143,7 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <ScrollContentPresenter Grid.Column="0"/>
-
-                            <!-- Vertical ScrollBar Only -->
                             <ScrollBar x:Name="PART_VerticalScrollBar"
                                        Style="{StaticResource ModernScrollBar}"
                                        Orientation="Vertical"
@@ -172,7 +160,6 @@
             </Setter>
         </Style>
 
-        <!-- Modern ScrollViewer Style (Horizontal + Vertical) -->
         <Style x:Key="ModernScrollViewer" TargetType="{x:Type ScrollViewer}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -189,7 +176,6 @@
 
                             <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
 
-                            <!-- Horizontal ScrollBar -->
                             <ScrollBar x:Name="PART_HorizontalScrollBar"
                                        Style="{StaticResource ModernScrollBar}"
                                        Orientation="Horizontal"
@@ -202,7 +188,6 @@
                                        ViewportSize="{TemplateBinding ViewportWidth}"
                                        Margin="0,4,0,0"/>
 
-                            <!-- Vertical ScrollBar -->
                             <ScrollBar x:Name="PART_VerticalScrollBar"
                                        Style="{StaticResource ModernScrollBar}"
                                        Orientation="Vertical"
@@ -221,35 +206,29 @@
         </Style>
     </UserControl.Resources>
 
-    <!-- =========================
-         LAYOUT: Sticky header + scrollable body
-         ========================= -->
+    <!-- Layout -->
     <Grid Grid.IsSharedSizeScope="True" Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- sticky header -->
             <RowDefinition Height="*"/>
-            <!-- scrollable body -->
         </Grid.RowDefinitions>
 
-        <!-- 📊 TABLE HEADER (STICKY) -->
-        <!-- Wrap header in a horizontal-only ScrollViewer so we can sync H-offset in code-behind -->
+        <!-- Sticky main header -->
         <Border Grid.Row="0"
-        Background="{DynamicResource SecondaryBackgroundBrush}"
-        BorderThickness="0,0,0,1"
-        BorderBrush="{DynamicResource BorderBrush}">
+                Background="{DynamicResource SecondaryBackgroundBrush}"
+                BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource BorderBrush}">
             <ScrollViewer x:Name="HeaderScrollViewer"
-                  HorizontalScrollBarVisibility="Hidden"
-                  VerticalScrollBarVisibility="Disabled">
-                <!-- ✅ Padding belongs on Border, not Grid -->
-                <Border Padding="24,8">
+                          HorizontalScrollBarVisibility="Hidden"
+                          VerticalScrollBarVisibility="Disabled">
+                <Border Padding="38,8">
                     <Grid MinWidth="2000">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="32"  SharedSizeGroup="cActive"/>
                             <ColumnDefinition Width="16"  SharedSizeGroup="cStatusDot"/>
                             <ColumnDefinition Width="20"  SharedSizeGroup="cExpand"/>
                             <ColumnDefinition Width="50"  SharedSizeGroup="cTestID"/>
-                            <ColumnDefinition Width="500" SharedSizeGroup="cTestName"/>
+                            <ColumnDefinition Width="600" SharedSizeGroup="cTestName"/>
                             <ColumnDefinition Width="130" SharedSizeGroup="cLastRunning"/>
                             <ColumnDefinition Width="130" SharedSizeGroup="cLastTimePass"/>
                             <ColumnDefinition Width="150" SharedSizeGroup="cRunStatus"/>
@@ -262,50 +241,47 @@
                             <ColumnDefinition Width="160" SharedSizeGroup="cSnapshotMultiple"/>
                             <ColumnDefinition Width="140" SharedSizeGroup="cEmailOnFailOnly"/>
                             <ColumnDefinition Width="130" SharedSizeGroup="cDisableKillDriver"/>
-                            <ColumnDefinition Width="120" SharedSizeGroup="cActions"/>
+                            <ColumnDefinition Width="160" SharedSizeGroup="cActions"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Explicit Foreground so text is visible -->
-                        <TextBlock Grid.Column="0"  Text="✓"                    FontSize="14" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" ToolTip="Active"/>
-                        <TextBlock Grid.Column="3"  Text="TEST ID"              FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="4"  Text="TEST NAME"            FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="5"  Text="LAST RUNNING"         FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="6"  Text="LAST TIME PASSED"     FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="7"  Text="STATUS"               FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="8"  Text="BUGS"                 FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="9"  Text="RECIPIENTS EMAIL"     FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="10" Text="EXCEPTION MESSAGE"    FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="11" Text="SEND EMAIL"           FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="12" Text="EXIT ON FAILURE"      FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="13" Text="RUN AGAIN TIMES"      FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="14" Text="SNAPSHOT MULTIPLE"    FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="15" Text="EMAIL ON FAIL ONLY"   FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="16" Text="DISABLE KILL DRIVER"  FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="17" Text="ACTIONS"              FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="0"  Text="✓" FontSize="14" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" ToolTip="Active"/>
+                        <TextBlock Grid.Column="3"  Text="TEST ID" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="4"  Text="TEST NAME" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="5"  Text="LAST RUNNING" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="6"  Text="LAST TIME PASSED" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="7"  Text="STATUS" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="8"  Text="BUGS" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="9"  Text="RECIPIENTS EMAIL" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="10" Text="EXCEPTION MESSAGE" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="11" Text="SEND EMAIL" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="12" Text="EXIT ON FAILURE" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="13" Text="RUN AGAIN TIMES" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="14" Text="SNAPSHOT MULTIPLE" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="15" Text="EMAIL ON FAIL ONLY" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="16" Text="DISABLE KILL DRIVER" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="17" Text="ACTIONS" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
                     </Grid>
                 </Border>
             </ScrollViewer>
         </Border>
 
-
-
-        <!-- 📋 TABLE BODY (SCROLLABLE) -->
+        <!-- Scrollable body -->
         <ScrollViewer Grid.Row="1"
                       x:Name="MainScrollViewer"
                       Margin="0"
@@ -318,7 +294,7 @@
                       MouseLeave="MainScrollViewer_MouseLeave"
                       Style="{StaticResource ModernScrollViewer}"
                       FlowDirection="LeftToRight">
-            <ItemsControl Grid.Row="1" x:Name="TestsItemsControl" Margin="10,5,24,24">
+            <ItemsControl x:Name="TestsItemsControl" Margin="10,5,24,24">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Background="{DynamicResource CardBackgroundBrush}"
@@ -333,11 +309,8 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- 🧪 TEST ROW -->
-                                <Border Grid.Row="0" 
-                                        Padding="24,5"
-                                        Background="Transparent"
-                                        CornerRadius="8,8,0,0">
+                                <!-- Test Row -->
+                                <Border Grid.Row="0" Padding="24,5" Background="Transparent" CornerRadius="8,8,0,0">
                                     <Grid MinWidth="2000">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="cActive"/>
@@ -360,23 +333,18 @@
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="cActions"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Checkbox -->
                                         <CheckBox Grid.Column="0"
                                                   IsChecked="{Binding IsActive, Mode=TwoWay}"
                                                   VerticalAlignment="Center"
                                                   HorizontalAlignment="Center"/>
 
-                                        <!-- Status Indicator (Colored Circle) -->
-                                        <Ellipse Grid.Column="1"
-                                                 Width="10" 
-                                                 Height="10"
+                                        <Ellipse Grid.Column="1" Width="10" Height="10"
                                                  Fill="{Binding RunStatus, Converter={StaticResource RunStatusToColorConverter}}"
                                                  VerticalAlignment="Center"
                                                  HorizontalAlignment="Center"
                                                  Margin="0,0,6,0"
                                                  ToolTip="{Binding RunStatus}"/>
 
-                                        <!-- Expand Toggle -->
                                         <ToggleButton Grid.Column="2" 
                                                       Style="{StaticResource ExpandToggle}"
                                                       IsChecked="{Binding IsExpanded, Mode=TwoWay}"
@@ -384,52 +352,32 @@
                                                       HorizontalAlignment="Center"
                                                       Margin="0,0,-10,4"/>
 
-                                        <!-- TestID -->
-                                        <TextBlock Grid.Column="3" 
-                                                   Text="{Binding TestID}" 
+                                        <TextBlock Grid.Column="3" Text="{Binding TestID}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"/>
 
-                                        <!-- TestName -->
-                                        <TextBlock Grid.Column="4" 
-                                                   Text="{Binding TestName}" 
+                                        <TextBlock Grid.Column="4" Text="{Binding TestName}" 
                                                    Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                   FontSize="13" 
-                                                   FontWeight="SemiBold"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Left"
-                                                   TextAlignment="Left"
-                                                   TextWrapping="Wrap"
+                                                   FontSize="13" FontWeight="SemiBold"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                   TextAlignment="Left" TextWrapping="Wrap"
                                                    ToolTip="{Binding TestName}"/>
 
-                                        <!-- LastRunning -->
-                                        <TextBlock Grid.Column="5" 
-                                                   Text="{Binding LastRunning}" 
+                                        <TextBlock Grid.Column="5" Text="{Binding LastRunning}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   TextWrapping="Wrap"
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" TextWrapping="Wrap"
                                                    ToolTip="{Binding LastRunning}"/>
 
-                                        <!-- LastTimePass -->
-                                        <TextBlock Grid.Column="6" 
-                                                   Text="{Binding LastTimePass}" 
+                                        <TextBlock Grid.Column="6" Text="{Binding LastTimePass}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextWrapping="Wrap"
-                                                   TextTrimming="CharacterEllipsis"
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                                    ToolTip="{Binding LastTimePass}"/>
 
-                                        <!-- RunStatus -->
                                         <Border Grid.Column="7"
                                                 Background="{DynamicResource SecondaryBackgroundBrush}"
                                                 BorderBrush="{DynamicResource BorderBrush}"
@@ -440,805 +388,487 @@
                                                 VerticalAlignment="Center">
                                             <TextBlock Text="{Binding RunStatus}" 
                                                        Foreground="{DynamicResource TextPrimaryBrush}" 
-                                                       FontSize="11" 
-                                                       FontWeight="SemiBold"
+                                                       FontSize="11" FontWeight="SemiBold"
                                                        HorizontalAlignment="Center"
                                                        TextAlignment="Center"/>
                                         </Border>
 
-                                        <!-- Bugs -->
-                                        <TextBlock Grid.Column="8" 
-                                                   Text="{Binding Bugs}" 
+                                        <TextBlock Grid.Column="8" Text="{Binding Bugs}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding Bugs}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Bugs}"/>
 
-                                        <!-- RecipientsEmailsList -->
-                                        <TextBlock Grid.Column="9" 
-                                                   Text="{Binding RecipientsEmailsList}" 
+                                        <TextBlock Grid.Column="9" Text="{Binding RecipientsEmailsList}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   TextWrapping="Wrap"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
+                                                   FontSize="12" TextWrapping="Wrap"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   TextAlignment="Center" TextTrimming="CharacterEllipsis"
                                                    ToolTip="{Binding RecipientsEmailsList}"/>
 
-                                        <!-- ExceptionMessage -->
-                                        <TextBlock Grid.Column="10" 
-                                                   Text="{Binding ExceptionMessage}" 
+                                        <TextBlock Grid.Column="10" Text="{Binding ExceptionMessage}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding ExceptionMessage}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding ExceptionMessage}"/>
 
-                                        <!-- SendEmailReport -->
-                                        <TextBlock Grid.Column="11" 
-                                                   Text="{Binding SendEmailReport}" 
+                                        <TextBlock Grid.Column="11" Text="{Binding SendEmailReport}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding SendEmailReport}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding SendEmailReport}"/>
 
-                                        <!-- ExitTestOnFailure -->
-                                        <TextBlock Grid.Column="12" 
-                                                   Text="{Binding ExitTestOnFailure}" 
+                                        <TextBlock Grid.Column="12" Text="{Binding ExitTestOnFailure}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding ExitTestOnFailure}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding ExitTestOnFailure}"/>
 
-                                        <!-- TestRunAgainTimes -->
-                                        <TextBlock Grid.Column="13" 
-                                                   Text="{Binding TestRunAgainTimes}" 
+                                        <TextBlock Grid.Column="13" Text="{Binding TestRunAgainTimes}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding TestRunAgainTimes}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding TestRunAgainTimes}"/>
 
-                                        <!-- SnapshotMultipleFailure -->
-                                        <TextBlock Grid.Column="14" 
-                                                   Text="{Binding SnapshotMultipleFailure}" 
+                                        <TextBlock Grid.Column="14" Text="{Binding SnapshotMultipleFailure}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding SnapshotMultipleFailure}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding SnapshotMultipleFailure}"/>
 
-                                        <!-- EmailOnFailureOnly -->
-                                        <TextBlock Grid.Column="15" 
-                                                   Text="{Binding EmailOnFailureOnly}" 
+                                        <TextBlock Grid.Column="15" Text="{Binding EmailOnFailureOnly}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding EmailOnFailureOnly}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding EmailOnFailureOnly}"/>
 
-                                        <!-- DisableKillDriver -->
-                                        <TextBlock Grid.Column="16" 
-                                                   Text="{Binding DisableKillDriver}" 
+                                        <TextBlock Grid.Column="16" Text="{Binding DisableKillDriver}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding DisableKillDriver}"/>
+                                                   FontSize="12" VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding DisableKillDriver}"/>
 
-                                        <!-- Actions -->
-                                        <StackPanel Grid.Column="17" 
-                                                    Orientation="Horizontal"
-                                                    VerticalAlignment="Center"
-                                                    HorizontalAlignment="Center">
-                                            <Button Style="{StaticResource IconButton}" 
-                                                    Width="28" 
-                                                    Height="28"
-                                                    ToolTip="Edit"
-                                                    Tag="{Binding}"
-                                                    Click="EditTest_Click"
-                                                    Margin="2,0">
+                                        <StackPanel Grid.Column="17" Orientation="Horizontal"
+                                                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                    ToolTip="Edit" Tag="{Binding}" Click="EditTest_Click" Margin="2,0">
                                                 <TextBlock Text="✏️" FontSize="12"/>
                                             </Button>
-                                            <Button Style="{StaticResource IconButton}" 
-                                                    Width="28" 
-                                                    Height="28"
-                                                    ToolTip="Run Test"
-                                                    Tag="{Binding}"
-                                                    Click="RunTest_Click"
-                                                    Margin="2,0">
+                                            <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                    ToolTip="Run Test" Tag="{Binding}" Click="RunTest_Click" Margin="2,0">
                                                 <TextBlock Text="▶️" FontSize="12"/>
                                             </Button>
-                                            <Button Style="{StaticResource IconButton}" 
-                                                    Width="28" 
-                                                    Height="28"
-                                                    ToolTip="Delete"
-                                                    Tag="{Binding}"
-                                                    Click="DeleteTest_Click"
-                                                    Margin="2,0">
+                                            <Button Style="{StaticResource IconButton}" Width="28" Height="28"
+                                                    ToolTip="Delete" Tag="{Binding}" Click="DeleteTest_Click" Margin="2,0">
                                                 <TextBlock Text="🗑️" FontSize="12"/>
                                             </Button>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
 
-                                <!-- 🔧 PROCESSES (Nested) -->
-                                <Border Grid.Row="1"
-                                        Padding="24,0,24,16"
+                                <!-- PROCESSES -->
+                                <Border Grid.Row="1" Padding="24,0,24,16"
                                         Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Grid Grid.IsSharedSizeScope="True">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
 
-                                        <!-- 🧾 PROCESS HEADER -->
+                                        <!-- Sticky Process Header -->
                                         <Border Grid.Row="0"
                                                 Background="{DynamicResource SecondaryBackgroundBrush}"
                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                 BorderThickness="0,0,0,1"
-                                                Padding="42,8,16,8"
-                                                Margin="42,4,0,12">
-                                            <Grid MinWidth="6600">
+                                                Padding="20,8,16,8"
+                                                Margin="42,0,0,6">
+                                            <Grid Grid.IsSharedSizeScope="True" MinWidth="6600">
                                                 <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="36" SharedSizeGroup="procExpand"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
-                                            <ColumnDefinition Width="240" SharedSizeGroup="procName"/>
-                                            <ColumnDefinition Width="200" SharedSizeGroup="procWeb3Operator"/>
-                                            <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
-                                            <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
-                                            <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam01"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam02"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam03"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam04"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam05"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam06"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam07"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam08"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam09"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam10"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam11"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam12"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam13"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam14"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam15"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam16"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam17"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam18"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam19"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam20"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam21"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam22"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam23"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam24"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam25"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam26"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam27"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam28"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam29"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam30"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam31"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam32"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam33"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam34"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam35"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam36"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam37"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam38"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam39"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam40"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam41"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam42"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam43"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam44"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam45"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam46"/>
+                                                    <!-- order: expand, position, web3 operator, process name, process id, pass/fail, last running, params... -->
+                                                    <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procWeb3Operator"/>
+                                                    <ColumnDefinition Width="700" SharedSizeGroup="procName"/>
+                                                    <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
+                                                    <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
+                                                    <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
+
+                                                    <!-- params -->
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam01"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam02"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam03"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam04"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam05"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam06"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam07"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam08"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam09"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam10"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam11"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam12"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam13"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam14"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam15"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam16"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam17"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam18"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam19"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam20"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam21"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam22"/>
+                                                    <ColumnDefinition Width="300" SharedSizeGroup="procParam23"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam24"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam25"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam26"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam27"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam28"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam29"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam30"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam31"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam32"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam33"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam34"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam35"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam36"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam37"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam38"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam39"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam40"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam41"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam42"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam43"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam44"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam45"/>
+                                                    <ColumnDefinition Width="120" SharedSizeGroup="procParam46"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text=""
-                                                           FontSize="11" FontWeight="Bold"
+
+                                                <TextBlock Grid.Column="0" Text="" FontSize="11" FontWeight="Bold"
                                                            HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="POSITION" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="2" Text="PROCESS NAME" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="3" Text="WEB3 OPERATOR" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="4" Text="PROCESS ID" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="5" Text="PASS/FAIL OPERATOR" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="6" Text="LAST RUNNING" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="7" Text="PARAM 1" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="8" Text="PARAM 2" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="9" Text="PARAM 3" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="10" Text="PARAM 4" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="11" Text="PARAM 5" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="12" Text="PARAM 6" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="13" Text="PARAM 7" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="14" Text="PARAM 8" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="15" Text="PARAM 9" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="16" Text="PARAM 10" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="17" Text="PARAM 11" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="18" Text="PARAM 12" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="19" Text="PARAM 13" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="20" Text="PARAM 14" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="21" Text="PARAM 15" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="22" Text="PARAM 16" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="23" Text="PARAM 17" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="24" Text="PARAM 18" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="25" Text="PARAM 19" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="26" Text="PARAM 20" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="27" Text="PARAM 21" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="28" Text="PARAM 22" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="29" Text="PARAM 23" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="30" Text="PARAM 24" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="31" Text="PARAM 25" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="32" Text="PARAM 26" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="33" Text="PARAM 27" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="34" Text="PARAM 28" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="35" Text="PARAM 29" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="36" Text="PARAM 30" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="37" Text="PARAM 31" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="38" Text="PARAM 32" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="39" Text="PARAM 33" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="40" Text="PARAM 34" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="41" Text="PARAM 35" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="42" Text="PARAM 36" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="43" Text="PARAM 37" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="44" Text="PARAM 38" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="45" Text="PARAM 39" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="46" Text="PARAM 40" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="47" Text="PARAM 41" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="48" Text="PARAM 42" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="49" Text="PARAM 43" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="50" Text="PARAM 44" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="51" Text="PARAM 45" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
-                                            <TextBlock Grid.Column="52" Text="PARAM 46" FontSize="11" FontWeight="Bold"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}"
-                                                       HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="POSITION" FontSize="11" FontWeight="Bold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="WEB3 OPERATOR" FontSize="11" FontWeight="Bold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="PROCESS NAME" FontSize="11" FontWeight="Bold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="PROCESS ID" FontSize="11" FontWeight="Bold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="5" Text="PASS/FAIL" FontSize="11" FontWeight="Bold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                <TextBlock Grid.Column="6" Text="LAST RUNNING" FontSize="11" FontWeight="Bold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+
+                                                <!-- params headers 1..46 -->
+                                                <TextBlock Grid.Column="7"  Text="PARAM 1"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="8"  Text="PARAM 2"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="9"  Text="PARAM 3"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="10" Text="PARAM 4"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="11" Text="PARAM 5"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="12" Text="PARAM 6"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="13" Text="PARAM 7"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="14" Text="PARAM 8"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="15" Text="PARAM 9"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="16" Text="PARAM 10" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="17" Text="PARAM 11" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="18" Text="PARAM 12" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="19" Text="PARAM 13" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="20" Text="PARAM 14" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="21" Text="PARAM 15" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="22" Text="PARAM 16" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="23" Text="PARAM 17" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="24" Text="PARAM 18" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="25" Text="PARAM 19" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="26" Text="PARAM 20" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="27" Text="PARAM 21" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="28" Text="PARAM 22" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="29" Text="PARAM 23" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="30" Text="PARAM 24" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="31" Text="PARAM 25" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="32" Text="PARAM 26" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="33" Text="PARAM 27" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="34" Text="PARAM 28" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="35" Text="PARAM 29" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="36" Text="PARAM 30" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="37" Text="PARAM 31" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="38" Text="PARAM 32" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="39" Text="PARAM 33" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="40" Text="PARAM 34" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="41" Text="PARAM 35" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="42" Text="PARAM 36" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="43" Text="PARAM 37" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="44" Text="PARAM 38" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="45" Text="PARAM 39" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="46" Text="PARAM 40" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="47" Text="PARAM 41" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="48" Text="PARAM 42" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="49" Text="PARAM 43" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="50" Text="PARAM 44" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="51" Text="PARAM 45" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <TextBlock Grid.Column="52" Text="PARAM 46" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                             </Grid>
                                         </Border>
 
-                                        <!-- 📋 PROCESS ROWS -->
-                                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Processes}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="{DynamicResource CardBackgroundBrush}"
-                                                            BorderBrush="{DynamicResource BorderBrush}"
-                                                            BorderThickness="1"
-                                                            CornerRadius="6"
-                                                            Padding="16,12"
-                                                            Margin="42,0,0,8">
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                            </Grid.RowDefinitions>
+                                        <!-- Rows with their own ScrollViewer so header sticks -->
+                                        <ScrollViewer Grid.Row="1"
+                                                      x:Name="ProcRowsScrollViewer"
+                                                      VerticalScrollBarVisibility="Auto"
+                                                      HorizontalScrollBarVisibility="Auto"
+                                                      CanContentScroll="True"
+                                                      PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
+                                                      MaxHeight="700">
+                                            <ItemsControl ItemsSource="{Binding Processes}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                BorderBrush="{DynamicResource BorderBrush}"
+                                                                BorderThickness="1"
+                                                                CornerRadius="6"
+                                                                Padding="16,12"
+                                                                Margin="42,0,0,8">
+                                                            <Grid>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
 
-                                                            <Grid Grid.Row="0" MinWidth="6600">
-                                                                <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="36" SharedSizeGroup="procExpand"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
-                                            <ColumnDefinition Width="240" SharedSizeGroup="procName"/>
-                                            <ColumnDefinition Width="200" SharedSizeGroup="procWeb3Operator"/>
-                                            <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
-                                            <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
-                                            <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam01"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam02"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam03"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam04"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam05"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam06"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam07"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam08"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam09"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam10"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam11"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam12"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam13"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam14"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam15"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam16"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam17"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam18"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam19"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam20"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam21"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam22"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam23"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam24"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam25"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam26"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam27"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam28"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam29"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam30"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam31"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam32"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam33"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam34"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam35"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam36"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam37"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam38"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam39"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam40"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam41"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam42"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam43"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam44"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam45"/>
-                                            <ColumnDefinition Width="120" SharedSizeGroup="procParam46"/>
-                                                                </Grid.ColumnDefinitions>
+                                                                <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" MinWidth="6600">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procWeb3Operator"/>
+                                                                        <ColumnDefinition Width="700" SharedSizeGroup="procName"/>
+                                                                        <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
+                                                                        <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
+                                                                        <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
 
-                                                                <ToggleButton Grid.Column="0"
-                                                                              Style="{StaticResource ExpandToggle}"
-                                                                              IsChecked="{Binding IsExpanded, Mode=TwoWay}"
-                                                                              Width="20" Height="20"
-                                                                              VerticalAlignment="Center"
-                                                                              HorizontalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding ProcessName}"
-                                                       Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding ProcessName}"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding WEB3Operator}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding WEB3Operator}"/>
-                                            <TextBlock Grid.Column="4" Text="{Binding ProcessID, StringFormat='{}{0:0.##}'}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding ProcessID, StringFormat='{}{0:0.##}'}"/>
-                                            <TextBlock Grid.Column="5" Text="{Binding Pass_Fail_WEB3Operator}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Pass_Fail_WEB3Operator}"/>
-                                            <TextBlock Grid.Column="6" Text="{Binding LastRunning}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding LastRunning}"/>
-                                            <TextBlock Grid.Column="7" Text="{Binding Param1}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param1}"/>
-                                            <TextBlock Grid.Column="8" Text="{Binding Param2}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param2}"/>
-                                            <TextBlock Grid.Column="9" Text="{Binding Param3}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param3}"/>
-                                            <TextBlock Grid.Column="10" Text="{Binding Param4}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param4}"/>
-                                            <TextBlock Grid.Column="11" Text="{Binding Param5}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param5}"/>
-                                            <TextBlock Grid.Column="12" Text="{Binding Param6}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param6}"/>
-                                            <TextBlock Grid.Column="13" Text="{Binding Param7}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param7}"/>
-                                            <TextBlock Grid.Column="14" Text="{Binding Param8}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param8}"/>
-                                            <TextBlock Grid.Column="15" Text="{Binding Param9}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param9}"/>
-                                            <TextBlock Grid.Column="16" Text="{Binding Param10}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param10}"/>
-                                            <TextBlock Grid.Column="17" Text="{Binding Param11}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param11}"/>
-                                            <TextBlock Grid.Column="18" Text="{Binding Param12}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param12}"/>
-                                            <TextBlock Grid.Column="19" Text="{Binding Param13}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param13}"/>
-                                            <TextBlock Grid.Column="20" Text="{Binding Param14}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param14}"/>
-                                            <TextBlock Grid.Column="21" Text="{Binding Param15}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param15}"/>
-                                            <TextBlock Grid.Column="22" Text="{Binding Param16}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param16}"/>
-                                            <TextBlock Grid.Column="23" Text="{Binding Param17}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param17}"/>
-                                            <TextBlock Grid.Column="24" Text="{Binding Param18}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param18}"/>
-                                            <TextBlock Grid.Column="25" Text="{Binding Param19}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param19}"/>
-                                            <TextBlock Grid.Column="26" Text="{Binding Param20}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param20}"/>
-                                            <TextBlock Grid.Column="27" Text="{Binding Param21}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param21}"/>
-                                            <TextBlock Grid.Column="28" Text="{Binding Param22}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param22}"/>
-                                            <TextBlock Grid.Column="29" Text="{Binding Param23}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param23}"/>
-                                            <TextBlock Grid.Column="30" Text="{Binding Param24}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param24}"/>
-                                            <TextBlock Grid.Column="31" Text="{Binding Param25}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param25}"/>
-                                            <TextBlock Grid.Column="32" Text="{Binding Param26}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param26}"/>
-                                            <TextBlock Grid.Column="33" Text="{Binding Param27}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param27}"/>
-                                            <TextBlock Grid.Column="34" Text="{Binding Param28}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param28}"/>
-                                            <TextBlock Grid.Column="35" Text="{Binding Param29}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param29}"/>
-                                            <TextBlock Grid.Column="36" Text="{Binding Param30}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param30}"/>
-                                            <TextBlock Grid.Column="37" Text="{Binding Param31}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param31}"/>
-                                            <TextBlock Grid.Column="38" Text="{Binding Param32}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param32}"/>
-                                            <TextBlock Grid.Column="39" Text="{Binding Param33}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param33}"/>
-                                            <TextBlock Grid.Column="40" Text="{Binding Param34}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param34}"/>
-                                            <TextBlock Grid.Column="41" Text="{Binding Param35}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param35}"/>
-                                            <TextBlock Grid.Column="42" Text="{Binding Param36}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param36}"/>
-                                            <TextBlock Grid.Column="43" Text="{Binding Param37}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param37}"/>
-                                            <TextBlock Grid.Column="44" Text="{Binding Param38}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param38}"/>
-                                            <TextBlock Grid.Column="45" Text="{Binding Param39}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param39}"/>
-                                            <TextBlock Grid.Column="46" Text="{Binding Param40}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param40}"/>
-                                            <TextBlock Grid.Column="47" Text="{Binding Param41}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param41}"/>
-                                            <TextBlock Grid.Column="48" Text="{Binding Param42}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param42}"/>
-                                            <TextBlock Grid.Column="49" Text="{Binding Param43}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param43}"/>
-                                            <TextBlock Grid.Column="50" Text="{Binding Param44}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param44}"/>
-                                            <TextBlock Grid.Column="51" Text="{Binding Param45}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param45}"/>
-                                            <TextBlock Grid.Column="52" Text="{Binding Param46}"
-                                                       Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                       TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                       ToolTip="{Binding Param46}"/>
-                                                            </Grid>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam01"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam02"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam03"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam04"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam05"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam06"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam07"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam08"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam09"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam10"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam11"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam12"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam13"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam14"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam15"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam16"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam17"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam18"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam19"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam20"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam21"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam22"/>
+                                                                        <ColumnDefinition Width="300" SharedSizeGroup="procParam23"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam24"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam25"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam26"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam27"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam28"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam29"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam30"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam31"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam32"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam33"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam34"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam35"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam36"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam37"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam38"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam39"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam40"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam41"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam42"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam43"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam44"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam45"/>
+                                                                        <ColumnDefinition Width="120" SharedSizeGroup="procParam46"/>
+                                                                    </Grid.ColumnDefinitions>
 
-                                                            <!-- ⚡ FUNCTIONS (Nested) -->
-                                                            <Border Grid.Row="1"
-                                                                    Margin="36,12,0,0"
-                                                                    Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                                <ItemsControl ItemsSource="{Binding Functions}">
-                                                                    <ItemsControl.ItemTemplate>
-                                                                        <DataTemplate>
-                                                                            <Border Background="{DynamicResource CardBackgroundBrush}"
-                                                                                    BorderBrush="{DynamicResource BorderBrush}"
-                                                                                    BorderThickness="1"
-                                                                                    CornerRadius="4"
-                                                                                    Padding="10,6"
-                                                                                    Margin="0,0,0,4">
-                                                                                <Grid>
-                                                                                    <Grid.ColumnDefinitions>
-                                                                                        <ColumnDefinition Width="24"/>
-                                                                                        <ColumnDefinition Width="200"/>
-                                                                                        <ColumnDefinition Width="*"/>
-                                                                                        <ColumnDefinition Width="160"/>
-                                                                                    </Grid.ColumnDefinitions>
+                                                                    <ToggleButton Grid.Column="0"
+                                                                                  Style="{StaticResource ExpandToggle}"
+                                                                                  IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                                                  Width="20" Height="20"
+                                                                                  VerticalAlignment="Center"
+                                                                                  HorizontalAlignment="Center"/>
 
-                                                                                    <!-- Icon -->
-                                                                                    <Border Grid.Column="0"
-                                                                                            Width="18" Height="18"
-                                                                                            Background="{DynamicResource PrimaryBlueBrush}"
-                                                                                            CornerRadius="4"
-                                                                                            Margin="0,0,8,0">
-                                                                                        <TextBlock Text="ƒ"
-                                                                                                   Foreground="White"
-                                                                                                   FontWeight="Bold"
-                                                                                                   FontSize="10"
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                               TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                               ToolTip="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"/>
+
+                                                                    <!-- WEB3 Operator -->
+                                                                    <TextBlock Grid.Column="2"
+                                                                               Text="{Binding WEB3Operator}"
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                               TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                               ToolTip="{Binding WEB3Operator}"/>
+
+                                                                    <!-- Process Name -->
+                                                                    <TextBlock Grid.Column="3"
+                                                                               Text="{Binding ProcessName}"
+                                                                               Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                               TextAlignment="Left" TextTrimming="CharacterEllipsis"
+                                                                               TextWrapping="Wrap"
+                                                                               ToolTip="{Binding ProcessName}"/>
+
+                                                                    <TextBlock Grid.Column="4" Text="{Binding ProcessID, StringFormat='{}{0:0.##}'}"
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                               TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                               ToolTip="{Binding ProcessID, StringFormat='{}{0:0.##}'}"/>
+
+                                                                    <TextBlock Grid.Column="5" Text="{Binding Pass_Fail_WEB3Operator}"
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                               TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                               ToolTip="{Binding Pass_Fail_WEB3Operator}"/>
+
+                                                                    <TextBlock Grid.Column="6" Text="{Binding LastRunning}"
+                                                                               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                               TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                               ToolTip="{Binding LastRunning}"/>
+
+                                                                    <!-- Params 1..46 -->
+                                                                    <TextBlock Grid.Column="7"  Text="{Binding Param1}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param1}"/>
+                                                                    <TextBlock Grid.Column="8"  Text="{Binding Param2}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param2}"/>
+                                                                    <TextBlock Grid.Column="9"  Text="{Binding Param3}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param3}"/>
+                                                                    <TextBlock Grid.Column="10" Text="{Binding Param4}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param4}"/>
+                                                                    <TextBlock Grid.Column="11" Text="{Binding Param5}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param5}"/>
+                                                                    <TextBlock Grid.Column="12" Text="{Binding Param6}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param6}"/>
+                                                                    <TextBlock Grid.Column="13" Text="{Binding Param7}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param7}"/>
+                                                                    <TextBlock Grid.Column="14" Text="{Binding Param8}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param8}"/>
+                                                                    <TextBlock Grid.Column="15" Text="{Binding Param9}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param9}"/>
+                                                                    <TextBlock Grid.Column="16" Text="{Binding Param10}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param10}"/>
+                                                                    <TextBlock Grid.Column="17" Text="{Binding Param11}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param11}"/>
+                                                                    <TextBlock Grid.Column="18" Text="{Binding Param12}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param12}"/>
+                                                                    <TextBlock Grid.Column="19" Text="{Binding Param13}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param13}"/>
+                                                                    <TextBlock Grid.Column="20" Text="{Binding Param14}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param14}"/>
+                                                                    <TextBlock Grid.Column="21" Text="{Binding Param15}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param15}"/>
+                                                                    <TextBlock Grid.Column="22" Text="{Binding Param16}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param16}"/>
+                                                                    <TextBlock Grid.Column="23" Text="{Binding Param17}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param17}"/>
+                                                                    <TextBlock Grid.Column="24" Text="{Binding Param18}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param18}"/>
+                                                                    <TextBlock Grid.Column="25" Text="{Binding Param19}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param19}"/>
+                                                                    <TextBlock Grid.Column="26" Text="{Binding Param20}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param20}"/>
+                                                                    <TextBlock Grid.Column="27" Text="{Binding Param21}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param21}"/>
+                                                                    <TextBlock Grid.Column="28" Text="{Binding Param22}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param22}"/>
+                                                                    <TextBlock Grid.Column="29" Text="{Binding Param23}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param23}"/>
+                                                                    <TextBlock Grid.Column="30" Text="{Binding Param24}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param24}"/>
+                                                                    <TextBlock Grid.Column="31" Text="{Binding Param25}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param25}"/>
+                                                                    <TextBlock Grid.Column="32" Text="{Binding Param26}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param26}"/>
+                                                                    <TextBlock Grid.Column="33" Text="{Binding Param27}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param27}"/>
+                                                                    <TextBlock Grid.Column="34" Text="{Binding Param28}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param28}"/>
+                                                                    <TextBlock Grid.Column="35" Text="{Binding Param29}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param29}"/>
+                                                                    <TextBlock Grid.Column="36" Text="{Binding Param30}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param30}"/>
+                                                                    <TextBlock Grid.Column="37" Text="{Binding Param31}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param31}"/>
+                                                                    <TextBlock Grid.Column="38" Text="{Binding Param32}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param32}"/>
+                                                                    <TextBlock Grid.Column="39" Text="{Binding Param33}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param33}"/>
+                                                                    <TextBlock Grid.Column="40" Text="{Binding Param34}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param34}"/>
+                                                                    <TextBlock Grid.Column="41" Text="{Binding Param35}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param35}"/>
+                                                                    <TextBlock Grid.Column="42" Text="{Binding Param36}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param36}"/>
+                                                                    <TextBlock Grid.Column="43" Text="{Binding Param37}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param37}"/>
+                                                                    <TextBlock Grid.Column="44" Text="{Binding Param38}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param38}"/>
+                                                                    <TextBlock Grid.Column="45" Text="{Binding Param39}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param39}"/>
+                                                                    <TextBlock Grid.Column="46" Text="{Binding Param40}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param40}"/>
+                                                                    <TextBlock Grid.Column="47" Text="{Binding Param41}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param41}"/>
+                                                                    <TextBlock Grid.Column="48" Text="{Binding Param42}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param42}"/>
+                                                                    <TextBlock Grid.Column="49" Text="{Binding Param43}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param43}"/>
+                                                                    <TextBlock Grid.Column="50" Text="{Binding Param44}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param44}"/>
+                                                                    <TextBlock Grid.Column="51" Text="{Binding Param45}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param45}"/>
+                                                                    <TextBlock Grid.Column="52" Text="{Binding Param46}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param46}"/>
+                                                                </Grid>
+
+                                                                <!-- Functions -->
+                                                                <Border Grid.Row="1"
+                                                                        Margin="36,12,0,0"
+                                                                        Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <ItemsControl ItemsSource="{Binding Functions}">
+                                                                        <ItemsControl.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                                        BorderBrush="{DynamicResource BorderBrush}"
+                                                                                        BorderThickness="1"
+                                                                                        CornerRadius="4"
+                                                                                        Padding="10,6"
+                                                                                        Margin="0,0,0,4">
+                                                                                    <Grid>
+                                                                                        <Grid.ColumnDefinitions>
+                                                                                            <ColumnDefinition Width="24"/>
+                                                                                            <ColumnDefinition Width="200"/>
+                                                                                            <ColumnDefinition Width="*"/>
+                                                                                            <ColumnDefinition Width="160"/>
+                                                                                        </Grid.ColumnDefinitions>
+
+                                                                                        <Border Grid.Column="0" Width="18" Height="18"
+                                                                                                Background="{DynamicResource PrimaryBlueBrush}"
+                                                                                                CornerRadius="4"
+                                                                                                Margin="0,0,8,0">
+                                                                                            <TextBlock Text="ƒ"
+                                                                                                       Foreground="White"
+                                                                                                       FontWeight="Bold"
+                                                                                                       FontSize="10"
+                                                                                                       HorizontalAlignment="Center"
+                                                                                                       VerticalAlignment="Center"/>
+                                                                                        </Border>
+
+                                                                                        <TextBlock Grid.Column="1"
+                                                                                                   Text="{Binding FunctionName}"
+                                                                                                   Foreground="{DynamicResource PrimaryBlueBrush}"
+                                                                                                   FontFamily="Consolas"
+                                                                                                   FontSize="11"
+                                                                                                   FontWeight="Medium"
+                                                                                                   VerticalAlignment="Center"
                                                                                                    HorizontalAlignment="Center"
-                                                                                                   VerticalAlignment="Center"/>
-                                                                                    </Border>
+                                                                                                   TextAlignment="Center"
+                                                                                                   Margin="0,0,10,0"
+                                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                                   ToolTip="{Binding FunctionName}"/>
 
-                                                                                    <!-- Function Name -->
-                                                                                    <TextBlock Grid.Column="1"
-                                                                                               Text="{Binding FunctionName}"
-                                                                                               Foreground="{DynamicResource PrimaryBlueBrush}"
-                                                                                               FontFamily="Consolas"
-                                                                                               FontSize="11"
-                                                                                               FontWeight="Medium"
-                                                                                               VerticalAlignment="Center"
-                                                                                               HorizontalAlignment="Center"
-                                                                                               TextAlignment="Center"
-                                                                                               Margin="0,0,10,0"
-                                                                                               TextTrimming="CharacterEllipsis"
-                                                                                               ToolTip="{Binding FunctionName}"/>
+                                                                                        <TextBlock Grid.Column="2"
+                                                                                                   Text="{Binding FunctionDescription}"
+                                                                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                                                   FontSize="10"
+                                                                                                   VerticalAlignment="Center"
+                                                                                                   HorizontalAlignment="Center"
+                                                                                                   TextAlignment="Center"
+                                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                                   ToolTip="{Binding FunctionDescription}"/>
 
-                                                                                    <!-- Description -->
-                                                                                    <TextBlock Grid.Column="2"
-                                                                                               Text="{Binding FunctionDescription}"
-                                                                                               Foreground="{DynamicResource TextTertiaryBrush}"
-                                                                                               FontSize="10"
-                                                                                               VerticalAlignment="Center"
-                                                                                               HorizontalAlignment="Center"
-                                                                                               TextAlignment="Center"
-                                                                                               TextTrimming="CharacterEllipsis"
-                                                                                               ToolTip="{Binding FunctionDescription}"/>
-
-                                                                                    <!-- Last Updated -->
-                                                                                    <TextBlock Grid.Column="3"
-                                                                                               Text="{Binding LastUpdated}"
-                                                                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                                               FontSize="10"
-                                                                                               VerticalAlignment="Center"
-                                                                                               HorizontalAlignment="Center"
-                                                                                               TextAlignment="Center"
-                                                                                               TextTrimming="CharacterEllipsis"
-                                                                                               ToolTip="{Binding LastUpdated}"/>
-                                                                                </Grid>
-                                                                            </Border>
-                                                                        </DataTemplate>
-                                                                    </ItemsControl.ItemTemplate>
-                                                                </ItemsControl>
-                                                            </Border>
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                                                                        <TextBlock Grid.Column="3"
+                                                                                                   Text="{Binding LastUpdated}"
+                                                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                                                   FontSize="10"
+                                                                                                   VerticalAlignment="Center"
+                                                                                                   HorizontalAlignment="Center"
+                                                                                                   TextAlignment="Center"
+                                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                                   ToolTip="{Binding LastUpdated}"/>
+                                                                                    </Grid>
+                                                                                </Border>
+                                                                            </DataTemplate>
+                                                                        </ItemsControl.ItemTemplate>
+                                                                    </ItemsControl>
+                                                                </Border>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
                                     </Grid>
                                 </Border>
                             </Grid>

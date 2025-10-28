@@ -78,6 +78,7 @@
                        Orientation="Horizontal" 
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
+                       Margin="200,0,0,0"
                        DataContext="{x:Static stats:TestStatisticsService.Instance}">
                     <!-- Active Badge -->
                     <Border Background="{DynamicResource CardBackgroundBrush}"
