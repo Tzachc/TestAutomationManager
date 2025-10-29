@@ -17,7 +17,7 @@
         <!-- Converters -->
         <converters:RunStatusToColorConverter x:Key="RunStatusToColorConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-
+        
         <!-- Shared function column sizing -->
         <sys:Double x:Key="FunctionPositionColumnMinWidth">70</sys:Double>
         <sys:Double x:Key="FunctionWeb3OperatorColumnMinWidth">60</sys:Double>
@@ -818,34 +818,34 @@
                                                                                 Background="{DynamicResource SecondaryBackgroundBrush}"
                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                 BorderThickness="0,0,0,1"
-                                                                                Padding="20,8,16,8"
+                                                                                Padding="15,8,16,8"
                                                                                 Margin="0,0,0,6">
                                                                             <Grid Grid.IsSharedSizeScope="True" MinWidth="6200">
                                                                                 <Grid.ColumnDefinitions>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPositionColumnMinWidth}" SharedSizeGroup="funcPosition"/>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionWeb3OperatorColumnMinWidth}" SharedSizeGroup="funcWeb3Operator"/>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPassFailColumnMinWidth}" SharedSizeGroup="funcPassFail"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionDescriptionColumnMinWidth}" SharedSizeGroup="funcDescription"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionNameColumnMinWidth}" SharedSizeGroup="funcName"/>
+                                                                                    <ColumnDefinition Width="400" MinWidth="{StaticResource FunctionDescriptionColumnMinWidth}" SharedSizeGroup="funcDescription"/>
+                                                                                    <ColumnDefinition Width="750" MinWidth="{StaticResource FunctionNameColumnMinWidth}" SharedSizeGroup="funcName"/>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionCommentsColumnMinWidth}" SharedSizeGroup="funcComments"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam01"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam02"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam03"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam04"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam05"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam06"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam07"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam08"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam09"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam10"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam11"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam12"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam13"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam14"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam15"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam16"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam17"/>
-                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam18"/>
+                                                                                    <ColumnDefinition Width="100" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam01"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam02"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam03"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam04"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam05"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam06"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam07"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam08"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam09"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam10"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam11"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam12"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam13"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam14"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam15"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam16"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam17"/>
+                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam18"/>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam19"/>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam20"/>
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam21"/>
@@ -860,7 +860,7 @@
                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam30"/>
                                                                                 </Grid.ColumnDefinitions>
 
-                                                                                <TextBlock Grid.Column="0" Text="FUNCTION POSITION" FontSize="11" FontWeight="Bold"
+                                                                                <TextBlock Grid.Column="0" Text="POSITION" FontSize="11" FontWeight="Bold"
                                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                                                                            HorizontalAlignment="Center" TextAlignment="Center"/>
                                                                                 <TextBlock Grid.Column="1" Text="WEB3 OPERATOR" FontSize="11" FontWeight="Bold"
@@ -874,7 +874,7 @@
                                                                                            HorizontalAlignment="Left" TextAlignment="Left"/>
                                                                                 <TextBlock Grid.Column="4" Text="FUNCTION NAME" FontSize="11" FontWeight="Bold"
                                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                                           HorizontalAlignment="Left" TextAlignment="Left"/>
+                                                                                           HorizontalAlignment="Center" TextAlignment="Center"/>
                                                                                 <TextBlock Grid.Column="5" Text="COMMENTS" FontSize="11" FontWeight="Bold"
                                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                                                                            HorizontalAlignment="Left" TextAlignment="Left"/>
@@ -937,34 +937,34 @@
                                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                                 BorderThickness="1"
                                                                                                 CornerRadius="6"
-                                                                                                Padding="16,10"
+                                                                                                Padding="40,10"
                                                                                                 Margin="0,0,0,8">
                                                                                             <Grid Grid.IsSharedSizeScope="True" MinWidth="6200">
                                                                                                 <Grid.ColumnDefinitions>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPositionColumnMinWidth}" SharedSizeGroup="funcPosition"/>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionWeb3OperatorColumnMinWidth}" SharedSizeGroup="funcWeb3Operator"/>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPassFailColumnMinWidth}" SharedSizeGroup="funcPassFail"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionDescriptionColumnMinWidth}" SharedSizeGroup="funcDescription"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionNameColumnMinWidth}" SharedSizeGroup="funcName"/>
+                                                                                                    <ColumnDefinition Width="400" MinWidth="{StaticResource FunctionDescriptionColumnMinWidth}" SharedSizeGroup="funcDescription"/>
+                                                                                                    <ColumnDefinition Width="750" MinWidth="{StaticResource FunctionNameColumnMinWidth}" SharedSizeGroup="funcName"/>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionCommentsColumnMinWidth}" SharedSizeGroup="funcComments"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam01"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam02"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam03"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam04"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam05"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam06"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam07"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam08"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam09"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam10"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam11"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam12"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam13"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam14"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam15"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam16"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam17"/>
-                                                                                                    <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam18"/>
+                                                                                                    <ColumnDefinition Width="100" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam01"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam02"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam03"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam04"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam05"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam06"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam07"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam08"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam09"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam10"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam11"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam12"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam13"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam14"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam15"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam16"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam17"/>
+                                                                                                    <ColumnDefinition Width="300" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam18"/>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam19"/>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam20"/>
                                                                                                     <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam21"/>
@@ -981,9 +981,9 @@
 
                                                                                                 <TextBlock Grid.Column="0"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                                                           FontSize="11"
+                                                                                                           FontSize="12"
                                                                                                            VerticalAlignment="Center"
-                                                                                                           HorizontalAlignment="Center"
+                                                                                                           HorizontalAlignment="Left"
                                                                                                            TextAlignment="Center"
                                                                                                            TextTrimming="CharacterEllipsis"
                                                                                                            ToolTip="{Binding FunctionPosition, StringFormat='{}{0}'}">
@@ -997,7 +997,7 @@
                                                                                                 <TextBlock Grid.Column="1"
                                                                                                            Text="{Binding WEB3Operator}"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                                                           FontSize="11"
+                                                                                                           FontSize="12"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Center"
                                                                                                            TextAlignment="Center"
@@ -1007,7 +1007,7 @@
                                                                                                 <TextBlock Grid.Column="2"
                                                                                                            Text="{Binding Pass_Fail_WEB3Operator}"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                                                           FontSize="11"
+                                                                                                           FontSize="12"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Center"
                                                                                                            TextAlignment="Center"
@@ -1017,57 +1017,61 @@
                                                                                                 <TextBlock Grid.Column="3"
                                                                                                            Text="{Binding FunctionDescription}"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                                                           FontSize="11"
+                                                                                                           FontSize="12"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Left"
                                                                                                            TextAlignment="Left"
+                                                                                                           TextWrapping="Wrap"
                                                                                                            TextTrimming="CharacterEllipsis"
                                                                                                            ToolTip="{Binding FunctionDescription}"/>
 
                                                                                                 <TextBlock Grid.Column="4"
                                                                                                            Text="{Binding FunctionName}"
                                                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
-                                                                                                           FontSize="11"
+                                                                                                           FontSize="12"
                                                                                                            FontWeight="SemiBold"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Left"
                                                                                                            TextAlignment="Left"
+                                                                                                           TextWrapping="Wrap"
                                                                                                            TextTrimming="CharacterEllipsis"
                                                                                                            ToolTip="{Binding FunctionName}"/>
 
                                                                                                 <TextBlock Grid.Column="5"
                                                                                                            Text="{Binding Comments}"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                                                           FontSize="11"
+                                                                                                           FontSize="12"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Left"
                                                                                                            TextAlignment="Left"
                                                                                                            TextTrimming="CharacterEllipsis"
                                                                                                            ToolTip="{Binding Comments}"/>
 
-                                                                                                <TextBlock Grid.Column="6"  Text="{Binding Param1}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param1}"/>
-                                                                                                <TextBlock Grid.Column="7"  Text="{Binding Param2}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param2}"/>
-                                                                                                <TextBlock Grid.Column="8"  Text="{Binding Param3}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param3}"/>
-                                                                                                <TextBlock Grid.Column="9"  Text="{Binding Param4}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param4}"/>
-                                                                                                <TextBlock Grid.Column="10" Text="{Binding Param5}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param5}"/>
-                                                                                                <TextBlock Grid.Column="11" Text="{Binding Param6}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param6}"/>
-                                                                                                <TextBlock Grid.Column="12" Text="{Binding Param7}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param7}"/>
-                                                                                                <TextBlock Grid.Column="13" Text="{Binding Param8}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param8}"/>
-                                                                                                <TextBlock Grid.Column="14" Text="{Binding Param9}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param9}"/>
-                                                                                                <TextBlock Grid.Column="15" Text="{Binding Param10}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param10}"/>
-                                                                                                <TextBlock Grid.Column="16" Text="{Binding Param11}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param11}"/>
-                                                                                                <TextBlock Grid.Column="17" Text="{Binding Param12}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param12}"/>
-                                                                                                <TextBlock Grid.Column="18" Text="{Binding Param13}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param13}"/>
-                                                                                                <TextBlock Grid.Column="19" Text="{Binding Param14}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param14}"/>
-                                                                                                <TextBlock Grid.Column="20" Text="{Binding Param15}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param15}"/>
-                                                                                                <TextBlock Grid.Column="21" Text="{Binding Param16}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param16}"/>
-                                                                                                <TextBlock Grid.Column="22" Text="{Binding Param17}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param17}"/>
-                                                                                                <TextBlock Grid.Column="23" Text="{Binding Param18}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param18}"/>
-                                                                                                <TextBlock Grid.Column="24" Text="{Binding Param19}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param19}"/>
-                                                                                                <TextBlock Grid.Column="25" Text="{Binding Param20}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param20}"/>
-                                                                                                <TextBlock Grid.Column="26" Text="{Binding Param21}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param21}"/>
-                                                                                                <TextBlock Grid.Column="27" Text="{Binding Param22}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param22}"/>
-                                                                                                <TextBlock Grid.Column="28" Text="{Binding Param23}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param23}"/>
+                                                                                                <TextBlock Grid.Column="6"  Text="{Binding Param1}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param1}"/>
+                                                                                                <TextBlock Grid.Column="7"  Text="{Binding Param2}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param2}"/>
+                                                                                                <TextBlock Grid.Column="8"  Text="{Binding Param3}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param3}"/>
+                                                                                                <TextBlock Grid.Column="9"  Text="{Binding Param4}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param4}"/>
+                                                                                                <TextBlock Grid.Column="10" Text="{Binding Param5}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param5}"/>
+                                                                                                <TextBlock Grid.Column="11" Text="{Binding Param6}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param6}"/>
+                                                                                                <TextBlock Grid.Column="12" Text="{Binding Param7}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param7}"/>
+                                                                                                <TextBlock Grid.Column="13" Text="{Binding Param8}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param8}"/>
+                                                                                                <TextBlock Grid.Column="14" Text="{Binding Param9}"  Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param9}"/>
+                                                                                                <TextBlock Grid.Column="15" Text="{Binding Param10}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param10}"/>
+                                                                                                <TextBlock Grid.Column="16" Text="{Binding Param11}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param11}"/>
+                                                                                                <TextBlock Grid.Column="17" Text="{Binding Param12}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param12}"/>
+                                                                                                <TextBlock Grid.Column="18" Text="{Binding Param13}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param13}"/>
+                                                                                                <TextBlock Grid.Column="19" Text="{Binding Param14}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param14}"/>
+                                                                                                <TextBlock Grid.Column="20" Text="{Binding Param15}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param15}"/>
+                                                                                                <TextBlock Grid.Column="21" Text="{Binding Param16}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param16}"/>
+                                                                                                <TextBlock Grid.Column="22" Text="{Binding Param17}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param17}"/>
+                                                                                                <TextBlock Grid.Column="23" Text="{Binding Param18}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param18}"/>
+                                                                                                <TextBlock Grid.Column="24" Text="{Binding Param19}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param19}"/>
+                                                                                                <TextBlock Grid.Column="25" Text="{Binding Param20}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param20}"/>
+                                                                                                <TextBlock Grid.Column="26" Text="{Binding Param21}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param21}"/>
+                                                                                                <TextBlock Grid.Column="27" Text="{Binding Param22}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param22}"/>
+                                                                                                <TextBlock Grid.Column="28" Text="{Binding Param23}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param23}"/>
+                                                                                                <TextBlock Grid.Column="28" Text="{Binding Param23}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param23}"/>
+                                                                                                <TextBlock Grid.Column="28" Text="{Binding Param23}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param23}"/>
                                                                                                 <TextBlock Grid.Column="29" Text="{Binding Param24}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param24}"/>
                                                                                                 <TextBlock Grid.Column="30" Text="{Binding Param25}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param25}"/>
                                                                                                 <TextBlock Grid.Column="31" Text="{Binding Param26}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Param26}"/>
