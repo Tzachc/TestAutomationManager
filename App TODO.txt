@@ -1,0 +1,36 @@
+* username and password, add columns in DB to see who made changes
+* switch Schemas from the UI (load in new app or replace current).
+* add new process from the Tests view.
+* add new function.
+* edit functionality for all.
+* improve extTest tables.
+* improve the migration program from Access to SQL - need IterationName to always appear first.
+* UI jump when clicking on process and functions inside the TestsView.
+
+
+
+
+Migrator from Access to SQL:
+save location of the project.
+CD to the folder.
+build the program: dotnet build -c Release
+run it with the parameters: dotnet run -- --server "(localdb)\Local" --database "AutomationDB" --files "C:\Users\Tzach\Desktop\PRODUCTION_Selenium.accdb"
+
+
+
+DROP tables:
+
+USE AutomationDB;
+GO
+
+-- 1️⃣ Drop all tables inside the schema
+DECLARE @sql NVARCHAR(MAX) = N'';
+SELECT @sql += N'DROP TABLE [' + s.name + '].[' + t.name + '];' + CHAR(13)
+FROM sys.tables t
+JOIN sys.schemas s ON t.schema_id = s.schema_id
+WHERE s.name = N'PRODUCTION_Selenium';
+EXEC sp_executesql @sql;
+
+-- 2️⃣ Drop the schema itself
+DROP SCHEMA [PRODUCTION_Selenium];
+GO
