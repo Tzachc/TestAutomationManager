@@ -468,8 +468,8 @@ namespace TestAutomationManager.Views
                     double progress = 10 + (processed / (double)totalTests * 80); // 10-90%
                     UpdateLoadingProgress($"Loaded {processed}/{totalTests} tests...", progress);
 
-                    // ⭐ CRITICAL: Yield to UI thread so progress bar can animate smoothly!
-                    await System.Threading.Tasks.Task.Delay(1);
+                    // ⭐ CRITICAL: Give animation time to complete (150ms delay for 100ms animation)
+                    await System.Threading.Tasks.Task.Delay(150);
                 }
 
                 // Update statistics
@@ -914,6 +914,7 @@ namespace TestAutomationManager.Views
                 LoadingOverlay.Visibility = Visibility.Visible;
                 LoadingProgressBar.Value = progress;
                 LoadingProgressText.Text = message;
+                LoadingPercentageText.Text = $"{progress:F0}%";
             });
         }
 
@@ -929,7 +930,7 @@ namespace TestAutomationManager.Views
                 {
                     From = LoadingProgressBar.Value,
                     To = progress,
-                    Duration = TimeSpan.FromMilliseconds(200), // Smooth 200ms transition
+                    Duration = TimeSpan.FromMilliseconds(100), // Fast 100ms animation
                     EasingFunction = new System.Windows.Media.Animation.QuadraticEase
                     {
                         EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
@@ -938,6 +939,9 @@ namespace TestAutomationManager.Views
 
                 LoadingProgressBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, animation);
                 LoadingProgressText.Text = message;
+
+                // ⭐ Update percentage display
+                LoadingPercentageText.Text = $"{progress:F0}%";
             });
         }
 
