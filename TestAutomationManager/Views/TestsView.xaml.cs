@@ -355,27 +355,37 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Handle database updates (called when external changes detected)
-        /// Preserves UI state like IsExpanded to avoid disrupting user experience
+        /// Handle INCREMENTAL database updates (multi-user collaboration)
+        /// Only updates the SPECIFIC tests that changed - NOT a full reload!
+        /// FAST - no UI freeze!
         /// </summary>
-        private void OnDatabaseTestsUpdated(object sender, List<Test> updatedTests)
+        private void OnDatabaseChanged(object sender, Services.DatabaseChangeEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("🔄 Applying database updates to UI...");
+            if (!e.HasChanges)
+                return;
 
-            // ⭐ STEP 1: Build dictionary of existing tests with their pre-loaded data
-            var existingTestsDict = _allTests.ToDictionary(t => t.Id, t => t);
+            System.Diagnostics.Debug.WriteLine($"⚡ Applying INCREMENTAL updates: {e.ChangedTests.Count} tests");
 
-            // ⭐ STEP 2: Update tests while preserving pre-loaded processes/functions
-            _allTests.Clear();
-            foreach (var freshTest in updatedTests)
+            // ⭐ STEP 1: Handle deleted tests
+            foreach (var deletedId in e.DeletedTestIds)
             {
-                Test testToAdd;
-
-                // Check if we have an existing test with pre-loaded data
-                if (existingTestsDict.TryGetValue(freshTest.Id, out var existingTest))
+                var testToRemove = _allTests.FirstOrDefault(t => t.Id == deletedId);
+                if (testToRemove != null)
                 {
-                    // ⭐ PRESERVE pre-loaded data from existing test
-                    // Update database properties from fresh test
+                    _allTests.Remove(testToRemove);
+                    Tests.Remove(testToRemove);
+                    System.Diagnostics.Debug.WriteLine($"🗑️ Removed test #{deletedId}");
+                }
+            }
+
+            // ⭐ STEP 2: Handle new and changed tests
+            foreach (var freshTest in e.ChangedTests)
+            {
+                var existingTest = _allTests.FirstOrDefault(t => t.Id == freshTest.Id);
+
+                if (existingTest != null)
+                {
+                    // ⭐ UPDATE existing test IN-PLACE (preserve pre-loaded data!)
                     existingTest.TestName = freshTest.TestName;
                     existingTest.RunStatus = freshTest.RunStatus;
                     existingTest.LastRunning = freshTest.LastRunning;
@@ -390,28 +400,32 @@ namespace TestAutomationManager.Views
                     existingTest.SnapshotMultipleFailure = freshTest.SnapshotMultipleFailure;
                     existingTest.DisableKillDriver = freshTest.DisableKillDriver;
 
-                    // Keep existing IsActive, Category (UI-only properties)
-                    // Keep existing Processes and AreProcessesLoaded flag (pre-loaded data!)
+                    // Keep existing Processes and AreProcessesLoaded (pre-loaded data!)
+                    // INotifyPropertyChanged will auto-update the UI!
 
-                    testToAdd = existingTest;
+                    System.Diagnostics.Debug.WriteLine($"✏️ Updated test #{freshTest.Id} in-place");
                 }
                 else
                 {
-                    // New test, subscribe to events
+                    // ⭐ NEW test - add it
                     freshTest.PropertyChanged += Test_PropertyChanged;
-                    testToAdd = freshTest;
-                }
+                    _allTests.Add(freshTest);
 
-                _allTests.Add(testToAdd);
+                    // Add to filtered list if it matches current filter
+                    if (string.IsNullOrEmpty(_currentSearchQuery) ||
+                        freshTest.Name.Contains(_currentSearchQuery, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Tests.Add(freshTest);
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"🆕 Added new test #{freshTest.Id}");
+                }
             }
 
-            // ⭐ STEP 3: Re-apply current filter
-            FilterTests(_currentSearchQuery);
-
-            // ⭐ STEP 4: Update statistics
+            // ⭐ STEP 3: Update statistics (minimal impact)
             UpdateStatistics();
 
-            System.Diagnostics.Debug.WriteLine("✓ UI synchronized with database (pre-loaded data preserved)");
+            System.Diagnostics.Debug.WriteLine($"✅ Incremental update complete - NO full reload!");
         }
 
         // ================================================
@@ -726,9 +740,9 @@ namespace TestAutomationManager.Views
 
         private void TestsView_Loaded(object sender, RoutedEventArgs e)
         {
-            // Make sure we subscribe exactly once
-            DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
-            DatabaseWatcherService.Instance.TestsUpdated += OnDatabaseTestsUpdated;
+            // Make sure we subscribe exactly once to the NEW incremental update event
+            DatabaseWatcherService.Instance.DatabaseChanged -= OnDatabaseChanged;
+            DatabaseWatcherService.Instance.DatabaseChanged += OnDatabaseChanged;
 
             // Ensure watcher is running (idempotent)
             if (!DatabaseWatcherService.Instance.IsWatching)
@@ -738,14 +752,14 @@ namespace TestAutomationManager.Views
             SyncHeaderToBody();
             UpdateProcessHeaderPositions();
 
-            System.Diagnostics.Debug.WriteLine("✓ TestsView Loaded: subscribed & watcher ensured");
+            System.Diagnostics.Debug.WriteLine("✓ TestsView Loaded: subscribed to incremental updates");
         }
 
         private void TestsView_Unloaded(object sender, RoutedEventArgs e)
         {
             // Only unsubscribe this view's handler; DO NOT stop the global watcher here
-            DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
-            System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed (watcher left running)");
+            DatabaseWatcherService.Instance.DatabaseChanged -= OnDatabaseChanged;
+            System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed from incremental updates (watcher left running)");
 
             // Safety: release capture if leaving while panning
             if (_isPanning && MainScrollViewer != null)

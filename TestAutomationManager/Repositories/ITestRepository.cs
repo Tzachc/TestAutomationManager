@@ -80,5 +80,14 @@ namespace TestAutomationManager.Repositories
         /// Get total function count across all tests (optimized for statistics)
         /// </summary>
         Task<int> GetTotalFunctionCountAsync();
+
+        // ================================================
+        // DIFFERENTIAL UPDATE METHODS (Multi-user collaboration)
+        // ================================================
+
+        /// <summary>
+        /// Get specific tests by their IDs (for incremental updates)
+        /// </summary>
+        Task<List<Test>> GetTestsByIdsAsync(List<int> testIds);
     }
 }
