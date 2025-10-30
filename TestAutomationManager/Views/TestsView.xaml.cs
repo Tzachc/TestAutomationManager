@@ -436,27 +436,46 @@ namespace TestAutomationManager.Views
                 // Get all tests from database (async)
                 var testsFromDb = await _repository.GetAllTestsAsync();
 
-                // Update progress
-                UpdateLoadingProgress("Processing tests...", 50);
-
-                // ⭐ Let progress update render
-                await System.Threading.Tasks.Task.Delay(100);
+                int totalTests = testsFromDb.Count;
+                UpdateLoadingProgress($"Processing {totalTests} tests...", 10);
+                await System.Threading.Tasks.Task.Delay(10);
 
                 // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // Add tests to collections and subscribe to expansion events
-                foreach (var test in testsFromDb)
-                {
-                    Tests.Add(test);
-                    _allTests.Add(test);
+                // ⭐ Process tests in BATCHES to keep UI responsive
+                const int batchSize = 50;
+                int processed = 0;
 
-                    // ⭐ Subscribe to PropertyChanged for lazy loading
-                    test.PropertyChanged += Test_PropertyChanged;
+                for (int i = 0; i < testsFromDb.Count; i += batchSize)
+                {
+                    // Process a batch
+                    int batchEnd = Math.Min(i + batchSize, testsFromDb.Count);
+
+                    for (int j = i; j < batchEnd; j++)
+                    {
+                        var test = testsFromDb[j];
+                        Tests.Add(test);
+                        _allTests.Add(test);
+
+                        // ⭐ Subscribe to PropertyChanged for lazy loading
+                        test.PropertyChanged += Test_PropertyChanged;
+                        processed++;
+                    }
+
+                    // Update progress after each batch
+                    double progress = 10 + (processed / (double)totalTests * 80); // 10-90%
+                    UpdateLoadingProgress($"Loaded {processed}/{totalTests} tests...", progress);
+
+                    // ⭐ CRITICAL: Yield to UI thread so progress bar can update!
+                    await System.Threading.Tasks.Task.Delay(1);
                 }
 
                 // Update statistics
+                UpdateLoadingProgress("Finalizing...", 95);
+                await System.Threading.Tasks.Task.Delay(10);
+
                 UpdateStatistics();
 
                 // Update progress
@@ -468,7 +487,7 @@ namespace TestAutomationManager.Views
                 DataLoaded?.Invoke(this, EventArgs.Empty);
 
                 // Hide loading screen after a short delay
-                await System.Threading.Tasks.Task.Delay(500);
+                await System.Threading.Tasks.Task.Delay(300);
                 HideLoadingScreen();
 
                 // ⭐ START BACKGROUND PRE-LOADING after UI is responsive
