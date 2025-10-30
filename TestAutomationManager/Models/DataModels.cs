@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 using TestAutomationManager.Services.Statistics;
 
@@ -191,7 +192,9 @@ namespace TestAutomationManager.Models
 
         /// <summary>
         /// Indicates whether Processes have been loaded from database (for lazy loading)
+        /// UI-only property - not mapped to database
         /// </summary>
+        [NotMapped]
         public bool AreProcessesLoaded
         {
             get => _areProcessesLoaded;
@@ -457,7 +460,9 @@ namespace TestAutomationManager.Models
 
         /// <summary>
         /// Indicates whether Functions have been loaded from database (for lazy loading)
+        /// UI-only property - not mapped to database
         /// </summary>
+        [NotMapped]
         public bool AreFunctionsLoaded
         {
             get => _areFunctionsLoaded;
