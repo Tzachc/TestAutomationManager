@@ -444,8 +444,8 @@ namespace TestAutomationManager.Views
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ Process tests in BATCHES to keep UI responsive
-                const int batchSize = 50;
+                // ⭐ Process tests in SMALL BATCHES for smooth progress updates
+                const int batchSize = 10; // Smaller batches = smoother animation
                 int processed = 0;
 
                 for (int i = 0; i < testsFromDb.Count; i += batchSize)
@@ -464,11 +464,11 @@ namespace TestAutomationManager.Views
                         processed++;
                     }
 
-                    // Update progress after each batch
+                    // Update progress after each batch (with smooth animation)
                     double progress = 10 + (processed / (double)totalTests * 80); // 10-90%
                     UpdateLoadingProgress($"Loaded {processed}/{totalTests} tests...", progress);
 
-                    // ⭐ CRITICAL: Yield to UI thread so progress bar can update!
+                    // ⭐ CRITICAL: Yield to UI thread so progress bar can animate smoothly!
                     await System.Threading.Tasks.Task.Delay(1);
                 }
 
@@ -918,13 +918,25 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Update loading progress
+        /// Update loading progress with smooth animation
         /// </summary>
         private void UpdateLoadingProgress(string message, double progress)
         {
             Dispatcher.Invoke(() =>
             {
-                LoadingProgressBar.Value = progress;
+                // ⭐ Animate progress bar smoothly instead of jumping
+                var animation = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    From = LoadingProgressBar.Value,
+                    To = progress,
+                    Duration = TimeSpan.FromMilliseconds(200), // Smooth 200ms transition
+                    EasingFunction = new System.Windows.Media.Animation.QuadraticEase
+                    {
+                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                    }
+                };
+
+                LoadingProgressBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, animation);
                 LoadingProgressText.Text = message;
             });
         }
