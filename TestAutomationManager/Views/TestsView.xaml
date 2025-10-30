@@ -1170,8 +1170,7 @@
                                                                 Background="Transparent"/>
                                                         <Border x:Name="PART_Indicator"
                                                                 CornerRadius="16"
-                                                                HorizontalAlignment="Left"
-                                                                Background="#0078D4">
+                                                                HorizontalAlignment="Left">
                                                             <Border.Effect>
                                                                 <DropShadowEffect Color="#0078D4"
                                                                                   BlurRadius="10"
