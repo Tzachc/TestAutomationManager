@@ -11,6 +11,21 @@ using TestAutomationManager.Repositories;
 namespace TestAutomationManager.Services
 {
     /// <summary>
+    /// Event args for incremental database updates (multi-user collaboration)
+    /// Contains ONLY the items that changed - not all data!
+    /// </summary>
+    public class DatabaseChangeEventArgs : EventArgs
+    {
+        public List<int> NewTestIds { get; set; } = new List<int>();
+        public List<int> ChangedTestIds { get; set; } = new List<int>();
+        public List<int> DeletedTestIds { get; set; } = new List<int>();
+
+        public List<Test> ChangedTests { get; set; } = new List<Test>();  // Only the changed tests!
+
+        public bool HasChanges => NewTestIds.Count > 0 || ChangedTestIds.Count > 0 || DeletedTestIds.Count > 0;
+    }
+
+    /// <summary>
     /// Monitors database for external changes and updates UI (Multi-user collaboration)
     /// Detects ANY changes on ANY column and updates ONLY what changed
     /// Perfect for real-time collaboration when multiple users work in parallel
@@ -47,7 +62,12 @@ namespace TestAutomationManager.Services
         private Dictionary<int, string> _testFingerprints = new Dictionary<int, string>();
 
         /// <summary>
-        /// Event fired when specific tests are updated from database
+        /// Event fired when database changes detected (incremental updates only!)
+        /// </summary>
+        public event EventHandler<DatabaseChangeEventArgs> DatabaseChanged;
+
+        /// <summary>
+        /// Legacy event for backward compatibility (full reload)
         /// </summary>
         public event EventHandler<List<Test>> TestsUpdated;
 
@@ -192,11 +212,32 @@ namespace TestAutomationManager.Services
                 if (deletedTestIds.Count > 0)
                     System.Diagnostics.Debug.WriteLine($"🗑️ Deleted tests detected: {string.Join(", ", deletedTestIds)}");
 
-                // ⭐ STEP 5: Reload ALL tests (but OnDatabaseTestsUpdated will preserve pre-loaded data)
-                // We reload all to keep it simple, but the UI update is smart and preserves state
-                await ReloadAllTestsAsync();
+                // ⭐ STEP 5: Load ONLY the changed/new tests (not all 700!)
+                var allChangedIds = newTestIds.Concat(changedTestIds).ToList();
+                List<Test> changedTests = new List<Test>();
 
-                // ⭐ STEP 6: Update fingerprint cache
+                if (allChangedIds.Count > 0)
+                {
+                    changedTests = await _repository.GetTestsByIdsAsync(allChangedIds);
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {changedTests.Count} changed tests (NOT all 700!)");
+                }
+
+                // ⭐ STEP 6: Fire incremental update event
+                var changeEvent = new DatabaseChangeEventArgs
+                {
+                    NewTestIds = newTestIds,
+                    ChangedTestIds = changedTestIds,
+                    DeletedTestIds = deletedTestIds,
+                    ChangedTests = changedTests
+                };
+
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    DatabaseChanged?.Invoke(this, changeEvent);
+                    System.Diagnostics.Debug.WriteLine($"✓ UI notified of incremental changes");
+                });
+
+                // ⭐ STEP 7: Update fingerprint cache
                 _testFingerprints = currentFingerprints;
             }
             catch (Exception ex)
@@ -252,24 +293,6 @@ namespace TestAutomationManager.Services
 
                 return result;
             }
-        }
-
-        /// <summary>
-        /// Reload all tests from database and notify UI
-        /// </summary>
-        private async Task ReloadAllTestsAsync()
-        {
-            // Get latest tests from database
-            var currentTests = await _repository.GetAllTestsAsync();
-
-            System.Diagnostics.Debug.WriteLine($"🔄 Reloading tests for UI update");
-
-            // Notify subscribers on UI thread
-            Application.Current?.Dispatcher.Invoke(() =>
-            {
-                TestsUpdated?.Invoke(this, currentTests);
-                System.Diagnostics.Debug.WriteLine($"✓ UI notified of changes");
-            });
         }
     }
 }

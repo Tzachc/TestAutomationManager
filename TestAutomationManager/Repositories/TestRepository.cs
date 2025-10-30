@@ -441,5 +441,53 @@ namespace TestAutomationManager.Repositories
                 throw new Exception("Failed to check test ID", ex);
             }
         }
+
+        /// <summary>
+        /// Get specific tests by their IDs (for differential updates in multi-user collaboration)
+        /// Only loads the specified tests - much faster than loading all 700!
+        /// </summary>
+        public async Task<List<Test>> GetTestsByIdsAsync(List<int> testIds)
+        {
+            try
+            {
+                if (testIds == null || testIds.Count == 0)
+                    return new List<Test>();
+
+                using (var context = new TestAutomationDbContext())
+                {
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading {testIds.Count} specific tests...");
+
+                    // ✅ Load ONLY the specified tests (not all 700!)
+                    var tests = await context.Tests
+                        .Where(t => testIds.Contains(t.TestID.Value))
+                        .OrderBy(t => t.TestID)
+                        .ToListAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests (differential update)");
+
+                    // ✅ Apply UI-only settings
+                    var uiSettingsService = TestUISettingsService.Instance;
+                    foreach (var test in tests)
+                    {
+                        if (test.TestID.HasValue)
+                        {
+                            test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
+                            test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
+                        }
+
+                        // Initialize empty collections
+                        test.Processes = new ObservableCollection<Process>();
+                        test.AreProcessesLoaded = false;
+                    }
+
+                    return tests;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading specific tests: {ex.Message}");
+                throw new Exception("Failed to load tests by IDs", ex);
+            }
+        }
     }
 }
