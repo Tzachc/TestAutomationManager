@@ -380,15 +380,21 @@ namespace TestAutomationManager.Views
             _allTests.Clear();
             foreach (var test in updatedTests)
             {
+                // ⭐ Subscribe to PropertyChanged for lazy loading
+                test.PropertyChanged += Test_PropertyChanged;
+
                 // Restore IsExpanded state for tests
                 if (expandedTestIds.Contains(test.Id))
                 {
                     test.IsExpanded = true;
                 }
 
-                // Restore IsExpanded state for processes
+                // Restore IsExpanded state for processes (if they were loaded)
                 foreach (var process in test.Processes)
                 {
+                    // Subscribe to process expansion events
+                    process.PropertyChanged += Process_PropertyChanged;
+
                     if (expandedProcessIds.Contains(process.Id))
                     {
                         process.IsExpanded = true;
@@ -427,11 +433,14 @@ namespace TestAutomationManager.Views
                 Tests.Clear();
                 _allTests.Clear();
 
-                // Add tests to collections
+                // Add tests to collections and subscribe to expansion events
                 foreach (var test in testsFromDb)
                 {
                     Tests.Add(test);
                     _allTests.Add(test);
+
+                    // ⭐ Subscribe to PropertyChanged for lazy loading
+                    test.PropertyChanged += Test_PropertyChanged;
                 }
 
                 // Update statistics
@@ -454,6 +463,113 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"✗ Error loading tests: {ex.Message}");
                 MessageBox.Show($"Failed to load tests from database.\n\nError: {ex.Message}\n\nCheck:\n1. Database connection\n2. SQL scripts ran\n3. DbConnectionConfig settings",
                     "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // ================================================
+        // LAZY LOADING EVENT HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle Test property changes to detect expansion and lazy load processes
+        /// </summary>
+        private async void Test_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Test.IsExpanded) && sender is Test test)
+            {
+                // Only load if expanded and not already loaded
+                if (test.IsExpanded && !test.AreProcessesLoaded)
+                {
+                    await LoadProcessesForTestAsync(test);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle Process property changes to detect expansion and lazy load functions
+        /// </summary>
+        private async void Process_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Process.IsExpanded) && sender is Process process)
+            {
+                // Only load if expanded and not already loaded
+                if (process.IsExpanded && !process.AreFunctionsLoaded)
+                {
+                    await LoadFunctionsForProcessAsync(process);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lazy load processes for a specific test
+        /// </summary>
+        private async System.Threading.Tasks.Task LoadProcessesForTestAsync(Test test)
+        {
+            if (!test.TestID.HasValue)
+                return;
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"⏳ Lazy loading processes for Test #{test.TestID}...");
+
+                var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
+
+                // Update UI on UI thread
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    test.Processes.Clear();
+                    foreach (var process in processes)
+                    {
+                        test.Processes.Add(process);
+
+                        // Subscribe to process expansion events for lazy loading functions
+                        process.PropertyChanged += Process_PropertyChanged;
+                    }
+
+                    test.AreProcessesLoaded = true;
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID}");
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error lazy loading processes: {ex.Message}");
+                MessageBox.Show($"Failed to load processes for test.\n\nError: {ex.Message}",
+                    "Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Lazy load functions for a specific process
+        /// </summary>
+        private async System.Threading.Tasks.Task LoadFunctionsForProcessAsync(Process process)
+        {
+            if (!process.ProcessID.HasValue)
+                return;
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"⏳ Lazy loading functions for Process #{process.ProcessID}...");
+
+                var functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
+
+                // Update UI on UI thread
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    process.Functions.Clear();
+                    foreach (var function in functions)
+                    {
+                        process.Functions.Add(function);
+                    }
+
+                    process.AreFunctionsLoaded = true;
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID}");
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error lazy loading functions: {ex.Message}");
+                MessageBox.Show($"Failed to load functions for process.\n\nError: {ex.Message}",
+                    "Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -504,8 +620,38 @@ namespace TestAutomationManager.Views
         // ================================================
 
         public int GetTestCount() => _allTests.Count;
-        public int GetProcessCount() => _allTests.Sum(t => t.Processes.Count);
-        public int GetFunctionCount() => _allTests.Sum(t => t.Processes.Sum(p => p.Functions.Count));
+
+        /// <summary>
+        /// Get total process count using efficient database query
+        /// (Lazy loading means we can't rely on in-memory counts)
+        /// </summary>
+        public async System.Threading.Tasks.Task<int> GetProcessCountAsync()
+        {
+            try
+            {
+                return await _repository.GetTotalProcessCountAsync();
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Get total function count using efficient database query
+        /// (Lazy loading means we can't rely on in-memory counts)
+        /// </summary>
+        public async System.Threading.Tasks.Task<int> GetFunctionCountAsync()
+        {
+            try
+            {
+                return await _repository.GetTotalFunctionCountAsync();
+            }
+            catch
+            {
+                return 0;
+            }
+        }
 
         // ================================================
         // STATISTICS

@@ -180,8 +180,9 @@ namespace TestAutomationManager.Services
 
             // Create a simple hash from key properties
             // Format: "Id:Name:IsActive:Status|Id:Name:IsActive:Status|..."
+            // Note: Don't include Processes.Count since lazy loading means it may not be loaded
             var hashString = string.Join("|", tests.Select(t =>
-                $"{t.Id}:{t.Name}:{t.IsActive}:{t.Status}:{t.Processes.Count}"
+                $"{t.Id}:{t.Name}:{t.IsActive}:{t.Status}:{t.LastRunning}"
             ));
 
             // Return the hash string

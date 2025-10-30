@@ -32,6 +32,7 @@ namespace TestAutomationManager.Models
         private bool _isExpanded;
         private string? _category;
         private ObservableCollection<Process>? _processes;
+        private bool _areProcessesLoaded;
 
         // ================================================
         // DATABASE COLUMNS
@@ -188,6 +189,15 @@ namespace TestAutomationManager.Models
             }
         }
 
+        /// <summary>
+        /// Indicates whether Processes have been loaded from database (for lazy loading)
+        /// </summary>
+        public bool AreProcessesLoaded
+        {
+            get => _areProcessesLoaded;
+            set { _areProcessesLoaded = value; OnPropertyChanged(); }
+        }
+
         private async void SaveCategoryToSettings()
         {
             try
@@ -289,6 +299,7 @@ namespace TestAutomationManager.Models
 
         private bool _isExpanded;
         private ObservableCollection<Function>? _functions;
+        private bool _areFunctionsLoaded;
 
         // ================================================
         // DATABASE COLUMNS
@@ -442,6 +453,15 @@ namespace TestAutomationManager.Models
         {
             get => _functions ??= new ObservableCollection<Function>();
             set { _functions = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// Indicates whether Functions have been loaded from database (for lazy loading)
+        /// </summary>
+        public bool AreFunctionsLoaded
+        {
+            get => _areFunctionsLoaded;
+            set { _areFunctionsLoaded = value; OnPropertyChanged(); }
         }
 
         // ================================================
