@@ -40,19 +40,19 @@ namespace TestAutomationManager.Repositories
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests (optimized - no relationships loaded yet)");
 
                     // ✅ Apply UI-only settings (IsActive, Category)
-                    var uiSettingsService = TestUISettingsService.Instance;
-                    foreach (var test in tests)
-                    {
-                        if (test.TestID.HasValue)
-                        {
-                            test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
-                            test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
-                        }
+                    //var uiSettingsService = TestUISettingsService.Instance;
+                  //  foreach (var test in tests)
+                   // {
+                     //   if (test.TestID.HasValue)
+                    //    {
+                    //        test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
+                    //        test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
+                    //    }
 
                         // Initialize empty collections for UI binding
-                        test.Processes = new ObservableCollection<Process>();
-                        test.AreProcessesLoaded = false;  // Mark as not loaded yet
-                    }
+                   //     test.Processes = new ObservableCollection<Process>();
+                    //    test.AreProcessesLoaded = false;  // Mark as not loaded yet
+                  //  }
 
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests from schema '{schemaName}'");
@@ -272,11 +272,11 @@ namespace TestAutomationManager.Repositories
                     await context.SaveChangesAsync();
 
                     // Update UI-only settings separately
-                    if (test.TestID.HasValue)
-                    {
-                        await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)test.TestID.Value, test.IsActive);
-                        await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)test.TestID.Value, test.Category);
-                    }
+              //      if (test.TestID.HasValue)
+               //     {
+               //         await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)test.TestID.Value, test.IsActive);
+                //        await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)test.TestID.Value, test.Category);
+               //     }
 
                     System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} updated successfully");
                 }

@@ -136,7 +136,7 @@ namespace TestAutomationManager.Models
                 {
                     _isActive = value;
                     OnPropertyChanged();
-                    SaveIsActiveToSettings();
+                    //SaveIsActiveToSettings();
                 }
             }
         }
@@ -185,7 +185,7 @@ namespace TestAutomationManager.Models
                 {
                     _category = value;
                     OnPropertyChanged();
-                    SaveCategoryToSettings();
+                    //SaveCategoryToSettings();
                 }
             }
         }
@@ -295,7 +295,6 @@ namespace TestAutomationManager.Models
         private string? _tempParam111;
         private string? _tempParam1111;
         private string? _tempParam11111;
-        private string? _tempParam111111;
 
         // Parameters
         private string?[] _params = new string?[46];
@@ -389,7 +388,6 @@ namespace TestAutomationManager.Models
         public string? TempParam111 { get => _tempParam111; set { _tempParam111 = value; OnPropertyChanged(); } }
         public string? TempParam1111 { get => _tempParam1111; set { _tempParam1111 = value; OnPropertyChanged(); } }
         public string? TempParam11111 { get => _tempParam11111; set { _tempParam11111 = value; OnPropertyChanged(); } }
-        public string? TempParam111111 { get => _tempParam111111; set { _tempParam111111 = value; OnPropertyChanged(); } }
 
         // ================================================
         // PARAMS 1–46

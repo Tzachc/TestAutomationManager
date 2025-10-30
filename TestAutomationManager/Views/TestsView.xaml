@@ -421,7 +421,8 @@
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding ExceptionMessage}"/>
+                                                   TextTrimming="CharacterEllipsis" 
+                                                   ToolTip="{Binding ExceptionMessage}"/>
 
                                         <TextBlock Grid.Column="11" Text="{Binding SendEmailReport}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
