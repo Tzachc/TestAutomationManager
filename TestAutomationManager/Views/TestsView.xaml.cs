@@ -362,46 +362,47 @@ namespace TestAutomationManager.Views
         {
             System.Diagnostics.Debug.WriteLine("🔄 Applying database updates to UI...");
 
-            // ⭐ STEP 1: Save current UI state (which items are expanded)
-            var expandedTestIds = new HashSet<int>(
-                _allTests.Where(t => t.IsExpanded).Select(t => t.Id)
-            );
+            // ⭐ STEP 1: Build dictionary of existing tests with their pre-loaded data
+            var existingTestsDict = _allTests.ToDictionary(t => t.Id, t => t);
 
-            var expandedProcessIds = new HashSet<int>();
-            foreach (var test in _allTests)
-            {
-                foreach (var process in test.Processes.Where(p => p.IsExpanded))
-                {
-                    expandedProcessIds.Add(process.Id);
-                }
-            }
-
-            // ⭐ STEP 2: Update data from database
+            // ⭐ STEP 2: Update tests while preserving pre-loaded processes/functions
             _allTests.Clear();
-            foreach (var test in updatedTests)
+            foreach (var freshTest in updatedTests)
             {
-                // ⭐ Subscribe to PropertyChanged for lazy loading
-                test.PropertyChanged += Test_PropertyChanged;
+                Test testToAdd;
 
-                // Restore IsExpanded state for tests
-                if (expandedTestIds.Contains(test.Id))
+                // Check if we have an existing test with pre-loaded data
+                if (existingTestsDict.TryGetValue(freshTest.Id, out var existingTest))
                 {
-                    test.IsExpanded = true;
+                    // ⭐ PRESERVE pre-loaded data from existing test
+                    // Update database properties from fresh test
+                    existingTest.TestName = freshTest.TestName;
+                    existingTest.RunStatus = freshTest.RunStatus;
+                    existingTest.LastRunning = freshTest.LastRunning;
+                    existingTest.LastTimePass = freshTest.LastTimePass;
+                    existingTest.Bugs = freshTest.Bugs;
+                    existingTest.ExceptionMessage = freshTest.ExceptionMessage;
+                    existingTest.RecipientsEmailsList = freshTest.RecipientsEmailsList;
+                    existingTest.SendEmailReport = freshTest.SendEmailReport;
+                    existingTest.EmailOnFailureOnly = freshTest.EmailOnFailureOnly;
+                    existingTest.ExitTestOnFailure = freshTest.ExitTestOnFailure;
+                    existingTest.TestRunAgainTimes = freshTest.TestRunAgainTimes;
+                    existingTest.SnapshotMultipleFailure = freshTest.SnapshotMultipleFailure;
+                    existingTest.DisableKillDriver = freshTest.DisableKillDriver;
+
+                    // Keep existing IsActive, Category (UI-only properties)
+                    // Keep existing Processes and AreProcessesLoaded flag (pre-loaded data!)
+
+                    testToAdd = existingTest;
+                }
+                else
+                {
+                    // New test, subscribe to events
+                    freshTest.PropertyChanged += Test_PropertyChanged;
+                    testToAdd = freshTest;
                 }
 
-                // Restore IsExpanded state for processes (if they were loaded)
-                foreach (var process in test.Processes)
-                {
-                    // Subscribe to process expansion events
-                    process.PropertyChanged += Process_PropertyChanged;
-
-                    if (expandedProcessIds.Contains(process.Id))
-                    {
-                        process.IsExpanded = true;
-                    }
-                }
-
-                _allTests.Add(test);
+                _allTests.Add(testToAdd);
             }
 
             // ⭐ STEP 3: Re-apply current filter
@@ -410,7 +411,7 @@ namespace TestAutomationManager.Views
             // ⭐ STEP 4: Update statistics
             UpdateStatistics();
 
-            System.Diagnostics.Debug.WriteLine("✓ UI synchronized with database (expanded items preserved)");
+            System.Diagnostics.Debug.WriteLine("✓ UI synchronized with database (pre-loaded data preserved)");
         }
 
         // ================================================
@@ -427,6 +428,9 @@ namespace TestAutomationManager.Views
                 // Show loading overlay
                 ShowLoadingScreen("Loading tests...", 0);
 
+                // ⭐ CRITICAL: Let UI render the loading screen before blocking
+                await System.Threading.Tasks.Task.Delay(50);
+
                 System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
 
                 // Get all tests from database (async)
@@ -434,6 +438,9 @@ namespace TestAutomationManager.Views
 
                 // Update progress
                 UpdateLoadingProgress("Processing tests...", 50);
+
+                // ⭐ Let progress update render
+                await System.Threading.Tasks.Task.Delay(100);
 
                 // Clear existing data
                 Tests.Clear();
