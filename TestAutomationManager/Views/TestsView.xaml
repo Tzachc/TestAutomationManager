@@ -1101,5 +1101,60 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <!-- Loading Overlay (appears on top) -->
+        <Grid x:Name="LoadingOverlay"
+              Grid.Row="0" Grid.RowSpan="2"
+              Background="#CC000000"
+              Visibility="Collapsed"
+              Panel.ZIndex="1000">
+            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="40"
+                    Width="400"
+                    Height="200"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               Text="Loading Tests"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               HorizontalAlignment="Center"/>
+
+                    <!-- Progress Bar -->
+                    <ProgressBar Grid.Row="2"
+                                 x:Name="LoadingProgressBar"
+                                 Height="20"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 Foreground="{DynamicResource AccentBrush}"
+                                 Background="{DynamicResource TertiaryBackgroundBrush}"
+                                 BorderBrush="{DynamicResource BorderBrush}"
+                                 BorderThickness="1"/>
+
+                    <!-- Progress Text -->
+                    <TextBlock Grid.Row="4"
+                               x:Name="LoadingProgressText"
+                               Text="Initializing..."
+                               FontSize="14"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
