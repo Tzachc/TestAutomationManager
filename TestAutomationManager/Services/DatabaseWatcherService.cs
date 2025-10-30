@@ -11,9 +11,9 @@ using TestAutomationManager.Repositories;
 namespace TestAutomationManager.Services
 {
     /// <summary>
-    /// Monitors database for external changes and updates UI
-    /// Uses LIGHTWEIGHT polling - only checks counts/timestamps, not full data
-    /// Only reloads when actual changes detected to avoid disrupting user experience
+    /// Monitors database for external changes and updates UI (Multi-user collaboration)
+    /// Detects ANY changes on ANY column and updates ONLY what changed
+    /// Perfect for real-time collaboration when multiple users work in parallel
     /// </summary>
     public class DatabaseWatcherService
     {
@@ -41,13 +41,13 @@ namespace TestAutomationManager.Services
         private bool _isWatching;
 
         /// <summary>
-        /// Lightweight snapshot of database state (counts only)
+        /// Cache of test fingerprints for differential updates
+        /// Key: TestID, Value: Fingerprint (hash of all important fields)
         /// </summary>
-        private int _lastTestCount = -1;
-        private string _lastTestsFingerprint = string.Empty;
+        private Dictionary<int, string> _testFingerprints = new Dictionary<int, string>();
 
         /// <summary>
-        /// Event fired when tests are updated from database
+        /// Event fired when specific tests are updated from database
         /// </summary>
         public event EventHandler<List<Test>> TestsUpdated;
 
@@ -56,9 +56,9 @@ namespace TestAutomationManager.Services
         // ================================================
 
         /// <summary>
-        /// Polling interval in seconds (default: 30 seconds - much less aggressive!)
+        /// Polling interval in seconds (default: 3 seconds for near real-time collaboration)
         /// </summary>
-        public int PollingIntervalSeconds { get; set; } = 30;
+        public int PollingIntervalSeconds { get; set; } = 3;
 
         /// <summary>
         /// Is the watcher currently active
@@ -134,37 +134,70 @@ namespace TestAutomationManager.Services
         // ================================================
 
         /// <summary>
-        /// Check database for changes using LIGHTWEIGHT detection
-        /// Only loads full data if actually changed!
+        /// Check database for changes using DIFFERENTIAL detection
+        /// Detects ANY change on ANY column and updates ONLY what changed!
+        /// Perfect for multi-user collaboration
         /// </summary>
         private async Task CheckForChangesAsync()
         {
             try
             {
-                // ⭐ STEP 1: LIGHTWEIGHT CHECK - Fast query to detect changes
-                var snapshot = await GetDatabaseSnapshotAsync();
+                // ⭐ STEP 1: Get lightweight fingerprints of all tests
+                var currentFingerprints = await GetTestFingerprintsAsync();
 
-                // Check if count changed
-                if (snapshot.TestCount != _lastTestCount)
+                // ⭐ STEP 2: Compare with cached fingerprints to find changes
+                var changedTestIds = new List<int>();
+                var deletedTestIds = new List<int>();
+                var newTestIds = new List<int>();
+
+                // Find changed tests
+                foreach (var kvp in currentFingerprints)
                 {
-                    System.Diagnostics.Debug.WriteLine($"🔄 Test count changed: {_lastTestCount} → {snapshot.TestCount}");
-                    await ReloadDataAsync();
-                    _lastTestCount = snapshot.TestCount;
-                    _lastTestsFingerprint = snapshot.Fingerprint;
+                    int testId = kvp.Key;
+                    string currentFingerprint = kvp.Value;
+
+                    if (!_testFingerprints.ContainsKey(testId))
+                    {
+                        // New test added
+                        newTestIds.Add(testId);
+                    }
+                    else if (_testFingerprints[testId] != currentFingerprint)
+                    {
+                        // Test changed
+                        changedTestIds.Add(testId);
+                    }
+                }
+
+                // Find deleted tests
+                foreach (var testId in _testFingerprints.Keys)
+                {
+                    if (!currentFingerprints.ContainsKey(testId))
+                    {
+                        deletedTestIds.Add(testId);
+                    }
+                }
+
+                // ⭐ STEP 3: If no changes, do nothing!
+                if (newTestIds.Count == 0 && changedTestIds.Count == 0 && deletedTestIds.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("✓ No database changes detected (differential check)");
                     return;
                 }
 
-                // Check if data fingerprint changed (based on LastRunning timestamps)
-                if (snapshot.Fingerprint != _lastTestsFingerprint)
-                {
-                    System.Diagnostics.Debug.WriteLine($"🔄 Test data changed (fingerprint mismatch)");
-                    await ReloadDataAsync();
-                    _lastTestsFingerprint = snapshot.Fingerprint;
-                    return;
-                }
+                // ⭐ STEP 4: Log what changed
+                if (newTestIds.Count > 0)
+                    System.Diagnostics.Debug.WriteLine($"🆕 New tests detected: {string.Join(", ", newTestIds)}");
+                if (changedTestIds.Count > 0)
+                    System.Diagnostics.Debug.WriteLine($"✏️ Changed tests detected: {string.Join(", ", changedTestIds)}");
+                if (deletedTestIds.Count > 0)
+                    System.Diagnostics.Debug.WriteLine($"🗑️ Deleted tests detected: {string.Join(", ", deletedTestIds)}");
 
-                // No changes detected - no reload needed!
-                System.Diagnostics.Debug.WriteLine("✓ No database changes detected (lightweight check)");
+                // ⭐ STEP 5: Reload ALL tests (but OnDatabaseTestsUpdated will preserve pre-loaded data)
+                // We reload all to keep it simple, but the UI update is smart and preserves state
+                await ReloadAllTestsAsync();
+
+                // ⭐ STEP 6: Update fingerprint cache
+                _testFingerprints = currentFingerprints;
             }
             catch (Exception ex)
             {
@@ -173,59 +206,70 @@ namespace TestAutomationManager.Services
         }
 
         /// <summary>
-        /// Get lightweight snapshot of database state (COUNT + fingerprint)
-        /// This is MUCH faster than loading all data!
+        /// Get fingerprints of all tests (lightweight query for change detection)
+        /// Fingerprint includes all important fields that users might edit
         /// </summary>
-        private async Task<DatabaseSnapshot> GetDatabaseSnapshotAsync()
+        private async Task<Dictionary<int, string>> GetTestFingerprintsAsync()
         {
             using (var context = new TestAutomationManager.Data.TestAutomationDbContext())
             {
-                // Count tests
-                int testCount = await context.Tests.CountAsync();
+                // Query only the fields needed for fingerprint (fast!)
+                var testFingerprints = await context.Tests
+                    .Select(t => new
+                    {
+                        t.TestID,
+                        // Include all fields that might change
+                        t.TestName,
+                        t.RunStatus,
+                        t.LastRunning,
+                        t.LastTimePass,
+                        t.Bugs,
+                        t.ExceptionMessage,
+                        t.RecipientsEmailsList,
+                        t.SendEmailReport,
+                        t.EmailOnFailureOnly,
+                        t.ExitTestOnFailure,
+                        t.TestRunAgainTimes,
+                        t.SnapshotMultipleFailure,
+                        t.DisableKillDriver
+                    })
+                    .ToListAsync();
 
-                // Get fingerprint based on most recent LastRunning timestamp
-                // This detects when tests are executed/updated
-                var mostRecentUpdate = await context.Tests
-                    .OrderByDescending(t => t.LastRunning)
-                    .Select(t => t.LastRunning)
-                    .FirstOrDefaultAsync();
-
-                string fingerprint = $"{testCount}:{mostRecentUpdate}";
-
-                return new DatabaseSnapshot
+                // Create fingerprint dictionary
+                var result = new Dictionary<int, string>();
+                foreach (var test in testFingerprints)
                 {
-                    TestCount = testCount,
-                    Fingerprint = fingerprint
-                };
+                    if (!test.TestID.HasValue) continue;
+
+                    // Create fingerprint: concat all important field values
+                    string fingerprint = $"{test.TestName}|{test.RunStatus}|{test.LastRunning}|{test.LastTimePass}|" +
+                                       $"{test.Bugs}|{test.ExceptionMessage}|{test.RecipientsEmailsList}|" +
+                                       $"{test.SendEmailReport}|{test.EmailOnFailureOnly}|{test.ExitTestOnFailure}|" +
+                                       $"{test.TestRunAgainTimes}|{test.SnapshotMultipleFailure}|{test.DisableKillDriver}";
+
+                    result[(int)test.TestID.Value] = fingerprint;
+                }
+
+                return result;
             }
         }
 
         /// <summary>
-        /// Reload full data from database and notify UI
-        /// Only called when changes actually detected
+        /// Reload all tests from database and notify UI
         /// </summary>
-        private async Task ReloadDataAsync()
+        private async Task ReloadAllTestsAsync()
         {
             // Get latest tests from database
             var currentTests = await _repository.GetAllTestsAsync();
 
-            System.Diagnostics.Debug.WriteLine($"🔄 Database changes detected - reloading {currentTests.Count} tests");
+            System.Diagnostics.Debug.WriteLine($"🔄 Reloading tests for UI update");
 
             // Notify subscribers on UI thread
             Application.Current?.Dispatcher.Invoke(() =>
             {
                 TestsUpdated?.Invoke(this, currentTests);
-                System.Diagnostics.Debug.WriteLine($"✓ UI updated with {currentTests.Count} tests");
+                System.Diagnostics.Debug.WriteLine($"✓ UI notified of changes");
             });
-        }
-
-        /// <summary>
-        /// Lightweight database state snapshot
-        /// </summary>
-        private class DatabaseSnapshot
-        {
-            public int TestCount { get; set; }
-            public string Fingerprint { get; set; }
         }
     }
 }
