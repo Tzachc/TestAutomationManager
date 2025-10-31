@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -206,8 +207,8 @@ namespace TestAutomationManager.Services
 
                 // ⭐ STEP 5: If nothing changed, do nothing!
                 if (newTestIds.Count == 0 && changedTestIds.Count == 0 && deletedTestIds.Count == 0 &&
-                    newProcessKeys.Count == 0 && changedProcessKeys.Count == 0 && deletedProcessKeys.Count == 0 &&
-                    newFunctionKeys.Count == 0 && changedFunctionKeys.Count == 0 && deletedFunctionKeys.Count == 0)
+                    newProcessKeys.Length == 0 && changedProcessKeys.Length == 0 && deletedProcessKeys.Length == 0 &&
+                    newFunctionKeys.Length == 0 && changedFunctionKeys.Length == 0 && deletedFunctionKeys.Length == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("✓ No changes detected (all 3 tables checked)");
                     return;
@@ -216,15 +217,15 @@ namespace TestAutomationManager.Services
                 // ⭐ STEP 6: Log what changed
                 if (newTestIds.Count > 0 || changedTestIds.Count > 0 || deletedTestIds.Count > 0)
                     System.Diagnostics.Debug.WriteLine($"📊 Test changes: +{newTestIds.Count} ~{changedTestIds.Count} -{deletedTestIds.Count}");
-                if (newProcessKeys.Count > 0 || changedProcessKeys.Count > 0 || deletedProcessKeys.Count > 0)
-                    System.Diagnostics.Debug.WriteLine($"🔧 Process changes: +{newProcessKeys.Count} ~{changedProcessKeys.Count} -{deletedProcessKeys.Count}");
-                if (newFunctionKeys.Count > 0 || changedFunctionKeys.Count > 0 || deletedFunctionKeys.Count > 0)
-                    System.Diagnostics.Debug.WriteLine($"⚙️ Function changes: +{newFunctionKeys.Count} ~{changedFunctionKeys.Count} -{deletedFunctionKeys.Count}");
+                if (newProcessKeys.Length > 0 || changedProcessKeys.Length > 0 || deletedProcessKeys.Length > 0)
+                    System.Diagnostics.Debug.WriteLine($"🔧 Process changes: +{newProcessKeys.Length} ~{changedProcessKeys.Length} -{deletedProcessKeys.Length}");
+                if (newFunctionKeys.Length > 0 || changedFunctionKeys.Length > 0 || deletedFunctionKeys.Length > 0)
+                    System.Diagnostics.Debug.WriteLine($"⚙️ Function changes: +{newFunctionKeys.Length} ~{changedFunctionKeys.Length} -{deletedFunctionKeys.Length}");
 
                 // ⭐ STEP 7: Load ONLY the changed data
                 var changedTests = await LoadChangedTestsAsync(newTestIds, changedTestIds);
-                var changedProcesses = await LoadChangedProcessesAsync(newProcessKeys, changedProcessKeys);
-                var changedFunctionsByProcess = await LoadChangedFunctionsAsync(newFunctionKeys, changedFunctionKeys);
+                var changedProcesses = await LoadChangedProcessesAsync(newProcessKeys.ToList(), changedProcessKeys.ToList());
+                var changedFunctionsByProcess = await LoadChangedFunctionsAsync(newFunctionKeys.ToList(), changedFunctionKeys.ToList());
 
                 // ⭐ STEP 8: Fire incremental update event
                 var changeEvent = new DatabaseChangeEventArgs
@@ -233,9 +234,9 @@ namespace TestAutomationManager.Services
                     ChangedTestIds = changedTestIds,
                     DeletedTestIds = deletedTestIds,
                     ChangedTests = changedTests,
-                    NewProcessKeys = newProcessKeys,
-                    ChangedProcessKeys = changedProcessKeys,
-                    DeletedProcessKeys = deletedProcessKeys,
+                    NewProcessKeys = newProcessKeys.ToList(),
+                    ChangedProcessKeys = changedProcessKeys.ToList(),
+                    DeletedProcessKeys = deletedProcessKeys.ToList(),
                     ChangedProcesses = changedProcesses,
                     NewFunctionProcessIds = newFunctionKeys.Select(k => k.processId).Distinct().ToList(),
                     ChangedFunctionProcessIds = changedFunctionKeys.Select(k => k.processId).Distinct().ToList(),
@@ -339,7 +340,6 @@ namespace TestAutomationManager.Services
                         p.TempParam111,
                         p.TempParam1111,
                         p.TempParam11111,
-                        p.TempParam111111,
                         // All 46 params
                         p.Param1, p.Param2, p.Param3, p.Param4, p.Param5,
                         p.Param6, p.Param7, p.Param8, p.Param9, p.Param10,
@@ -366,7 +366,7 @@ namespace TestAutomationManager.Services
                     string fingerprint = $"{proc.ProcessName}|{proc.ProcessPosition}|{proc.Comments}|{proc.Index}|" +
                                        $"{proc.LastRunning}|{proc.Module}|{proc.Pass_Fail_WEB3Operator}|{proc.Repeat}|" +
                                        $"{proc.TempParam}|{proc.WEB3Operator}|{proc.TempParam1}|{proc.TempParam11}|" +
-                                       $"{proc.TempParam111}|{proc.TempParam1111}|{proc.TempParam11111}|{proc.TempParam111111}|" +
+                                       $"{proc.TempParam111}|{proc.TempParam1111}|{proc.TempParam11111}|" +
                                        $"{proc.Param1}|{proc.Param2}|{proc.Param3}|{proc.Param4}|{proc.Param5}|" +
                                        $"{proc.Param6}|{proc.Param7}|{proc.Param8}|{proc.Param9}|{proc.Param10}|" +
                                        $"{proc.Param11}|{proc.Param12}|{proc.Param13}|{proc.Param14}|{proc.Param15}|" +
