@@ -78,7 +78,7 @@ namespace TestAutomationManager.Services
         /// <summary>
         /// Polling interval in seconds (default: 3 seconds for near real-time collaboration)
         /// </summary>
-        public int PollingIntervalSeconds { get; set; } = 3;
+        public int PollingIntervalSeconds { get; set; } = 5;
 
         /// <summary>
         /// Is the watcher currently active
@@ -117,7 +117,7 @@ namespace TestAutomationManager.Services
             _pollingTimer = new Timer(
                 async _ => await CheckForChangesAsync(),
                 null,
-                TimeSpan.FromSeconds(1), // Start after 1 second
+                TimeSpan.FromSeconds(30), // Start after 1 second
                 TimeSpan.FromSeconds(PollingIntervalSeconds) // Repeat every X seconds
             );
 
