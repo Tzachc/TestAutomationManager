@@ -455,6 +455,7 @@ namespace TestAutomationManager.Views
                             existingProcess.TempParam111 = freshProcess.TempParam111;
                             existingProcess.TempParam1111 = freshProcess.TempParam1111;
                             existingProcess.TempParam11111 = freshProcess.TempParam11111;
+                            existingProcess.TempParam111111 = freshProcess.TempParam111111;
 
                             // Update all 46 params
                             existingProcess.Param1 = freshProcess.Param1;
