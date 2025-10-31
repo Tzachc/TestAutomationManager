@@ -459,7 +459,7 @@ namespace TestAutomationManager.Repositories
 
                     // ✅ Load ONLY the specified tests (not all 700!)
                     var tests = await context.Tests
-                        .Where(t => testIds.Contains(t.TestID.Value))
+                        .Where(t => t.TestID.HasValue && testIds.Contains((int)t.TestID.Value))
                         .OrderBy(t => t.TestID)
                         .ToListAsync();
 

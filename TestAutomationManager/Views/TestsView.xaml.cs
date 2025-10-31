@@ -345,8 +345,8 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void StartLiveUpdates()
         {
-            // Subscribe to database change events
-            DatabaseWatcherService.Instance.TestsUpdated += OnDatabaseTestsUpdated;
+            // Subscribe to database change events (incremental updates)
+            DatabaseWatcherService.Instance.DatabaseChanged += OnDatabaseChanged;
 
             // Start watching (polls every 3 seconds by default)
             DatabaseWatcherService.Instance.StartWatching();
