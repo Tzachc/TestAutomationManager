@@ -56,5 +56,38 @@ namespace TestAutomationManager.Repositories
         /// Get test by ID
         /// </summary>
         Task<Test> GetTestByIdAsync(int testId);
+
+        // ================================================
+        // LAZY LOADING METHODS (Performance Optimization)
+        // ================================================
+
+        /// <summary>
+        /// Load processes for a specific test (lazy loading optimization)
+        /// </summary>
+        Task<List<Process>> GetProcessesForTestAsync(int testId);
+
+        /// <summary>
+        /// Load functions for a specific process (lazy loading optimization)
+        /// </summary>
+        Task<List<Function>> GetFunctionsForProcessAsync(double processId);
+
+        /// <summary>
+        /// Get total process count across all tests (optimized for statistics)
+        /// </summary>
+        Task<int> GetTotalProcessCountAsync();
+
+        /// <summary>
+        /// Get total function count across all tests (optimized for statistics)
+        /// </summary>
+        Task<int> GetTotalFunctionCountAsync();
+
+        // ================================================
+        // DIFFERENTIAL UPDATE METHODS (Multi-user collaboration)
+        // ================================================
+
+        /// <summary>
+        /// Get specific tests by their IDs (for incremental updates)
+        /// </summary>
+        Task<List<Test>> GetTestsByIdsAsync(List<int> testIds);
     }
 }

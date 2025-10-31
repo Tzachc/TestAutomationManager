@@ -181,7 +181,6 @@ namespace TestAutomationManager.Data
                 entity.Property(e => e.TempParam111).HasColumnName("TempParam111");
                 entity.Property(e => e.TempParam1111).HasColumnName("TempParam1111");
                 entity.Property(e => e.TempParam11111).HasColumnName("TempParam11111");
-                entity.Property(e => e.TempParam111111).HasColumnName("TempParam111111");
 
                 // Relationships
                 // Functions link to Process via ProcessID (not via the primary key Index)

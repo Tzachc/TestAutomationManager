@@ -13,6 +13,7 @@ using TestAutomationManager.Dialogs;
 using TestAutomationManager.Exceptions;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
+using TestAutomationManager.Services;
 
 namespace TestAutomationManager.Views
 {
@@ -148,6 +149,7 @@ namespace TestAutomationManager.Views
         /// </summary>
         private async System.Threading.Tasks.Task<DataTable> LoadTableDataFromDatabase(string tableName)
         {
+            var schemaName = SchemaConfigService.Instance.CurrentSchema;
             return await System.Threading.Tasks.Task.Run(() =>
             {
                 DataTable dataTable = new DataTable();
@@ -159,7 +161,7 @@ namespace TestAutomationManager.Views
                     using (var connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
-                        string query = $"SELECT * FROM [PRODUCTION_Selenium].[{tableName}]";
+                        string query = $"SELECT * FROM [{schemaName}].[{tableName}]";
 
                         using (var command = new SqlCommand(query, connection))
                         {

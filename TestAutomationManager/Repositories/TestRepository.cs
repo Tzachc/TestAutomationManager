@@ -20,8 +20,9 @@ namespace TestAutomationManager.Repositories
         // ================================================
 
         /// <summary>
-        /// Get all tests with their processes and functions from the current schema
-        /// Loads data from [PRODUCTION_Selenium].[Test_WEB3], [Process_WEB3], [Function_WEB3]
+        /// Get all tests WITHOUT processes/functions (optimized for fast initial load)
+        /// Loads data from [PRODUCTION_Selenium].[Test_WEB3] only
+        /// Use GetProcessesForTestAsync() and GetFunctionsForProcessAsync() for lazy loading
         /// </summary>
         public async Task<List<Test>> GetAllTestsAsync()
         {
@@ -29,52 +30,29 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    System.Diagnostics.Debug.WriteLine("⏳ Starting to load tests from database...");
+                    System.Diagnostics.Debug.WriteLine("⏳ Starting to load tests from database (optimized - no relationships)...");
 
-                    // ✅ Eager load all relationships in one shot to ensure full UI population
+                    // ✅ Load ONLY tests (no Include) for maximum performance
                     var tests = await context.Tests
-                        .Include(t => t.Processes)
-                            .ThenInclude(p => p.Functions)
                         .OrderBy(t => t.TestID)
                         .ToListAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests (with relationships)");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests (optimized - no relationships loaded yet)");
 
                     // ✅ Apply UI-only settings (IsActive, Category)
-                    var uiSettingsService = TestUISettingsService.Instance;
-                    foreach (var test in tests)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"🧩 Test {test.Id} - {test.Name}: {test.Processes?.Count ?? 0} processes");
-                        if (test.TestID.HasValue)
-                        {
-                            test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
-                            test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
-                        }
+                    //var uiSettingsService = TestUISettingsService.Instance;
+                  //  foreach (var test in tests)
+                   // {
+                     //   if (test.TestID.HasValue)
+                    //    {
+                    //        test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
+                    //        test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
+                    //    }
 
-                        // Ensure null lists are initialized for UI binding
-                        test.Processes ??= new ObservableCollection<Process>();
-
-                        if (test.Processes.Count > 0)
-                        {
-                            var orderedProcesses = test.Processes
-                                .OrderBy(p => p.ProcessPosition ?? double.MaxValue)
-                                .ThenBy(p => p.ProcessID ?? double.MaxValue)
-                                .ThenBy(p => p.ProcessName)
-                                .ToList();
-
-                            if (!(test.Processes is ObservableCollection<Process> existingCollection && existingCollection.SequenceEqual(orderedProcesses)))
-                            {
-                                test.Processes = new ObservableCollection<Process>(orderedProcesses);
-                            }
-                        }
-
-                        foreach (var process in test.Processes)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"   ↳ Process {process.Id}: {process.Functions?.Count ?? 0} functions");
-                            process.Functions ??= new ObservableCollection<Function>();
-                        }
-
-                    }
+                        // Initialize empty collections for UI binding
+                   //     test.Processes = new ObservableCollection<Process>();
+                    //    test.AreProcessesLoaded = false;  // Mark as not loaded yet
+                  //  }
 
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests from schema '{schemaName}'");
@@ -89,7 +67,70 @@ namespace TestAutomationManager.Repositories
         }
 
         /// <summary>
-        /// Get test by ID
+        /// Load processes for a specific test (lazy loading optimization)
+        /// </summary>
+        public async Task<List<Process>> GetProcessesForTestAsync(int testId)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes for Test #{testId}...");
+
+                    var processes = await context.Set<Process>()
+                        .Where(p => p.TestID == testId)
+                        .OrderBy(p => p.ProcessPosition ?? double.MaxValue)
+                        .ThenBy(p => p.ProcessID ?? double.MaxValue)
+                        .ThenBy(p => p.ProcessName)
+                        .ToListAsync();
+
+                    // Initialize empty functions collection for each process
+                    foreach (var process in processes)
+                    {
+                        process.Functions = new ObservableCollection<Function>();
+                        process.AreFunctionsLoaded = false;
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId}");
+                    return processes;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading processes for test: {ex.Message}");
+                throw new Exception("Failed to load processes", ex);
+            }
+        }
+
+        /// <summary>
+        /// Load functions for a specific process (lazy loading optimization)
+        /// </summary>
+        public async Task<List<Function>> GetFunctionsForProcessAsync(double processId)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for Process #{processId}...");
+
+                    var functions = await context.Set<Function>()
+                        .Where(f => f.ProcessID == processId)
+                        .OrderBy(f => f.FunctionPosition ?? 0)
+                        .ToListAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {functions.Count} functions for Process #{processId}");
+                    return functions;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading functions for process: {ex.Message}");
+                throw new Exception("Failed to load functions", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get test by ID (with full eager loading for backward compatibility)
         /// </summary>
         public async Task<Test> GetTestByIdAsync(int testId)
         {
@@ -231,11 +272,11 @@ namespace TestAutomationManager.Repositories
                     await context.SaveChangesAsync();
 
                     // Update UI-only settings separately
-                    if (test.TestID.HasValue)
-                    {
-                        await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)test.TestID.Value, test.IsActive);
-                        await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)test.TestID.Value, test.Category);
-                    }
+              //      if (test.TestID.HasValue)
+               //     {
+               //         await TestAutomationManager.Services.TestUISettingsService.Instance.SetIsActiveAsync((int)test.TestID.Value, test.IsActive);
+                //        await TestAutomationManager.Services.TestUISettingsService.Instance.SetCategoryAsync((int)test.TestID.Value, test.Category);
+               //     }
 
                     System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} updated successfully");
                 }
@@ -341,6 +382,46 @@ namespace TestAutomationManager.Repositories
         }
 
         /// <summary>
+        /// Get total process count across all tests (optimized for statistics)
+        /// </summary>
+        public async Task<int> GetTotalProcessCountAsync()
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    int count = await context.Set<Process>().CountAsync();
+                    return count;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting process count: {ex.Message}");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Get total function count across all tests (optimized for statistics)
+        /// </summary>
+        public async Task<int> GetTotalFunctionCountAsync()
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    int count = await context.Set<Function>().CountAsync();
+                    return count;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting function count: {ex.Message}");
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Check if test ID already exists
         /// </summary>
         public async Task<bool> TestIdExistsAsync(int testId)
@@ -358,6 +439,54 @@ namespace TestAutomationManager.Repositories
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error checking if test ID exists: {ex.Message}");
                 throw new Exception("Failed to check test ID", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get specific tests by their IDs (for differential updates in multi-user collaboration)
+        /// Only loads the specified tests - much faster than loading all 700!
+        /// </summary>
+        public async Task<List<Test>> GetTestsByIdsAsync(List<int> testIds)
+        {
+            try
+            {
+                if (testIds == null || testIds.Count == 0)
+                    return new List<Test>();
+
+                using (var context = new TestAutomationDbContext())
+                {
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading {testIds.Count} specific tests...");
+
+                    // ✅ Load ONLY the specified tests (not all 700!)
+                    var tests = await context.Tests
+                        .Where(t => t.TestID.HasValue && testIds.Contains((int)t.TestID.Value))
+                        .OrderBy(t => t.TestID)
+                        .ToListAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests (differential update)");
+
+                    // ✅ Apply UI-only settings
+                    var uiSettingsService = TestUISettingsService.Instance;
+                    foreach (var test in tests)
+                    {
+                        if (test.TestID.HasValue)
+                        {
+                            test.IsActive = uiSettingsService.GetIsActive((int)test.TestID.Value);
+                            test.Category = uiSettingsService.GetCategory((int)test.TestID.Value);
+                        }
+
+                        // Initialize empty collections
+                        test.Processes = new ObservableCollection<Process>();
+                        test.AreProcessesLoaded = false;
+                    }
+
+                    return tests;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading specific tests: {ex.Message}");
+                throw new Exception("Failed to load tests by IDs", ex);
             }
         }
     }

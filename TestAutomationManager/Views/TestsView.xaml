@@ -421,7 +421,8 @@
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding ExceptionMessage}"/>
+                                                   TextTrimming="CharacterEllipsis" 
+                                                   ToolTip="{Binding ExceptionMessage}"/>
 
                                         <TextBlock Grid.Column="11" Text="{Binding SendEmailReport}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
@@ -1101,5 +1102,131 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <!-- Loading Overlay (appears on top) -->
+        <Grid x:Name="LoadingOverlay"
+              Grid.Row="0" Grid.RowSpan="2"
+              Background="#CC000000"
+              Visibility="Collapsed"
+              Panel.ZIndex="1000">
+            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Padding="50"
+                    Width="450"
+                    Height="240"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.5"/>
+                </Border.Effect>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0"
+                               Text="Loading Tests"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               HorizontalAlignment="Center"/>
+
+                    <!-- Modern Progress Bar Container -->
+                    <Border Grid.Row="2"
+                            Height="32"
+                            CornerRadius="16"
+                            Background="#1A1A1A"
+                            BorderBrush="#333333"
+                            BorderThickness="1">
+                        <Grid>
+                            <!-- Background track -->
+                            <Border CornerRadius="16"
+                                    Background="#2A2A2A"/>
+
+                            <!-- Animated progress bar -->
+                            <ProgressBar x:Name="LoadingProgressBar"
+                                         Minimum="0"
+                                         Maximum="100"
+                                         Value="0"
+                                         BorderThickness="0"
+                                         Background="Transparent">
+                                <ProgressBar.Style>
+                                    <Style TargetType="ProgressBar">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ProgressBar">
+                                                    <Grid>
+                                                        <Border x:Name="PART_Track"
+                                                                CornerRadius="16"
+                                                                Background="Transparent"/>
+                                                        <Border x:Name="PART_Indicator"
+                                                                CornerRadius="16"
+                                                                HorizontalAlignment="Left">
+                                                            <Border.Effect>
+                                                                <DropShadowEffect Color="#0078D4"
+                                                                                  BlurRadius="10"
+                                                                                  ShadowDepth="0"
+                                                                                  Opacity="0.6"/>
+                                                            </Border.Effect>
+                                                            <Border.Background>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                                    <GradientStop Color="#0078D4" Offset="0"/>
+                                                                    <GradientStop Color="#00BCF2" Offset="1"/>
+                                                                </LinearGradientBrush>
+                                                            </Border.Background>
+                                                        </Border>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ProgressBar.Style>
+                            </ProgressBar>
+
+                            <!-- Percentage overlay -->
+                            <TextBlock x:Name="LoadingPercentageText"
+                                       Text="0%"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Panel.ZIndex="10">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="Black" BlurRadius="4" ShadowDepth="1" Opacity="0.8"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+
+                    <!-- Progress Text -->
+                    <TextBlock Grid.Row="4"
+                               x:Name="LoadingProgressText"
+                               Text="Initializing..."
+                               FontSize="14"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"/>
+
+                    <!-- Speed/ETA text -->
+                    <TextBlock Grid.Row="6"
+                               x:Name="LoadingSpeedText"
+                               Text=""
+                               FontSize="12"
+                               Foreground="{DynamicResource TextTertiaryBrush}"
+                               HorizontalAlignment="Center"
+                               Opacity="0.7"/>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

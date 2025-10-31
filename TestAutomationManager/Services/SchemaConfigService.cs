@@ -47,7 +47,7 @@ namespace TestAutomationManager.Services
         private SchemaConfigService()
         {
             // Default schema
-            _currentSchema = "PRODUCTION_Selenium";
+            _currentSchema = "SeleniumDB";
             System.Diagnostics.Debug.WriteLine($"✓ SchemaConfigService initialized with schema: {_currentSchema}");
         }
 

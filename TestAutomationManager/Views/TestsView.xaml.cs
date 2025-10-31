@@ -345,8 +345,8 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void StartLiveUpdates()
         {
-            // Subscribe to database change events
-            DatabaseWatcherService.Instance.TestsUpdated += OnDatabaseTestsUpdated;
+            // Subscribe to database change events (incremental updates)
+            DatabaseWatcherService.Instance.DatabaseChanged += OnDatabaseChanged;
 
             // Start watching (polls every 3 seconds by default)
             DatabaseWatcherService.Instance.StartWatching();
@@ -355,56 +355,77 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Handle database updates (called when external changes detected)
-        /// Preserves UI state like IsExpanded to avoid disrupting user experience
+        /// Handle INCREMENTAL database updates (multi-user collaboration)
+        /// Only updates the SPECIFIC tests that changed - NOT a full reload!
+        /// FAST - no UI freeze!
         /// </summary>
-        private void OnDatabaseTestsUpdated(object sender, List<Test> updatedTests)
+        private void OnDatabaseChanged(object sender, Services.DatabaseChangeEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("🔄 Applying database updates to UI...");
+            if (!e.HasChanges)
+                return;
 
-            // ⭐ STEP 1: Save current UI state (which items are expanded)
-            var expandedTestIds = new HashSet<int>(
-                _allTests.Where(t => t.IsExpanded).Select(t => t.Id)
-            );
+            System.Diagnostics.Debug.WriteLine($"⚡ Applying INCREMENTAL updates: {e.ChangedTests.Count} tests");
 
-            var expandedProcessIds = new HashSet<int>();
-            foreach (var test in _allTests)
+            // ⭐ STEP 1: Handle deleted tests
+            foreach (var deletedId in e.DeletedTestIds)
             {
-                foreach (var process in test.Processes.Where(p => p.IsExpanded))
+                var testToRemove = _allTests.FirstOrDefault(t => t.Id == deletedId);
+                if (testToRemove != null)
                 {
-                    expandedProcessIds.Add(process.Id);
+                    _allTests.Remove(testToRemove);
+                    Tests.Remove(testToRemove);
+                    System.Diagnostics.Debug.WriteLine($"🗑️ Removed test #{deletedId}");
                 }
             }
 
-            // ⭐ STEP 2: Update data from database
-            _allTests.Clear();
-            foreach (var test in updatedTests)
+            // ⭐ STEP 2: Handle new and changed tests
+            foreach (var freshTest in e.ChangedTests)
             {
-                // Restore IsExpanded state for tests
-                if (expandedTestIds.Contains(test.Id))
-                {
-                    test.IsExpanded = true;
-                }
+                var existingTest = _allTests.FirstOrDefault(t => t.Id == freshTest.Id);
 
-                // Restore IsExpanded state for processes
-                foreach (var process in test.Processes)
+                if (existingTest != null)
                 {
-                    if (expandedProcessIds.Contains(process.Id))
+                    // ⭐ UPDATE existing test IN-PLACE (preserve pre-loaded data!)
+                    existingTest.TestName = freshTest.TestName;
+                    existingTest.RunStatus = freshTest.RunStatus;
+                    existingTest.LastRunning = freshTest.LastRunning;
+                    existingTest.LastTimePass = freshTest.LastTimePass;
+                    existingTest.Bugs = freshTest.Bugs;
+                    existingTest.ExceptionMessage = freshTest.ExceptionMessage;
+                    existingTest.RecipientsEmailsList = freshTest.RecipientsEmailsList;
+                    existingTest.SendEmailReport = freshTest.SendEmailReport;
+                    existingTest.EmailOnFailureOnly = freshTest.EmailOnFailureOnly;
+                    existingTest.ExitTestOnFailure = freshTest.ExitTestOnFailure;
+                    existingTest.TestRunAgainTimes = freshTest.TestRunAgainTimes;
+                    existingTest.SnapshotMultipleFailure = freshTest.SnapshotMultipleFailure;
+                    existingTest.DisableKillDriver = freshTest.DisableKillDriver;
+
+                    // Keep existing Processes and AreProcessesLoaded (pre-loaded data!)
+                    // INotifyPropertyChanged will auto-update the UI!
+
+                    System.Diagnostics.Debug.WriteLine($"✏️ Updated test #{freshTest.Id} in-place");
+                }
+                else
+                {
+                    // ⭐ NEW test - add it
+                    freshTest.PropertyChanged += Test_PropertyChanged;
+                    _allTests.Add(freshTest);
+
+                    // Add to filtered list if it matches current filter
+                    if (string.IsNullOrEmpty(_currentSearchQuery) ||
+                        freshTest.Name.Contains(_currentSearchQuery, StringComparison.OrdinalIgnoreCase))
                     {
-                        process.IsExpanded = true;
+                        Tests.Add(freshTest);
                     }
-                }
 
-                _allTests.Add(test);
+                    System.Diagnostics.Debug.WriteLine($"🆕 Added new test #{freshTest.Id}");
+                }
             }
 
-            // ⭐ STEP 3: Re-apply current filter
-            FilterTests(_currentSearchQuery);
-
-            // ⭐ STEP 4: Update statistics
+            // ⭐ STEP 3: Update statistics (minimal impact)
             UpdateStatistics();
 
-            System.Diagnostics.Debug.WriteLine("✓ UI synchronized with database (expanded items preserved)");
+            System.Diagnostics.Debug.WriteLine($"✅ Incremental update complete - NO full reload!");
         }
 
         // ================================================
@@ -412,35 +433,79 @@ namespace TestAutomationManager.Views
         // ================================================
 
         /// <summary>
-        /// Load tests from SQL database
+        /// Load tests from SQL database with loading screen
         /// </summary>
         private async void LoadTestsFromDatabase()
         {
             try
             {
+                // Show loading overlay
+                ShowLoadingScreen("Loading tests...", 0);
+
+                // ⭐ CRITICAL: Let UI render the loading screen before blocking
+                await System.Threading.Tasks.Task.Delay(50);
+
                 System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
 
                 // Get all tests from database (async)
                 var testsFromDb = await _repository.GetAllTestsAsync();
 
+                int totalTests = testsFromDb.Count;
+                UpdateLoadingProgress($"Processing {totalTests} tests...", 10);
+                await System.Threading.Tasks.Task.Delay(10);
+
                 // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // Add tests to collections
-                foreach (var test in testsFromDb)
+                // ⭐ Process tests in SMALL BATCHES for smooth progress updates
+                const int batchSize = 10; // Smaller batches = smoother animation
+                int processed = 0;
+
+                for (int i = 0; i < testsFromDb.Count; i += batchSize)
                 {
-                    Tests.Add(test);
-                    _allTests.Add(test);
+                    // Process a batch
+                    int batchEnd = Math.Min(i + batchSize, testsFromDb.Count);
+
+                    for (int j = i; j < batchEnd; j++)
+                    {
+                        var test = testsFromDb[j];
+                        Tests.Add(test);
+                        _allTests.Add(test);
+
+                        // ⭐ Subscribe to PropertyChanged for lazy loading
+                        test.PropertyChanged += Test_PropertyChanged;
+                        processed++;
+                    }
+
+                    // Update progress after each batch (with smooth animation)
+                    double progress = 10 + (processed / (double)totalTests * 80); // 10-90%
+                    UpdateLoadingProgress($"Loaded {processed}/{totalTests} tests...", progress);
+
+                    // ⭐ CRITICAL: Give animation time to complete (150ms delay for 100ms animation)
+                    await System.Threading.Tasks.Task.Delay(150);
                 }
 
                 // Update statistics
+                UpdateLoadingProgress("Finalizing...", 95);
+                await System.Threading.Tasks.Task.Delay(10);
+
                 UpdateStatistics();
+
+                // Update progress
+                UpdateLoadingProgress($"Loaded {Tests.Count} tests successfully!", 100);
 
                 System.Diagnostics.Debug.WriteLine($"✓ Loaded {Tests.Count} tests from database successfully!");
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
+
+                // Hide loading screen after a short delay
+                await System.Threading.Tasks.Task.Delay(300);
+                HideLoadingScreen();
+
+                // ⭐ START BACKGROUND PRE-LOADING after UI is responsive
+                StartBackgroundPreloading();
 
                 // Show message if no data
                 if (Tests.Count == 0)
@@ -451,9 +516,117 @@ namespace TestAutomationManager.Views
             }
             catch (Exception ex)
             {
+                HideLoadingScreen();
                 System.Diagnostics.Debug.WriteLine($"✗ Error loading tests: {ex.Message}");
                 MessageBox.Show($"Failed to load tests from database.\n\nError: {ex.Message}\n\nCheck:\n1. Database connection\n2. SQL scripts ran\n3. DbConnectionConfig settings",
                     "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // ================================================
+        // LAZY LOADING EVENT HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle Test property changes to detect expansion and lazy load processes
+        /// </summary>
+        private async void Test_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Test.IsExpanded) && sender is Test test)
+            {
+                // Only load if expanded and not already loaded
+                if (test.IsExpanded && !test.AreProcessesLoaded)
+                {
+                    await LoadProcessesForTestAsync(test);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle Process property changes to detect expansion and lazy load functions
+        /// </summary>
+        private async void Process_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Process.IsExpanded) && sender is Process process)
+            {
+                // Only load if expanded and not already loaded
+                if (process.IsExpanded && !process.AreFunctionsLoaded)
+                {
+                    await LoadFunctionsForProcessAsync(process);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lazy load processes for a specific test
+        /// </summary>
+        private async System.Threading.Tasks.Task LoadProcessesForTestAsync(Test test)
+        {
+            if (!test.TestID.HasValue)
+                return;
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"⏳ Lazy loading processes for Test #{test.TestID}...");
+
+                var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
+
+                // Update UI on UI thread
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    test.Processes.Clear();
+                    foreach (var process in processes)
+                    {
+                        test.Processes.Add(process);
+
+                        // Subscribe to process expansion events for lazy loading functions
+                        process.PropertyChanged += Process_PropertyChanged;
+                    }
+
+                    test.AreProcessesLoaded = true;
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID}");
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error lazy loading processes: {ex.Message}");
+                MessageBox.Show($"Failed to load processes for test.\n\nError: {ex.Message}",
+                    "Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Lazy load functions for a specific process
+        /// </summary>
+        private async System.Threading.Tasks.Task LoadFunctionsForProcessAsync(Process process)
+        {
+            if (!process.ProcessID.HasValue)
+                return;
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"⏳ Lazy loading functions for Process #{process.ProcessID}...");
+
+                var functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
+
+                // Update UI on UI thread
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    process.Functions.Clear();
+                    foreach (var function in functions)
+                    {
+                        process.Functions.Add(function);
+                    }
+
+                    process.AreFunctionsLoaded = true;
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID}");
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error lazy loading functions: {ex.Message}");
+                MessageBox.Show($"Failed to load functions for process.\n\nError: {ex.Message}",
+                    "Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -504,8 +677,38 @@ namespace TestAutomationManager.Views
         // ================================================
 
         public int GetTestCount() => _allTests.Count;
-        public int GetProcessCount() => _allTests.Sum(t => t.Processes.Count);
-        public int GetFunctionCount() => _allTests.Sum(t => t.Processes.Sum(p => p.Functions.Count));
+
+        /// <summary>
+        /// Get total process count using efficient database query
+        /// (Lazy loading means we can't rely on in-memory counts)
+        /// </summary>
+        public async System.Threading.Tasks.Task<int> GetProcessCountAsync()
+        {
+            try
+            {
+                return await _repository.GetTotalProcessCountAsync();
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Get total function count using efficient database query
+        /// (Lazy loading means we can't rely on in-memory counts)
+        /// </summary>
+        public async System.Threading.Tasks.Task<int> GetFunctionCountAsync()
+        {
+            try
+            {
+                return await _repository.GetTotalFunctionCountAsync();
+            }
+            catch
+            {
+                return 0;
+            }
+        }
 
         // ================================================
         // STATISTICS
@@ -537,9 +740,9 @@ namespace TestAutomationManager.Views
 
         private void TestsView_Loaded(object sender, RoutedEventArgs e)
         {
-            // Make sure we subscribe exactly once
-            DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
-            DatabaseWatcherService.Instance.TestsUpdated += OnDatabaseTestsUpdated;
+            // Make sure we subscribe exactly once to the NEW incremental update event
+            DatabaseWatcherService.Instance.DatabaseChanged -= OnDatabaseChanged;
+            DatabaseWatcherService.Instance.DatabaseChanged += OnDatabaseChanged;
 
             // Ensure watcher is running (idempotent)
             if (!DatabaseWatcherService.Instance.IsWatching)
@@ -549,14 +752,14 @@ namespace TestAutomationManager.Views
             SyncHeaderToBody();
             UpdateProcessHeaderPositions();
 
-            System.Diagnostics.Debug.WriteLine("✓ TestsView Loaded: subscribed & watcher ensured");
+            System.Diagnostics.Debug.WriteLine("✓ TestsView Loaded: subscribed to incremental updates");
         }
 
         private void TestsView_Unloaded(object sender, RoutedEventArgs e)
         {
             // Only unsubscribe this view's handler; DO NOT stop the global watcher here
-            DatabaseWatcherService.Instance.TestsUpdated -= OnDatabaseTestsUpdated;
-            System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed (watcher left running)");
+            DatabaseWatcherService.Instance.DatabaseChanged -= OnDatabaseChanged;
+            System.Diagnostics.Debug.WriteLine("✓ TestsView Unloaded: unsubscribed from incremental updates (watcher left running)");
 
             // Safety: release capture if leaving while panning
             if (_isPanning && MainScrollViewer != null)
@@ -709,6 +912,153 @@ namespace TestAutomationManager.Views
                     sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
                 }
             }
+        }
+
+        // ================================================
+        // LOADING SCREEN HELPERS
+        // ================================================
+
+        /// <summary>
+        /// Show loading overlay with progress
+        /// </summary>
+        private void ShowLoadingScreen(string message, double progress)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                LoadingOverlay.Visibility = Visibility.Visible;
+                LoadingProgressBar.Value = progress;
+                LoadingProgressText.Text = message;
+                LoadingPercentageText.Text = $"{progress:F0}%";
+            });
+        }
+
+        /// <summary>
+        /// Update loading progress with smooth animation
+        /// </summary>
+        private void UpdateLoadingProgress(string message, double progress)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                // ⭐ Animate progress bar smoothly instead of jumping
+                var animation = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    From = LoadingProgressBar.Value,
+                    To = progress,
+                    Duration = TimeSpan.FromMilliseconds(100), // Fast 100ms animation
+                    EasingFunction = new System.Windows.Media.Animation.QuadraticEase
+                    {
+                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                    }
+                };
+
+                LoadingProgressBar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, animation);
+                LoadingProgressText.Text = message;
+
+                // ⭐ Update percentage display
+                LoadingPercentageText.Text = $"{progress:F0}%";
+            });
+        }
+
+        /// <summary>
+        /// Hide loading overlay
+        /// </summary>
+        private void HideLoadingScreen()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+            });
+        }
+
+        // ================================================
+        // BACKGROUND PRE-LOADING
+        // ================================================
+
+        private bool _isBackgroundLoadingRunning = false;
+        private readonly System.Collections.Concurrent.ConcurrentQueue<Test> _preloadQueue = new();
+
+        /// <summary>
+        /// Start background pre-loading of processes/functions after initial UI load
+        /// Loads data in the background so subsequent expansions are instant
+        /// </summary>
+        private async void StartBackgroundPreloading()
+        {
+            if (_isBackgroundLoadingRunning)
+                return;
+
+            _isBackgroundLoadingRunning = true;
+            System.Diagnostics.Debug.WriteLine("🚀 Starting background pre-loading...");
+
+            // Build priority queue: Active tests first, then others
+            var activeTests = _allTests.Where(t => t.IsActive).ToList();
+            var inactiveTests = _allTests.Where(t => !t.IsActive).ToList();
+
+            // Add active tests first (user is more likely to use these)
+            foreach (var test in activeTests)
+                _preloadQueue.Enqueue(test);
+
+            // Then add inactive tests
+            foreach (var test in inactiveTests)
+                _preloadQueue.Enqueue(test);
+
+            // Start background loading task
+            await System.Threading.Tasks.Task.Run(async () => await BackgroundPreloadWorker());
+        }
+
+        /// <summary>
+        /// Background worker that pre-loads data with throttling
+        /// </summary>
+        private async System.Threading.Tasks.Task BackgroundPreloadWorker()
+        {
+            int testsLoaded = 0;
+            int totalTests = _preloadQueue.Count;
+
+            while (_preloadQueue.TryDequeue(out Test test))
+            {
+                try
+                {
+                    // Only load if not already loaded
+                    if (!test.AreProcessesLoaded)
+                    {
+                        // Load processes for this test
+                        var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
+
+                        // Update UI on UI thread
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            test.Processes.Clear();
+                            foreach (var process in processes)
+                            {
+                                test.Processes.Add(process);
+                                process.PropertyChanged += Process_PropertyChanged;
+                            }
+                            test.AreProcessesLoaded = true;
+                        });
+
+                        testsLoaded++;
+
+                        // Log progress every 50 tests
+                        if (testsLoaded % 50 == 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"📦 Background pre-loaded {testsLoaded}/{totalTests} tests");
+                        }
+
+                        // Throttle to avoid overwhelming database/UI (load 5 tests, pause 100ms)
+                        if (testsLoaded % 5 == 0)
+                        {
+                            await System.Threading.Tasks.Task.Delay(100);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"⚠ Background preload error for test #{test.TestID}: {ex.Message}");
+                    // Continue with next test
+                }
+            }
+
+            _isBackgroundLoadingRunning = false;
+            System.Diagnostics.Debug.WriteLine($"✓ Background pre-loading completed! Loaded {testsLoaded}/{totalTests} tests");
         }
 
     }

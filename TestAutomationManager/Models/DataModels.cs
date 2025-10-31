@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
 using TestAutomationManager.Services.Statistics;
 
@@ -32,6 +33,7 @@ namespace TestAutomationManager.Models
         private bool _isExpanded;
         private string? _category;
         private ObservableCollection<Process>? _processes;
+        private bool _areProcessesLoaded;
 
         // ================================================
         // DATABASE COLUMNS
@@ -134,7 +136,7 @@ namespace TestAutomationManager.Models
                 {
                     _isActive = value;
                     OnPropertyChanged();
-                    SaveIsActiveToSettings();
+                    //SaveIsActiveToSettings();
                 }
             }
         }
@@ -183,9 +185,20 @@ namespace TestAutomationManager.Models
                 {
                     _category = value;
                     OnPropertyChanged();
-                    SaveCategoryToSettings();
+                    //SaveCategoryToSettings();
                 }
             }
+        }
+
+        /// <summary>
+        /// Indicates whether Processes have been loaded from database (for lazy loading)
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool AreProcessesLoaded
+        {
+            get => _areProcessesLoaded;
+            set { _areProcessesLoaded = value; OnPropertyChanged(); }
         }
 
         private async void SaveCategoryToSettings()
@@ -282,13 +295,13 @@ namespace TestAutomationManager.Models
         private string? _tempParam111;
         private string? _tempParam1111;
         private string? _tempParam11111;
-        private string? _tempParam111111;
 
         // Parameters
         private string?[] _params = new string?[46];
 
         private bool _isExpanded;
         private ObservableCollection<Function>? _functions;
+        private bool _areFunctionsLoaded;
 
         // ================================================
         // DATABASE COLUMNS
@@ -375,7 +388,6 @@ namespace TestAutomationManager.Models
         public string? TempParam111 { get => _tempParam111; set { _tempParam111 = value; OnPropertyChanged(); } }
         public string? TempParam1111 { get => _tempParam1111; set { _tempParam1111 = value; OnPropertyChanged(); } }
         public string? TempParam11111 { get => _tempParam11111; set { _tempParam11111 = value; OnPropertyChanged(); } }
-        public string? TempParam111111 { get => _tempParam111111; set { _tempParam111111 = value; OnPropertyChanged(); } }
 
         // ================================================
         // PARAMS 1–46
@@ -442,6 +454,17 @@ namespace TestAutomationManager.Models
         {
             get => _functions ??= new ObservableCollection<Function>();
             set { _functions = value; OnPropertyChanged(); }
+        }
+
+        /// <summary>
+        /// Indicates whether Functions have been loaded from database (for lazy loading)
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool AreFunctionsLoaded
+        {
+            get => _areFunctionsLoaded;
+            set { _areFunctionsLoaded = value; OnPropertyChanged(); }
         }
 
         // ================================================
