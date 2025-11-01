@@ -785,15 +785,9 @@ namespace TestAutomationManager
                 "⚙️",
                 () =>
                 {
-                    var textBlock = new TextBlock
-                    {
-                        Text = "Processes View - Coming Soon",
-                        FontSize = 24,
-                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"],
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-                    return textBlock;
+                    var view = new Views.ProcessView();
+                    view.DataLoaded += (s, e) => UpdateRecordCount();
+                    return view;
                 }
             );
         }
