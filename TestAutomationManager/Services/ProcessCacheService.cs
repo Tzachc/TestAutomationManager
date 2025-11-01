@@ -22,8 +22,14 @@ namespace TestAutomationManager.Services
         // ================================================
 
         /// <summary>
-        /// Cache of all processes by ProcessID
+        /// Cache of ALL processes (including duplicates with same ProcessID)
         /// Thread-safe for concurrent access from background workers
+        /// </summary>
+        private readonly System.Collections.Concurrent.ConcurrentBag<Process> _allProcesses = new();
+
+        /// <summary>
+        /// Quick lookup cache by ProcessID (for single process lookup)
+        /// Note: May contain duplicates - use _allProcesses for complete list
         /// </summary>
         private readonly ConcurrentDictionary<double, Process> _processCache = new();
 
@@ -62,6 +68,10 @@ namespace TestAutomationManager.Services
             if (process?.ProcessID == null)
                 return;
 
+            // Add to complete list (allows duplicates)
+            _allProcesses.Add(process);
+
+            // Add to quick lookup (last one wins for duplicates)
             _processCache[process.ProcessID.Value] = process;
         }
 
@@ -72,6 +82,7 @@ namespace TestAutomationManager.Services
         {
             int addedCount = 0;
             int skippedCount = 0;
+            int duplicateCount = 0;
 
             foreach (var process in processes)
             {
@@ -81,11 +92,19 @@ namespace TestAutomationManager.Services
                     continue;
                 }
 
+                // Add to complete list (keeps ALL processes)
+                _allProcesses.Add(process);
+
+                // Track if this is a duplicate ProcessID
+                if (_processCache.ContainsKey(process.ProcessID.Value))
+                    duplicateCount++;
+
+                // Add to quick lookup (overwrites duplicates)
                 _processCache[process.ProcessID.Value] = process;
                 addedCount++;
             }
 
-            System.Diagnostics.Debug.WriteLine($"📦 Cache: Added {addedCount} processes, skipped {skippedCount} (null IDs). Total cached: {_processCache.Count}");
+            System.Diagnostics.Debug.WriteLine($"📦 Cache: Added {addedCount} processes ({duplicateCount} duplicate IDs), skipped {skippedCount} (null IDs). Total cached: {_allProcesses.Count} (unique IDs: {_processCache.Count})");
         }
 
         /// <summary>
@@ -104,12 +123,13 @@ namespace TestAutomationManager.Services
         }
 
         /// <summary>
-        /// Get all cached processes
+        /// Get all cached processes (including duplicates)
         /// </summary>
         public List<Process> GetAllCachedProcesses()
         {
-            System.Diagnostics.Debug.WriteLine($"📦 ProcessCache: Retrieving {_processCache.Count} cached processes");
-            return _processCache.Values.ToList();
+            var allProcessesList = _allProcesses.ToList();
+            System.Diagnostics.Debug.WriteLine($"📦 ProcessCache: Retrieving {allProcessesList.Count} cached processes ({_processCache.Count} unique IDs)");
+            return allProcessesList;
         }
 
         /// <summary>
@@ -121,11 +141,11 @@ namespace TestAutomationManager.Services
         }
 
         /// <summary>
-        /// Get count of cached processes
+        /// Get count of cached processes (including duplicates)
         /// </summary>
         public int GetCachedProcessCount()
         {
-            return _processCache.Count;
+            return _allProcesses.Count;
         }
 
         // ================================================
@@ -173,6 +193,7 @@ namespace TestAutomationManager.Services
         /// </summary>
         public void Clear()
         {
+            _allProcesses.Clear();
             _processCache.Clear();
             _functionCache.Clear();
             _functionsLoaded.Clear();
@@ -190,8 +211,10 @@ namespace TestAutomationManager.Services
                 ? (_cacheHits / (double)(_cacheHits + _cacheMisses)) * 100
                 : 0;
 
+            int duplicates = _allProcesses.Count - _processCache.Count;
+
             System.Diagnostics.Debug.WriteLine($"📊 ProcessCache Statistics:");
-            System.Diagnostics.Debug.WriteLine($"   Processes cached: {_processCache.Count}");
+            System.Diagnostics.Debug.WriteLine($"   Processes cached: {_allProcesses.Count} total ({_processCache.Count} unique IDs, {duplicates} duplicates)");
             System.Diagnostics.Debug.WriteLine($"   Functions cached: {_functionCache.Count}");
             System.Diagnostics.Debug.WriteLine($"   Cache hits: {_cacheHits}");
             System.Diagnostics.Debug.WriteLine($"   Cache misses: {_cacheMisses}");
