@@ -4,10 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:stats="clr-namespace:TestAutomationManager.Services.Statistics"        mc:Ignorable="d"
+        xmlns:stats="clr-namespace:TestAutomationManager.Services.Statistics"        
+        xmlns:services="clr-namespace:TestAutomationManager.Services"
+        xmlns:converters="clr-namespace:TestAutomationManager.Converters"
+        mc:Ignorable="d"
         Title="Test Automation Manager" 
         Height="800" Width="1400"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="{DynamicResource PrimaryBackgroundBrush}"
         BorderBrush="{DynamicResource BorderBrush}"
         BorderThickness="1"
@@ -20,9 +24,8 @@
         TitleForeground="{DynamicResource TextPrimaryBrush}"
         ResizeMode="CanResize">
 
-    <!-- Add Resources for ExtTables -->
     <mah:MetroWindow.Resources>
-        <!-- Expandable Navigation Item Style -->
+
         <Style x:Key="ExpandableNavItem" TargetType="Border">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -37,7 +40,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Child Navigation Item Style -->
         <Style x:Key="ChildNavItem" TargetType="Border">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="CornerRadius" Value="4"/>
@@ -52,7 +54,6 @@
         </Style>
     </mah:MetroWindow.Resources>
 
-    <!-- 🎨 CUSTOM TITLE BAR -->
     <mah:MetroWindow.TitleTemplate>
         <DataTemplate>
             <Grid Height="48" Background="{DynamicResource SecondaryBackgroundBrush}">
@@ -62,7 +63,6 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 💎 LEFT: App Title Only -->
                 <StackPanel Grid.Column="0" 
                        Orientation="Horizontal" 
                        VerticalAlignment="Center"
@@ -71,16 +71,31 @@
                          FontSize="14" 
                          FontWeight="SemiBold" 
                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+
+                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="8,4"
+                            Margin="12,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🗃️" FontSize="11" Margin="0,0,6,0"/>
+                            <TextBlock FontSize="11" 
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
+                                     FontWeight="Medium">
+                                <Run Text="Schema:"/>
+                                <Run Text="{Binding CurrentSchema, Source={x:Static services:SchemaConfigService.Instance}, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
 
-                <!-- 🎯 CENTER: Test Status Overview - LIVE DATA -->
                 <StackPanel Grid.Column="1"
                        Orientation="Horizontal" 
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
                        Margin="200,0,0,0"
                        DataContext="{x:Static stats:TestStatisticsService.Instance}">
-                    <!-- Active Badge -->
                     <Border Background="{DynamicResource CardBackgroundBrush}"
                        BorderBrush="{DynamicResource BorderBrush}"
                        BorderThickness="1"
@@ -100,7 +115,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Passed Badge -->
                     <Border Background="{DynamicResource CardBackgroundBrush}"
                        BorderBrush="{DynamicResource BorderBrush}"
                        BorderThickness="1"
@@ -120,7 +134,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Failed Badge -->
                     <Border Background="{DynamicResource CardBackgroundBrush}"
                        BorderBrush="{DynamicResource BorderBrush}"
                        BorderThickness="1"
@@ -140,7 +153,6 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Running Badge -->
                     <Border Background="{DynamicResource CardBackgroundBrush}"
                        BorderBrush="{DynamicResource BorderBrush}"
                        BorderThickness="1"
@@ -161,13 +173,11 @@
                     </Border>
                 </StackPanel>
 
-                <!-- ⚙️ RIGHT: Quick Actions -->
                 <StackPanel Grid.Column="2" 
                        Orientation="Horizontal" 
                        VerticalAlignment="Center"
                        Margin="0,0,120,0">
 
-                    <!-- Settings Button -->
                     <Button Style="{StaticResource IconButton}"
                        Width="32" Height="32"
                        ToolTip="Settings"
@@ -176,23 +186,20 @@
                         <TextBlock Text="⚙️" FontSize="14"/>
                     </Button>
 
-                    <!-- Notifications Button -->
                     <Button Style="{StaticResource IconButton}" 
                        Width="32" Height="32"
                        ToolTip="Notifications"
                        Margin="4,0">
                         <Grid>
                             <TextBlock Text="🔔" FontSize="14"/>
-                            <!-- Notification Badge -->
                             <Ellipse Width="8" Height="8" 
-                                Fill="{DynamicResource ErrorBrush}"
+                                 Fill="{DynamicResource ErrorBrush}"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Top"
                                 Margin="0,-2,-2,0"/>
                         </Grid>
                     </Button>
 
-                    <!-- User Profile Button -->
                     <Button Style="{StaticResource IconButton}" 
                        Width="32" Height="32"
                        ToolTip="Profile"
@@ -219,7 +226,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- 🎨 PROFESSIONAL SIDEBAR -->
         <Border Grid.Column="0" 
                 Background="{DynamicResource SecondaryBackgroundBrush}"
                 BorderThickness="0,0,1,0"
@@ -231,7 +237,6 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- 💎 MODERN HEADER -->
                 <Border Grid.Row="0" Padding="20,24">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -239,7 +244,6 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Logo Section: only the image -->
                         <Image Source="Assets/deadpoolIcon.png"
        Width="64"
        Height="62"
@@ -248,7 +252,6 @@
        VerticalAlignment="Center"/>
 
 
-                        <!-- App Name -->
                         <StackPanel Grid.Row="1" Margin="0,16,0,0">
                             <TextBlock Text="Test Manager" 
                        FontSize="16" 
@@ -268,10 +271,8 @@
 
 
 
-                <!-- 🎯 NAVIGATION -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12,8">
                     <StackPanel>
-                        <!-- Main Section -->
                         <TextBlock Text="WORKSPACE" 
                                  FontSize="10" 
                                  FontWeight="SemiBold" 
@@ -310,7 +311,69 @@
                             </StackPanel>
                         </RadioButton>
 
-                        <!-- ⭐ NEW: ExtTables Expandable Section -->
+                        <Border x:Name="SchemaNavItem"
+                                Style="{StaticResource ExpandableNavItem}"
+                                MouseLeftButtonDown="SchemaNav_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <TextBlock Text="🗃️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock x:Name="SchemaText" 
+                                             Text="Database Schema" 
+                                             FontSize="13" 
+                                             FontWeight="Medium" 
+                                             Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding CurrentSchema, Source={x:Static services:SchemaConfigService.Instance}, Mode=OneWay}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryBlueBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock x:Name="SchemaArrow"
+                                         Grid.Column="1"
+                                         Text="▶" 
+                                         FontSize="10"
+                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                         VerticalAlignment="Center"
+                                         RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform x:Name="SchemaArrowRotation" Angle="0"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel x:Name="SchemaChildren" Visibility="Collapsed">
+                            <ItemsControl x:Name="SchemaItemsControl" ItemsSource="{Binding AvailableSchemas}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="SchemaSelection"
+                                                     Style="{StaticResource ChildSchemaRadioButton}"
+                                                     Tag="{Binding}"
+                                                     Checked="SchemaItem_Checked">
+                                            <RadioButton.IsChecked>
+                                                <Binding Path="." Mode="OneWay">
+                                                    <Binding.Converter>
+                                                        <converters:SchemaToBoolConverter />
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </RadioButton.IsChecked>
+                                            <TextBlock Text="{Binding}" 
+                                                       FontSize="11" 
+                                                       FontWeight="Medium"/>
+                                        </RadioButton>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+
                         <Border x:Name="ExtTablesNavItem"
                                 Style="{StaticResource ExpandableNavItem}"
                                 MouseLeftButtonDown="ExtTablesNav_Click">
@@ -330,7 +393,6 @@
                                              VerticalAlignment="Center"/>
                                 </StackPanel>
 
-                                <!-- Expand/Collapse Arrow -->
                                 <TextBlock x:Name="ExtTablesArrow"
                                          Grid.Column="1"
                                          Text="▶" 
@@ -345,11 +407,9 @@
                             </Grid>
                         </Border>
 
-                        <!-- ExtTables Children (Collapsed by default) -->
                         <StackPanel x:Name="ExtTablesChildren" Visibility="Collapsed">
-                            <!-- Search Box for Tables -->
                             <Border Background="{DynamicResource CardBackgroundBrush}"
-                                   BorderBrush="{DynamicResource BorderBrush}"
+                                  BorderBrush="{DynamicResource BorderBrush}"
                                    BorderThickness="1"
                                    CornerRadius="4"
                                    Margin="32,4,8,4"
@@ -365,9 +425,8 @@
                                            GotFocus="ExtTablesSearchBox_GotFocus"
                                            LostFocus="ExtTablesSearchBox_LostFocus"/>
 
-                                    <!-- Placeholder Text -->
                                     <TextBlock x:Name="ExtTablesSearchPlaceholder"
-                                             Text="🔍 Search tables..."
+                                         Text="🔍 Search tables..."
                                              Foreground="{DynamicResource TextTertiaryBrush}"
                                              FontSize="11"
                                              Padding="6,4"
@@ -376,7 +435,6 @@
                                 </Grid>
                             </Border>
 
-                            <!-- Tables Count Badge -->
                             <Border Background="{DynamicResource SecondaryBackgroundBrush}"
                                    BorderBrush="{DynamicResource BorderBrush}"
                                    BorderThickness="1"
@@ -391,7 +449,6 @@
                                 </TextBlock>
                             </Border>
 
-                            <!-- Scrollable Tables List -->
                             <ScrollViewer MaxHeight="300" 
                                         VerticalScrollBarVisibility="Auto"
                                         HorizontalScrollBarVisibility="Disabled">
@@ -409,37 +466,34 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <!-- Test ID Badge -->
                                                     <Border Grid.Column="0"
-                                                           Width="18" Height="18"
+                                                            Width="18" Height="18"
                                                            Background="{DynamicResource PrimaryBlueBrush}"
                                                            CornerRadius="3"
                                                            Margin="0,0,6,0">
                                                         <TextBlock Text="{Binding TestId}" 
-                                                                 FontSize="9"
-                                                                 FontWeight="Bold"
+                                                                   FontSize="9"
+                                                                   FontWeight="Bold"
                                                                  Foreground="White"
                                                                  HorizontalAlignment="Center"
                                                                  VerticalAlignment="Center"/>
                                                     </Border>
 
-                                                    <!-- Table Name -->
                                                     <TextBlock Grid.Column="1"
-                                                             Text="{Binding TableName}" 
+                                                               Text="{Binding TableName}" 
                                                              FontSize="11"
                                                              Foreground="{DynamicResource TextSecondaryBrush}"
                                                              VerticalAlignment="Center"
                                                              TextTrimming="CharacterEllipsis"/>
 
-                                                    <!-- Row Count Badge -->
                                                     <Border Grid.Column="2"
-                                                           Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                            Background="{DynamicResource SecondaryBackgroundBrush}"
                                                            CornerRadius="3"
                                                            Padding="4,2"
                                                            Margin="4,0,0,0">
                                                         <TextBlock Text="{Binding RowCount}" 
-                                                                 FontSize="9"
-                                                                 FontWeight="SemiBold"
+                                                                   FontSize="9"
+                                                                   FontWeight="SemiBold"
                                                                  Foreground="{DynamicResource TextTertiaryBrush}"/>
                                                     </Border>
                                                 </Grid>
@@ -449,7 +503,6 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
-                            <!-- Empty State -->
                             <TextBlock x:Name="ExtTablesEmptyState"
                                      Text="No tables found"
                                      FontSize="11"
@@ -459,12 +512,10 @@
                                      Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <!-- Divider -->
                         <Border Height="1" 
                                Background="{DynamicResource BorderBrush}" 
                                Margin="8,16"/>
 
-                        <!-- Analytics Section -->
                         <TextBlock Text="INSIGHTS" 
                                  FontSize="10" 
                                  FontWeight="SemiBold" 
@@ -493,7 +544,6 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <!-- 🟢 STATUS INDICATOR -->
                 <Border Grid.Row="2" 
        Margin="12,8,12,16"
        Background="{DynamicResource CardBackgroundBrush}"
@@ -510,7 +560,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Status Icon with Dynamic Background -->
                         <Border Width="32" Height="32" 
                CornerRadius="6">
                             <Border.Style>
@@ -530,7 +579,6 @@
                                 </Style>
                             </Border.Style>
 
-                            <!-- Status Dot with Dynamic Color -->
                             <Ellipse Width="8" Height="8" Fill="{Binding SystemStatusColor}"/>
                         </Border>
 
@@ -549,14 +597,12 @@
             </Grid>
         </Border>
 
-        <!-- 🎯 MAIN CONTENT AREA -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 🔥 PROFESSIONAL TOOLBAR -->
             <Border Grid.Row="0" 
        Background="{DynamicResource SecondaryBackgroundBrush}"
        BorderThickness="0,0,0,1"
@@ -569,7 +615,6 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Title Section -->
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock x:Name="PageTitle" 
                      Text="Tests" 
@@ -588,16 +633,13 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- Action Buttons -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- Search Box -->
                         <TextBox Width="260" 
                Style="{StaticResource ModernTextBox}"
                x:Name="SearchBox" 
                TextChanged="SearchBox_TextChanged"
                Margin="0,0,12,0"/>
 
-                        <!-- Add New Test Button -->
                         <Button Style="{StaticResource PrimaryButton}" 
               Padding="10,8"
               Margin="0,0,8,0" 
@@ -609,7 +651,6 @@
                             </StackPanel>
                         </Button>
 
-                        <!-- Refresh Button -->
                         <Button Style="{StaticResource SecondaryButton}" 
               Padding="10,8"
               Margin="0,0,0,0" 
@@ -621,13 +662,11 @@
                 </Grid>
             </Border>
 
-            <!-- ✨ TABBED CONTENT AREA -->
             <Border Grid.Row="1" Background="{DynamicResource PrimaryBackgroundBrush}">
                 <TabControl x:Name="ContentTabControl"
-                           Background="Transparent"
+                            Background="Transparent"
                            BorderThickness="0"
                            Padding="0">
-                    <!-- Override MahApps TabItem Style Completely -->
                     <TabControl.ItemContainerStyle>
                         <Style TargetType="TabItem">
                             <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
@@ -644,7 +683,7 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="TabItem">
                                         <Border x:Name="Border"
-                                               Background="{TemplateBinding Background}"
+                                                Background="{TemplateBinding Background}"
                                                BorderBrush="{TemplateBinding BorderBrush}"
                                                BorderThickness="{TemplateBinding BorderThickness}"
                                                Padding="12,0"
@@ -661,17 +700,15 @@
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
-                                                <!-- Icon -->
                                                 <TextBlock Grid.Column="0"
-                                                         x:Name="TabIcon"
+                                                       x:Name="TabIcon"
                                                          Text="{Binding Tag.Icon, RelativeSource={RelativeSource TemplatedParent}}"
                                                          FontSize="14"
                                                          VerticalAlignment="Center"
                                                          Margin="0,0,6,0"/>
 
-                                                <!-- Title -->
                                                 <TextBlock Grid.Column="1"
-                                                         Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
+                                                       Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
                                                          FontSize="12"
                                                          FontWeight="Medium"
                                                          VerticalAlignment="Center"
@@ -679,9 +716,8 @@
                                                          TextTrimming="CharacterEllipsis"
                                                          MaxWidth="180"/>
 
-                                                <!-- Close Button -->
                                                 <Button Grid.Column="2"
-                                                       x:Name="CloseButton"
+                                                        x:Name="CloseButton"
                                                        Width="20" Height="18"
                                                        Margin="6,0,0,0"
                                                        Background="Transparent"
@@ -690,13 +726,12 @@
                                                        Click="TabCloseButton_Click"
                                                        Visibility="Collapsed">
                                                     <TextBlock Text="✕" 
-                                                             FontSize="11"
+                                                               FontSize="11"
                                                              Foreground="{DynamicResource TextTertiaryBrush}"/>
                                                 </Button>
                                             </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
-                                            <!-- Show close button on hover or when selected -->
                                             <Trigger Property="IsMouseOver" Value="True">
                                                 <Setter TargetName="Border" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
                                                 <Setter TargetName="CloseButton" Property="Visibility" Value="Visible"/>

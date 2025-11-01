@@ -17,7 +17,7 @@ namespace TestAutomationManager.Data
         /// Current active schema name
         /// Change this to switch to a different schema (e.g., "QA_Selenium", "DEV_Selenium")
         /// </summary>
-        private static string _currentSchema = "SeleniumDB";
+        private static string _currentSchema = "PRODUCTION_Selenium";
         //private static string _currentSchema = "SeleniumDB";
         /// <summary>
         /// Get or set the current schema name

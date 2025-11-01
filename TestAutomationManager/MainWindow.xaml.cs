@@ -14,9 +14,15 @@ using TestAutomationManager.Data;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
 using TestAutomationManager.Services.Statistics;
+using TestAutomationManager.Services; // Import Services
+using TestAutomationManager.Dialogs; // Import Dialogs
+using System.Diagnostics; // For Process
+// Note: Removed unused System.Windows.Data and System.Globalization
 
 namespace TestAutomationManager
 {
+    // ⭐ FIX: Removed the SchemaToBoolConverter class from here. It is now in its own file.
+
     public partial class MainWindow : MetroWindow, INotifyPropertyChanged
     {
         // Tab tracking
@@ -43,6 +49,10 @@ namespace TestAutomationManager
         private Point _dragStartPoint;
         private bool _isDragging = false;
         private TabItem _draggedTab = null;
+
+        // ⭐ NEW: Schema navigation fields
+        private bool _isSchemaExpanded = false;
+        public List<string> AvailableSchemas { get; set; }
 
         // ================================================
         // PROPERTIES FOR BINDING
@@ -92,6 +102,10 @@ namespace TestAutomationManager
             _allExtTables = new ObservableCollection<ExternalTableInfo>();
             ExtTablesItemsControl.ItemsSource = ExtTablesList;
 
+            // ⭐ NEW: Bind available schemas to the ItemsControl
+            AvailableSchemas = SchemaConfigService.AvailableSchemas;
+            SchemaItemsControl.ItemsSource = AvailableSchemas;
+
             // Subscribe to tab selection changed
             ContentTabControl.SelectionChanged += ContentTabControl_SelectionChanged;
 
@@ -109,6 +123,8 @@ namespace TestAutomationManager
 
             this.PreviewKeyDown += MainWindow_PreviewKeyDown;
 
+            // ⭐ FIX: Removed the redundant PropertyChanged handler for CurrentSchema.
+            // The binding in the XAML title bar is to the static instance and will update automatically.
         }
 
         // ================================================
@@ -178,8 +194,15 @@ namespace TestAutomationManager
             var tabInfo = _openTabs.FirstOrDefault(t => t.TabItem == tabItem);
             if (tabInfo != null)
             {
+                // Clean up content if it's a view
+                if (tabInfo.Content is Views.TestsView testsView)
+                {
+                    // Manually call Unloaded logic if needed, though WPF should handle it
+                }
+
                 _openTabs.Remove(tabInfo);
                 ContentTabControl.Items.Remove(tabItem);
+                tabInfo.Content = null; // Help GC
 
                 // If no tabs left, open Tests by default
                 if (_openTabs.Count == 0)
@@ -188,6 +211,22 @@ namespace TestAutomationManager
                 }
             }
         }
+
+        /// <summary>
+        /// ⭐ NEW: Close all open tabs (used for schema reload)
+        /// </summary>
+        private void CloseAllTabs()
+        {
+            // Create a copy of the list to iterate over, as we'll be modifying the original
+            var tabsToClose = new List<TabItem>(_openTabs.Select(t => t.TabItem));
+            foreach (var tabItem in tabsToClose)
+            {
+                CloseTab(tabItem);
+            }
+            _openTabs.Clear();
+            ContentTabControl.Items.Clear();
+        }
+
 
         /// <summary>
         /// Handle tab selection changed
@@ -269,6 +308,188 @@ namespace TestAutomationManager
         }
 
         // ================================================
+        // ⭐ NEW: SCHEMA NAVIGATION
+        // ================================================
+
+        /// <summary>
+        /// Handle Schema navigation click (expand/collapse)
+        /// </summary>
+        private void SchemaNav_Click(object sender, MouseButtonEventArgs e)
+        {
+            _isSchemaExpanded = !_isSchemaExpanded;
+
+            if (_isSchemaExpanded)
+            {
+                SchemaChildren.Visibility = Visibility.Visible;
+                AnimateArrow(SchemaArrowRotation, 0, 90);
+                SchemaNavItem.Background = (System.Windows.Media.Brush)Application.Current.Resources["CardBackgroundBrush"];
+                SchemaText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"];
+            }
+            else
+            {
+                SchemaChildren.Visibility = Visibility.Collapsed;
+                AnimateArrow(SchemaArrowRotation, 90, 0);
+                SchemaNavItem.Background = System.Windows.Media.Brushes.Transparent;
+                SchemaText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"];
+            }
+        }
+
+        /// <summary>
+        /// Handle selection of a new schema from the list
+        /// </summary>
+        private void SchemaItem_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is RadioButton rb && rb.Tag is string newSchema)
+            {
+                string currentSchema = SchemaConfigService.Instance.CurrentSchema;
+
+                if (newSchema == currentSchema)
+                {
+                    return; // Already on this schema, do nothing
+                }
+
+                // Show the dialog to ask the user what to do
+                var dialog = new SwitchSchemaDialog(currentSchema, newSchema);
+                dialog.Owner = this;
+                dialog.ShowDialog();
+
+                if (dialog.Result == SchemaSwitchAction.Reload)
+                {
+                    // Reload the current instance
+                    ReloadApplication(newSchema);
+                }
+                else if (dialog.Result == SchemaSwitchAction.OpenNew)
+                {
+                    // Launch a new instance with the new schema as an argument
+                    LaunchNewInstance(newSchema);
+
+                    // Reset the radio button check
+                    rb.IsChecked = false;
+                    var oldRb = FindVisualChild<RadioButton>(SchemaItemsControl,
+                        (r) => r.Tag is string && (string)r.Tag == currentSchema);
+                    if (oldRb != null)
+                    {
+                        oldRb.IsChecked = true;
+                    }
+                }
+                else
+                {
+                    // User cancelled. We need to reset the RadioButton selection.
+                    rb.IsChecked = false;
+                    var oldRb = FindVisualChild<RadioButton>(SchemaItemsControl,
+                        (r) => r.Tag is string && (string)r.Tag == currentSchema);
+                    if (oldRb != null)
+                    {
+                        oldRb.IsChecked = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reloads the entire application content to reflect a new schema
+        /// </summary>
+        private void ReloadApplication(string newSchema)
+        {
+            System.Diagnostics.Debug.WriteLine($"🔄 Reloading application with new schema: {newSchema}");
+
+            // 1. Set the new schema in the service. This will trigger property changed events.
+            SchemaConfigService.Instance.CurrentSchema = newSchema;
+
+            // 2. Force a stop of the database watcher
+            DatabaseWatcherService.Instance.StopWatching();
+
+            // 3. Close all open tabs
+            CloseAllTabs();
+
+            // 4. Re-check database connection with new schema
+            CheckDatabaseConnection();
+
+            // 5. Re-load ExtTables list for navigation
+            LoadExtTablesForNavigation();
+
+            // 6. Force refresh statistics (will be 0)
+            TestStatisticsService.Instance.Reset();
+            UpdateRecordCount();
+
+            // 7. Open the default "Tests" tab. This will create a new TestsView,
+            //    which will use the new schema from the SchemaConfigService.
+            OpenTestsTab();
+
+            // 8. Restart the database watcher
+            DatabaseWatcherService.Instance.StartWatching();
+
+            System.Diagnostics.Debug.WriteLine($"✅ Application reloaded with schema: {newSchema}");
+        }
+
+        /// <summary>
+        /// Launches a new instance of the application with a schema argument
+        /// </summary>
+        private void LaunchNewInstance(string newSchema)
+        {
+            try
+            {
+                // ⭐ FIX: Fully qualify 'Process' to avoid ambiguity
+                string currentExecutable = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                string arguments = $"/schema:{newSchema}";
+
+                ProcessStartInfo startInfo = new ProcessStartInfo(currentExecutable, arguments)
+                {
+                    UseShellExecute = true
+                };
+
+                System.Diagnostics.Process.Start(startInfo);
+                System.Diagnostics.Debug.WriteLine($"🚀 Launched new instance with schema: {newSchema}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to launch new instance: {ex.Message}");
+                ModernMessageDialog.ShowError(
+                    $"Failed to open a new application window.\n\nError: {ex.Message}",
+                    "Error Launching",
+                    this);
+            }
+        }
+
+        /// <summary>
+        /// Helper to find a child element in an ItemsControl
+        /// </summary>
+        private T FindVisualChild<T>(DependencyObject parent, Func<T, bool> predicate) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T childAsT && predicate(childAsT))
+                {
+                    return childAsT;
+                }
+
+                // Check inside containers like ContentPresenter
+                if (child is ContentPresenter contentPresenter)
+                {
+                    if (VisualTreeHelper.GetChildrenCount(contentPresenter) > 0)
+                    {
+                        var contentChild = VisualTreeHelper.GetChild(contentPresenter, 0);
+                        if (contentChild is T contentChildAsT && predicate(contentChildAsT))
+                        {
+                            return contentChildAsT;
+                        }
+                        var resultInContent = FindVisualChild(contentChild, predicate);
+                        if (resultInContent != null) return resultInContent;
+                    }
+                }
+
+                var result = FindVisualChild(child, predicate);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+
+        // ================================================
         // EXTTABLES NAVIGATION
         // ================================================
 
@@ -281,10 +502,12 @@ namespace TestAutomationManager
             {
                 System.Diagnostics.Debug.WriteLine("📊 Loading external tables for navigation...");
 
-                var tables = await _repository.GetAllExternalTablesAsync();
-
+                // Clear existing lists
                 _allExtTables.Clear();
                 ExtTablesList.Clear();
+                UpdateExtTablesCount(); // Show 0
+
+                var tables = await _repository.GetAllExternalTablesAsync();
 
                 foreach (var table in tables)
                 {
@@ -299,6 +522,9 @@ namespace TestAutomationManager
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error loading external tables for navigation: {ex.Message}");
+                ExtTablesEmptyState.Text = "Error loading tables";
+                ExtTablesEmptyState.Visibility = Visibility.Visible;
+                ExtTablesItemsControl.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -312,7 +538,7 @@ namespace TestAutomationManager
             if (_isExtTablesExpanded)
             {
                 ExtTablesChildren.Visibility = Visibility.Visible;
-                AnimateArrow(0, 90);
+                AnimateArrow(ExtTablesArrowRotation, 0, 90);
                 ExtTablesNavItem.Background = (System.Windows.Media.Brush)Application.Current.Resources["CardBackgroundBrush"];
                 ExtTablesText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"];
                 LoadExtTablesForNavigation();
@@ -321,7 +547,7 @@ namespace TestAutomationManager
             else
             {
                 ExtTablesChildren.Visibility = Visibility.Collapsed;
-                AnimateArrow(90, 0);
+                AnimateArrow(ExtTablesArrowRotation, 90, 0);
                 ExtTablesNavItem.Background = System.Windows.Media.Brushes.Transparent;
                 ExtTablesText.Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"];
                 ExtTablesSearchBox.Text = "";
@@ -407,6 +633,7 @@ namespace TestAutomationManager
         private void UpdateExtTablesCount()
         {
             ExtTablesCountRun.Text = ExtTablesList.Count.ToString();
+            ExtTablesEmptyState.Text = "No tables found"; // Reset error message
 
             if (ExtTablesList.Count == 0)
             {
@@ -423,7 +650,7 @@ namespace TestAutomationManager
         /// <summary>
         /// Animate the expand/collapse arrow
         /// </summary>
-        private void AnimateArrow(double from, double to)
+        private void AnimateArrow(RotateTransform transform, double from, double to)
         {
             var animation = new DoubleAnimation
             {
@@ -433,7 +660,7 @@ namespace TestAutomationManager
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
             };
 
-            ExtTablesArrowRotation.BeginAnimation(RotateTransform.AngleProperty, animation);
+            transform.BeginAnimation(RotateTransform.AngleProperty, animation);
         }
 
         /// <summary>
@@ -480,6 +707,11 @@ namespace TestAutomationManager
                 {
                     RecordCountText = "";
                 }
+            }
+            else
+            {
+                // Default to 0 if no tab is selected (e.g., during reload)
+                RecordCountText = "(0 tests)";
             }
         }
 
@@ -556,7 +788,7 @@ namespace TestAutomationManager
                     {
                         Text = "Processes View - Coming Soon",
                         FontSize = 24,
-                        Foreground = System.Windows.Media.Brushes.White,
+                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"],
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
@@ -577,7 +809,7 @@ namespace TestAutomationManager
                     {
                         Text = "Functions View - Coming Soon",
                         FontSize = 24,
-                        Foreground = System.Windows.Media.Brushes.White,
+                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"],
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
@@ -598,7 +830,7 @@ namespace TestAutomationManager
                     {
                         Text = "Reports View - Coming Soon",
                         FontSize = 24,
-                        Foreground = System.Windows.Media.Brushes.White,
+                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"],
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
@@ -989,9 +1221,5 @@ namespace TestAutomationManager
                 }
             }
         }
-
-
-
-
     }
 }

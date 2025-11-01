@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -14,6 +15,21 @@ namespace TestAutomationManager.Services
         private static readonly object _lock = new object();
 
         private string _currentSchema;
+
+        // ================================================
+        // NEW: AVAILABLE SCHEMAS
+        // ================================================
+
+        /// <summary>
+        /// Gets the list of available schemas.
+        /// This can be expanded in the future.
+        /// </summary>
+        public static List<string> AvailableSchemas { get; } = new List<string>
+        {
+            "SeleniumDB",
+            "PRODUCTION_Selenium"
+            // Add more schemas here in the future
+        };
 
         // ================================================
         // SINGLETON INSTANCE
@@ -47,7 +63,7 @@ namespace TestAutomationManager.Services
         private SchemaConfigService()
         {
             // Default schema
-            _currentSchema = "SeleniumDB";
+            _currentSchema = "PRODUCTION_Selenium";
             System.Diagnostics.Debug.WriteLine($"✓ SchemaConfigService initialized with schema: {_currentSchema}");
         }
 
@@ -63,7 +79,7 @@ namespace TestAutomationManager.Services
             get => _currentSchema;
             set
             {
-                if (_currentSchema != value)
+                if (_currentSchema != value && AvailableSchemas.Contains(value))
                 {
                     string oldSchema = _currentSchema;
                     _currentSchema = value;
