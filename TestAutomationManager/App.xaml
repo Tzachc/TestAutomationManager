@@ -11,7 +11,6 @@
                 <ResourceDictionary Source="Themes/DarkTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- 📦 MODERN CARD STYLE -->
             <Style x:Key="ModernCard" TargetType="Border">
                 <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
@@ -19,7 +18,6 @@
                 <Setter Property="CornerRadius" Value="8"/>
             </Style>
 
-            <!-- 🔘 SLEEK NAVIGATION BUTTON -->
             <Style x:Key="NavigationRadioButton" TargetType="RadioButton">
                 <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
                 <Setter Property="Background" Value="Transparent"/>
@@ -60,7 +58,46 @@
                 </Setter>
             </Style>
 
-            <!-- 🎯 PRIMARY BUTTON -->
+            <Style x:Key="ChildSchemaRadioButton" TargetType="RadioButton">
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Margin" Value="32,1,0,1"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="MainBorder" 
+                                    Background="{TemplateBinding Background}"
+                                    BorderThickness="0"
+                                    CornerRadius="4"
+                                    Padding="8,6">
+                                <Grid>
+                                    <Border x:Name="SelectedIndicator" 
+                                            Background="{DynamicResource PrimaryBlueBrush}"
+                                            CornerRadius="4"
+                                            Opacity="0"/>
+
+                                    <ContentPresenter HorizontalAlignment="Left" 
+                                                    VerticalAlignment="Center"
+                                                    Margin="4,0"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+                                    <Setter TargetName="SelectedIndicator" Property="Opacity" Value="0.25"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style x:Key="PrimaryButton" TargetType="Button">
                 <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
                 <Setter Property="Foreground" Value="#010409"/>
@@ -92,7 +129,6 @@
                 </Setter>
             </Style>
 
-            <!-- 🎯 SECONDARY BUTTON -->
             <Style x:Key="SecondaryButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -129,7 +165,6 @@
                 </Setter>
             </Style>
 
-            <!-- 💫 ICON BUTTON -->
             <Style x:Key="IconButton" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
@@ -160,7 +195,6 @@
                 </Setter>
             </Style>
 
-            <!-- 🔍 PROFESSIONAL SEARCH BOX WITH TYPING INDICATOR -->
             <Style x:Key="ModernTextBox" TargetType="TextBox">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
@@ -177,7 +211,6 @@
                         BorderThickness="{TemplateBinding BorderThickness}"
                         CornerRadius="6">
                                 <Grid>
-                                    <!-- Search Icon (Left) -->
                                     <TextBlock x:Name="SearchIcon"
                                  Text="🔍" 
                                  FontSize="14"
@@ -191,7 +224,6 @@
                                     Margin="10,8,0,0"
                                     VerticalAlignment="Center"/>
 
-                                    <!-- Placeholder Text -->
                                     <TextBlock x:Name="Hint" 
                                  Text="Search tests..." 
                                  Foreground="{DynamicResource TextTertiaryBrush}"
@@ -200,15 +232,13 @@
                                  IsHitTestVisible="False"
                                  Visibility="Collapsed"/>
 
-                                    <!-- Typing Indicator (Right) -->
                                     <Grid x:Name="TypingIndicator"
-                              HorizontalAlignment="Right"
+                                 HorizontalAlignment="Right"
                               Margin="0,0,10,0"
                               Visibility="Collapsed">
                                         <StackPanel Orientation="Horizontal">
-                                            <!-- Animated Dots -->
                                             <Ellipse x:Name="Dot1" Width="4" Height="4" 
-                                        Fill="{DynamicResource PrimaryBlueBrush}" 
+                                                     Fill="{DynamicResource PrimaryBlueBrush}" 
                                         Margin="2,0">
                                                 <Ellipse.RenderTransform>
                                                     <TranslateTransform x:Name="Dot1Transform" Y="0"/>
@@ -233,7 +263,6 @@
                                 </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
-                                <!-- Show placeholder when empty -->
                                 <Trigger Property="Text" Value="">
                                     <Setter TargetName="Hint" Property="Visibility" Value="Visible"/>
                                 </Trigger>
@@ -241,7 +270,6 @@
                                     <Setter TargetName="Hint" Property="Visibility" Value="Visible"/>
                                 </Trigger>
 
-                                <!-- Show typing indicator when focused and has text -->
                                 <MultiTrigger>
                                     <MultiTrigger.Conditions>
                                         <Condition Property="IsFocused" Value="True"/>
@@ -259,7 +287,6 @@
                                     </MultiTrigger.EnterActions>
                                 </MultiTrigger>
 
-                                <!-- Focused state -->
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                                     <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
@@ -272,16 +299,14 @@
                                                     <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="{x:Static Visibility.Visible}"/>
                                                 </ObjectAnimationUsingKeyFrames>
 
-                                                <!-- Animate Dot 1 -->
                                                 <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Dot1Transform" 
-                                                                  Storyboard.TargetProperty="Y"
-                                                                  RepeatBehavior="Forever">
+                                                                   Storyboard.TargetProperty="Y"
+                                                                   RepeatBehavior="Forever">
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0" Value="0"/>
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="-3"/>
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="0"/>
                                                 </DoubleAnimationUsingKeyFrames>
 
-                                                <!-- Animate Dot 2 (delayed) -->
                                                 <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Dot2Transform" 
                                                                   Storyboard.TargetProperty="Y"
                                                                   RepeatBehavior="Forever">
@@ -290,10 +315,9 @@
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0.7" Value="0"/>
                                                 </DoubleAnimationUsingKeyFrames>
 
-                                                <!-- Animate Dot 3 (more delayed) -->
                                                 <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Dot3Transform" 
-                                                                  Storyboard.TargetProperty="Y"
-                                                                  RepeatBehavior="Forever">
+                                                                   Storyboard.TargetProperty="Y"
+                                                                   RepeatBehavior="Forever">
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0"/>
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="-3"/>
                                                     <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0"/>
@@ -313,7 +337,6 @@
                                     </Trigger.ExitActions>
                                 </Trigger>
 
-                                <!-- Mouse over -->
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
                                 </Trigger>
@@ -323,7 +346,6 @@
                 </Setter>
             </Style>
 
-            <!-- 🎚️ MODERN TOGGLE -->
             <Style x:Key="ModernToggle" TargetType="CheckBox">
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Template">
@@ -362,7 +384,6 @@
                 </Setter>
             </Style>
 
-            <!-- 🏷️ BADGE STYLE -->
             <Style x:Key="Badge" TargetType="Border">
                 <Setter Property="CornerRadius" Value="12"/>
                 <Setter Property="Padding" Value="8,4"/>
