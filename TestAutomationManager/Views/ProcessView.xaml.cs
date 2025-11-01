@@ -205,23 +205,45 @@ namespace TestAutomationManager.Views
                 // ⭐ INSTANT LOAD when using cache, batched load when from database
                 if (usedCache)
                 {
-                    // INSTANT: No delays, no batching - just load everything at once!
-                    System.Diagnostics.Debug.WriteLine($"⚡ INSTANT LOAD: Adding all {totalProcesses} processes without delays");
+                    // FAST BATCHED LOAD: Add in batches with UI breathing room to prevent freeze
+                    // Even cached data needs batching because ObservableCollection fires events for each Add()
+                    System.Diagnostics.Debug.WriteLine($"⚡ FAST LOAD: Adding {totalProcesses} cached processes in responsive batches");
 
-                    foreach (var process in processesFromDb)
+                    const int batchSize = 500; // Large batches for speed, but let UI breathe between batches
+                    int processed = 0;
+
+                    for (int i = 0; i < processesFromDb.Count; i += batchSize)
                     {
-                        Processes.Add(process);
-                        _allProcesses.Add(process);
-                        process.PropertyChanged += Process_PropertyChanged;
+                        int batchEnd = Math.Min(i + batchSize, processesFromDb.Count);
+
+                        // Add a batch of processes
+                        for (int j = i; j < batchEnd; j++)
+                        {
+                            var process = processesFromDb[j];
+                            Processes.Add(process);
+                            _allProcesses.Add(process);
+                            process.PropertyChanged += Process_PropertyChanged;
+                            processed++;
+                        }
+
+                        // Update progress
+                        double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
+                        UpdateLoadingProgress($"Displaying {processed}/{totalProcesses} processes...", progress);
+
+                        // ⭐ CRITICAL: Let UI thread process events to stay responsive
+                        // Dispatcher.Yield() allows UI to update without blocking
+                        await Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
                     }
 
-                    UpdateLoadingProgress($"Loaded {Processes.Count} processes instantly!", 100);
-                    System.Diagnostics.Debug.WriteLine($"✓ Instant load complete: {Processes.Count} processes (0 delays)");
+                    UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
+                    System.Diagnostics.Debug.WriteLine($"✓ Fast load complete: {Processes.Count} processes with UI responsiveness");
                 }
                 else
                 {
-                    // BATCHED: Load in batches for database queries (smooth progress)
-                    const int batchSize = 100; // Larger batches since we're not blocking UI
+                    // BATCHED: Load in batches from database with UI responsiveness
+                    System.Diagnostics.Debug.WriteLine($"📊 Loading {totalProcesses} processes from database in responsive batches");
+
+                    const int batchSize = 500; // Same batch size for consistency
                     int processed = 0;
 
                     for (int i = 0; i < processesFromDb.Count; i += batchSize)
@@ -241,13 +263,12 @@ namespace TestAutomationManager.Views
                         double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
                         UpdateLoadingProgress($"Loaded {processed}/{totalProcesses} processes...", progress);
 
-                        // Small delay only for database loads
-                        if (i + batchSize < processesFromDb.Count) // Don't delay on last batch
-                            await System.Threading.Tasks.Task.Delay(50); // Reduced from 100ms
+                        // ⭐ Let UI breathe - no Task.Delay, just yield to UI thread
+                        await Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
                     }
 
                     UpdateLoadingProgress($"Loaded {Processes.Count} processes successfully!", 100);
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {Processes.Count} processes from database");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {Processes.Count} processes from database with UI responsiveness");
                 }
 
                 // Fire data loaded event
