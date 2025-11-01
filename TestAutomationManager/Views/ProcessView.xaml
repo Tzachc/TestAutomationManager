@@ -206,12 +206,14 @@
     </UserControl.Resources>
 
 
-    <!-- Main Layout -->
-    <Grid Grid.IsSharedSizeScope="True" Margin="0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <!-- Main Container -->
+    <Grid>
+        <!-- Main Layout -->
+        <Grid Grid.IsSharedSizeScope="True" Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
         <!-- Sticky Main Header -->
         <Border Grid.Row="0"
@@ -717,14 +719,14 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </ScrollViewer>
-    </Grid>
+            </ScrollViewer>
+        </Grid>
 
-    <!-- Loading Overlay -->
-    <Grid x:Name="LoadingOverlay" 
-          Visibility="Collapsed"
-          Background="#CC000000"
-          Panel.ZIndex="1000">
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay"
+              Visibility="Collapsed"
+              Background="#CC000000"
+              Panel.ZIndex="1000">
         <Border Background="{DynamicResource CardBackgroundBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="2"
@@ -757,6 +759,7 @@
                            HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
+        </Grid>
     </Grid>
 
 </UserControl>
