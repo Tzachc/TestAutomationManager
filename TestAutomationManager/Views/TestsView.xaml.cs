@@ -1068,11 +1068,6 @@ namespace TestAutomationManager.Views
 
             _isBackgroundLoadingRunning = false;
             System.Diagnostics.Debug.WriteLine($"✓ Background pre-loading completed! Loaded {testsLoaded}/{totalTests} tests");
-
-            // ⭐ OPTIMIZATION: Start preloading ProcessView data in background
-            // This way when user clicks on ProcessView tab, data is already cached!
-            System.Diagnostics.Debug.WriteLine("🚀 TestsView background load complete - triggering ProcessView preload...");
-            ProcessView.StartGlobalBackgroundPreload();
         }
 
     }
