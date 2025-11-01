@@ -231,8 +231,8 @@ namespace TestAutomationManager.Views
                         UpdateLoadingProgress($"Displaying {processed}/{totalProcesses} processes...", progress);
 
                         // ⭐ CRITICAL: Let UI thread process events to stay responsive
-                        // Dispatcher.Yield() allows UI to update without blocking
-                        await Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
+                        // Task.Delay(1) yields control to UI thread to process events
+                        await System.Threading.Tasks.Task.Delay(1);
                     }
 
                     UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
@@ -263,8 +263,8 @@ namespace TestAutomationManager.Views
                         double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
                         UpdateLoadingProgress($"Loaded {processed}/{totalProcesses} processes...", progress);
 
-                        // ⭐ Let UI breathe - no Task.Delay, just yield to UI thread
-                        await Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
+                        // ⭐ Let UI breathe - minimal delay to process UI events
+                        await System.Threading.Tasks.Task.Delay(1);
                     }
 
                     UpdateLoadingProgress($"Loaded {Processes.Count} processes successfully!", 100);
