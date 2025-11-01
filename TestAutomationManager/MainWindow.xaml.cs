@@ -388,38 +388,39 @@ namespace TestAutomationManager
 
         /// <summary>
         /// Reloads the entire application content to reflect a new schema
+        /// This restarts the application process with the new schema to ensure
+        /// Entity Framework Core rebuilds its model with the correct schema
         /// </summary>
         private void ReloadApplication(string newSchema)
         {
             System.Diagnostics.Debug.WriteLine($"🔄 Reloading application with new schema: {newSchema}");
 
-            // 1. Set the new schema in the service. This will trigger property changed events.
-            SchemaConfigService.Instance.CurrentSchema = newSchema;
+            try
+            {
+                // Launch a new instance with the new schema
+                string currentExecutable = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                string arguments = $"/schema:{newSchema}";
 
-            // 2. Force a stop of the database watcher
-            DatabaseWatcherService.Instance.StopWatching();
+                ProcessStartInfo startInfo = new ProcessStartInfo(currentExecutable, arguments)
+                {
+                    UseShellExecute = true
+                };
 
-            // 3. Close all open tabs
-            CloseAllTabs();
+                System.Diagnostics.Process.Start(startInfo);
+                System.Diagnostics.Debug.WriteLine($"✅ New instance launched with schema: {newSchema}");
 
-            // 4. Re-check database connection with new schema
-            CheckDatabaseConnection();
-
-            // 5. Re-load ExtTables list for navigation
-            LoadExtTablesForNavigation();
-
-            // 6. Force refresh statistics (will be 0)
-            TestStatisticsService.Instance.Reset();
-            UpdateRecordCount();
-
-            // 7. Open the default "Tests" tab. This will create a new TestsView,
-            //    which will use the new schema from the SchemaConfigService.
-            OpenTestsTab();
-
-            // 8. Restart the database watcher
-            DatabaseWatcherService.Instance.StartWatching();
-
-            System.Diagnostics.Debug.WriteLine($"✅ Application reloaded with schema: {newSchema}");
+                // Close the current application window
+                // This effectively "reloads" by replacing the old instance with a new one
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to reload application: {ex.Message}");
+                ModernMessageDialog.ShowError(
+                    $"Failed to reload the application with the new schema.\n\nError: {ex.Message}",
+                    "Reload Error",
+                    this);
+            }
         }
 
         /// <summary>
