@@ -28,7 +28,7 @@
                                 Padding="{TemplateBinding Padding}">
                             <Border.Effect>
                                 <DropShadowEffect x:Name="shadow"
-                                                Color="{TemplateBinding Background}"
+                                                Color="Black"
                                                 Opacity="0.3"
                                                 BlurRadius="12"
                                                 ShadowDepth="0"/>
@@ -186,7 +186,7 @@
                                 CornerRadius="12"
                                 Margin="0,0,16,0">
                             <Border.Effect>
-                                <DropShadowEffect Color="{DynamicResource PrimaryBlueColor}"
+                                <DropShadowEffect Color="#539BF5"
                                                 Opacity="0.4"
                                                 BlurRadius="10"
                                                 ShadowDepth="0"/>
@@ -252,7 +252,7 @@
                         CornerRadius="12"
                         Padding="24,20,24,20">
                     <Border.Effect>
-                        <DropShadowEffect Color="{DynamicResource PrimaryBlueColor}"
+                        <DropShadowEffect Color="#539BF5"
                                         Opacity="0.15"
                                         BlurRadius="16"
                                         ShadowDepth="0"/>
@@ -302,7 +302,7 @@
                                     CornerRadius="22"
                                     HorizontalAlignment="Center">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="{DynamicResource PrimaryBlueColor}"
+                                    <DropShadowEffect Color="#539BF5"
                                                     Opacity="0.4"
                                                     BlurRadius="12"
                                                     ShadowDepth="0"/>
@@ -323,7 +323,7 @@
                                 CornerRadius="8"
                                 Padding="16,12">
                             <Border.Effect>
-                                <DropShadowEffect Color="{DynamicResource PrimaryBlueColor}"
+                                <DropShadowEffect Color="#539BF5"
                                                 Opacity="0.4"
                                                 BlurRadius="14"
                                                 ShadowDepth="0"/>
@@ -376,7 +376,7 @@
                             HorizontalAlignment="Left"
                             MinWidth="120"/>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="ReloadButton"
                                 Style="{StaticResource ModernButton}"
                                 Background="{DynamicResource PrimaryBlueBrush}"
