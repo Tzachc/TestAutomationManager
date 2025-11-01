@@ -159,6 +159,7 @@ namespace TestAutomationManager.Views
         /// <summary>
         /// Load processes from SQL database with loading screen
         /// OPTIMIZED FOR LARGE DATASETS (20000+ records)
+        /// Uses bulk loading to avoid UI freeze
         /// </summary>
         private async void LoadProcessesFromDatabase()
         {
@@ -196,96 +197,46 @@ namespace TestAutomationManager.Views
                 }
 
                 int totalProcesses = processesFromDb.Count;
-                UpdateLoadingProgress($"Displaying {totalProcesses} processes...", 70);
+                UpdateLoadingProgress($"Preparing {totalProcesses} processes...", 75);
 
-                // Clear existing data
-                Processes.Clear();
-                _allProcesses.Clear();
+                // ⭐ CRITICAL FIX: Build collections OFF the UI thread, then update UI once
+                // This prevents 21k+ individual UI updates that freeze the app
+                System.Diagnostics.Debug.WriteLine($"⚡ BULK LOAD: Preparing {totalProcesses} processes for single UI update");
 
-                // ⭐ FAST LOAD when using cache - use small batches to keep UI responsive
-                if (usedCache)
+                await System.Threading.Tasks.Task.Run(() =>
                 {
-                    // FAST BATCHED LOAD: Very small batches with frequent UI yields
-                    // ObservableCollection fires events for EVERY Add() - must yield often!
-                    System.Diagnostics.Debug.WriteLine($"⚡ FAST LOAD: Adding {totalProcesses} cached processes with frequent UI yields");
-
-                    const int batchSize = 50; // SMALL batches - yield every 50 items to prevent freeze
-                    int processed = 0;
-
-                    for (int i = 0; i < processesFromDb.Count; i += batchSize)
+                    // Attach PropertyChanged handlers off UI thread
+                    foreach (var process in processesFromDb)
                     {
-                        int batchEnd = Math.Min(i + batchSize, processesFromDb.Count);
-
-                        // Add a small batch of processes
-                        for (int j = i; j < batchEnd; j++)
-                        {
-                            var process = processesFromDb[j];
-                            Processes.Add(process);
-                            _allProcesses.Add(process);
-                            process.PropertyChanged += Process_PropertyChanged;
-                            processed++;
-                        }
-
-                        // Update progress every 500 items to reduce overhead
-                        if (processed % 500 == 0 || processed == totalProcesses)
-                        {
-                            double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
-                            UpdateLoadingProgress($"Displaying {processed}/{totalProcesses} processes...", progress);
-                        }
-
-                        // ⭐ CRITICAL: Yield EVERY batch to keep UI responsive
-                        await System.Threading.Tasks.Task.Delay(1);
-
-                        // Log progress every 1000 items
-                        if (processed % 1000 == 0)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"   Progress: {processed}/{totalProcesses} processes loaded");
-                        }
+                        process.PropertyChanged += Process_PropertyChanged;
                     }
+                });
 
-                    UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
-                    System.Diagnostics.Debug.WriteLine($"✓ Fast load complete: {Processes.Count} processes with UI responsiveness");
-                }
-                else
+                UpdateLoadingProgress($"Displaying {totalProcesses} processes...", 90);
+
+                // ⭐ SINGLE UI UPDATE: Replace entire collection in one operation
+                // This triggers only ONE UI update instead of 21k+ individual updates!
+                System.Diagnostics.Debug.WriteLine($"📊 Replacing collections with {totalProcesses} processes in single operation...");
+
+                // Update UI on UI thread - single operation
+                await Dispatcher.InvokeAsync(() =>
                 {
-                    // BATCHED: Load in batches from database with UI responsiveness
-                    System.Diagnostics.Debug.WriteLine($"📊 Loading {totalProcesses} processes from database in responsive batches");
+                    // Create NEW ObservableCollections from the list (single operation)
+                    Processes = new ObservableCollection<Process>(processesFromDb);
+                    _allProcesses = new ObservableCollection<Process>(processesFromDb);
 
-                    const int batchSize = 500; // Same batch size for consistency
-                    int processed = 0;
+                    // Update ItemsControl to use new collection
+                    ProcessesItemsControl.ItemsSource = Processes;
+                });
 
-                    for (int i = 0; i < processesFromDb.Count; i += batchSize)
-                    {
-                        int batchEnd = Math.Min(i + batchSize, processesFromDb.Count);
-
-                        for (int j = i; j < batchEnd; j++)
-                        {
-                            var process = processesFromDb[j];
-                            Processes.Add(process);
-                            _allProcesses.Add(process);
-                            process.PropertyChanged += Process_PropertyChanged;
-                            processed++;
-                        }
-
-                        // Update progress after each batch
-                        double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
-                        UpdateLoadingProgress($"Loaded {processed}/{totalProcesses} processes...", progress);
-
-                        // ⭐ Let UI breathe - minimal delay to process UI events
-                        await System.Threading.Tasks.Task.Delay(1);
-                    }
-
-                    UpdateLoadingProgress($"Loaded {Processes.Count} processes successfully!", 100);
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {Processes.Count} processes from database with UI responsiveness");
-                }
+                UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
+                System.Diagnostics.Debug.WriteLine($"✓ Bulk load complete: {Processes.Count} processes loaded instantly");
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
 
-                // Hide loading screen (instant for cache, short delay for database)
-                if (!usedCache)
-                    await System.Threading.Tasks.Task.Delay(300);
-
+                // Hide loading screen
+                await System.Threading.Tasks.Task.Delay(100);
                 HideLoadingScreen();
 
                 // ⭐ START BACKGROUND PRE-LOADING after UI is responsive

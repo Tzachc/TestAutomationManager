@@ -367,6 +367,7 @@ namespace TestAutomationManager.Views
             System.Diagnostics.Debug.WriteLine($"⚡ Applying INCREMENTAL updates: {e.ChangedTests.Count} tests");
 
             // ⭐ STEP 1: Handle deleted tests
+            int deletedCount = 0;
             foreach (var deletedId in e.DeletedTestIds)
             {
                 var testToRemove = _allTests.FirstOrDefault(t => t.Id == deletedId);
@@ -374,11 +375,13 @@ namespace TestAutomationManager.Views
                 {
                     _allTests.Remove(testToRemove);
                     Tests.Remove(testToRemove);
-                    System.Diagnostics.Debug.WriteLine($"🗑️ Removed test #{deletedId}");
+                    deletedCount++;
                 }
             }
 
             // ⭐ STEP 2: Handle new and changed tests
+            int updatedCount = 0;
+            int addedCount = 0;
             foreach (var freshTest in e.ChangedTests)
             {
                 var existingTest = _allTests.FirstOrDefault(t => t.Id == freshTest.Id);
@@ -403,7 +406,7 @@ namespace TestAutomationManager.Views
                     // Keep existing Processes and AreProcessesLoaded (pre-loaded data!)
                     // INotifyPropertyChanged will auto-update the UI!
 
-                    System.Diagnostics.Debug.WriteLine($"✏️ Updated test #{freshTest.Id} in-place");
+                    updatedCount++;
                 }
                 else
                 {
@@ -418,14 +421,14 @@ namespace TestAutomationManager.Views
                         Tests.Add(freshTest);
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"🆕 Added new test #{freshTest.Id}");
+                    addedCount++;
                 }
             }
 
             // ⭐ STEP 3: Update statistics (minimal impact)
             UpdateStatistics();
 
-            System.Diagnostics.Debug.WriteLine($"✅ Incremental update complete - NO full reload!");
+            System.Diagnostics.Debug.WriteLine($"✅ Incremental update complete: {updatedCount} updated, {addedCount} added, {deletedCount} deleted");
         }
 
         // ================================================
