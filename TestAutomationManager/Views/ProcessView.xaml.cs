@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
+using TestAutomationManager.Services;
 
 namespace TestAutomationManager.Views
 {
@@ -169,13 +170,31 @@ namespace TestAutomationManager.Views
                 // ⭐ CRITICAL: Let UI render the loading screen before blocking
                 await System.Threading.Tasks.Task.Delay(50);
 
-                System.Diagnostics.Debug.WriteLine("📊 Loading processes from database...");
+                System.Diagnostics.Debug.WriteLine("📊 Loading processes...");
 
-                // Get all processes from database (async)
-                var processesFromDb = await _repository.GetAllProcessesAsync();
+                List<Process> processesFromDb;
+                var cache = ProcessCacheService.Instance;
+
+                // ⭐ SMART CACHING: Check if we already have processes loaded from TestsView
+                if (cache.HasSignificantCachedData())
+                {
+                    System.Diagnostics.Debug.WriteLine($"🚀 CACHE HIT! Using {cache.GetCachedProcessCount()} cached processes from TestsView");
+                    processesFromDb = cache.GetAllCachedProcesses();
+                    UpdateLoadingProgress($"Loading {processesFromDb.Count} cached processes (instant!)...", 50);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("📊 Cache miss - loading from database...");
+                    // Get all processes from database (async)
+                    processesFromDb = await _repository.GetAllProcessesAsync();
+
+                    // Add to cache for future use
+                    cache.AddProcesses(processesFromDb);
+                    System.Diagnostics.Debug.WriteLine($"✓ Added {processesFromDb.Count} processes to cache");
+                }
 
                 int totalProcesses = processesFromDb.Count;
-                UpdateLoadingProgress($"Processing {totalProcesses} processes...", 10);
+                UpdateLoadingProgress($"Processing {totalProcesses} processes...", 60);
                 await System.Threading.Tasks.Task.Delay(10);
 
                 // Clear existing data
@@ -273,9 +292,23 @@ namespace TestAutomationManager.Views
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"⏳ Lazy loading functions for Process #{process.ProcessID}...");
+                var cache = ProcessCacheService.Instance;
+                List<Function> functions;
 
-                var functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
+                // ⭐ Check cache first
+                if (cache.AreFunctionsLoaded(process.ProcessID.Value))
+                {
+                    functions = cache.GetFunctions(process.ProcessID.Value);
+                    System.Diagnostics.Debug.WriteLine($"🚀 CACHE HIT! Using cached functions for Process #{process.ProcessID}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for Process #{process.ProcessID} from database...");
+                    functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
+
+                    // Add to cache
+                    cache.AddFunctions(process.ProcessID.Value, functions);
+                }
 
                 // Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
@@ -287,7 +320,7 @@ namespace TestAutomationManager.Views
                     }
 
                     process.AreFunctionsLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {functions.Count} functions for Process #{process.ProcessID}");
                 });
             }
             catch (Exception ex)
@@ -607,6 +640,63 @@ namespace TestAutomationManager.Views
                     sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
                 }
             }
+        }
+
+        // ================================================
+        // GLOBAL BACKGROUND PRELOADING
+        // ================================================
+
+        private static bool _globalPreloadRunning = false;
+
+        /// <summary>
+        /// Start global background preloading of ALL processes for ProcessView
+        /// Call this from TestsView after it finishes loading
+        /// This runs in background and populates the cache so ProcessView loads instantly
+        /// </summary>
+        public static async void StartGlobalBackgroundPreload()
+        {
+            if (_globalPreloadRunning)
+            {
+                System.Diagnostics.Debug.WriteLine("⚠️ Global preload already running, skipping...");
+                return;
+            }
+
+            _globalPreloadRunning = true;
+            System.Diagnostics.Debug.WriteLine("🚀 Starting GLOBAL background preload for ProcessView...");
+
+            await System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    var repository = new ProcessRepository();
+                    var cache = ProcessCacheService.Instance;
+
+                    // Check if we already have significant data
+                    if (cache.HasSignificantCachedData())
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ Cache already has {cache.GetCachedProcessCount()} processes, skipping global preload");
+                        _globalPreloadRunning = false;
+                        return;
+                    }
+
+                    System.Diagnostics.Debug.WriteLine("📦 Loading ALL processes from database for cache...");
+                    var allProcesses = await repository.GetAllProcessesAsync();
+
+                    // Add to cache
+                    cache.AddProcesses(allProcesses);
+                    System.Diagnostics.Debug.WriteLine($"✓ Global preload: Added {allProcesses.Count} processes to cache");
+
+                    // Log cache statistics
+                    cache.LogStatistics();
+
+                    _globalPreloadRunning = false;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Error in global background preload: {ex.Message}");
+                    _globalPreloadRunning = false;
+                }
+            });
         }
     }
 }

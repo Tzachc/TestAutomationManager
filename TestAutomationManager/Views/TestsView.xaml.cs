@@ -571,6 +571,9 @@ namespace TestAutomationManager.Views
 
                 var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
 
+                // ⭐ Add processes to shared cache for ProcessView to use
+                Services.ProcessCacheService.Instance.AddProcesses(processes);
+
                 // Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -584,7 +587,7 @@ namespace TestAutomationManager.Views
                     }
 
                     test.AreProcessesLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID} (added to cache)");
                 });
             }
             catch (Exception ex)
@@ -609,6 +612,9 @@ namespace TestAutomationManager.Views
 
                 var functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
 
+                // ⭐ Add functions to shared cache for ProcessView to use
+                Services.ProcessCacheService.Instance.AddFunctions(process.ProcessID.Value, functions);
+
                 // Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -619,7 +625,7 @@ namespace TestAutomationManager.Views
                     }
 
                     process.AreFunctionsLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID} (added to cache)");
                 });
             }
             catch (Exception ex)
@@ -1059,6 +1065,11 @@ namespace TestAutomationManager.Views
 
             _isBackgroundLoadingRunning = false;
             System.Diagnostics.Debug.WriteLine($"✓ Background pre-loading completed! Loaded {testsLoaded}/{totalTests} tests");
+
+            // ⭐ OPTIMIZATION: Start preloading ProcessView data in background
+            // This way when user clicks on ProcessView tab, data is already cached!
+            System.Diagnostics.Debug.WriteLine("🚀 TestsView background load complete - triggering ProcessView preload...");
+            ProcessView.StartGlobalBackgroundPreload();
         }
 
     }

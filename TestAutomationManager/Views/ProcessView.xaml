@@ -226,11 +226,11 @@
                 <Border Padding="38,8">
                     <Grid MinWidth="10000">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="20"  SharedSizeGroup="cExpand"/>
-                            <ColumnDefinition Width="120" SharedSizeGroup="cProcessID"/>
-                            <ColumnDefinition Width="150" SharedSizeGroup="cWEB3Operator"/>
-                            <ColumnDefinition Width="180" SharedSizeGroup="cPassFailOp"/>
-                            <ColumnDefinition Width="120" SharedSizeGroup="cTestID"/>
+                            <ColumnDefinition Width="24"  SharedSizeGroup="cExpand"/>
+                            <ColumnDefinition Width="80"  SharedSizeGroup="cProcessID"/>
+                            <ColumnDefinition Width="100" SharedSizeGroup="cWEB3Operator"/>
+                            <ColumnDefinition Width="120" SharedSizeGroup="cPassFailOp"/>
+                            <ColumnDefinition Width="80"  SharedSizeGroup="cTestID"/>
                             <ColumnDefinition Width="600" SharedSizeGroup="cProcessName"/>
                             <ColumnDefinition Width="140" SharedSizeGroup="cProcessPosition"/>
                             <ColumnDefinition Width="180" SharedSizeGroup="cLastRunning"/>
