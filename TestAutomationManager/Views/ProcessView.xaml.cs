@@ -202,21 +202,21 @@ namespace TestAutomationManager.Views
                 Processes.Clear();
                 _allProcesses.Clear();
 
-                // ⭐ INSTANT LOAD when using cache, batched load when from database
+                // ⭐ FAST LOAD when using cache - use small batches to keep UI responsive
                 if (usedCache)
                 {
-                    // FAST BATCHED LOAD: Add in batches with UI breathing room to prevent freeze
-                    // Even cached data needs batching because ObservableCollection fires events for each Add()
-                    System.Diagnostics.Debug.WriteLine($"⚡ FAST LOAD: Adding {totalProcesses} cached processes in responsive batches");
+                    // FAST BATCHED LOAD: Very small batches with frequent UI yields
+                    // ObservableCollection fires events for EVERY Add() - must yield often!
+                    System.Diagnostics.Debug.WriteLine($"⚡ FAST LOAD: Adding {totalProcesses} cached processes with frequent UI yields");
 
-                    const int batchSize = 500; // Large batches for speed, but let UI breathe between batches
+                    const int batchSize = 50; // SMALL batches - yield every 50 items to prevent freeze
                     int processed = 0;
 
                     for (int i = 0; i < processesFromDb.Count; i += batchSize)
                     {
                         int batchEnd = Math.Min(i + batchSize, processesFromDb.Count);
 
-                        // Add a batch of processes
+                        // Add a small batch of processes
                         for (int j = i; j < batchEnd; j++)
                         {
                             var process = processesFromDb[j];
@@ -226,13 +226,21 @@ namespace TestAutomationManager.Views
                             processed++;
                         }
 
-                        // Update progress
-                        double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
-                        UpdateLoadingProgress($"Displaying {processed}/{totalProcesses} processes...", progress);
+                        // Update progress every 500 items to reduce overhead
+                        if (processed % 500 == 0 || processed == totalProcesses)
+                        {
+                            double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
+                            UpdateLoadingProgress($"Displaying {processed}/{totalProcesses} processes...", progress);
+                        }
 
-                        // ⭐ CRITICAL: Let UI thread process events to stay responsive
-                        // Task.Delay(1) yields control to UI thread to process events
+                        // ⭐ CRITICAL: Yield EVERY batch to keep UI responsive
                         await System.Threading.Tasks.Task.Delay(1);
+
+                        // Log progress every 1000 items
+                        if (processed % 1000 == 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"   Progress: {processed}/{totalProcesses} processes loaded");
+                        }
                     }
 
                     UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
