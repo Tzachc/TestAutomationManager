@@ -49,6 +49,9 @@ namespace TestAutomationManager.Views
         private double _startH;
         private double _startV;
 
+        // ----- Internal ScrollViewer from ListBox -----
+        private ScrollViewer _listBoxScrollViewer;
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -76,9 +79,54 @@ namespace TestAutomationManager.Views
         // ================================================
 
         /// <summary>
+        /// Get the internal ScrollViewer from the ListBox
+        /// </summary>
+        private ScrollViewer GetListBoxScrollViewer()
+        {
+            if (_listBoxScrollViewer != null)
+                return _listBoxScrollViewer;
+
+            // Find the ScrollViewer inside the ListBox
+            if (ProcessesItemsControl != null)
+            {
+                _listBoxScrollViewer = FindVisualChild<ScrollViewer>(ProcessesItemsControl);
+
+                // Hook up scroll changed event
+                if (_listBoxScrollViewer != null)
+                {
+                    _listBoxScrollViewer.ScrollChanged += ListBoxScrollViewer_ScrollChanged;
+                }
+            }
+
+            return _listBoxScrollViewer;
+        }
+
+        /// <summary>
+        /// Find a visual child of a specific type
+        /// </summary>
+        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T typedChild)
+                    return typedChild;
+
+                var result = FindVisualChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Synchronize sticky header with body horizontal offset
         /// </summary>
-        private void MainScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        private void ListBoxScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             // Keep header aligned horizontally with body
             SyncHeaderToBody();
@@ -89,8 +137,9 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void SyncHeaderToBody()
         {
-            if (HeaderScrollViewer == null || MainScrollViewer == null) return;
-            HeaderScrollViewer.ScrollToHorizontalOffset(MainScrollViewer.HorizontalOffset);
+            var scrollViewer = GetListBoxScrollViewer();
+            if (HeaderScrollViewer == null || scrollViewer == null) return;
+            HeaderScrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset);
         }
 
         // ================================================
@@ -101,12 +150,15 @@ namespace TestAutomationManager.Views
         {
             if (e.ChangedButton == MouseButton.Middle)
             {
-                _isPanning = true;
-                _lastPanPoint = e.GetPosition(MainScrollViewer);
-                _startH = MainScrollViewer.HorizontalOffset;
-                _startV = MainScrollViewer.VerticalOffset;
+                var scrollViewer = GetListBoxScrollViewer();
+                if (scrollViewer == null) return;
 
-                MainScrollViewer.CaptureMouse();
+                _isPanning = true;
+                _lastPanPoint = e.GetPosition(scrollViewer);
+                _startH = scrollViewer.HorizontalOffset;
+                _startV = scrollViewer.VerticalOffset;
+
+                ProcessesItemsControl.CaptureMouse();
                 e.Handled = true;
             }
         }
@@ -115,7 +167,10 @@ namespace TestAutomationManager.Views
         {
             if (!_isPanning) return;
 
-            var current = e.GetPosition(MainScrollViewer);
+            var scrollViewer = GetListBoxScrollViewer();
+            if (scrollViewer == null) return;
+
+            var current = e.GetPosition(scrollViewer);
             var dx = current.X - _lastPanPoint.X;
             var dy = current.Y - _lastPanPoint.Y;
 
@@ -124,11 +179,11 @@ namespace TestAutomationManager.Views
             var targetV = _startV + dy;
 
             // Clamp to bounds
-            targetH = Math.Max(0, Math.Min(targetH, MainScrollViewer.ScrollableWidth));
-            targetV = Math.Max(0, Math.Min(targetV, MainScrollViewer.ScrollableHeight));
+            targetH = Math.Max(0, Math.Min(targetH, scrollViewer.ScrollableWidth));
+            targetV = Math.Max(0, Math.Min(targetV, scrollViewer.ScrollableHeight));
 
-            MainScrollViewer.ScrollToHorizontalOffset(targetH);
-            MainScrollViewer.ScrollToVerticalOffset(targetV);
+            scrollViewer.ScrollToHorizontalOffset(targetH);
+            scrollViewer.ScrollToVerticalOffset(targetV);
 
             e.Handled = true;
         }
@@ -138,7 +193,7 @@ namespace TestAutomationManager.Views
             if (e.ChangedButton == MouseButton.Middle && _isPanning)
             {
                 _isPanning = false;
-                MainScrollViewer.ReleaseMouseCapture();
+                ProcessesItemsControl.ReleaseMouseCapture();
                 e.Handled = true;
             }
         }
@@ -148,7 +203,7 @@ namespace TestAutomationManager.Views
             if (_isPanning)
             {
                 _isPanning = false;
-                MainScrollViewer.ReleaseMouseCapture();
+                ProcessesItemsControl.ReleaseMouseCapture();
             }
         }
 
@@ -393,19 +448,22 @@ namespace TestAutomationManager.Views
 
         private void ProcessView_Loaded(object sender, RoutedEventArgs e)
         {
+            // Initialize the ListBox's internal ScrollViewer
+            GetListBoxScrollViewer();
+
             // Ensure header/body sync is correct at load
             SyncHeaderToBody();
 
-            System.Diagnostics.Debug.WriteLine("✓ ProcessView Loaded");
+            System.Diagnostics.Debug.WriteLine("✓ ProcessView Loaded with virtualization enabled");
         }
 
         private void ProcessView_Unloaded(object sender, RoutedEventArgs e)
         {
             // Safety: release capture if leaving while panning
-            if (_isPanning && MainScrollViewer != null)
+            if (_isPanning && ProcessesItemsControl != null)
             {
                 _isPanning = false;
-                MainScrollViewer.ReleaseMouseCapture();
+                ProcessesItemsControl.ReleaseMouseCapture();
             }
 
             System.Diagnostics.Debug.WriteLine("✓ ProcessView Unloaded");
