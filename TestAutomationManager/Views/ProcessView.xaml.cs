@@ -174,6 +174,7 @@ namespace TestAutomationManager.Views
 
                 List<Process> processesFromDb;
                 var cache = ProcessCacheService.Instance;
+                bool usedCache = false;
 
                 // ⭐ SMART CACHING: Check if we already have processes loaded from TestsView
                 if (cache.HasSignificantCachedData())
@@ -181,6 +182,7 @@ namespace TestAutomationManager.Views
                     System.Diagnostics.Debug.WriteLine($"🚀 CACHE HIT! Using {cache.GetCachedProcessCount()} cached processes from TestsView");
                     processesFromDb = cache.GetAllCachedProcesses();
                     UpdateLoadingProgress($"Loading {processesFromDb.Count} cached processes (instant!)...", 50);
+                    usedCache = true;
                 }
                 else
                 {
@@ -194,58 +196,82 @@ namespace TestAutomationManager.Views
                 }
 
                 int totalProcesses = processesFromDb.Count;
-                UpdateLoadingProgress($"Processing {totalProcesses} processes...", 60);
-                await System.Threading.Tasks.Task.Delay(10);
+                UpdateLoadingProgress($"Displaying {totalProcesses} processes...", 70);
 
                 // Clear existing data
                 Processes.Clear();
                 _allProcesses.Clear();
 
-                // ⭐ Process in SMALL BATCHES for smooth progress updates
-                const int batchSize = 50; // Larger batches for processes (they're simpler than tests)
-                int processed = 0;
-
-                for (int i = 0; i < processesFromDb.Count; i += batchSize)
+                // ⭐ INSTANT LOAD when using cache, batched load when from database
+                if (usedCache)
                 {
-                    // Process a batch
-                    int batchEnd = Math.Min(i + batchSize, processesFromDb.Count);
+                    // INSTANT: No delays, no batching - just load everything at once!
+                    System.Diagnostics.Debug.WriteLine($"⚡ INSTANT LOAD: Adding all {totalProcesses} processes without delays");
 
-                    for (int j = i; j < batchEnd; j++)
+                    foreach (var process in processesFromDb)
                     {
-                        var process = processesFromDb[j];
                         Processes.Add(process);
                         _allProcesses.Add(process);
-
-                        // ⭐ Subscribe to PropertyChanged for lazy loading
                         process.PropertyChanged += Process_PropertyChanged;
-                        processed++;
                     }
 
-                    // Update progress after each batch (with smooth animation)
-                    double progress = 10 + (processed / (double)totalProcesses * 80); // 10-90%
-                    UpdateLoadingProgress($"Loaded {processed}/{totalProcesses} processes...", progress);
-
-                    // ⭐ CRITICAL: Give animation time to complete
-                    await System.Threading.Tasks.Task.Delay(100);
+                    UpdateLoadingProgress($"Loaded {Processes.Count} processes instantly!", 100);
+                    System.Diagnostics.Debug.WriteLine($"✓ Instant load complete: {Processes.Count} processes (0 delays)");
                 }
+                else
+                {
+                    // BATCHED: Load in batches for database queries (smooth progress)
+                    const int batchSize = 100; // Larger batches since we're not blocking UI
+                    int processed = 0;
 
-                // Finalize
-                UpdateLoadingProgress("Finalizing...", 95);
-                await System.Threading.Tasks.Task.Delay(10);
+                    for (int i = 0; i < processesFromDb.Count; i += batchSize)
+                    {
+                        int batchEnd = Math.Min(i + batchSize, processesFromDb.Count);
 
-                UpdateLoadingProgress($"Loaded {Processes.Count} processes successfully!", 100);
+                        for (int j = i; j < batchEnd; j++)
+                        {
+                            var process = processesFromDb[j];
+                            Processes.Add(process);
+                            _allProcesses.Add(process);
+                            process.PropertyChanged += Process_PropertyChanged;
+                            processed++;
+                        }
 
-                System.Diagnostics.Debug.WriteLine($"✓ Loaded {Processes.Count} processes from database successfully!");
+                        // Update progress after each batch
+                        double progress = 70 + (processed / (double)totalProcesses * 25); // 70-95%
+                        UpdateLoadingProgress($"Loaded {processed}/{totalProcesses} processes...", progress);
+
+                        // Small delay only for database loads
+                        if (i + batchSize < processesFromDb.Count) // Don't delay on last batch
+                            await System.Threading.Tasks.Task.Delay(50); // Reduced from 100ms
+                    }
+
+                    UpdateLoadingProgress($"Loaded {Processes.Count} processes successfully!", 100);
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {Processes.Count} processes from database");
+                }
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
 
-                // Hide loading screen after a short delay
-                await System.Threading.Tasks.Task.Delay(300);
+                // Hide loading screen (instant for cache, short delay for database)
+                if (!usedCache)
+                    await System.Threading.Tasks.Task.Delay(300);
+
                 HideLoadingScreen();
 
                 // ⭐ START BACKGROUND PRE-LOADING after UI is responsive
-                StartBackgroundPreloading();
+                // But SKIP if we used cache - functions are likely already cached too!
+                if (!usedCache)
+                {
+                    System.Diagnostics.Debug.WriteLine("🔄 Starting background function preload (database load)");
+                    StartBackgroundPreloading();
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("⚡ Skipping background preload (cache already has data)");
+                    // Log cache statistics to see what we have
+                    ProcessCacheService.Instance.LogStatistics();
+                }
 
                 // Show message if no data
                 if (Processes.Count == 0)

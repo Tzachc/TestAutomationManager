@@ -70,10 +70,22 @@ namespace TestAutomationManager.Services
         /// </summary>
         public void AddProcesses(IEnumerable<Process> processes)
         {
+            int addedCount = 0;
+            int skippedCount = 0;
+
             foreach (var process in processes)
             {
-                AddProcess(process);
+                if (process?.ProcessID == null)
+                {
+                    skippedCount++;
+                    continue;
+                }
+
+                _processCache[process.ProcessID.Value] = process;
+                addedCount++;
             }
+
+            System.Diagnostics.Debug.WriteLine($"📦 Cache: Added {addedCount} processes, skipped {skippedCount} (null IDs). Total cached: {_processCache.Count}");
         }
 
         /// <summary>
