@@ -988,6 +988,17 @@ namespace TestAutomationManager.Views
             }
         }
 
+        /// <summary>
+        /// Prevent automatic scrolling when expanding items inside ProcRowsScrollViewer
+        /// This fixes the UI "jump" bug when clicking expand buttons
+        /// </summary>
+        private void ProcRowsScrollViewer_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Cancel the automatic scroll-to-focused-element behavior
+            // This prevents the annoying jump when clicking expand buttons
+            e.Handled = true;
+        }
+
         // ================================================
         // LOADING SCREEN HELPERS
         // ================================================

@@ -312,7 +312,11 @@
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
-            
+            <!-- Apply modern scrollbar styling WITHOUT breaking virtualization -->
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBar}"/>
+            </ListBox.Resources>
+
             <!-- Remove default ListBox selection visual -->
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
@@ -657,6 +661,7 @@
                                                       HorizontalScrollBarVisibility="Auto"
                                                       CanContentScroll="True"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
+                                                      RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
                                                       MaxHeight="700">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
@@ -944,6 +949,7 @@
                                                                                       HorizontalScrollBarVisibility="Auto"
                                                                                       CanContentScroll="True"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
+                                                                                      RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
                                                                                       MaxHeight="400">
                                                                         <ItemsControl>
                                                                             <ItemsControl.Resources>
