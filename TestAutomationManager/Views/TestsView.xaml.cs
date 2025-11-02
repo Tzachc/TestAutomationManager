@@ -452,19 +452,21 @@ namespace TestAutomationManager.Views
         // ================================================
 
         /// <summary>
-        /// Load tests from SQL database - NO LOADING SCREEN!
-        /// UI shows immediately, tests load in background
+        /// Load tests from SQL database with responsive loading screen
         /// </summary>
         private async void LoadTestsFromDatabase()
         {
             try
             {
-                // ⭐ CRITICAL: Let UI render first before starting database query
-                await System.Threading.Tasks.Task.Delay(50);
+                // ⭐ Show loading screen
+                ShowLoadingScreen("Loading tests from database...", 0);
 
-                System.Diagnostics.Debug.WriteLine("📊 Loading tests from database in background...");
+                // ⭐ CRITICAL: Let UI render the loading screen
+                await System.Threading.Tasks.Task.Yield();
 
-                // ⭐ Load tests in background (off UI thread) to avoid blocking
+                System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
+
+                // ⭐ Load tests in background thread to avoid blocking UI
                 var testsFromDb = await System.Threading.Tasks.Task.Run(async () =>
                 {
                     return await _repository.GetAllTestsAsync();
@@ -472,11 +474,14 @@ namespace TestAutomationManager.Views
 
                 System.Diagnostics.Debug.WriteLine($"✓ Loaded {testsFromDb.Count} tests from database");
 
-                // Clear existing data on UI thread
+                // ⭐ Update progress
+                UpdateLoadingProgress("Adding tests to UI...", 50);
+
+                // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ Add tests to UI
+                // Add tests to UI
                 foreach (var test in testsFromDb)
                 {
                     Tests.Add(test);
@@ -487,12 +492,19 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"✓ {testsFromDb.Count} tests added to UI - ready!");
 
                 // Update statistics
+                UpdateLoadingProgress("Finalizing...", 90);
                 UpdateStatistics();
+
+                UpdateLoadingProgress($"Loaded {Tests.Count} tests successfully!", 100);
 
                 System.Diagnostics.Debug.WriteLine($"✓ TestsView ready with {Tests.Count} tests!");
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
+
+                // ⭐ Hide loading screen
+                await System.Threading.Tasks.Task.Delay(300);
+                HideLoadingScreen();
 
                 // ⭐ Mark initial load as complete to allow incremental updates
                 _isInitialLoad = false;
@@ -511,6 +523,7 @@ namespace TestAutomationManager.Views
             }
             catch (Exception ex)
             {
+                HideLoadingScreen();
                 System.Diagnostics.Debug.WriteLine($"✗ Error loading tests: {ex.Message}");
                 MessageBox.Show($"Failed to load tests from database.\n\nError: {ex.Message}\n\nCheck:\n1. Database connection\n2. SQL scripts ran\n3. DbConnectionConfig settings",
                     "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
