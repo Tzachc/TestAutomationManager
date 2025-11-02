@@ -452,61 +452,53 @@ namespace TestAutomationManager.Views
         // ================================================
 
         /// <summary>
-        /// Load tests from SQL database with loading screen
+        /// Load tests from SQL database - NO LOADING SCREEN!
+        /// UI shows immediately, tests load in background
         /// </summary>
         private async void LoadTestsFromDatabase()
         {
             try
             {
-                // Show loading overlay
-                ShowLoadingScreen("Loading tests...", 0);
-
-                // ⭐ CRITICAL: Let UI render the loading screen before blocking
+                // ⭐ CRITICAL: Let UI render first before starting database query
                 await System.Threading.Tasks.Task.Delay(50);
 
-                System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
+                System.Diagnostics.Debug.WriteLine("📊 Loading tests from database in background...");
 
-                // ⭐ STEP 1: Get all tests from database - FAST with stored procedure!
-                var testsFromDb = await _repository.GetAllTestsAsync();
-                int totalTests = testsFromDb.Count;
-                UpdateLoadingProgress($"Loaded {totalTests} tests...", 50);
+                // ⭐ Load tests in background (off UI thread) to avoid blocking
+                var testsFromDb = await System.Threading.Tasks.Task.Run(async () =>
+                {
+                    return await _repository.GetAllTestsAsync();
+                });
 
-                // Clear existing data
+                System.Diagnostics.Debug.WriteLine($"✓ Loaded {testsFromDb.Count} tests from database");
+
+                // Clear existing data on UI thread
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ STEP 2: Add tests to UI - FAST! (no processes yet)
+                // ⭐ Add tests to UI
                 foreach (var test in testsFromDb)
                 {
                     Tests.Add(test);
                     _allTests.Add(test);
                     test.PropertyChanged += Test_PropertyChanged;
-                    // Processes will be loaded on-demand from cache (instant) or database (fallback)
                 }
 
-                System.Diagnostics.Debug.WriteLine($"✓ Loaded {testsFromDb.Count} tests - UI ready!");
+                System.Diagnostics.Debug.WriteLine($"✓ {testsFromDb.Count} tests added to UI - ready!");
 
                 // Update statistics
-                UpdateLoadingProgress("Ready!", 100);
                 UpdateStatistics();
 
-                // Update progress
-                UpdateLoadingProgress($"Loaded {Tests.Count} tests successfully!", 100);
-
-                System.Diagnostics.Debug.WriteLine($"✓ Loaded {Tests.Count} tests from database successfully!");
+                System.Diagnostics.Debug.WriteLine($"✓ TestsView ready with {Tests.Count} tests!");
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
-
-                // Hide loading screen after a short delay
-                await System.Threading.Tasks.Task.Delay(300);
-                HideLoadingScreen();
 
                 // ⭐ Mark initial load as complete to allow incremental updates
                 _isInitialLoad = false;
                 System.Diagnostics.Debug.WriteLine("✓ Initial load complete - incremental updates now enabled");
 
-                // ⭐ STEP 3: Start background job to preload ALL processes into cache (non-blocking!)
+                // ⭐ Start background job to preload ALL processes into cache (non-blocking!)
                 System.Diagnostics.Debug.WriteLine("🚀 Starting background process preload into cache...");
                 _ = PreloadAllProcessesInBackgroundAsync();
 
@@ -519,7 +511,6 @@ namespace TestAutomationManager.Views
             }
             catch (Exception ex)
             {
-                HideLoadingScreen();
                 System.Diagnostics.Debug.WriteLine($"✗ Error loading tests: {ex.Message}");
                 MessageBox.Show($"Failed to load tests from database.\n\nError: {ex.Message}\n\nCheck:\n1. Database connection\n2. SQL scripts ran\n3. DbConnectionConfig settings",
                     "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
