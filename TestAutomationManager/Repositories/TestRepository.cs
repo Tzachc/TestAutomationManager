@@ -22,7 +22,7 @@ namespace TestAutomationManager.Repositories
 
         /// <summary>
         /// Get all tests WITHOUT processes/functions (optimized with stored procedure)
-        /// Uses [dbo].[usp_GetAllTests] for 4-5x faster performance
+        /// Uses schema-qualified stored procedure for 4-5x faster performance
         /// Use GetProcessesForTestAsync() and GetFunctionsForProcessAsync() for lazy loading
         /// </summary>
         public async Task<List<Test>> GetAllTestsAsync()
@@ -31,11 +31,13 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    System.Diagnostics.Debug.WriteLine("⏳ Loading tests using stored procedure (FAST!)...");
+                    var schemaName = SchemaConfigService.Instance.CurrentSchema;
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading tests using stored procedure from schema '{schemaName}'...");
 
-                    // ✅ Use stored procedure for 4-5x faster performance
+                    // ✅ Use schema-qualified stored procedure for 4-5x faster performance
+                    var spName = $"EXEC [{schemaName}].[usp_GetAllTests]";
                     var tests = await context.Tests
-                        .FromSqlRaw("EXEC [dbo].[usp_GetAllTests]")
+                        .FromSqlRaw(spName)
                         .ToListAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests via stored procedure");
@@ -47,7 +49,6 @@ namespace TestAutomationManager.Repositories
                         test.AreProcessesLoaded = false;  // Mark as not loaded yet
                     }
 
-                    var schemaName = SchemaConfigService.Instance.CurrentSchema;
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {tests.Count} tests from schema '{schemaName}' using SP");
                     return tests;
                 }
@@ -61,7 +62,7 @@ namespace TestAutomationManager.Repositories
 
         /// <summary>
         /// Load processes for a specific test (optimized with stored procedure)
-        /// Uses [dbo].[usp_GetProcessesByTestID] for faster performance
+        /// Uses schema-qualified stored procedure for faster performance
         /// </summary>
         public async Task<List<Process>> GetProcessesForTestAsync(int testId)
         {
@@ -69,13 +70,15 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes for Test #{testId} via stored procedure...");
+                    var schemaName = SchemaConfigService.Instance.CurrentSchema;
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes for Test #{testId} via stored procedure from schema '{schemaName}'...");
 
-                    // ✅ Use stored procedure with parameter
+                    // ✅ Use schema-qualified stored procedure with parameter
                     var testIdParam = new SqlParameter("@TestID", testId);
+                    var spName = $"EXEC [{schemaName}].[usp_GetProcessesByTestID] @TestID";
 
                     var processes = await context.Set<Process>()
-                        .FromSqlRaw("EXEC [dbo].[usp_GetProcessesByTestID] @TestID", testIdParam)
+                        .FromSqlRaw(spName, testIdParam)
                         .ToListAsync();
 
                     // Initialize empty functions collection for each process
@@ -98,7 +101,7 @@ namespace TestAutomationManager.Repositories
 
         /// <summary>
         /// Load functions for a specific process (optimized with stored procedure)
-        /// Uses [dbo].[usp_GetFunctionsByProcessID] for faster performance
+        /// Uses schema-qualified stored procedure for faster performance
         /// </summary>
         public async Task<List<Function>> GetFunctionsForProcessAsync(double processId)
         {
@@ -106,13 +109,15 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for Process #{processId} via stored procedure...");
+                    var schemaName = SchemaConfigService.Instance.CurrentSchema;
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for Process #{processId} via stored procedure from schema '{schemaName}'...");
 
-                    // ✅ Use stored procedure with parameter
+                    // ✅ Use schema-qualified stored procedure with parameter
                     var processIdParam = new SqlParameter("@ProcessID", processId);
+                    var spName = $"EXEC [{schemaName}].[usp_GetFunctionsByProcessID] @ProcessID";
 
                     var functions = await context.Set<Function>()
-                        .FromSqlRaw("EXEC [dbo].[usp_GetFunctionsByProcessID] @ProcessID", processIdParam)
+                        .FromSqlRaw(spName, processIdParam)
                         .ToListAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {functions.Count} functions for Process #{processId} via SP");
