@@ -40,6 +40,11 @@ namespace TestAutomationManager.Views
         /// </summary>
         private string _currentSearchQuery = "";
 
+        /// <summary>
+        /// Flag to prevent incremental updates during initial load
+        /// </summary>
+        private bool _isInitialLoad = true;
+
         private readonly List<ProcessHeaderRegistration> _processHeaders = new();
 
         private const string ProcessContainerTag = "ProcessContainer";
@@ -48,6 +53,10 @@ namespace TestAutomationManager.Views
         /// Event fired when data is loaded
         /// </summary>
         public event EventHandler DataLoaded;
+
+        // ----- ScrollViewer reference for panning (from ListBox's internal template) -----
+        private ScrollViewer _mainScrollViewer;
+        private ScrollViewer MainScrollViewer => _mainScrollViewer ??= GetScrollViewer(TestsItemsControl);
 
         // ----- Middle-mouse panning state -----
         private bool _isPanning = false;
@@ -361,12 +370,20 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void OnDatabaseChanged(object sender, Services.DatabaseChangeEventArgs e)
         {
+            // ⭐ Skip incremental updates during initial load
+            if (_isInitialLoad)
+            {
+                System.Diagnostics.Debug.WriteLine("⏭ Skipping incremental update during initial load");
+                return;
+            }
+
             if (!e.HasChanges)
                 return;
 
             System.Diagnostics.Debug.WriteLine($"⚡ Applying INCREMENTAL updates: {e.ChangedTests.Count} tests");
 
             // ⭐ STEP 1: Handle deleted tests
+            int deletedCount = 0;
             foreach (var deletedId in e.DeletedTestIds)
             {
                 var testToRemove = _allTests.FirstOrDefault(t => t.Id == deletedId);
@@ -374,11 +391,13 @@ namespace TestAutomationManager.Views
                 {
                     _allTests.Remove(testToRemove);
                     Tests.Remove(testToRemove);
-                    System.Diagnostics.Debug.WriteLine($"🗑️ Removed test #{deletedId}");
+                    deletedCount++;
                 }
             }
 
             // ⭐ STEP 2: Handle new and changed tests
+            int updatedCount = 0;
+            int addedCount = 0;
             foreach (var freshTest in e.ChangedTests)
             {
                 var existingTest = _allTests.FirstOrDefault(t => t.Id == freshTest.Id);
@@ -403,7 +422,7 @@ namespace TestAutomationManager.Views
                     // Keep existing Processes and AreProcessesLoaded (pre-loaded data!)
                     // INotifyPropertyChanged will auto-update the UI!
 
-                    System.Diagnostics.Debug.WriteLine($"✏️ Updated test #{freshTest.Id} in-place");
+                    updatedCount++;
                 }
                 else
                 {
@@ -418,14 +437,14 @@ namespace TestAutomationManager.Views
                         Tests.Add(freshTest);
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"🆕 Added new test #{freshTest.Id}");
+                    addedCount++;
                 }
             }
 
             // ⭐ STEP 3: Update statistics (minimal impact)
             UpdateStatistics();
 
-            System.Diagnostics.Debug.WriteLine($"✅ Incremental update complete - NO full reload!");
+            System.Diagnostics.Debug.WriteLine($"✅ Incremental update complete: {updatedCount} updated, {addedCount} added, {deletedCount} deleted");
         }
 
         // ================================================
@@ -447,49 +466,26 @@ namespace TestAutomationManager.Views
 
                 System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
 
-                // Get all tests from database (async)
+                // Get all tests from database (async) - FAST with stored procedure!
                 var testsFromDb = await _repository.GetAllTestsAsync();
 
                 int totalTests = testsFromDb.Count;
-                UpdateLoadingProgress($"Processing {totalTests} tests...", 10);
-                await System.Threading.Tasks.Task.Delay(10);
+                UpdateLoadingProgress($"Processing {totalTests} tests...", 50);
 
                 // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ Process tests in SMALL BATCHES for smooth progress updates
-                const int batchSize = 10; // Smaller batches = smoother animation
-                int processed = 0;
-
-                for (int i = 0; i < testsFromDb.Count; i += batchSize)
+                // ⭐ Add all tests at once - FAST with UI virtualization! (no batching needed)
+                foreach (var test in testsFromDb)
                 {
-                    // Process a batch
-                    int batchEnd = Math.Min(i + batchSize, testsFromDb.Count);
-
-                    for (int j = i; j < batchEnd; j++)
-                    {
-                        var test = testsFromDb[j];
-                        Tests.Add(test);
-                        _allTests.Add(test);
-
-                        // ⭐ Subscribe to PropertyChanged for lazy loading
-                        test.PropertyChanged += Test_PropertyChanged;
-                        processed++;
-                    }
-
-                    // Update progress after each batch (with smooth animation)
-                    double progress = 10 + (processed / (double)totalTests * 80); // 10-90%
-                    UpdateLoadingProgress($"Loaded {processed}/{totalTests} tests...", progress);
-
-                    // ⭐ CRITICAL: Give animation time to complete (150ms delay for 100ms animation)
-                    await System.Threading.Tasks.Task.Delay(150);
+                    Tests.Add(test);
+                    _allTests.Add(test);
+                    test.PropertyChanged += Test_PropertyChanged;
                 }
 
                 // Update statistics
-                UpdateLoadingProgress("Finalizing...", 95);
-                await System.Threading.Tasks.Task.Delay(10);
-
+                UpdateLoadingProgress("Finalizing...", 90);
                 UpdateStatistics();
 
                 // Update progress
@@ -504,8 +500,9 @@ namespace TestAutomationManager.Views
                 await System.Threading.Tasks.Task.Delay(300);
                 HideLoadingScreen();
 
-                // ⭐ START BACKGROUND PRE-LOADING after UI is responsive
-                StartBackgroundPreloading();
+                // ⭐ Mark initial load as complete to allow incremental updates
+                _isInitialLoad = false;
+                System.Diagnostics.Debug.WriteLine("✓ Initial load complete - incremental updates now enabled");
 
                 // Show message if no data
                 if (Tests.Count == 0)
@@ -571,6 +568,9 @@ namespace TestAutomationManager.Views
 
                 var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
 
+                // ⭐ Add processes to shared cache for ProcessView to use
+                Services.ProcessCacheService.Instance.AddProcesses(processes);
+
                 // Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -584,7 +584,7 @@ namespace TestAutomationManager.Views
                     }
 
                     test.AreProcessesLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID} (added to cache)");
                 });
             }
             catch (Exception ex)
@@ -609,6 +609,9 @@ namespace TestAutomationManager.Views
 
                 var functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
 
+                // ⭐ Add functions to shared cache for ProcessView to use
+                Services.ProcessCacheService.Instance.AddFunctions(process.ProcessID.Value, functions);
+
                 // Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -619,7 +622,7 @@ namespace TestAutomationManager.Views
                     }
 
                     process.AreFunctionsLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID} (added to cache)");
                 });
             }
             catch (Exception ex)
@@ -970,95 +973,23 @@ namespace TestAutomationManager.Views
             });
         }
 
-        // ================================================
-        // BACKGROUND PRE-LOADING
-        // ================================================
-
-        private bool _isBackgroundLoadingRunning = false;
-        private readonly System.Collections.Concurrent.ConcurrentQueue<Test> _preloadQueue = new();
-
         /// <summary>
-        /// Start background pre-loading of processes/functions after initial UI load
-        /// Loads data in the background so subsequent expansions are instant
+        /// Get ScrollViewer from ListBox's visual tree (for virtualization support)
         /// </summary>
-        private async void StartBackgroundPreloading()
+        private ScrollViewer GetScrollViewer(DependencyObject element)
         {
-            if (_isBackgroundLoadingRunning)
-                return;
+            if (element is ScrollViewer scrollViewer)
+                return scrollViewer;
 
-            _isBackgroundLoadingRunning = true;
-            System.Diagnostics.Debug.WriteLine("🚀 Starting background pre-loading...");
-
-            // Build priority queue: Active tests first, then others
-            var activeTests = _allTests.Where(t => t.IsActive).ToList();
-            var inactiveTests = _allTests.Where(t => !t.IsActive).ToList();
-
-            // Add active tests first (user is more likely to use these)
-            foreach (var test in activeTests)
-                _preloadQueue.Enqueue(test);
-
-            // Then add inactive tests
-            foreach (var test in inactiveTests)
-                _preloadQueue.Enqueue(test);
-
-            // Start background loading task
-            await System.Threading.Tasks.Task.Run(async () => await BackgroundPreloadWorker());
-        }
-
-        /// <summary>
-        /// Background worker that pre-loads data with throttling
-        /// </summary>
-        private async System.Threading.Tasks.Task BackgroundPreloadWorker()
-        {
-            int testsLoaded = 0;
-            int totalTests = _preloadQueue.Count;
-
-            while (_preloadQueue.TryDequeue(out Test test))
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
             {
-                try
-                {
-                    // Only load if not already loaded
-                    if (!test.AreProcessesLoaded)
-                    {
-                        // Load processes for this test
-                        var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
-
-                        // Update UI on UI thread
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            test.Processes.Clear();
-                            foreach (var process in processes)
-                            {
-                                test.Processes.Add(process);
-                                process.PropertyChanged += Process_PropertyChanged;
-                            }
-                            test.AreProcessesLoaded = true;
-                        });
-
-                        testsLoaded++;
-
-                        // Log progress every 50 tests
-                        if (testsLoaded % 50 == 0)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"📦 Background pre-loaded {testsLoaded}/{totalTests} tests");
-                        }
-
-                        // Throttle to avoid overwhelming database/UI (load 5 tests, pause 100ms)
-                        if (testsLoaded % 5 == 0)
-                        {
-                            await System.Threading.Tasks.Task.Delay(100);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"⚠ Background preload error for test #{test.TestID}: {ex.Message}");
-                    // Continue with next test
-                }
+                var child = VisualTreeHelper.GetChild(element, i);
+                var result = GetScrollViewer(child);
+                if (result != null)
+                    return result;
             }
 
-            _isBackgroundLoadingRunning = false;
-            System.Diagnostics.Debug.WriteLine($"✓ Background pre-loading completed! Loaded {testsLoaded}/{totalTests} tests");
+            return null;
         }
 
     }
