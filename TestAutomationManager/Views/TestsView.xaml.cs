@@ -452,31 +452,31 @@ namespace TestAutomationManager.Views
         // ================================================
 
         /// <summary>
-        /// Load tests from SQL database - NO LOADING SCREEN!
-        /// UI shows immediately, tests load in background
+        /// Load tests from SQL database with loading screen
         /// </summary>
         private async void LoadTestsFromDatabase()
         {
             try
             {
-                // ⭐ CRITICAL: Let UI render first before starting database query
+                // Show loading overlay
+                ShowLoadingScreen("Loading tests...", 0);
+
+                // ⭐ CRITICAL: Let UI render the loading screen before blocking
                 await System.Threading.Tasks.Task.Delay(50);
 
-                System.Diagnostics.Debug.WriteLine("📊 Loading tests from database in background...");
+                System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
 
-                // ⭐ Load tests in background (off UI thread) to avoid blocking
-                var testsFromDb = await System.Threading.Tasks.Task.Run(async () =>
-                {
-                    return await _repository.GetAllTestsAsync();
-                });
+                // Get all tests from database (async) - FAST with stored procedure!
+                var testsFromDb = await _repository.GetAllTestsAsync();
 
-                System.Diagnostics.Debug.WriteLine($"✓ Loaded {testsFromDb.Count} tests from database");
+                int totalTests = testsFromDb.Count;
+                UpdateLoadingProgress($"Processing {totalTests} tests...", 50);
 
-                // Clear existing data on UI thread
+                // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ Add tests to UI
+                // ⭐ Add all tests at once - FAST with UI virtualization! (no batching needed)
                 foreach (var test in testsFromDb)
                 {
                     Tests.Add(test);
@@ -484,23 +484,25 @@ namespace TestAutomationManager.Views
                     test.PropertyChanged += Test_PropertyChanged;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"✓ {testsFromDb.Count} tests added to UI - ready!");
-
                 // Update statistics
+                UpdateLoadingProgress("Finalizing...", 90);
                 UpdateStatistics();
 
-                System.Diagnostics.Debug.WriteLine($"✓ TestsView ready with {Tests.Count} tests!");
+                // Update progress
+                UpdateLoadingProgress($"Loaded {Tests.Count} tests successfully!", 100);
+
+                System.Diagnostics.Debug.WriteLine($"✓ Loaded {Tests.Count} tests from database successfully!");
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
 
+                // Hide loading screen after a short delay
+                await System.Threading.Tasks.Task.Delay(300);
+                HideLoadingScreen();
+
                 // ⭐ Mark initial load as complete to allow incremental updates
                 _isInitialLoad = false;
                 System.Diagnostics.Debug.WriteLine("✓ Initial load complete - incremental updates now enabled");
-
-                // ⭐ Start background job to preload ALL processes into cache (non-blocking!)
-                System.Diagnostics.Debug.WriteLine("🚀 Starting background process preload into cache...");
-                _ = PreloadAllProcessesInBackgroundAsync();
 
                 // Show message if no data
                 if (Tests.Count == 0)
@@ -511,6 +513,7 @@ namespace TestAutomationManager.Views
             }
             catch (Exception ex)
             {
+                HideLoadingScreen();
                 System.Diagnostics.Debug.WriteLine($"✗ Error loading tests: {ex.Message}");
                 MessageBox.Show($"Failed to load tests from database.\n\nError: {ex.Message}\n\nCheck:\n1. Database connection\n2. SQL scripts ran\n3. DbConnectionConfig settings",
                     "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -518,60 +521,11 @@ namespace TestAutomationManager.Views
         }
 
         // ================================================
-        // BACKGROUND PRELOAD
+        // LAZY LOADING EVENT HANDLERS
         // ================================================
 
         /// <summary>
-        /// Background job to preload ALL processes into cache (non-blocking!)
-        /// This runs AFTER the UI is visible, so users see tests immediately
-        /// </summary>
-        private async System.Threading.Tasks.Task PreloadAllProcessesInBackgroundAsync()
-        {
-            try
-            {
-                // Run on background thread to avoid blocking UI
-                await System.Threading.Tasks.Task.Run(async () =>
-                {
-                    System.Diagnostics.Debug.WriteLine("📊 [Background] Loading all processes from database...");
-
-                    var processRepository = new ProcessRepository();
-                    var allProcesses = await processRepository.GetAllProcessesAsync();
-
-                    System.Diagnostics.Debug.WriteLine($"✓ [Background] Loaded {allProcesses.Count} processes from database");
-
-                    // Group processes by TestID for quick lookup
-                    var processesByTestId = allProcesses
-                        .Where(p => p.TestID.HasValue)
-                        .GroupBy(p => (int)p.TestID.Value)
-                        .ToDictionary(g => g.Key, g => g.ToList());
-
-                    System.Diagnostics.Debug.WriteLine($"✓ [Background] Grouped {allProcesses.Count} processes by {processesByTestId.Count} tests");
-
-                    // Add ALL processes to cache (no UI updates, super fast!)
-                    int totalProcesses = 0;
-                    foreach (var kvp in processesByTestId)
-                    {
-                        Services.ProcessCacheService.Instance.AddProcessesByTestId(kvp.Key, kvp.Value);
-                        totalProcesses += kvp.Value.Count;
-                    }
-
-                    System.Diagnostics.Debug.WriteLine($"✅ [Background] Preloaded {totalProcesses} processes into cache - expansion will be instant!");
-                });
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"⚠️ [Background] Error preloading processes: {ex.Message}");
-                // Don't crash - just log the error. Users can still expand tests (will lazy load from database)
-            }
-        }
-
-        // ================================================
-        // LAZY LOADING EVENT HANDLERS (with cache-first strategy!)
-        // ================================================
-
-        /// <summary>
-        /// Handle Test property changes to detect expansion
-        /// Processes are loaded from CACHE (instant) or database (fallback)
+        /// Handle Test property changes to detect expansion and lazy load processes
         /// </summary>
         private async void Test_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -587,7 +541,6 @@ namespace TestAutomationManager.Views
 
         /// <summary>
         /// Handle Process property changes to detect expansion and lazy load functions
-        /// Functions are still lazy loaded on-demand (too many to preload all at once)
         /// </summary>
         private async void Process_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -602,9 +555,7 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Load processes for a specific test (CACHE-FIRST strategy!)
-        /// 1. Check cache first (INSTANT - from background preload)
-        /// 2. Fallback to database if not in cache (lazy load)
+        /// Lazy load processes for a specific test
         /// </summary>
         private async System.Threading.Tasks.Task LoadProcessesForTestAsync(Test test)
         {
@@ -613,27 +564,14 @@ namespace TestAutomationManager.Views
 
             try
             {
-                var testId = (int)test.TestID.Value;
-                List<Process> processes;
+                System.Diagnostics.Debug.WriteLine($"⏳ Lazy loading processes for Test #{test.TestID}...");
 
-                // ⭐ STEP 1: Try cache first (INSTANT!)
-                var cachedProcesses = Services.ProcessCacheService.Instance.GetProcessesByTestId(testId);
-                if (cachedProcesses != null && cachedProcesses.Count > 0)
-                {
-                    System.Diagnostics.Debug.WriteLine($"⚡ Loading processes for Test #{testId} from CACHE (instant!)");
-                    processes = cachedProcesses;
-                }
-                else
-                {
-                    // ⭐ STEP 2: Fallback to database (background preload hasn't finished yet)
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes for Test #{testId} from DATABASE (cache miss)...");
-                    processes = await _repository.GetProcessesForTestAsync(testId);
+                var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
 
-                    // Add to cache for next time
-                    Services.ProcessCacheService.Instance.AddProcessesByTestId(testId, processes);
-                }
+                // ⭐ Add processes to shared cache for ProcessView to use
+                Services.ProcessCacheService.Instance.AddProcesses(processes);
 
-                // ⭐ STEP 3: Update UI on UI thread
+                // Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
                     test.Processes.Clear();
@@ -646,12 +584,12 @@ namespace TestAutomationManager.Views
                     }
 
                     test.AreProcessesLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {processes.Count} processes for Test #{test.TestID} (added to cache)");
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error loading processes: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"✗ Error lazy loading processes: {ex.Message}");
                 MessageBox.Show($"Failed to load processes for test.\n\nError: {ex.Message}",
                     "Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
