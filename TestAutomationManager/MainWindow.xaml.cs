@@ -118,8 +118,13 @@ namespace TestAutomationManager
             // Load initial view as first tab
             OpenTestsTab();
 
-            // Pre-load external tables
-            LoadExtTablesForNavigation();
+            // ⭐ Load external tables in background (non-blocking!)
+            // They will load when user clicks ExtTables nav, or in background after UI is shown
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                await System.Threading.Tasks.Task.Delay(2000); // Wait 2 seconds after UI loads
+                await Dispatcher.InvokeAsync(() => LoadExtTablesForNavigation());
+            });
 
             this.PreviewKeyDown += MainWindow_PreviewKeyDown;
 
