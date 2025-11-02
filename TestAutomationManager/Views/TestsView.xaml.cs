@@ -40,6 +40,11 @@ namespace TestAutomationManager.Views
         /// </summary>
         private string _currentSearchQuery = "";
 
+        /// <summary>
+        /// Flag to prevent incremental updates during initial load
+        /// </summary>
+        private bool _isInitialLoad = true;
+
         private readonly List<ProcessHeaderRegistration> _processHeaders = new();
 
         private const string ProcessContainerTag = "ProcessContainer";
@@ -361,6 +366,13 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void OnDatabaseChanged(object sender, Services.DatabaseChangeEventArgs e)
         {
+            // ⭐ Skip incremental updates during initial load
+            if (_isInitialLoad)
+            {
+                System.Diagnostics.Debug.WriteLine("⏭ Skipping incremental update during initial load");
+                return;
+            }
+
             if (!e.HasChanges)
                 return;
 
@@ -506,6 +518,10 @@ namespace TestAutomationManager.Views
                 // Hide loading screen after a short delay
                 await System.Threading.Tasks.Task.Delay(300);
                 HideLoadingScreen();
+
+                // ⭐ Mark initial load as complete to allow incremental updates
+                _isInitialLoad = false;
+                System.Diagnostics.Debug.WriteLine("✓ Initial load complete - incremental updates now enabled");
 
                 // Show message if no data
                 if (Tests.Count == 0)
