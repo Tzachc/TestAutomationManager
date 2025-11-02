@@ -225,7 +225,7 @@
                                             <Border Grid.Column="2" Width="48" Background="#3D8BFF" CornerRadius="0,12,12,0"/>
                                             <StackPanel Grid.ColumnSpan="3" VerticalAlignment="Bottom" Margin="16">
                                                 <TextBlock Text="Dark Ops" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
-                                                <TextBlock Text="Sharp contrast & stealth metrics." FontSize="11" Foreground="#C2D3FF"/>
+                                                <TextBlock Text="Sharp contrast &amp; stealth metrics." FontSize="11" Foreground="#C2D3FF"/>
                                             </StackPanel>
                                         </Grid>
                                     </RadioButton>
@@ -290,7 +290,7 @@
                     <Border Style="{StaticResource ModernCard}" Padding="24">
                         <StackPanel>
                             <StackPanel Style="{StaticResource SectionHeader}">
-                                <TextBlock Text="Accessibility & comfort"
+                                <TextBlock Text="Accessibility &amp; comfort"
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
