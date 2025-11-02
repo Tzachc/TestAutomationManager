@@ -40,6 +40,12 @@ namespace TestAutomationManager.Services
         private readonly ConcurrentDictionary<double, List<Function>> _functionCache = new();
 
         /// <summary>
+        /// Cache of processes grouped by TestID (for TestsView expansion)
+        /// Key: TestID, Value: List of processes for that test
+        /// </summary>
+        private readonly ConcurrentDictionary<int, List<Process>> _processesByTestIdCache = new();
+
+        /// <summary>
         /// Track which processes have had their functions loaded
         /// </summary>
         private readonly ConcurrentDictionary<double, bool> _functionsLoaded = new();
@@ -148,6 +154,51 @@ namespace TestAutomationManager.Services
             return _allProcesses.Count;
         }
 
+        /// <summary>
+        /// Add processes grouped by TestID to cache (for fast TestsView expansion)
+        /// </summary>
+        public void AddProcessesByTestId(int testId, List<Process> processes)
+        {
+            if (processes == null || processes.Count == 0)
+                return;
+
+            _processesByTestIdCache[testId] = processes;
+
+            // Also add to main process cache
+            foreach (var process in processes)
+            {
+                if (process?.ProcessID != null)
+                {
+                    _allProcesses.Add(process);
+                    _processCache[process.ProcessID.Value] = process;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get processes for a specific TestID from cache
+        /// Returns null if not cached
+        /// </summary>
+        public List<Process> GetProcessesByTestId(int testId)
+        {
+            if (_processesByTestIdCache.TryGetValue(testId, out var processes))
+            {
+                _cacheHits++;
+                return processes;
+            }
+
+            _cacheMisses++;
+            return null;
+        }
+
+        /// <summary>
+        /// Check if processes are cached for a specific TestID
+        /// </summary>
+        public bool AreProcessesCachedForTest(int testId)
+        {
+            return _processesByTestIdCache.ContainsKey(testId);
+        }
+
         // ================================================
         // FUNCTION CACHE METHODS
         // ================================================
@@ -195,6 +246,7 @@ namespace TestAutomationManager.Services
         {
             _allProcesses.Clear();
             _processCache.Clear();
+            _processesByTestIdCache.Clear();
             _functionCache.Clear();
             _functionsLoaded.Clear();
             _cacheHits = 0;
