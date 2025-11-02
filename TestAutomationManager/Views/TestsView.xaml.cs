@@ -466,23 +466,53 @@ namespace TestAutomationManager.Views
 
                 System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
 
-                // Get all tests from database (async) - FAST with stored procedure!
+                // ⭐ STEP 1: Get all tests from database - FAST with stored procedure!
                 var testsFromDb = await _repository.GetAllTestsAsync();
-
                 int totalTests = testsFromDb.Count;
-                UpdateLoadingProgress($"Processing {totalTests} tests...", 50);
+                UpdateLoadingProgress($"Loaded {totalTests} tests, loading processes...", 30);
+
+                // ⭐ STEP 2: Get ALL processes at once - FAST with stored procedure!
+                System.Diagnostics.Debug.WriteLine("📊 Loading all processes from database...");
+                var processRepository = new ProcessRepository();
+                var allProcesses = await processRepository.GetAllProcessesAsync();
+
+                // Group processes by TestID for quick lookup
+                var processesByTestId = allProcesses
+                    .Where(p => p.TestID.HasValue)
+                    .GroupBy(p => (int)p.TestID.Value)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                System.Diagnostics.Debug.WriteLine($"✓ Loaded {allProcesses.Count} processes, grouped by {processesByTestId.Count} tests");
+                UpdateLoadingProgress($"Processing {totalTests} tests and {allProcesses.Count} processes...", 60);
 
                 // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ Add all tests at once - FAST with UI virtualization! (no batching needed)
+                // ⭐ STEP 3: Add tests and assign their processes - FAST with UI virtualization!
                 foreach (var test in testsFromDb)
                 {
                     Tests.Add(test);
                     _allTests.Add(test);
                     test.PropertyChanged += Test_PropertyChanged;
+
+                    // ⭐ PRELOAD processes for this test (no lazy loading delay!)
+                    if (test.TestID.HasValue && processesByTestId.TryGetValue((int)test.TestID.Value, out var testProcesses))
+                    {
+                        test.Processes.Clear();
+                        foreach (var process in testProcesses)
+                        {
+                            test.Processes.Add(process);
+                            process.PropertyChanged += Process_PropertyChanged;
+                        }
+                        test.AreProcessesLoaded = true;
+
+                        // ⭐ Add processes to shared cache for ProcessView
+                        Services.ProcessCacheService.Instance.AddProcesses(testProcesses);
+                    }
                 }
+
+                System.Diagnostics.Debug.WriteLine($"✓ Preloaded processes for all {testsFromDb.Count} tests (no lazy loading needed!)");
 
                 // Update statistics
                 UpdateLoadingProgress("Finalizing...", 90);
@@ -521,17 +551,18 @@ namespace TestAutomationManager.Views
         }
 
         // ================================================
-        // LAZY LOADING EVENT HANDLERS
+        // LAZY LOADING EVENT HANDLERS (Fallback only - processes are preloaded!)
         // ================================================
 
         /// <summary>
-        /// Handle Test property changes to detect expansion and lazy load processes
+        /// Handle Test property changes to detect expansion
+        /// NOTE: Processes are now PRELOADED during initial load, so this is mainly a fallback
         /// </summary>
         private async void Test_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(Test.IsExpanded) && sender is Test test)
             {
-                // Only load if expanded and not already loaded
+                // Only load if expanded and not already loaded (edge case fallback)
                 if (test.IsExpanded && !test.AreProcessesLoaded)
                 {
                     await LoadProcessesForTestAsync(test);
@@ -541,6 +572,7 @@ namespace TestAutomationManager.Views
 
         /// <summary>
         /// Handle Process property changes to detect expansion and lazy load functions
+        /// Functions are still lazy loaded on-demand (too many to preload all at once)
         /// </summary>
         private async void Process_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -555,7 +587,8 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Lazy load processes for a specific test
+        /// Lazy load processes for a specific test (FALLBACK - processes are now preloaded!)
+        /// This is only called for edge cases where processes weren't preloaded
         /// </summary>
         private async System.Threading.Tasks.Task LoadProcessesForTestAsync(Test test)
         {
