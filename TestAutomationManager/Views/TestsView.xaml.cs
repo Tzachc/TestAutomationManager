@@ -54,6 +54,10 @@ namespace TestAutomationManager.Views
         /// </summary>
         public event EventHandler DataLoaded;
 
+        // ----- ScrollViewer reference for panning (from ListBox's internal template) -----
+        private ScrollViewer _mainScrollViewer;
+        private ScrollViewer MainScrollViewer => _mainScrollViewer ??= GetScrollViewer(TestsItemsControl);
+
         // ----- Middle-mouse panning state -----
         private bool _isPanning = false;
         private Point _lastPanPoint;
@@ -462,49 +466,26 @@ namespace TestAutomationManager.Views
 
                 System.Diagnostics.Debug.WriteLine("📊 Loading tests from database...");
 
-                // Get all tests from database (async)
+                // Get all tests from database (async) - FAST with stored procedure!
                 var testsFromDb = await _repository.GetAllTestsAsync();
 
                 int totalTests = testsFromDb.Count;
-                UpdateLoadingProgress($"Processing {totalTests} tests...", 10);
-                await System.Threading.Tasks.Task.Delay(10);
+                UpdateLoadingProgress($"Processing {totalTests} tests...", 50);
 
                 // Clear existing data
                 Tests.Clear();
                 _allTests.Clear();
 
-                // ⭐ Process tests in SMALL BATCHES for smooth progress updates
-                const int batchSize = 10; // Smaller batches = smoother animation
-                int processed = 0;
-
-                for (int i = 0; i < testsFromDb.Count; i += batchSize)
+                // ⭐ Add all tests at once - FAST with UI virtualization! (no batching needed)
+                foreach (var test in testsFromDb)
                 {
-                    // Process a batch
-                    int batchEnd = Math.Min(i + batchSize, testsFromDb.Count);
-
-                    for (int j = i; j < batchEnd; j++)
-                    {
-                        var test = testsFromDb[j];
-                        Tests.Add(test);
-                        _allTests.Add(test);
-
-                        // ⭐ Subscribe to PropertyChanged for lazy loading
-                        test.PropertyChanged += Test_PropertyChanged;
-                        processed++;
-                    }
-
-                    // Update progress after each batch (with smooth animation)
-                    double progress = 10 + (processed / (double)totalTests * 80); // 10-90%
-                    UpdateLoadingProgress($"Loaded {processed}/{totalTests} tests...", progress);
-
-                    // ⭐ CRITICAL: Give animation time to complete (150ms delay for 100ms animation)
-                    await System.Threading.Tasks.Task.Delay(150);
+                    Tests.Add(test);
+                    _allTests.Add(test);
+                    test.PropertyChanged += Test_PropertyChanged;
                 }
 
                 // Update statistics
-                UpdateLoadingProgress("Finalizing...", 95);
-                await System.Threading.Tasks.Task.Delay(10);
-
+                UpdateLoadingProgress("Finalizing...", 90);
                 UpdateStatistics();
 
                 // Update progress
@@ -990,6 +971,25 @@ namespace TestAutomationManager.Views
             {
                 LoadingOverlay.Visibility = Visibility.Collapsed;
             });
+        }
+
+        /// <summary>
+        /// Get ScrollViewer from ListBox's visual tree (for virtualization support)
+        /// </summary>
+        private ScrollViewer GetScrollViewer(DependencyObject element)
+        {
+            if (element is ScrollViewer scrollViewer)
+                return scrollViewer;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                var child = VisualTreeHelper.GetChild(element, i);
+                var result = GetScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
 
     }
