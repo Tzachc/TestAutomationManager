@@ -386,9 +386,10 @@
                                                  Margin="0,0,6,0"
                                                  ToolTip="{Binding RunStatus}"/>
 
-                                    <ToggleButton Grid.Column="2" 
+                                    <ToggleButton Grid.Column="2"
                                                       Style="{StaticResource ExpandToggle}"
                                                       IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                      Focusable="False"
                                                       VerticalAlignment="Center"
                                                       HorizontalAlignment="Center"
                                                       Margin="0,0,-10,4"/>
@@ -740,6 +741,7 @@
                                                                 <ToggleButton Grid.Column="0"
                                                                                   Style="{StaticResource ExpandToggle}"
                                                                                   IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                                                  Focusable="False"
                                                                                   Width="20" Height="20"
                                                                                   VerticalAlignment="Center"
                                                                                   HorizontalAlignment="Center"/>
