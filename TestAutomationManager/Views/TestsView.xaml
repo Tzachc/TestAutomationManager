@@ -312,6 +312,7 @@
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
+            
             <!-- Remove default ListBox selection visual -->
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
