@@ -303,6 +303,7 @@
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ScrollViewer.CanContentScroll="True"
                  ScrollViewer.ScrollChanged="MainScrollViewer_ScrollChanged"
+                 RequestBringIntoView="TestsItemsControl_RequestBringIntoView"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
                  VirtualizingPanel.CacheLength="20,20"

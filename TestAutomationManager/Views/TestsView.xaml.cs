@@ -999,6 +999,17 @@ namespace TestAutomationManager.Views
             e.Handled = true;
         }
 
+        /// <summary>
+        /// Prevent automatic scrolling in main ListBox when collapsing/expanding tests
+        /// This fixes the UI "jump" bug when collapsing tests that have expanded processes
+        /// </summary>
+        private void TestsItemsControl_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Cancel the automatic scroll-to-focused-element behavior
+            // This prevents the annoying jump when collapsing expanded tests
+            e.Handled = true;
+        }
+
         // ================================================
         // LOADING SCREEN HELPERS
         // ================================================
