@@ -52,6 +52,9 @@ namespace TestAutomationManager.Views
         // ----- Internal ScrollViewer from ListBox -----
         private ScrollViewer _listBoxScrollViewer;
 
+        // ----- Track which ProcessIDs are currently loading to prevent duplicates -----
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<double, bool> _loadingProcessIds = new();
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -294,20 +297,6 @@ namespace TestAutomationManager.Views
                 await System.Threading.Tasks.Task.Delay(100);
                 HideLoadingScreen();
 
-                // ⭐ START BACKGROUND PRE-LOADING after UI is responsive
-                // But SKIP if we used cache - functions are likely already cached too!
-                if (!usedCache)
-                {
-                    System.Diagnostics.Debug.WriteLine("🔄 Starting background function preload (database load)");
-                    StartBackgroundPreloading();
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("⚡ Skipping background preload (cache already has data)");
-                    // Log cache statistics to see what we have
-                    ProcessCacheService.Instance.LogStatistics();
-                }
-
                 // Show message if no data
                 if (Processes.Count == 0)
                 {
@@ -345,30 +334,44 @@ namespace TestAutomationManager.Views
 
         /// <summary>
         /// Lazy load functions for a specific process
+        /// PREVENTS DUPLICATE LOADS for same ProcessID (handles duplicates + virtualization)
         /// </summary>
         private async System.Threading.Tasks.Task LoadFunctionsForProcessAsync(Process process)
         {
             if (!process.ProcessID.HasValue)
                 return;
 
+            var processId = process.ProcessID.Value;
+
+            // ⭐ CRITICAL: Prevent duplicate loads for same ProcessID
+            // With virtualization recycling + duplicate ProcessIDs, this can happen!
+            if (_loadingProcessIds.ContainsKey(processId))
+            {
+                // Already loading this ProcessID, skip
+                return;
+            }
+
             try
             {
+                // Mark as loading
+                _loadingProcessIds[processId] = true;
+
                 var cache = ProcessCacheService.Instance;
                 List<Function> functions;
 
                 // ⭐ Check cache first
-                if (cache.AreFunctionsLoaded(process.ProcessID.Value))
+                if (cache.AreFunctionsLoaded(processId))
                 {
-                    functions = cache.GetFunctions(process.ProcessID.Value);
-                    System.Diagnostics.Debug.WriteLine($"🚀 CACHE HIT! Using cached functions for Process #{process.ProcessID}");
+                    functions = cache.GetFunctions(processId);
+                    // Removed excessive logging for cache hits
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for Process #{process.ProcessID} from database...");
-                    functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for Process #{processId} from database...");
+                    functions = await _repository.GetFunctionsForProcessAsync(processId);
 
                     // Add to cache
-                    cache.AddFunctions(process.ProcessID.Value, functions);
+                    cache.AddFunctions(processId, functions);
                 }
 
                 // Update UI on UI thread
@@ -381,7 +384,6 @@ namespace TestAutomationManager.Views
                     }
 
                     process.AreFunctionsLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {functions.Count} functions for Process #{process.ProcessID}");
                 });
             }
             catch (Exception ex)
@@ -389,6 +391,11 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"✗ Error lazy loading functions: {ex.Message}");
                 MessageBox.Show($"Failed to load functions for process.\n\nError: {ex.Message}",
                     "Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            finally
+            {
+                // Remove from loading tracker
+                _loadingProcessIds.TryRemove(processId, out _);
             }
         }
 
@@ -607,88 +614,6 @@ namespace TestAutomationManager.Views
             {
                 LoadingOverlay.Visibility = Visibility.Collapsed;
             });
-        }
-
-        // ================================================
-        // BACKGROUND PRE-LOADING
-        // ================================================
-
-        private bool _isBackgroundLoadingRunning = false;
-        private readonly System.Collections.Concurrent.ConcurrentQueue<Process> _preloadQueue = new();
-
-        /// <summary>
-        /// Start background pre-loading of functions after initial UI load
-        /// Loads data in the background so subsequent expansions are instant
-        /// </summary>
-        private async void StartBackgroundPreloading()
-        {
-            if (_isBackgroundLoadingRunning)
-                return;
-
-            _isBackgroundLoadingRunning = true;
-            System.Diagnostics.Debug.WriteLine("🚀 Starting background pre-loading for processes...");
-
-            // Add all processes to the queue
-            foreach (var process in _allProcesses)
-                _preloadQueue.Enqueue(process);
-
-            // Start background loading task
-            await System.Threading.Tasks.Task.Run(async () => await BackgroundPreloadWorker());
-        }
-
-        /// <summary>
-        /// Background worker that pre-loads data with throttling
-        /// </summary>
-        private async System.Threading.Tasks.Task BackgroundPreloadWorker()
-        {
-            int processesLoaded = 0;
-            int totalProcesses = _preloadQueue.Count;
-
-            while (_preloadQueue.TryDequeue(out Process process))
-            {
-                try
-                {
-                    // Only load if not already loaded
-                    if (!process.AreFunctionsLoaded && process.ProcessID.HasValue)
-                    {
-                        // Load functions for this process
-                        var functions = await _repository.GetFunctionsForProcessAsync(process.ProcessID.Value);
-
-                        // Update UI on UI thread
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            process.Functions.Clear();
-                            foreach (var function in functions)
-                            {
-                                process.Functions.Add(function);
-                            }
-                            process.AreFunctionsLoaded = true;
-                        });
-
-                        processesLoaded++;
-
-                        // Log progress every 100 processes
-                        if (processesLoaded % 100 == 0)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"📦 Background pre-loaded {processesLoaded}/{totalProcesses} processes");
-                        }
-
-                        // Throttle to avoid overwhelming database/UI (load 10 processes, pause 100ms)
-                        if (processesLoaded % 10 == 0)
-                        {
-                            await System.Threading.Tasks.Task.Delay(100);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"⚠ Background preload error for process #{process.ProcessID}: {ex.Message}");
-                    // Continue with next process
-                }
-            }
-
-            _isBackgroundLoadingRunning = false;
-            System.Diagnostics.Debug.WriteLine($"✓ Background pre-loading completed! Loaded {processesLoaded}/{totalProcesses} processes");
         }
 
         private void FuncRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)

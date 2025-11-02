@@ -507,9 +507,6 @@ namespace TestAutomationManager.Views
                 await System.Threading.Tasks.Task.Delay(300);
                 HideLoadingScreen();
 
-                // ⭐ START BACKGROUND PRE-LOADING after UI is responsive
-                StartBackgroundPreloading();
-
                 // Show message if no data
                 if (Tests.Count == 0)
                 {
@@ -977,97 +974,6 @@ namespace TestAutomationManager.Views
             {
                 LoadingOverlay.Visibility = Visibility.Collapsed;
             });
-        }
-
-        // ================================================
-        // BACKGROUND PRE-LOADING
-        // ================================================
-
-        private bool _isBackgroundLoadingRunning = false;
-        private readonly System.Collections.Concurrent.ConcurrentQueue<Test> _preloadQueue = new();
-
-        /// <summary>
-        /// Start background pre-loading of processes/functions after initial UI load
-        /// Loads data in the background so subsequent expansions are instant
-        /// </summary>
-        private async void StartBackgroundPreloading()
-        {
-            if (_isBackgroundLoadingRunning)
-                return;
-
-            _isBackgroundLoadingRunning = true;
-            System.Diagnostics.Debug.WriteLine("🚀 Starting background pre-loading...");
-
-            // Build priority queue: Active tests first, then others
-            var activeTests = _allTests.Where(t => t.IsActive).ToList();
-            var inactiveTests = _allTests.Where(t => !t.IsActive).ToList();
-
-            // Add active tests first (user is more likely to use these)
-            foreach (var test in activeTests)
-                _preloadQueue.Enqueue(test);
-
-            // Then add inactive tests
-            foreach (var test in inactiveTests)
-                _preloadQueue.Enqueue(test);
-
-            // Start background loading task
-            await System.Threading.Tasks.Task.Run(async () => await BackgroundPreloadWorker());
-        }
-
-        /// <summary>
-        /// Background worker that pre-loads data with throttling
-        /// </summary>
-        private async System.Threading.Tasks.Task BackgroundPreloadWorker()
-        {
-            int testsLoaded = 0;
-            int totalTests = _preloadQueue.Count;
-
-            while (_preloadQueue.TryDequeue(out Test test))
-            {
-                try
-                {
-                    // Only load if not already loaded
-                    if (!test.AreProcessesLoaded)
-                    {
-                        // Load processes for this test
-                        var processes = await _repository.GetProcessesForTestAsync((int)test.TestID.Value);
-
-                        // Update UI on UI thread
-                        await Dispatcher.InvokeAsync(() =>
-                        {
-                            test.Processes.Clear();
-                            foreach (var process in processes)
-                            {
-                                test.Processes.Add(process);
-                                process.PropertyChanged += Process_PropertyChanged;
-                            }
-                            test.AreProcessesLoaded = true;
-                        });
-
-                        testsLoaded++;
-
-                        // Log progress every 50 tests
-                        if (testsLoaded % 50 == 0)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"📦 Background pre-loaded {testsLoaded}/{totalTests} tests");
-                        }
-
-                        // Throttle to avoid overwhelming database/UI (load 5 tests, pause 100ms)
-                        if (testsLoaded % 5 == 0)
-                        {
-                            await System.Threading.Tasks.Task.Delay(100);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"⚠ Background preload error for test #{test.TestID}: {ex.Message}");
-                    // Continue with next test
-                }
-            }
-
-            _isBackgroundLoadingRunning = false;
-            System.Diagnostics.Debug.WriteLine($"✓ Background pre-loading completed! Loaded {testsLoaded}/{totalTests} tests");
         }
 
     }
