@@ -661,9 +661,10 @@
                                     <Border Grid.Row="1"
                                             x:Name="ProcScrollBorder"
                                             Tag="FocusBorder"
-                                            BorderThickness="2"
+                                            BorderThickness="3"
                                             BorderBrush="Transparent"
-                                            CornerRadius="4">
+                                            CornerRadius="6"
+                                            Padding="2">
                                         <ScrollViewer x:Name="ProcRowsScrollViewer"
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Auto"
@@ -959,9 +960,10 @@
                                                                     <Border Grid.Row="1"
                                                                             x:Name="FuncScrollBorder"
                                                                             Tag="FocusBorder"
-                                                                            BorderThickness="2"
+                                                                            BorderThickness="3"
                                                                             BorderBrush="Transparent"
-                                                                            CornerRadius="4">
+                                                                            CornerRadius="6"
+                                                                            Padding="2">
                                                                         <ScrollViewer x:Name="FuncRowsScrollViewer"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Auto"

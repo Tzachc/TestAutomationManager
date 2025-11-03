@@ -985,6 +985,13 @@ namespace TestAutomationManager.Views
             if (sender is not ScrollViewer scrollViewer)
                 return;
 
+            // FOCUS CHECK: If there's a focused ScrollViewer, only handle if this is it
+            if (_focusedScrollViewer != null && _focusedScrollViewer != scrollViewer)
+            {
+                // Not the focused one, don't handle - let it bubble up
+                return;
+            }
+
             // Only handle if this ScrollViewer actually has scrollable content
             if (scrollViewer.ScrollableHeight <= 0)
                 return;
@@ -1051,7 +1058,8 @@ namespace TestAutomationManager.Views
             // Show hover indication (only if not already focused)
             if (_focusedScrollViewer != scrollViewer)
             {
-                border.BorderBrush = new SolidColorBrush(Color.FromArgb(0x40, 0x00, 0xAA, 0xFF)); // Light blue semi-transparent
+                // Subtle hover: Light blue/cyan with low opacity
+                border.BorderBrush = new SolidColorBrush(Color.FromArgb(0x50, 0x3B, 0x9F, 0xF3)); // #503B9FF3
             }
         }
 
@@ -1094,10 +1102,10 @@ namespace TestAutomationManager.Views
                 _focusedScrollBorder.BorderBrush = Brushes.Transparent;
             }
 
-            // Set new focus
+            // Set new focus with a clean, modern blue
             _focusedScrollViewer = scrollViewer;
             _focusedScrollBorder = border;
-            border.BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0xAA, 0xFF)); // Solid blue
+            border.BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x3B, 0x9F, 0xF3)); // #FF3B9FF3 - Clean blue
         }
 
         /// <summary>
