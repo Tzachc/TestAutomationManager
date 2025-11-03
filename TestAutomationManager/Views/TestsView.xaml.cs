@@ -978,24 +978,30 @@ namespace TestAutomationManager.Views
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // Allow inner ScrollViewer to consume the wheel if it can scroll
-            if (sender is ScrollViewer sv)
+            if (sender is not ScrollViewer scrollViewer)
+                return;
+
+            // Only handle if this ScrollViewer actually has scrollable content
+            if (scrollViewer.ScrollableHeight <= 0)
+                return;
+
+            var delta = e.Delta;
+
+            // Check if we can scroll in the requested direction
+            bool canScrollDown = delta < 0 && scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight;
+            bool canScrollUp = delta > 0 && scrollViewer.VerticalOffset > 0;
+
+            if (canScrollDown || canScrollUp)
             {
-                var delta = e.Delta;
+                // Smooth scrolling: 48 pixels per wheel notch (3 lines of 16px each)
+                double scrollAmount = -delta / 120.0 * 48.0;
+                double newOffset = scrollViewer.VerticalOffset + scrollAmount;
 
-                // Check if ScrollViewer can scroll in the direction requested
-                bool canScrollDown = delta < 0 && sv.VerticalOffset < sv.ScrollableHeight;
-                bool canScrollUp = delta > 0 && sv.VerticalOffset > 0;
+                // Clamp to valid range
+                newOffset = Math.Max(0, Math.Min(newOffset, scrollViewer.ScrollableHeight));
 
-                if (canScrollDown || canScrollUp)
-                {
-                    // Handle scrolling smoothly (3 lines per wheel notch)
-                    double lineHeight = 16.0; // Standard line height
-                    double scrollAmount = (delta / 120.0) * lineHeight * 3;
-
-                    sv.ScrollToVerticalOffset(sv.VerticalOffset - scrollAmount);
-                    e.Handled = true;
-                }
+                scrollViewer.ScrollToVerticalOffset(newOffset);
+                e.Handled = true;
             }
         }
 
