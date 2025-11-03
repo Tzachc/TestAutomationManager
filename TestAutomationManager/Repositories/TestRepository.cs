@@ -334,44 +334,112 @@ namespace TestAutomationManager.Repositories
         // SMART ID OPERATIONS
         // ================================================
 
-        /// <summary>
-        /// Get next available test ID (finds gaps in sequence)
-        /// For example: if IDs are 1,2,4,5 -> returns 3
-        /// If no gaps, returns max + 1
-        /// </summary>
         public async Task<int?> GetNextAvailableTestIdAsync()
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
-                    var existingIds = await context.Tests
-                        .Where(t => t.TestID.HasValue)
-                        .OrderBy(t => t.TestID)
-                        .Select(t => (int)t.TestID.Value)
+                    // Pull full entities (no tracking) so we can normalize IDs in-memory
+                    var tests = await context.Tests
+                        .AsNoTracking()
                         .ToListAsync();
 
-                    if (existingIds.Count == 0)
+                    // Helper: robustly coerce various nullable numeric/string shapes into int?
+                    static int? CoerceToInt(object? id)
                     {
-                        // No tests exist, start with ID 1
-                        System.Diagnostics.Debug.WriteLine("✓ No tests exist, suggesting ID: 1");
-                        return 1;
-                    }
+                        if (id is null) return null;
 
-                    // Find first gap in sequence
-                    for (int i = 0; i < existingIds.Count; i++)
-                    {
-                        int expectedId = i + 1;
-                        if (existingIds[i] != expectedId)
+                        // Unwrap Nullable<T> to its value if present
+                        var t = id.GetType();
+                        if (Nullable.GetUnderlyingType(t) is Type underlying && id is not string)
                         {
-                            // Found a gap!
-                            System.Diagnostics.Debug.WriteLine($"✓ Found gap in sequence, suggesting ID: {expectedId}");
-                            return expectedId;
+                            id = Convert.ChangeType(id, underlying);
+                            t = underlying;
+                        }
+
+                        try
+                        {
+                            if (t == typeof(int)) return (int)id!;
+                            if (t == typeof(long)) return checked((int)(long)id!);
+                            if (t == typeof(short)) return (short)id!;
+                            if (t == typeof(byte)) return (byte)id!;
+                            if (t == typeof(double)) return (int)Math.Truncate((double)id!);
+                            if (t == typeof(float)) return (int)Math.Truncate((float)id!);
+                            if (t == typeof(decimal)) return (int)Math.Truncate((decimal)id!);
+                            if (t == typeof(string))
+                            {
+                                return int.TryParse((string)id!, out var i) ? i : (int?)null;
+                            }
+
+                            // Fallback via Convert.ToInt32 where reasonable
+                            return Convert.ToInt32(id);
+                        }
+                        catch
+                        {
+                            return null; // if anything odd, treat as missing
                         }
                     }
 
-                    // No gaps found, return max + 1
-                    int nextId = existingIds.Max() + 1;
+                    // 1) Prefer reusing an existing "FREE" test (name/status contains "FREE", case-insensitive)
+                    bool ContainsFree(string? s) =>
+                        !string.IsNullOrWhiteSpace(s) &&
+                        s.IndexOf("FREE", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    var freeIds = tests
+                        .Select(t => new
+                        {
+                            Id = CoerceToInt(t.TestID),        // <-- tolerant coercion
+                            t.TestName,
+                            t.RunStatus
+                        })
+                        .Where(t => t.Id.HasValue && (ContainsFree(t.TestName) || ContainsFree(t.RunStatus)))
+                        .Select(t => t.Id!.Value)
+                        .Distinct()
+                        .OrderBy(id => id)
+                        .ToList();
+
+                    if (freeIds.Count > 0)
+                    {
+                        var reuseId = freeIds.First();
+                        System.Diagnostics.Debug.WriteLine($"✓ Found existing 'FREE' test #{reuseId}. Returning as next available (REUSE).");
+                        // Note: InsertTestAsync will reject inserting an existing ID.
+                        // If you intend to reuse, update/overwrite that row instead of inserting.
+                        return reuseId;
+                    }
+
+                    // 2) No FREE rows — classic gap search
+                    var existingIds = tests
+                        .Select(t => CoerceToInt(t.TestID))
+                        .Where(id => id.HasValue)
+                        .Select(id => id!.Value)
+                        .Distinct()
+                        .OrderBy(id => id)
+                        .ToList();
+
+                    if (existingIds.Count == 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("✓ No tests exist, suggesting ID: 0");
+                        return 0;
+                    }
+
+                    if (existingIds[0] > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine("✓ First ID is > 0, suggesting ID: 0");
+                        return 0;
+                    }
+
+                    for (int i = 0; i < existingIds.Count - 1; i++)
+                    {
+                        int expected = existingIds[i] + 1;
+                        if (existingIds[i + 1] > expected)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"✓ Found gap in sequence, suggesting ID: {expected}");
+                            return expected;
+                        }
+                    }
+
+                    int nextId = existingIds[^1] + 1;
                     System.Diagnostics.Debug.WriteLine($"✓ No gaps found, suggesting ID: {nextId}");
                     return nextId;
                 }
@@ -382,6 +450,8 @@ namespace TestAutomationManager.Repositories
                 throw new Exception("Failed to get next available test ID", ex);
             }
         }
+
+
 
         /// <summary>
         /// Get total process count across all tests (optimized for statistics)
