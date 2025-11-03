@@ -303,6 +303,7 @@
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ScrollViewer.CanContentScroll="True"
                  ScrollViewer.ScrollChanged="MainScrollViewer_ScrollChanged"
+                 RequestBringIntoView="TestsItemsControl_RequestBringIntoView"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
                  VirtualizingPanel.CacheLength="20,20"
@@ -312,7 +313,11 @@
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
-            
+            <!-- Apply modern scrollbar styling WITHOUT breaking virtualization -->
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBar}"/>
+            </ListBox.Resources>
+
             <!-- Remove default ListBox selection visual -->
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
@@ -381,9 +386,10 @@
                                                  Margin="0,0,6,0"
                                                  ToolTip="{Binding RunStatus}"/>
 
-                                    <ToggleButton Grid.Column="2" 
+                                    <ToggleButton Grid.Column="2"
                                                       Style="{StaticResource ExpandToggle}"
                                                       IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                      Focusable="False"
                                                       VerticalAlignment="Center"
                                                       HorizontalAlignment="Center"
                                                       Margin="0,0,-10,4"/>
@@ -655,9 +661,9 @@
                                                       x:Name="ProcRowsScrollViewer"
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Auto"
-                                                      CanContentScroll="True"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
-                                                      MaxHeight="700">
+                                                      RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
+                                                      MaxHeight="550">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -734,6 +740,7 @@
                                                                 <ToggleButton Grid.Column="0"
                                                                                   Style="{StaticResource ExpandToggle}"
                                                                                   IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                                                  Focusable="False"
                                                                                   Width="20" Height="20"
                                                                                   VerticalAlignment="Center"
                                                                                   HorizontalAlignment="Center"/>
@@ -942,9 +949,9 @@
                                                                     <ScrollViewer Grid.Row="1"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Auto"
-                                                                                      CanContentScroll="True"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
-                                                                                      MaxHeight="400">
+                                                                                      RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
+                                                                                      MaxHeight="350">
                                                                         <ItemsControl>
                                                                             <ItemsControl.Resources>
                                                                                 <CollectionViewSource x:Key="FunctionsSorted"

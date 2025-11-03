@@ -765,7 +765,7 @@
                            Foreground="{DynamicResource TextPrimaryBrush}"
                            HorizontalAlignment="Center"
                            Margin="0,0,0,20"/>
-                
+
                 <ProgressBar x:Name="LoadingProgressBar"
                              Height="8"
                              MinWidth="350"
@@ -773,7 +773,7 @@
                              Foreground="#4CAF50"
                              BorderThickness="0"
                              Margin="0,0,0,15"/>
-                
+
                 <TextBlock x:Name="LoadingPercentageText"
                            Text="0%"
                            FontSize="14"
@@ -782,6 +782,22 @@
             </StackPanel>
         </Border>
         </Grid>
+
+        <!-- Record Count Footer (Overlay - doesn't reduce page size) -->
+        <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource BorderBrush}"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Stretch"
+                Panel.ZIndex="100"
+                Padding="16,8">
+            <TextBlock x:Name="RecordCountText"
+                       Text="0 processes"
+                       FontSize="12"
+                       FontWeight="Medium"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       HorizontalAlignment="Right"/>
+        </Border>
     </Grid>
 
 </UserControl>

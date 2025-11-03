@@ -272,6 +272,9 @@ namespace TestAutomationManager.Views
 
                 UpdateLoadingProgress($"Displaying {totalProcesses} processes...", 90);
 
+                // ⭐ SORT: Sort processes by ProcessID (low to high)
+                var sortedProcesses = processesFromDb.OrderBy(p => p.ProcessID).ToList();
+
                 // ⭐ SINGLE UI UPDATE: Replace entire collection in one operation
                 // This triggers only ONE UI update instead of 21k+ individual updates!
                 System.Diagnostics.Debug.WriteLine($"📊 Replacing collections with {totalProcesses} processes in single operation...");
@@ -279,9 +282,9 @@ namespace TestAutomationManager.Views
                 // Update UI on UI thread - single operation
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    // Create NEW ObservableCollections from the list (single operation)
-                    Processes = new ObservableCollection<Process>(processesFromDb);
-                    _allProcesses = new ObservableCollection<Process>(processesFromDb);
+                    // Create NEW ObservableCollections from the sorted list (single operation)
+                    Processes = new ObservableCollection<Process>(sortedProcesses);
+                    _allProcesses = new ObservableCollection<Process>(sortedProcesses);
 
                     // Update ItemsControl to use new collection
                     ProcessesItemsControl.ItemsSource = Processes;
@@ -289,6 +292,9 @@ namespace TestAutomationManager.Views
 
                 UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
                 System.Diagnostics.Debug.WriteLine($"✓ Bulk load complete: {Processes.Count} processes loaded instantly");
+
+                // Update record count footer
+                UpdateRecordCount();
 
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
@@ -436,6 +442,9 @@ namespace TestAutomationManager.Views
                     Processes.Add(process);
                 }
             }
+
+            // Update record count after filtering
+            UpdateRecordCount();
         }
 
         // ================================================
@@ -613,6 +622,18 @@ namespace TestAutomationManager.Views
             Dispatcher.Invoke(() =>
             {
                 LoadingOverlay.Visibility = Visibility.Collapsed;
+            });
+        }
+
+        /// <summary>
+        /// Update the record count footer
+        /// </summary>
+        private void UpdateRecordCount()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                int count = Processes?.Count ?? 0;
+                RecordCountText.Text = count == 1 ? "1 process" : $"{count:N0} processes";
             });
         }
 

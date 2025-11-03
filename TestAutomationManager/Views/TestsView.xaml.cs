@@ -642,6 +642,9 @@ namespace TestAutomationManager.Views
                     Services.ProcessCacheService.Instance.AddProcessesByTestId(testId, processes);
                 }
 
+                // ⭐ STEP 2.5: Sort processes by ProcessPosition (low to high)
+                processes = processes.OrderBy(p => p.ProcessPosition).ToList();
+
                 // ⭐ STEP 3: Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -975,17 +978,53 @@ namespace TestAutomationManager.Views
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // allow inner ScrollViewer to consume the wheel if it can scroll
-            if (sender is ScrollViewer sv)
+            if (sender is not ScrollViewer scrollViewer)
+                return;
+
+            // Only handle if this ScrollViewer actually has scrollable content
+            if (scrollViewer.ScrollableHeight <= 0)
+                return;
+
+            var delta = e.Delta;
+
+            // Check if we can scroll in the requested direction
+            bool canScrollDown = delta < 0 && scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight;
+            bool canScrollUp = delta > 0 && scrollViewer.VerticalOffset > 0;
+
+            if (canScrollDown || canScrollUp)
             {
-                var delta = e.Delta;
-                if ((delta < 0 && sv.VerticalOffset < sv.ScrollableHeight) ||
-                    (delta > 0 && sv.VerticalOffset > 0))
-                {
-                    e.Handled = true;
-                    sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
-                }
+                // Smooth scrolling: 48 pixels per wheel notch (3 lines of 16px each)
+                double scrollAmount = -delta / 120.0 * 48.0;
+                double newOffset = scrollViewer.VerticalOffset + scrollAmount;
+
+                // Clamp to valid range
+                newOffset = Math.Max(0, Math.Min(newOffset, scrollViewer.ScrollableHeight));
+
+                scrollViewer.ScrollToVerticalOffset(newOffset);
+                e.Handled = true;
             }
+        }
+
+        /// <summary>
+        /// Prevent automatic scrolling when expanding items inside ProcRowsScrollViewer
+        /// This fixes the UI "jump" bug when clicking expand buttons
+        /// </summary>
+        private void ProcRowsScrollViewer_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Cancel the automatic scroll-to-focused-element behavior
+            // This prevents the annoying jump when clicking expand buttons
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Prevent automatic scrolling in main ListBox when collapsing/expanding tests
+        /// This fixes the UI "jump" bug when collapsing tests that have expanded processes
+        /// </summary>
+        private void TestsItemsControl_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Cancel the automatic scroll-to-focused-element behavior
+            // This prevents the annoying jump when collapsing expanded tests
+            e.Handled = true;
         }
 
         // ================================================

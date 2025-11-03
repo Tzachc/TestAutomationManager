@@ -409,44 +409,5 @@
                 </StackPanel>
             </Grid>
         </Border>
-        <!-- Gaps Popup -->
-        <Popup x:Name="GapsPopup"
-               PlacementTarget="{Binding ElementName=ShowGapsButton}"
-               Placement="Bottom"
-               StaysOpen="False"
-               AllowsTransparency="True">
-            <Border Background="{DynamicResource CardBackgroundBrush}"
-                    BorderBrush="{DynamicResource PrimaryBlueBrush}"
-                    BorderThickness="2"
-                    CornerRadius="8"
-                    Padding="12">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" 
-                                    Direction="270" 
-                                    ShadowDepth="4" 
-                                    BlurRadius="12" 
-                                    Opacity="0.3"/>
-                </Border.Effect>
-                <StackPanel MinWidth="200" MaxWidth="300">
-                    <TextBlock Text="📊 Available Gap IDs" 
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextPrimaryBrush}"
-                               Margin="0,0,0,8"/>
-
-                    <TextBlock x:Name="GapsListText"
-                               FontSize="11"
-                               Foreground="{DynamicResource TextSecondaryBrush}"
-                               TextWrapping="Wrap"
-                               Margin="0,0,0,8"/>
-
-                    <TextBlock FontSize="10"
-                               Foreground="{DynamicResource TextTertiaryBrush}"
-                               TextWrapping="Wrap"
-                               FontStyle="Italic"
-                               Text="💡 Click on any gap ID to use it"/>
-                </StackPanel>
-            </Border>
-        </Popup>
     </Grid>
 </Window>
