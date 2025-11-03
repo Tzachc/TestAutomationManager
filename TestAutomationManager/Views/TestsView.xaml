@@ -663,8 +663,7 @@
                                                       HorizontalScrollBarVisibility="Auto"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
-                                                      Loaded="ProcRowsScrollViewer_Loaded"
-                                                      SizeChanged="ProcRowsScrollViewer_SizeChanged">
+                                                      MaxHeight="550">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -952,8 +951,7 @@
                                                                                       HorizontalScrollBarVisibility="Auto"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
-                                                                                      Loaded="FuncRowsScrollViewer_Loaded"
-                                                                                      SizeChanged="FuncRowsScrollViewer_SizeChanged">
+                                                                                      MaxHeight="350">
                                                                         <ItemsControl>
                                                                             <ItemsControl.Resources>
                                                                                 <CollectionViewSource x:Key="FunctionsSorted"
