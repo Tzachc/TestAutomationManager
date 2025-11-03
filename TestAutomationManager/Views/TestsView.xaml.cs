@@ -986,57 +986,31 @@ namespace TestAutomationManager.Views
             if (sender is not ScrollViewer scrollViewer)
                 return;
 
+            // Check if mouse is actually over this ScrollViewer
+            var mousePosition = e.GetPosition(scrollViewer);
+            bool isMouseOver = mousePosition.X >= 0 && mousePosition.X <= scrollViewer.ActualWidth &&
+                               mousePosition.Y >= 0 && mousePosition.Y <= scrollViewer.ActualHeight;
+
+            if (!isMouseOver)
+                return;
+
             // Only handle if this ScrollViewer has scrollable content
             if (scrollViewer.ScrollableHeight <= 0)
                 return;
 
-            // Get element directly under mouse
-            var mousePoint = e.GetPosition(scrollViewer);
-            var elementUnderMouse = scrollViewer.InputHitTest(mousePoint) as DependencyObject;
+            var delta = e.Delta;
+            bool scrollingDown = delta < 0;
+            bool scrollingUp = delta > 0;
 
-            if (elementUnderMouse == null)
-                return;
-
-            // Check if there's a nested ScrollViewer between mouse and this ScrollViewer
-            var parent = elementUnderMouse;
-            ScrollViewer nestedScrollViewer = null;
-
-            while (parent != null && parent != scrollViewer)
-            {
-                if (parent is ScrollViewer sv && sv != scrollViewer)
-                {
-                    nestedScrollViewer = sv;
-                    break;
-                }
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-
-            // If there's a nested ScrollViewer with scrollable content, let it handle the event
-            if (nestedScrollViewer != null && nestedScrollViewer.ScrollableHeight > 0)
-            {
-                var delta = e.Delta;
-                bool nestedCanScrollDown = delta < 0 && nestedScrollViewer.VerticalOffset < nestedScrollViewer.ScrollableHeight;
-                bool nestedCanScrollUp = delta > 0 && nestedScrollViewer.VerticalOffset > 0;
-
-                if (nestedCanScrollDown || nestedCanScrollUp)
-                {
-                    // Let nested ScrollViewer handle it
-                    return;
-                }
-            }
-
-            // This ScrollViewer should handle the scroll
-            var scrollDelta = e.Delta;
-            bool scrollingDown = scrollDelta < 0;
-            bool scrollingUp = scrollDelta > 0;
-
+            // Check if we can scroll in the requested direction
             bool canScrollDown = scrollingDown && scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight;
             bool canScrollUp = scrollingUp && scrollViewer.VerticalOffset > 0;
 
+            // Only handle if we can actually scroll in the requested direction
             if (canScrollDown || canScrollUp)
             {
-                // Moderate scrolling speed: 32 pixels per wheel notch
-                double scrollAmount = -scrollDelta / 120.0 * 32.0;
+                // Moderate scrolling speed: 32 pixels per wheel notch (2 lines of 16px each)
+                double scrollAmount = -delta / 120.0 * 32.0;
                 double newOffset = scrollViewer.VerticalOffset + scrollAmount;
 
                 // Clamp to valid range
@@ -1045,6 +1019,7 @@ namespace TestAutomationManager.Views
                 scrollViewer.ScrollToVerticalOffset(newOffset);
                 e.Handled = true;
             }
+            // If we can't scroll, let the event bubble to parent (main scroll)
         }
 
         /// <summary>
@@ -1067,78 +1042,6 @@ namespace TestAutomationManager.Views
             // Cancel the automatic scroll-to-focused-element behavior
             // This prevents the annoying jump when collapsing expanded tests
             e.Handled = true;
-        }
-
-        // ================================================
-        // SMART MAXHEIGHT CALCULATION (One-time)
-        // ================================================
-
-        /// <summary>
-        /// Calculate dynamic MaxHeight for Process ScrollViewer ONCE when loaded
-        /// </summary>
-        private void ProcRowsScrollViewer_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is ScrollViewer scrollViewer && MainScrollViewer != null)
-            {
-                // Use background priority to avoid blocking UI
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        // Get position relative to viewport
-                        var transform = scrollViewer.TransformToAncestor(MainScrollViewer);
-                        var position = transform.Transform(new Point(0, 0));
-
-                        // Calculate available space
-                        double availableSpace = MainScrollViewer.ViewportHeight - position.Y - 80; // 80px buffer
-
-                        // Set reasonable bounds: min 300px, max 600px, or available space
-                        double calculatedHeight = Math.Max(300, Math.Min(600, availableSpace));
-                        scrollViewer.MaxHeight = calculatedHeight;
-
-                        System.Diagnostics.Debug.WriteLine($"📐 Process ScrollViewer MaxHeight set to {calculatedHeight:F0}px");
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"⚠️ Error calculating Process MaxHeight: {ex.Message}");
-                        scrollViewer.MaxHeight = 550; // Fallback
-                    }
-                }), System.Windows.Threading.DispatcherPriority.Background);
-            }
-        }
-
-        /// <summary>
-        /// Calculate dynamic MaxHeight for Function ScrollViewer ONCE when loaded
-        /// </summary>
-        private void FuncRowsScrollViewer_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is ScrollViewer scrollViewer && MainScrollViewer != null)
-            {
-                // Use background priority to avoid blocking UI
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        // Get position relative to viewport
-                        var transform = scrollViewer.TransformToAncestor(MainScrollViewer);
-                        var position = transform.Transform(new Point(0, 0));
-
-                        // Calculate available space
-                        double availableSpace = MainScrollViewer.ViewportHeight - position.Y - 80; // 80px buffer
-
-                        // Set reasonable bounds: min 200px, max 400px, or available space
-                        double calculatedHeight = Math.Max(200, Math.Min(400, availableSpace));
-                        scrollViewer.MaxHeight = calculatedHeight;
-
-                        System.Diagnostics.Debug.WriteLine($"📐 Function ScrollViewer MaxHeight set to {calculatedHeight:F0}px");
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"⚠️ Error calculating Function MaxHeight: {ex.Message}");
-                        scrollViewer.MaxHeight = 350; // Fallback
-                    }
-                }), System.Windows.Threading.DispatcherPriority.Background);
-            }
         }
 
         // ================================================

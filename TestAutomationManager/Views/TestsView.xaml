@@ -663,11 +663,8 @@
                                                       HorizontalScrollBarVisibility="Auto"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
-                                                      Loaded="ProcRowsScrollViewer_Loaded"
                                                       MaxHeight="550">
-                                        <ItemsControl ItemsSource="{Binding Processes}"
-                                                      HorizontalAlignment="Stretch"
-                                                      VerticalAlignment="Top">
+                                        <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Background="{DynamicResource CardBackgroundBrush}"
@@ -950,15 +947,12 @@
 
                                                                     <!-- Function Rows with scrollable content -->
                                                                     <ScrollViewer Grid.Row="1"
-                                                                                      x:Name="FuncRowsScrollViewer"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Auto"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
-                                                                                      Loaded="FuncRowsScrollViewer_Loaded"
                                                                                       MaxHeight="350">
-                                                                        <ItemsControl HorizontalAlignment="Stretch"
-                                                                                      VerticalAlignment="Top">
+                                                                        <ItemsControl>
                                                                             <ItemsControl.Resources>
                                                                                 <CollectionViewSource x:Key="FunctionsSorted"
                                                                                                           Source="{Binding Functions}">
