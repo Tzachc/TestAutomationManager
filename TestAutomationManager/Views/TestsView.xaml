@@ -657,21 +657,15 @@
                                     </Border>
 
                                     <!-- Rows with their own ScrollViewer so header sticks -->
-                                    <!-- Border for focus indication with modern shadow effect -->
+                                    <!-- Border for clean modern focus indication -->
                                     <Border Grid.Row="1"
                                             x:Name="ProcScrollBorder"
                                             Tag="FocusBorder"
                                             BorderThickness="2"
                                             BorderBrush="Transparent"
                                             CornerRadius="8"
-                                            Padding="4">
-                                        <Border.Effect>
-                                            <DropShadowEffect x:Name="ProcShadowEffect"
-                                                              BlurRadius="0"
-                                                              ShadowDepth="0"
-                                                              Opacity="0"
-                                                              Color="#3B9FF3"/>
-                                        </Border.Effect>
+                                            Padding="4"
+                                            Background="Transparent">
                                         <ScrollViewer x:Name="ProcRowsScrollViewer"
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Disabled"
@@ -963,21 +957,15 @@
                                                                     </Border>
 
                                                                     <!-- Function Rows with scrollable content -->
-                                                                    <!-- Border for focus indication with modern shadow effect -->
+                                                                    <!-- Border for clean modern focus indication -->
                                                                     <Border Grid.Row="1"
                                                                             x:Name="FuncScrollBorder"
                                                                             Tag="FocusBorder"
                                                                             BorderThickness="2"
                                                                             BorderBrush="Transparent"
                                                                             CornerRadius="8"
-                                                                            Padding="4">
-                                                                        <Border.Effect>
-                                                                            <DropShadowEffect x:Name="FuncShadowEffect"
-                                                                                              BlurRadius="0"
-                                                                                              ShadowDepth="0"
-                                                                                              Opacity="0"
-                                                                                              Color="#3B9FF3"/>
-                                                                        </Border.Effect>
+                                                                            Padding="4"
+                                                                            Background="Transparent">
                                                                         <ScrollViewer x:Name="FuncRowsScrollViewer"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Disabled"
