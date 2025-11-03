@@ -312,6 +312,11 @@ namespace TestAutomationManager.Views
             var dx = current.X - _lastPanPoint.X;
             var dy = current.Y - _lastPanPoint.Y;
 
+            // Reduce panning sensitivity for smoother control (0.5x speed)
+            const double panSensitivity = 0.5;
+            dx *= panSensitivity;
+            dy *= panSensitivity;
+
             // ✅ Natural panning: drag RIGHT -> scroll RIGHT, drag DOWN -> scroll DOWN
             var targetH = _startH + dx;
             var targetV = _startV + dy;
@@ -981,20 +986,31 @@ namespace TestAutomationManager.Views
             if (sender is not ScrollViewer scrollViewer)
                 return;
 
-            // Only handle if this ScrollViewer actually has scrollable content
+            // Check if mouse is actually over this ScrollViewer
+            var mousePosition = e.GetPosition(scrollViewer);
+            bool isMouseOver = mousePosition.X >= 0 && mousePosition.X <= scrollViewer.ActualWidth &&
+                               mousePosition.Y >= 0 && mousePosition.Y <= scrollViewer.ActualHeight;
+
+            if (!isMouseOver)
+                return;
+
+            // Only handle if this ScrollViewer has scrollable content
             if (scrollViewer.ScrollableHeight <= 0)
                 return;
 
             var delta = e.Delta;
+            bool scrollingDown = delta < 0;
+            bool scrollingUp = delta > 0;
 
             // Check if we can scroll in the requested direction
-            bool canScrollDown = delta < 0 && scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight;
-            bool canScrollUp = delta > 0 && scrollViewer.VerticalOffset > 0;
+            bool canScrollDown = scrollingDown && scrollViewer.VerticalOffset < scrollViewer.ScrollableHeight;
+            bool canScrollUp = scrollingUp && scrollViewer.VerticalOffset > 0;
 
+            // Only handle if we can actually scroll in the requested direction
             if (canScrollDown || canScrollUp)
             {
-                // Smooth scrolling: 48 pixels per wheel notch (3 lines of 16px each)
-                double scrollAmount = -delta / 120.0 * 48.0;
+                // Moderate scrolling speed: 32 pixels per wheel notch (2 lines of 16px each)
+                double scrollAmount = -delta / 120.0 * 32.0;
                 double newOffset = scrollViewer.VerticalOffset + scrollAmount;
 
                 // Clamp to valid range
@@ -1003,6 +1019,7 @@ namespace TestAutomationManager.Views
                 scrollViewer.ScrollToVerticalOffset(newOffset);
                 e.Handled = true;
             }
+            // If we can't scroll, let the event bubble to parent (main scroll)
         }
 
         /// <summary>
