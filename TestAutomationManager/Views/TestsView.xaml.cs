@@ -642,6 +642,9 @@ namespace TestAutomationManager.Views
                     Services.ProcessCacheService.Instance.AddProcessesByTestId(testId, processes);
                 }
 
+                // ⭐ STEP 2.5: Sort processes by ProcessPosition (low to high)
+                processes = processes.OrderBy(p => p.ProcessPosition).ToList();
+
                 // ⭐ STEP 3: Update UI on UI thread
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -975,15 +978,23 @@ namespace TestAutomationManager.Views
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // allow inner ScrollViewer to consume the wheel if it can scroll
+            // Allow inner ScrollViewer to consume the wheel if it can scroll
             if (sender is ScrollViewer sv)
             {
                 var delta = e.Delta;
-                if ((delta < 0 && sv.VerticalOffset < sv.ScrollableHeight) ||
-                    (delta > 0 && sv.VerticalOffset > 0))
+
+                // Check if ScrollViewer can scroll in the direction requested
+                bool canScrollDown = delta < 0 && sv.VerticalOffset < sv.ScrollableHeight;
+                bool canScrollUp = delta > 0 && sv.VerticalOffset > 0;
+
+                if (canScrollDown || canScrollUp)
                 {
+                    // Handle scrolling smoothly (3 lines per wheel notch)
+                    double lineHeight = 16.0; // Standard line height
+                    double scrollAmount = (delta / 120.0) * lineHeight * 3;
+
+                    sv.ScrollToVerticalOffset(sv.VerticalOffset - scrollAmount);
                     e.Handled = true;
-                    sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
                 }
             }
         }
