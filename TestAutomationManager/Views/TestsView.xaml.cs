@@ -1101,7 +1101,7 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Find the parent Border for a ScrollViewer (ProcScrollBorder or FuncScrollBorder)
+        /// Find the parent Border for a ScrollViewer (identified by Tag="FocusBorder")
         /// </summary>
         private Border FindScrollBorder(ScrollViewer scrollViewer)
         {
@@ -1109,7 +1109,7 @@ namespace TestAutomationManager.Views
                 return null;
 
             var parent = VisualTreeHelper.GetParent(scrollViewer);
-            if (parent is Border border && (border.Name == "ProcScrollBorder" || border.Name == "FuncScrollBorder"))
+            if (parent is Border border && border.Tag?.ToString() == "FocusBorder")
             {
                 return border;
             }

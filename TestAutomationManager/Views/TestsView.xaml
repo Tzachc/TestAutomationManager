@@ -660,6 +660,7 @@
                                     <!-- Border for focus indication -->
                                     <Border Grid.Row="1"
                                             x:Name="ProcScrollBorder"
+                                            Tag="FocusBorder"
                                             BorderThickness="2"
                                             BorderBrush="Transparent"
                                             CornerRadius="4">
@@ -957,6 +958,7 @@
                                                                     <!-- Border for focus indication -->
                                                                     <Border Grid.Row="1"
                                                                             x:Name="FuncScrollBorder"
+                                                                            Tag="FocusBorder"
                                                                             BorderThickness="2"
                                                                             BorderBrush="Transparent"
                                                                             CornerRadius="4">
