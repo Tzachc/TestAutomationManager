@@ -64,6 +64,10 @@ namespace TestAutomationManager.Views
         private double _startH;
         private double _startV;
 
+        // ----- Scroll area focus tracking -----
+        private ScrollViewer _focusedScrollViewer = null;
+        private Border _focusedScrollBorder = null;
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -1025,6 +1029,92 @@ namespace TestAutomationManager.Views
             // Cancel the automatic scroll-to-focused-element behavior
             // This prevents the annoying jump when collapsing expanded tests
             e.Handled = true;
+        }
+
+        // ================================================
+        // SCROLL AREA FOCUS HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Show hover indication when mouse enters a scroll area
+        /// </summary>
+        private void ScrollArea_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is not ScrollViewer scrollViewer)
+                return;
+
+            // Find the parent Border for this ScrollViewer
+            var border = FindScrollBorder(scrollViewer);
+            if (border == null)
+                return;
+
+            // Show hover indication (only if not already focused)
+            if (_focusedScrollViewer != scrollViewer)
+            {
+                border.BorderBrush = new SolidColorBrush(Color.FromArgb(0x40, 0x00, 0xAA, 0xFF)); // Light blue semi-transparent
+            }
+        }
+
+        /// <summary>
+        /// Remove hover indication when mouse leaves a scroll area
+        /// </summary>
+        private void ScrollArea_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is not ScrollViewer scrollViewer)
+                return;
+
+            // Find the parent Border for this ScrollViewer
+            var border = FindScrollBorder(scrollViewer);
+            if (border == null)
+                return;
+
+            // Remove hover indication (only if not focused)
+            if (_focusedScrollViewer != scrollViewer)
+            {
+                border.BorderBrush = Brushes.Transparent;
+            }
+        }
+
+        /// <summary>
+        /// Set focus on a scroll area when clicked
+        /// </summary>
+        private void ScrollArea_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not ScrollViewer scrollViewer)
+                return;
+
+            // Find the parent Border for this ScrollViewer
+            var border = FindScrollBorder(scrollViewer);
+            if (border == null)
+                return;
+
+            // Clear previous focus
+            if (_focusedScrollBorder != null && _focusedScrollBorder != border)
+            {
+                _focusedScrollBorder.BorderBrush = Brushes.Transparent;
+            }
+
+            // Set new focus
+            _focusedScrollViewer = scrollViewer;
+            _focusedScrollBorder = border;
+            border.BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x00, 0xAA, 0xFF)); // Solid blue
+        }
+
+        /// <summary>
+        /// Find the parent Border for a ScrollViewer (ProcScrollBorder or FuncScrollBorder)
+        /// </summary>
+        private Border FindScrollBorder(ScrollViewer scrollViewer)
+        {
+            if (scrollViewer == null)
+                return null;
+
+            var parent = VisualTreeHelper.GetParent(scrollViewer);
+            if (parent is Border border && (border.Name == "ProcScrollBorder" || border.Name == "FuncScrollBorder"))
+            {
+                return border;
+            }
+
+            return null;
         }
 
         // ================================================

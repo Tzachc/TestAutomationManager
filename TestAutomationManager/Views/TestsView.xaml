@@ -657,13 +657,21 @@
                                     </Border>
 
                                     <!-- Rows with their own ScrollViewer so header sticks -->
-                                    <ScrollViewer Grid.Row="1"
-                                                      x:Name="ProcRowsScrollViewer"
+                                    <!-- Border for focus indication -->
+                                    <Border Grid.Row="1"
+                                            x:Name="ProcScrollBorder"
+                                            BorderThickness="2"
+                                            BorderBrush="Transparent"
+                                            CornerRadius="4">
+                                        <ScrollViewer x:Name="ProcRowsScrollViewer"
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Auto"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
-                                                      MaxHeight="1200">
+                                                      MouseEnter="ScrollArea_MouseEnter"
+                                                      MouseLeave="ScrollArea_MouseLeave"
+                                                      PreviewMouseDown="ScrollArea_PreviewMouseDown"
+                                                      MaxHeight="700">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -946,12 +954,21 @@
                                                                     </Border>
 
                                                                     <!-- Function Rows with scrollable content -->
-                                                                    <ScrollViewer Grid.Row="1"
+                                                                    <!-- Border for focus indication -->
+                                                                    <Border Grid.Row="1"
+                                                                            x:Name="FuncScrollBorder"
+                                                                            BorderThickness="2"
+                                                                            BorderBrush="Transparent"
+                                                                            CornerRadius="4">
+                                                                        <ScrollViewer x:Name="FuncRowsScrollViewer"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Auto"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
-                                                                                      MaxHeight="800">
+                                                                                      MouseEnter="ScrollArea_MouseEnter"
+                                                                                      MouseLeave="ScrollArea_MouseLeave"
+                                                                                      PreviewMouseDown="ScrollArea_PreviewMouseDown"
+                                                                                      MaxHeight="600">
                                                                         <ItemsControl>
                                                                             <ItemsControl.Resources>
                                                                                 <CollectionViewSource x:Key="FunctionsSorted"
@@ -1117,7 +1134,8 @@
                                                                                 </DataTemplate>
                                                                             </ItemsControl.ItemTemplate>
                                                                         </ItemsControl>
-                                                                    </ScrollViewer>
+                                                                        </ScrollViewer>
+                                                                    </Border>
                                                                 </Grid>
                                                             </Border>
                                                         </Grid>
@@ -1125,7 +1143,8 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                    </ScrollViewer>
+                                        </ScrollViewer>
+                                    </Border>
                                 </Grid>
                             </Border>
                         </Grid>
