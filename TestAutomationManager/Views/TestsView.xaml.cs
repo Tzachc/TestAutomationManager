@@ -1058,8 +1058,14 @@ namespace TestAutomationManager.Views
             // Show hover indication (only if not already focused)
             if (_focusedScrollViewer != scrollViewer)
             {
-                // Subtle hover: Light blue/cyan with low opacity
-                border.BorderBrush = new SolidColorBrush(Color.FromArgb(0x50, 0x3B, 0x9F, 0xF3)); // #503B9FF3
+                // Subtle glow effect on hover
+                border.BorderBrush = new SolidColorBrush(Color.FromArgb(0x60, 0x3B, 0x9F, 0xF3)); // Subtle border
+
+                if (border.Effect is DropShadowEffect shadow)
+                {
+                    shadow.BlurRadius = 12;
+                    shadow.Opacity = 0.4;
+                }
             }
         }
 
@@ -1080,6 +1086,12 @@ namespace TestAutomationManager.Views
             if (_focusedScrollViewer != scrollViewer)
             {
                 border.BorderBrush = Brushes.Transparent;
+
+                if (border.Effect is DropShadowEffect shadow)
+                {
+                    shadow.BlurRadius = 0;
+                    shadow.Opacity = 0;
+                }
             }
         }
 
@@ -1100,12 +1112,24 @@ namespace TestAutomationManager.Views
             if (_focusedScrollBorder != null && _focusedScrollBorder != border)
             {
                 _focusedScrollBorder.BorderBrush = Brushes.Transparent;
+
+                if (_focusedScrollBorder.Effect is DropShadowEffect prevShadow)
+                {
+                    prevShadow.BlurRadius = 0;
+                    prevShadow.Opacity = 0;
+                }
             }
 
-            // Set new focus with a clean, modern blue
+            // Set new focus with modern glow effect
             _focusedScrollViewer = scrollViewer;
             _focusedScrollBorder = border;
-            border.BorderBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0x3B, 0x9F, 0xF3)); // #FF3B9FF3 - Clean blue
+            border.BorderBrush = new SolidColorBrush(Color.FromArgb(0xCC, 0x3B, 0x9F, 0xF3)); // Semi-transparent modern blue
+
+            if (border.Effect is DropShadowEffect shadow)
+            {
+                shadow.BlurRadius = 20;
+                shadow.Opacity = 0.8;
+            }
         }
 
         /// <summary>

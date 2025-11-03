@@ -657,23 +657,30 @@
                                     </Border>
 
                                     <!-- Rows with their own ScrollViewer so header sticks -->
-                                    <!-- Border for focus indication -->
+                                    <!-- Border for focus indication with modern shadow effect -->
                                     <Border Grid.Row="1"
                                             x:Name="ProcScrollBorder"
                                             Tag="FocusBorder"
-                                            BorderThickness="3"
+                                            BorderThickness="2"
                                             BorderBrush="Transparent"
-                                            CornerRadius="6"
-                                            Padding="2">
+                                            CornerRadius="8"
+                                            Padding="4">
+                                        <Border.Effect>
+                                            <DropShadowEffect x:Name="ProcShadowEffect"
+                                                              BlurRadius="0"
+                                                              ShadowDepth="0"
+                                                              Opacity="0"
+                                                              Color="#3B9FF3"/>
+                                        </Border.Effect>
                                         <ScrollViewer x:Name="ProcRowsScrollViewer"
                                                       VerticalScrollBarVisibility="Auto"
-                                                      HorizontalScrollBarVisibility="Auto"
+                                                      HorizontalScrollBarVisibility="Disabled"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
                                                       MouseEnter="ScrollArea_MouseEnter"
                                                       MouseLeave="ScrollArea_MouseLeave"
                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
-                                                      MaxHeight="700">
+                                                      MaxHeight="1000">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -956,23 +963,30 @@
                                                                     </Border>
 
                                                                     <!-- Function Rows with scrollable content -->
-                                                                    <!-- Border for focus indication -->
+                                                                    <!-- Border for focus indication with modern shadow effect -->
                                                                     <Border Grid.Row="1"
                                                                             x:Name="FuncScrollBorder"
                                                                             Tag="FocusBorder"
-                                                                            BorderThickness="3"
+                                                                            BorderThickness="2"
                                                                             BorderBrush="Transparent"
-                                                                            CornerRadius="6"
-                                                                            Padding="2">
+                                                                            CornerRadius="8"
+                                                                            Padding="4">
+                                                                        <Border.Effect>
+                                                                            <DropShadowEffect x:Name="FuncShadowEffect"
+                                                                                              BlurRadius="0"
+                                                                                              ShadowDepth="0"
+                                                                                              Opacity="0"
+                                                                                              Color="#3B9FF3"/>
+                                                                        </Border.Effect>
                                                                         <ScrollViewer x:Name="FuncRowsScrollViewer"
                                                                                       VerticalScrollBarVisibility="Auto"
-                                                                                      HorizontalScrollBarVisibility="Auto"
+                                                                                      HorizontalScrollBarVisibility="Disabled"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
                                                                                       MouseEnter="ScrollArea_MouseEnter"
                                                                                       MouseLeave="ScrollArea_MouseLeave"
                                                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
-                                                                                      MaxHeight="600">
+                                                                                      MaxHeight="800">
                                                                         <ItemsControl>
                                                                             <ItemsControl.Resources>
                                                                                 <CollectionViewSource x:Key="FunctionsSorted"
