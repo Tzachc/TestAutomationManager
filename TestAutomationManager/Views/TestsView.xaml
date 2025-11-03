@@ -661,7 +661,7 @@
                                                       x:Name="ProcRowsScrollViewer"
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Auto"
-                                                      CanContentScroll="True"
+                                                      CanContentScroll="False"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
                                                       MaxHeight="700">
@@ -950,7 +950,7 @@
                                                                     <ScrollViewer Grid.Row="1"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Auto"
-                                                                                      CanContentScroll="True"
+                                                                                      CanContentScroll="False"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
                                                                                       RequestBringIntoView="ProcRowsScrollViewer_RequestBringIntoView"
                                                                                       MaxHeight="400">

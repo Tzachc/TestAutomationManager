@@ -293,6 +293,9 @@ namespace TestAutomationManager.Views
                 UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
                 System.Diagnostics.Debug.WriteLine($"✓ Bulk load complete: {Processes.Count} processes loaded instantly");
 
+                // Update record count footer
+                UpdateRecordCount();
+
                 // Fire data loaded event
                 DataLoaded?.Invoke(this, EventArgs.Empty);
 
@@ -439,6 +442,9 @@ namespace TestAutomationManager.Views
                     Processes.Add(process);
                 }
             }
+
+            // Update record count after filtering
+            UpdateRecordCount();
         }
 
         // ================================================
@@ -616,6 +622,18 @@ namespace TestAutomationManager.Views
             Dispatcher.Invoke(() =>
             {
                 LoadingOverlay.Visibility = Visibility.Collapsed;
+            });
+        }
+
+        /// <summary>
+        /// Update the record count footer
+        /// </summary>
+        private void UpdateRecordCount()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                int count = Processes?.Count ?? 0;
+                RecordCountText.Text = count == 1 ? "1 process" : $"{count:N0} processes";
             });
         }
 
