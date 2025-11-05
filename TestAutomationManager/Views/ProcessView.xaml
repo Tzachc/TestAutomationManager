@@ -257,7 +257,7 @@
                     <Grid MinWidth="10000">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="24"  SharedSizeGroup="cExpand"/>
-                            <ColumnDefinition Width="80"  SharedSizeGroup="cProcessID"/>
+                            <ColumnDefinition Width="90"  SharedSizeGroup="cProcessID"/>
                             <ColumnDefinition Width="100" SharedSizeGroup="cWEB3Operator"/>
                             <ColumnDefinition Width="120" SharedSizeGroup="cPassFailOp"/>
                             <ColumnDefinition Width="80"  SharedSizeGroup="cTestID"/>

@@ -127,7 +127,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="80"  SharedSizeGroup="cWEB3Operator"/>
                             <ColumnDefinition Width="150" SharedSizeGroup="cComments"/>
-                            <ColumnDefinition Width="80"  SharedSizeGroup="cProcessID"/>
+                            <ColumnDefinition Width="90"  SharedSizeGroup="cProcessID"/>
                             <ColumnDefinition Width="80" SharedSizeGroup="cFunctionPosition"/>
                             <ColumnDefinition Width="350" SharedSizeGroup="cFunctionDescription"/>
                             <ColumnDefinition Width="400" SharedSizeGroup="cFunctionName"/>
