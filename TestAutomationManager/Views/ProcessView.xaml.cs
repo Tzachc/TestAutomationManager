@@ -4,8 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using TestAutomationManager.Controls;
+using TestAutomationManager.Helpers;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
 using TestAutomationManager.Services;
@@ -55,6 +58,10 @@ namespace TestAutomationManager.Views
         // ----- Track which ProcessIDs are currently loading to prevent duplicates -----
         private readonly System.Collections.Concurrent.ConcurrentDictionary<double, bool> _loadingProcessIds = new();
 
+        // ----- Filter management -----
+        private FilterManager<Process> _filterManager;
+        private Button _currentFilterButton;
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -69,6 +76,9 @@ namespace TestAutomationManager.Views
             // Initialize collections
             Processes = new ObservableCollection<Process>();
             _allProcesses = new ObservableCollection<Process>();
+
+            // Initialize filter manager
+            _filterManager = new FilterManager<Process>(_allProcesses, Processes);
 
             // Set data context
             ProcessesItemsControl.ItemsSource = Processes;
@@ -650,6 +660,72 @@ namespace TestAutomationManager.Views
                     sv.ScrollToVerticalOffset(sv.VerticalOffset - delta);
                 }
             }
+        }
+
+        // ================================================
+        // FILTER METHODS
+        // ================================================
+
+        /// <summary>
+        /// Show filter popup for a column
+        /// </summary>
+        private void ShowFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag == null)
+                return;
+
+            // Parse the Tag: "ColumnName|PropertyName"
+            var tag = button.Tag.ToString();
+            var parts = tag.Split('|');
+            if (parts.Length != 2)
+                return;
+
+            var columnName = parts[0];
+            var propertyName = parts[1];
+
+            // Get or create filter for this column
+            var filter = _filterManager.GetColumnFilter(columnName, propertyName);
+
+            // Initialize the filter control
+            FilterControl.Initialize(filter);
+
+            // Position the popup relative to the button
+            FilterPopup.PlacementTarget = button;
+            FilterPopup.IsOpen = true;
+
+            _currentFilterButton = button;
+        }
+
+        /// <summary>
+        /// Apply filter and close popup
+        /// </summary>
+        private void FilterControl_FilterApplied(object sender, ColumnFilter filter)
+        {
+            FilterPopup.IsOpen = false;
+
+            // Apply all filters
+            _filterManager.ApplyFilters();
+
+            // Update record count
+            UpdateRecordCount();
+
+            System.Diagnostics.Debug.WriteLine($"✓ Filter applied: {filter.ColumnName}");
+        }
+
+        /// <summary>
+        /// Clear filter and close popup
+        /// </summary>
+        private void FilterControl_FilterCleared(object sender, EventArgs e)
+        {
+            FilterPopup.IsOpen = false;
+
+            // Apply all filters (which will show all items if no filters are active)
+            _filterManager.ApplyFilters();
+
+            // Update record count
+            UpdateRecordCount();
+
+            System.Diagnostics.Debug.WriteLine("✓ Filter cleared");
         }
     }
 }
