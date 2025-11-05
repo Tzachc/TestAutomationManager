@@ -135,7 +135,7 @@
             <TextBox x:Name="FilterValueTextBox"
                      Style="{StaticResource ModernTextBox}"
                      Margin="0,0,0,10"
-                     IsEnabled="False"
+                     IsEnabled="True"
                      KeyDown="FilterValueTextBox_KeyDown"/>
 
             <!-- Action Buttons -->
@@ -154,7 +154,7 @@
                         BorderThickness="0"
                         HorizontalContentAlignment="Center"
                         Margin="0,0,4,0"
-                        IsEnabled="False"
+                        IsEnabled="True"
                         Click="Apply_Click"/>
 
                 <Button Grid.Column="1"

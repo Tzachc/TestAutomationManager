@@ -450,8 +450,7 @@
         <Popup x:Name="FilterPopup"
                StaysOpen="False"
                AllowsTransparency="True"
-               Placement="Bottom"
-               PlacementTarget="{Binding ElementName=FilterPopupTarget}">
+               Placement="Bottom">
             <controls:ColumnFilterPopup x:Name="FilterControl"
                                         FilterApplied="FilterControl_FilterApplied"
                                         FilterCleared="FilterControl_FilterCleared"/>

@@ -92,13 +92,39 @@ namespace TestAutomationManager.Helpers
             if (propertyInfo == null)
                 return items;
 
+            // Create a comparer that handles nulls and different types
+            var comparer = Comparer<object>.Create((x, y) =>
+            {
+                // Handle nulls
+                if (x == null && y == null) return 0;
+                if (x == null) return -1;
+                if (y == null) return 1;
+
+                // Try to compare as IComparable
+                if (x is IComparable comparableX)
+                {
+                    try
+                    {
+                        return comparableX.CompareTo(y);
+                    }
+                    catch
+                    {
+                        // If comparison fails, fall back to string comparison
+                        return string.Compare(x.ToString(), y.ToString(), StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+
+                // Fall back to string comparison
+                return string.Compare(x.ToString(), y.ToString(), StringComparison.OrdinalIgnoreCase);
+            });
+
             if (filter.SortDirection == SortDirection.Ascending)
             {
-                return items.OrderBy(item => GetPropertyValue(item, filter.PropertyName));
+                return items.OrderBy(item => GetPropertyValue(item, filter.PropertyName), comparer);
             }
             else if (filter.SortDirection == SortDirection.Descending)
             {
-                return items.OrderByDescending(item => GetPropertyValue(item, filter.PropertyName));
+                return items.OrderByDescending(item => GetPropertyValue(item, filter.PropertyName), comparer);
             }
 
             return items;
