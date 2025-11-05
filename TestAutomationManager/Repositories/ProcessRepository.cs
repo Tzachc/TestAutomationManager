@@ -92,6 +92,38 @@ namespace TestAutomationManager.Repositories
         }
 
         /// <summary>
+        /// Get all functions WITHOUT process details (optimized with stored procedure)
+        /// Uses schema-qualified stored procedure for fast performance
+        /// OPTIMIZED FOR LARGE DATASETS (potentially more records than processes)
+        /// </summary>
+        public async Task<List<Function>> GetAllFunctionsAsync()
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var schemaName = TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading all functions using stored procedure from schema '{schemaName}'...");
+
+                    // ✅ Use schema-qualified stored procedure for fast performance
+                    var spName = $"EXEC [{schemaName}].[usp_GetAllFunctions]";
+                    var functions = await context.Set<Function>()
+                        .FromSqlRaw(spName)
+                        .ToListAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {functions.Count} functions via stored procedure");
+
+                    return functions;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error loading all functions: {ex.Message}");
+                throw new Exception("Failed to load functions from database", ex);
+            }
+        }
+
+        /// <summary>
         /// Get process by ID
         /// </summary>
         public async Task<Process> GetProcessByIdAsync(double processId)

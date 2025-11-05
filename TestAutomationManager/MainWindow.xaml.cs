@@ -699,6 +699,16 @@ namespace TestAutomationManager
                     int testCount = testsView.GetTestCount();
                     RecordCountText = $"({testCount} {(testCount == 1 ? "test" : "tests")})";
                 }
+                else if (selectedTab.Content is Views.ProcessView processView)
+                {
+                    int processCount = processView.GetProcessCount();
+                    RecordCountText = $"({processCount} {(processCount == 1 ? "process" : "processes")})";
+                }
+                else if (selectedTab.Content is Views.FunctionView functionView)
+                {
+                    int functionCount = functionView.GetFunctionCount();
+                    RecordCountText = $"({functionCount} {(functionCount == 1 ? "function" : "functions")})";
+                }
                 else if (selectedTab.Content is Views.ExtTableDetailView extTableView)
                 {
                     int rowCount = extTableView.GetRowCount();
@@ -800,15 +810,9 @@ namespace TestAutomationManager
                 "⚡",
                 () =>
                 {
-                    var textBlock = new TextBlock
-                    {
-                        Text = "Functions View - Coming Soon",
-                        FontSize = 24,
-                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"],
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-                    return textBlock;
+                    var view = new Views.FunctionView();
+                    view.DataLoaded += (s, e) => UpdateRecordCount();
+                    return view;
                 }
             );
         }
