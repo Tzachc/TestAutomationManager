@@ -1004,9 +1004,11 @@ namespace TestAutomationManager.Views
 
             if (canScrollDown || canScrollUp)
             {
-                // Smooth scrolling: 48 pixels per wheel notch (3 lines of 16px each)
-                double scrollAmount = -delta / 120.0 * 48.0;
+                const double lineHeightPx = 16.0;
+                const int linesPerNotch = 2;              // how many rows to scroll
+                double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
                 double newOffset = scrollViewer.VerticalOffset + scrollAmount;
+
 
                 // Clamp to valid range
                 newOffset = Math.Max(0, Math.Min(newOffset, scrollViewer.ScrollableHeight));
@@ -1015,6 +1017,8 @@ namespace TestAutomationManager.Views
                 e.Handled = true;
             }
         }
+
+
 
         /// <summary>
         /// Prevent automatic scrolling when expanding items inside ProcRowsScrollViewer

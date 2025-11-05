@@ -674,7 +674,7 @@
                                                       MouseEnter="ScrollArea_MouseEnter"
                                                       MouseLeave="ScrollArea_MouseLeave"
                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
-                                                      MaxHeight="1000">
+                                                      MaxHeight="450">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -683,7 +683,7 @@
                                                                 BorderThickness="1"
                                                                 CornerRadius="6"
                                                                 Padding="16,12"
-                                                                Margin="42,0,0,8">
+                                                                Margin="42,0,0,4">
                                                         <Grid>
                                                             <Grid.RowDefinitions>
                                                                 <RowDefinition Height="Auto"/>

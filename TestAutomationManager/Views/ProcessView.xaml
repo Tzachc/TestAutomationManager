@@ -285,9 +285,9 @@
 
                         <TextBlock Grid.Column="1"  Text="PROCESS ID" FontSize="12" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="2"  Text="WEB3 OPERATOR" FontSize="12" FontWeight="Bold"
+                        <TextBlock Grid.Column="2"  Text="OPERATOR" FontSize="12" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="3"  Text="PASS/FAIL OPERATOR" FontSize="12" FontWeight="Bold"
+                        <TextBlock Grid.Column="3"  Text="PASS/FAIL" FontSize="12" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
                         <TextBlock Grid.Column="4"  Text="TEST ID" FontSize="12" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
@@ -639,7 +639,7 @@
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Auto"
                                                       PreviewMouseWheel="FuncRowsScrollViewer_PreviewMouseWheel"
-                                                      MaxHeight="500">
+                                                      MaxHeight="450">
                                             <ItemsControl ItemsSource="{Binding Functions}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
