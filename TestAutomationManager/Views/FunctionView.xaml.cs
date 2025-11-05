@@ -4,8 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using TestAutomationManager.Controls;
+using TestAutomationManager.Helpers;
 using TestAutomationManager.Models;
 using TestAutomationManager.Repositories;
 
@@ -51,6 +54,10 @@ namespace TestAutomationManager.Views
         // ----- Internal ScrollViewer from ListBox -----
         private ScrollViewer _listBoxScrollViewer;
 
+        // ----- Filter management -----
+        private FilterManager<Function> _filterManager;
+        private Button _currentFilterButton;
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -65,6 +72,9 @@ namespace TestAutomationManager.Views
             // Initialize collections
             Functions = new ObservableCollection<Function>();
             _allFunctions = new ObservableCollection<Function>();
+
+            // Initialize filter manager
+            _filterManager = new FilterManager<Function>(_allFunctions, Functions);
 
             // Set data context
             FunctionsItemsControl.ItemsSource = Functions;
@@ -434,6 +444,72 @@ namespace TestAutomationManager.Views
                 int count = Functions?.Count ?? 0;
                 RecordCountText.Text = count == 1 ? "1 function" : $"{count:N0} functions";
             });
+        }
+
+        // ================================================
+        // FILTER METHODS
+        // ================================================
+
+        /// <summary>
+        /// Show filter popup for a column
+        /// </summary>
+        private void ShowFilter_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag == null)
+                return;
+
+            // Parse the Tag: "ColumnName|PropertyName"
+            var tag = button.Tag.ToString();
+            var parts = tag.Split('|');
+            if (parts.Length != 2)
+                return;
+
+            var columnName = parts[0];
+            var propertyName = parts[1];
+
+            // Get or create filter for this column
+            var filter = _filterManager.GetColumnFilter(columnName, propertyName);
+
+            // Initialize the filter control
+            FilterControl.Initialize(filter);
+
+            // Position the popup relative to the button
+            FilterPopup.PlacementTarget = button;
+            FilterPopup.IsOpen = true;
+
+            _currentFilterButton = button;
+        }
+
+        /// <summary>
+        /// Apply filter and close popup
+        /// </summary>
+        private void FilterControl_FilterApplied(object sender, ColumnFilter filter)
+        {
+            FilterPopup.IsOpen = false;
+
+            // Apply all filters
+            _filterManager.ApplyFilters();
+
+            // Update record count
+            UpdateRecordCount();
+
+            System.Diagnostics.Debug.WriteLine($"✓ Filter applied: {filter.ColumnName}");
+        }
+
+        /// <summary>
+        /// Clear filter and close popup
+        /// </summary>
+        private void FilterControl_FilterCleared(object sender, EventArgs e)
+        {
+            FilterPopup.IsOpen = false;
+
+            // Apply all filters (which will show all items if no filters are active)
+            _filterManager.ApplyFilters();
+
+            // Update record count
+            UpdateRecordCount();
+
+            System.Diagnostics.Debug.WriteLine("✓ Filter cleared");
         }
     }
 }

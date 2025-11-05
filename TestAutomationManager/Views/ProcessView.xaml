@@ -1,11 +1,12 @@
 <UserControl x:Class="TestAutomationManager.Views.ProcessView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TestAutomationManager.Views"
              xmlns:converters="clr-namespace:TestAutomationManager.Converters"
-             mc:Ignorable="d" 
+             xmlns:controls="clr-namespace:TestAutomationManager.Controls"
+             mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="1600"
              Background="{DynamicResource PrimaryBackgroundBrush}"
              Loaded="ProcessView_Loaded"
@@ -13,7 +14,36 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        
+
+        <!-- Filter Button Style -->
+        <Style x:Key="FilterIconButton" TargetType="Button">
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3">
+                            <TextBlock Text="⚙" FontSize="12"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Expand Toggle -->
         <Style x:Key="ExpandToggle" TargetType="ToggleButton">
             <Setter Property="Width" Value="24"/>
@@ -227,7 +257,7 @@
                     <Grid MinWidth="10000">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="24"  SharedSizeGroup="cExpand"/>
-                            <ColumnDefinition Width="80"  SharedSizeGroup="cProcessID"/>
+                            <ColumnDefinition Width="90"  SharedSizeGroup="cProcessID"/>
                             <ColumnDefinition Width="100" SharedSizeGroup="cWEB3Operator"/>
                             <ColumnDefinition Width="120" SharedSizeGroup="cPassFailOp"/>
                             <ColumnDefinition Width="80"  SharedSizeGroup="cTestID"/>
@@ -283,20 +313,40 @@
                             <ColumnDefinition Width="160" SharedSizeGroup="cActions"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="1"  Text="PROCESS ID" FontSize="12" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        <!-- PROCESS ID with filter -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="PROCESS ID" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <Button Style="{StaticResource FilterIconButton}" Click="ShowFilter_Click" Tag="PROCESS ID|ProcessID"/>
+                        </StackPanel>
+
                         <TextBlock Grid.Column="2"  Text="OPERATOR" FontSize="12" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
                         <TextBlock Grid.Column="3"  Text="PASS/FAIL" FontSize="12" FontWeight="Bold"
                                    Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="4"  Text="TEST ID" FontSize="12" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="5"  Text="PROCESS NAME" FontSize="12" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="6"  Text="PROCESS POSITION" FontSize="12" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="7"  Text="LAST RUNNING" FontSize="12" FontWeight="Bold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center"/>
+
+                        <!-- TEST ID with filter -->
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="TEST ID" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <Button Style="{StaticResource FilterIconButton}" Click="ShowFilter_Click" Tag="TEST ID|TestID"/>
+                        </StackPanel>
+
+                        <!-- PROCESS NAME with filter -->
+                        <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="PROCESS NAME" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <Button Style="{StaticResource FilterIconButton}" Click="ShowFilter_Click" Tag="PROCESS NAME|ProcessName"/>
+                        </StackPanel>
+
+                        <!-- PROCESS POSITION with filter -->
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="PROCESS POSITION" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <Button Style="{StaticResource FilterIconButton}" Click="ShowFilter_Click" Tag="PROCESS POSITION|ProcessPosition"/>
+                        </StackPanel>
+
+                        <!-- LAST RUNNING with filter -->
+                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="LAST RUNNING" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <Button Style="{StaticResource FilterIconButton}" Click="ShowFilter_Click" Tag="LAST RUNNING|LastRunning"/>
+                        </StackPanel>
                         <TextBlock Grid.Column="8"  Text="PARAM 1"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Column="9"  Text="PARAM 2"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                         <TextBlock Grid.Column="10" Text="PARAM 3"  FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
@@ -798,6 +848,16 @@
                        Foreground="{DynamicResource TextSecondaryBrush}"
                        HorizontalAlignment="Right"/>
         </Border>
+
+        <!-- Filter Popup -->
+        <Popup x:Name="FilterPopup"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               Placement="Bottom">
+            <controls:ColumnFilterPopup x:Name="FilterControl"
+                                        FilterApplied="FilterControl_FilterApplied"
+                                        FilterCleared="FilterControl_FilterCleared"/>
+        </Popup>
     </Grid>
 
 </UserControl>
