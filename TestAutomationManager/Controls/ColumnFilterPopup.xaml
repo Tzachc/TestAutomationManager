@@ -10,16 +10,15 @@
             BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             CornerRadius="8"
-            Padding="12"
-            Effect="{StaticResource ModernDropShadow}">
-        <Border.Resources>
-            <!-- Modern Drop Shadow for popup -->
-            <DropShadowEffect x:Key="ModernDropShadow"
-                              BlurRadius="15"
+            Padding="12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="15"
                               ShadowDepth="2"
                               Direction="270"
                               Color="Black"
                               Opacity="0.25"/>
+        </Border.Effect>
+        <Border.Resources>
 
             <!-- Button Style -->
             <Style x:Key="FilterButton" TargetType="Button">
