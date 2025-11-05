@@ -24,13 +24,27 @@ namespace TestAutomationManager.Controls
         public void Initialize(ColumnFilter filter)
         {
             _filter = filter;
-            ColumnNameText.Text = $"Filter: {filter.ColumnName}";
+
+            if (ColumnNameText != null)
+                ColumnNameText.Text = $"Filter: {filter.ColumnName}";
 
             // Restore previous filter state if exists
             if (filter.TextFilterType != TextFilterType.None)
             {
-                FilterTypeComboBox.SelectedIndex = (int)filter.TextFilterType - 1;
-                FilterValueTextBox.Text = filter.FilterValue ?? "";
+                if (FilterTypeComboBox != null)
+                    FilterTypeComboBox.SelectedIndex = (int)filter.TextFilterType - 1;
+
+                if (FilterValueTextBox != null)
+                    FilterValueTextBox.Text = filter.FilterValue ?? "";
+            }
+            else
+            {
+                // Reset to default state
+                if (FilterTypeComboBox != null)
+                    FilterTypeComboBox.SelectedIndex = 0;
+
+                if (FilterValueTextBox != null)
+                    FilterValueTextBox.Text = "";
             }
         }
 
@@ -58,6 +72,10 @@ namespace TestAutomationManager.Controls
 
         private void FilterTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Null check - controls may not be loaded yet
+            if (FilterValueTextBox == null || ApplyButton == null || FilterTypeComboBox == null)
+                return;
+
             // Enable the text box and apply button when a filter type is selected
             FilterValueTextBox.IsEnabled = FilterTypeComboBox.SelectedIndex >= 0;
             ApplyButton.IsEnabled = FilterTypeComboBox.SelectedIndex >= 0;
@@ -97,8 +115,12 @@ namespace TestAutomationManager.Controls
             if (_filter == null) return;
 
             _filter.Clear();
-            FilterValueTextBox.Text = "";
-            FilterTypeComboBox.SelectedIndex = 0;
+
+            if (FilterValueTextBox != null)
+                FilterValueTextBox.Text = "";
+
+            if (FilterTypeComboBox != null)
+                FilterTypeComboBox.SelectedIndex = 0;
 
             FilterCleared?.Invoke(this, EventArgs.Empty);
         }
