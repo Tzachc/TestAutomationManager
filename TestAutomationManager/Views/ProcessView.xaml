@@ -370,54 +370,6 @@
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
-            <!-- Apply Modern ScrollViewer Style -->
-            <ListBox.Resources>
-                <Style TargetType="{x:Type ScrollViewer}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
-
-                                    <ScrollBar x:Name="PART_HorizontalScrollBar"
-                                               Style="{StaticResource ModernScrollBar}"
-                                               Orientation="Horizontal"
-                                               Grid.Row="1"
-                                               Grid.Column="0"
-                                               Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
-                                               Value="{TemplateBinding HorizontalOffset}"
-                                               Minimum="0"
-                                               Maximum="{TemplateBinding ScrollableWidth}"
-                                               ViewportSize="{TemplateBinding ViewportWidth}"
-                                               Margin="0,4,0,0"/>
-
-                                    <ScrollBar x:Name="PART_VerticalScrollBar"
-                                               Style="{StaticResource ModernScrollBar}"
-                                               Orientation="Vertical"
-                                               Grid.Row="0"
-                                               Grid.Column="1"
-                                               Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
-                                               Value="{TemplateBinding VerticalOffset}"
-                                               Minimum="0"
-                                               Maximum="{TemplateBinding ScrollableHeight}"
-                                               ViewportSize="{TemplateBinding ViewportHeight}"
-                                               Margin="4,0,0,0"/>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListBox.Resources>
-
             <!-- Remove default ListBox selection visual -->
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
