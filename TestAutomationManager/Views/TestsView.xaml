@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:TestAutomationManager.Views"
              xmlns:converters="clr-namespace:TestAutomationManager.Converters"
              xmlns:controls="clr-namespace:TestAutomationManager.Controls"
+             xmlns:helpers="clr-namespace:TestAutomationManager.Helpers"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d"
@@ -455,7 +456,7 @@
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
-                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   MouseLeftButtonDown="EditableField_DoubleClick"
                                                    Tag="TestID"
                                                    Cursor="Hand"/>
 
@@ -465,7 +466,7 @@
                                                    VerticalAlignment="Center" HorizontalAlignment="Left"
                                                    TextAlignment="Left" TextWrapping="Wrap"
                                                    ToolTip="{Binding TestName}"
-                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   MouseLeftButtonDown="EditableField_DoubleClick"
                                                    Tag="TestName"
                                                    Cursor="Hand"/>
 
@@ -503,7 +504,7 @@
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
                                                    TextTrimming="CharacterEllipsis" ToolTip="{Binding Bugs}"
-                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   MouseLeftButtonDown="EditableField_DoubleClick"
                                                    Tag="Bugs"
                                                    Cursor="Hand"/>
 
@@ -513,7 +514,7 @@
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    TextAlignment="Center" TextTrimming="CharacterEllipsis"
                                                    ToolTip="{Binding RecipientsEmailsList}"
-                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   MouseLeftButtonDown="EditableField_DoubleClick"
                                                    Tag="RecipientsEmailsList"
                                                    Cursor="Hand"/>
 
@@ -523,7 +524,7 @@
                                                    HorizontalAlignment="Center" TextAlignment="Center"
                                                    TextTrimming="CharacterEllipsis"
                                                    ToolTip="{Binding ExceptionMessage}"
-                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   MouseLeftButtonDown="EditableField_DoubleClick"
                                                    Tag="ExceptionMessage"
                                                    Cursor="Hand"/>
 

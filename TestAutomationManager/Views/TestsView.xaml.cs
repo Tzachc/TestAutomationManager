@@ -1401,8 +1401,11 @@ namespace TestAutomationManager.Views
         /// <summary>
         /// Handle double-click on editable fields to open edit dialog
         /// </summary>
-        private async void EditableField_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void EditableField_DoubleClick(object sender, MouseButtonEventArgs e)
         {
+            // Only handle double-click
+            if (e.ClickCount != 2) return;
+
             if (sender is TextBlock textBlock && textBlock.DataContext is Test test)
             {
                 string fieldName = textBlock.Tag?.ToString();
@@ -1411,7 +1414,7 @@ namespace TestAutomationManager.Views
                 string oldValue = textBlock.Text;
 
                 // Show input dialog
-                var dialog = new Dialogs.ModernInputDialog(
+                var dialog = new SimpleInputDialog(
                     $"Edit {fieldName}",
                     $"Enter new value for {fieldName}:",
                     oldValue,
@@ -1419,7 +1422,7 @@ namespace TestAutomationManager.Views
 
                 if (dialog.ShowDialog() == true)
                 {
-                    string newValue = dialog.InputText;
+                    string newValue = dialog.InputValue;
 
                     var result = await _editService.EditTestFieldAsync(test, fieldName, oldValue, newValue, Window.GetWindow(this));
 
