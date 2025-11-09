@@ -290,7 +290,7 @@ namespace TestAutomationManager.Services
         /// <summary>
         /// Get next available TestID
         /// </summary>
-        public async Task<int> GetNextAvailableTestIdAsync()
+        public async Task<int?> GetNextAvailableTestIdAsync()
         {
             return await _repository.GetNextAvailableTestIdAsync();
         }
