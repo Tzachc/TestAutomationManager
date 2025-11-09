@@ -256,19 +256,23 @@ namespace TestAutomationManager.Views
                     .ThenBy(f => f.FunctionPosition)
                     .ToList();
 
-                // ⭐ SINGLE UI UPDATE: Replace entire collection in one operation
-                // This triggers only ONE UI update instead of thousands of individual updates!
-                System.Diagnostics.Debug.WriteLine($"📊 Replacing collections with {totalFunctions} functions in single operation...");
+                // ⭐ CRITICAL FIX: Clear and reuse existing collections instead of creating new ones
+                // This ensures FilterManager maintains valid references to the collections
+                System.Diagnostics.Debug.WriteLine($"📊 Updating collections with {totalFunctions} functions...");
 
-                // Update UI on UI thread - single operation
+                // Update UI on UI thread - clear and add to existing collections
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    // Create NEW ObservableCollections from the sorted list (single operation)
-                    Functions = new ObservableCollection<Function>(sortedFunctions);
-                    _allFunctions = new ObservableCollection<Function>(sortedFunctions);
+                    // Clear existing collections
+                    Functions.Clear();
+                    _allFunctions.Clear();
 
-                    // Update ItemsControl to use new collection
-                    FunctionsItemsControl.ItemsSource = Functions;
+                    // Add sorted functions to existing collections
+                    foreach (var function in sortedFunctions)
+                    {
+                        Functions.Add(function);
+                        _allFunctions.Add(function);
+                    }
                 });
 
                 UpdateLoadingProgress($"Loaded {Functions.Count} functions!", 100);
