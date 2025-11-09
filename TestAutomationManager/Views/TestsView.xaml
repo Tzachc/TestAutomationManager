@@ -505,14 +505,14 @@
                                                    helpers:InlineEditHelper.IsEditable="True"
                                                    helpers:InlineEditHelper.FieldName="Bugs"/>
 
-                                    <TextBlock Grid.Column="9" Text="{Binding Recipients}"
+                                    <TextBlock Grid.Column="9" Text="{Binding RecipientsEmailsList}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" TextWrapping="Wrap"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding Recipients}"
+                                                   ToolTip="{Binding RecipientsEmailsList}"
                                                    helpers:InlineEditHelper.IsEditable="True"
-                                                   helpers:InlineEditHelper.FieldName="Recipients"/>
+                                                   helpers:InlineEditHelper.FieldName="RecipientsEmailsList"/>
 
                                     <TextBlock Grid.Column="10" Text="{Binding ExceptionMessage}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"

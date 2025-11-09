@@ -228,18 +228,18 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var existingFunction = await context.Set<Function>()
-                        .FirstOrDefaultAsync(f => f.FunctionID == function.FunctionID);
+                        .FirstOrDefaultAsync(f => f.Index == function.Index);
 
                     if (existingFunction == null)
                     {
-                        throw new InvalidOperationException($"Function with ID {function.FunctionID} not found");
+                        throw new InvalidOperationException($"Function with Index {function.Index} not found");
                     }
 
                     // Update properties
                     context.Entry(existingFunction).CurrentValues.SetValues(function);
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Function #{function.FunctionID} updated successfully");
+                    System.Diagnostics.Debug.WriteLine($"✓ Function #{function.Index} updated successfully");
                 }
             }
             catch (Exception ex)

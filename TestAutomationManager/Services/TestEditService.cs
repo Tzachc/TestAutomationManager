@@ -50,15 +50,15 @@ namespace TestAutomationManager.Services
                 // Special validation for TestID
                 if (fieldName == "TestID")
                 {
-                    if (!int.TryParse(newValue, out int newTestId))
+                    if (!double.TryParse(newValue, out double newTestId))
                         return EditResult.Failed("TestID must be a valid number");
 
                     // Check if ID already exists (and it's not the current test)
-                    if (await _repository.TestIdExistsAsync(newTestId))
+                    if (await _repository.TestIdExistsAsync((int)newTestId))
                     {
-                        if (newTestId != test.TestID)
+                        if (test.TestID.HasValue && (int)newTestId != (int)test.TestID.Value)
                         {
-                            return EditResult.Failed($"TestID {newTestId} already exists. Please choose a different ID.");
+                            return EditResult.Failed($"TestID {(int)newTestId} already exists. Please choose a different ID.");
                         }
                     }
 
@@ -72,9 +72,9 @@ namespace TestAutomationManager.Services
                 {
                     test.Bugs = newValue;
                 }
-                else if (fieldName == "Recipients")
+                else if (fieldName == "RecipientsEmailsList" || fieldName == "Recipients")
                 {
-                    test.Recipients = newValue;
+                    test.RecipientsEmailsList = newValue;
                 }
                 else if (fieldName == "ExceptionMessage")
                 {
@@ -87,27 +87,6 @@ namespace TestAutomationManager.Services
                 else if (fieldName == "LastTimePass")
                 {
                     test.LastTimePass = newValue;
-                }
-                else if (fieldName == "SendEmailOnFail")
-                {
-                    if (bool.TryParse(newValue, out bool value))
-                        test.SendEmailOnFail = value;
-                    else
-                        return EditResult.Failed("SendEmailOnFail must be true or false");
-                }
-                else if (fieldName == "SendEmailOnPass")
-                {
-                    if (bool.TryParse(newValue, out bool value))
-                        test.SendEmailOnPass = value;
-                    else
-                        return EditResult.Failed("SendEmailOnPass must be true or false");
-                }
-                else if (fieldName == "SendAlwaysEmail")
-                {
-                    if (bool.TryParse(newValue, out bool value))
-                        test.SendAlwaysEmail = value;
-                    else
-                        return EditResult.Failed("SendAlwaysEmail must be true or false");
                 }
                 else
                 {
@@ -147,26 +126,20 @@ namespace TestAutomationManager.Services
         /// </summary>
         private void RevertTestField(Test test, string fieldName, string oldValue)
         {
-            if (fieldName == "TestID" && int.TryParse(oldValue, out int testId))
+            if (fieldName == "TestID" && double.TryParse(oldValue, out double testId))
                 test.TestID = testId;
             else if (fieldName == "TestName")
                 test.TestName = oldValue;
             else if (fieldName == "Bugs")
                 test.Bugs = oldValue;
-            else if (fieldName == "Recipients")
-                test.Recipients = oldValue;
+            else if (fieldName == "RecipientsEmailsList" || fieldName == "Recipients")
+                test.RecipientsEmailsList = oldValue;
             else if (fieldName == "ExceptionMessage")
                 test.ExceptionMessage = oldValue;
             else if (fieldName == "LastRunning")
                 test.LastRunning = oldValue;
             else if (fieldName == "LastTimePass")
                 test.LastTimePass = oldValue;
-            else if (fieldName == "SendEmailOnFail" && bool.TryParse(oldValue, out bool fail))
-                test.SendEmailOnFail = fail;
-            else if (fieldName == "SendEmailOnPass" && bool.TryParse(oldValue, out bool pass))
-                test.SendEmailOnPass = pass;
-            else if (fieldName == "SendAlwaysEmail" && bool.TryParse(oldValue, out bool always))
-                test.SendAlwaysEmail = always;
         }
 
         // ================================================
@@ -202,10 +175,6 @@ namespace TestAutomationManager.Services
                     if (string.IsNullOrWhiteSpace(newValue))
                         return EditResult.Failed("ProcessName cannot be empty");
                     process.ProcessName = newValue;
-                }
-                else if (fieldName == "State")
-                {
-                    process.State = newValue;
                 }
                 else
                 {
@@ -292,7 +261,7 @@ namespace TestAutomationManager.Services
                 // Save to database
                 await _processRepository.UpdateFunctionAsync(function);
 
-                System.Diagnostics.Debug.WriteLine($"✓ Function {function.FunctionID} updated: {fieldName} = '{newValue}'");
+                System.Diagnostics.Debug.WriteLine($"✓ Function {function.Index} updated: {fieldName} = '{newValue}'");
 
                 return EditResult.Success($"{fieldName} updated successfully");
             }
