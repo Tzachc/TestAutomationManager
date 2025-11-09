@@ -326,6 +326,11 @@ namespace TestAutomationManager.Views
             var dx = current.X - _lastPanPoint.X;
             var dy = current.Y - _lastPanPoint.Y;
 
+            // Apply damping factor for smoother, slower panning (0.3 = 30% of mouse movement speed)
+            const double dampingFactor = 0.3;
+            dx *= dampingFactor;
+            dy *= dampingFactor;
+
             // ✅ Natural panning: drag RIGHT -> scroll RIGHT, drag DOWN -> scroll DOWN
             var targetH = _startH + dx;
             var targetV = _startV + dy;
@@ -356,6 +361,43 @@ namespace TestAutomationManager.Views
             {
                 _isPanning = false;
                 MainScrollViewer.ReleaseMouseCapture();
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse wheel scrolling for the main view with reduced speed
+        /// </summary>
+        private void MainScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (MainScrollViewer == null)
+                return;
+
+            // Only handle if there's no focused inner ScrollViewer
+            if (_focusedScrollViewer != null)
+                return;
+
+            // Only handle if this ScrollViewer actually has scrollable content
+            if (MainScrollViewer.ScrollableHeight <= 0)
+                return;
+
+            var delta = e.Delta;
+
+            // Check if we can scroll in the requested direction
+            bool canScrollDown = delta < 0 && MainScrollViewer.VerticalOffset < MainScrollViewer.ScrollableHeight;
+            bool canScrollUp = delta > 0 && MainScrollViewer.VerticalOffset > 0;
+
+            if (canScrollDown || canScrollUp)
+            {
+                const double lineHeightPx = 16.0;
+                const double linesPerNotch = 1.0;         // Smooth scrolling - 1 line per notch
+                double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
+                double newOffset = MainScrollViewer.VerticalOffset + scrollAmount;
+
+                // Clamp to valid range
+                newOffset = Math.Max(0, Math.Min(newOffset, MainScrollViewer.ScrollableHeight));
+
+                MainScrollViewer.ScrollToVerticalOffset(newOffset);
+                e.Handled = true;
             }
         }
 
@@ -1015,7 +1057,7 @@ namespace TestAutomationManager.Views
             if (canScrollDown || canScrollUp)
             {
                 const double lineHeightPx = 16.0;
-                const int linesPerNotch = 2;              // how many rows to scroll
+                const double linesPerNotch = 1.0;         // Reduced from 2 to 1 for smoother scrolling
                 double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
                 double newOffset = scrollViewer.VerticalOffset + scrollAmount;
 

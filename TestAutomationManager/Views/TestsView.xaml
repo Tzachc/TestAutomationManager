@@ -366,6 +366,7 @@
                  PreviewMouseDown="MainScrollViewer_PreviewMouseDown"
                  PreviewMouseMove="MainScrollViewer_PreviewMouseMove"
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
+                 PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
             <!-- Apply modern scrollbar styling WITHOUT breaking virtualization -->
