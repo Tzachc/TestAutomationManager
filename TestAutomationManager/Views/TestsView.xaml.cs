@@ -29,6 +29,16 @@ namespace TestAutomationManager.Views
         private readonly ITestRepository _repository;
 
         /// <summary>
+        /// Process repository for database operations
+        /// </summary>
+        private readonly ProcessRepository _processRepository;
+
+        /// <summary>
+        /// Edit service for inline editing
+        /// </summary>
+        private readonly TestEditService _editService;
+
+        /// <summary>
         /// Observable collection for UI binding
         /// </summary>
         public ObservableCollection<Test> Tests { get; set; }
@@ -85,8 +95,12 @@ namespace TestAutomationManager.Views
         {
             InitializeComponent();
 
-            // Initialize repository
+            // Initialize repositories
             _repository = new TestRepository();
+            _processRepository = new ProcessRepository();
+
+            // Initialize edit service
+            _editService = new TestEditService(_repository, _processRepository);
 
             // Initialize collections
             Tests = new ObservableCollection<Test>();
@@ -1378,6 +1392,43 @@ namespace TestAutomationManager.Views
             UpdateStatistics();
 
             System.Diagnostics.Debug.WriteLine("✓ Filter cleared");
+        }
+
+        // ================================================
+        // INLINE EDITING
+        // ================================================
+
+        /// <summary>
+        /// Handle double-click on editable fields to open edit dialog
+        /// </summary>
+        private async void EditableField_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBlock textBlock && textBlock.DataContext is Test test)
+            {
+                string fieldName = textBlock.Tag?.ToString();
+                if (string.IsNullOrEmpty(fieldName)) return;
+
+                string oldValue = textBlock.Text;
+
+                // Show input dialog
+                var dialog = new Dialogs.ModernInputDialog(
+                    $"Edit {fieldName}",
+                    $"Enter new value for {fieldName}:",
+                    oldValue,
+                    Window.GetWindow(this));
+
+                if (dialog.ShowDialog() == true)
+                {
+                    string newValue = dialog.InputText;
+
+                    var result = await _editService.EditTestFieldAsync(test, fieldName, oldValue, newValue, Window.GetWindow(this));
+
+                    if (!result.IsSuccess && !result.IsCancelled)
+                    {
+                        MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
 
     }

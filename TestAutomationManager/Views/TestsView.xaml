@@ -454,14 +454,20 @@
                                     <TextBlock Grid.Column="3" Text="{Binding TestID}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   Tag="TestID"
+                                                   Cursor="Hand"/>
 
                                     <TextBlock Grid.Column="4" Text="{Binding TestName}"
                                                    Foreground="{DynamicResource TextPrimaryBrush}"
                                                    FontSize="13" FontWeight="SemiBold"
                                                    VerticalAlignment="Center" HorizontalAlignment="Left"
                                                    TextAlignment="Left" TextWrapping="Wrap"
-                                                   ToolTip="{Binding TestName}"/>
+                                                   ToolTip="{Binding TestName}"
+                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   Tag="TestName"
+                                                   Cursor="Hand"/>
 
                                     <TextBlock Grid.Column="5" Text="{Binding LastRunning}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
@@ -496,21 +502,30 @@
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Bugs}"/>
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Bugs}"
+                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   Tag="Bugs"
+                                                   Cursor="Hand"/>
 
                                     <TextBlock Grid.Column="9" Text="{Binding RecipientsEmailsList}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" TextWrapping="Wrap"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding RecipientsEmailsList}"/>
+                                                   ToolTip="{Binding RecipientsEmailsList}"
+                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   Tag="RecipientsEmailsList"
+                                                   Cursor="Hand"/>
 
                                     <TextBlock Grid.Column="10" Text="{Binding ExceptionMessage}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
                                                    TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding ExceptionMessage}"/>
+                                                   ToolTip="{Binding ExceptionMessage}"
+                                                   MouseDoubleClick="EditableField_MouseDoubleClick"
+                                                   Tag="ExceptionMessage"
+                                                   Cursor="Hand"/>
 
                                     <TextBlock Grid.Column="11" Text="{Binding SendEmailReport}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
