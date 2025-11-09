@@ -204,8 +204,22 @@ namespace TestAutomationManager.Repositories
                         throw new InvalidOperationException($"Process with ID {process.ProcessID} not found");
                     }
 
-                    // Update properties
-                    context.Entry(existingProcess).CurrentValues.SetValues(process);
+                    // Update properties manually to avoid modifying primary keys
+                    foreach (var property in typeof(Process).GetProperties())
+                    {
+                        // Skip primary key fields and navigation properties
+                        if (property.Name == "Index" || property.Name == "ProcessID" ||
+                            property.Name == "Test" || property.Name == "Functions")
+                            continue;
+
+                        // Skip read-only properties
+                        if (!property.CanWrite)
+                            continue;
+
+                        var newValue = property.GetValue(process);
+                        property.SetValue(existingProcess, newValue);
+                    }
+
                     await context.SaveChangesAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} updated successfully");
@@ -235,8 +249,22 @@ namespace TestAutomationManager.Repositories
                         throw new InvalidOperationException($"Function with Index {function.Index} not found");
                     }
 
-                    // Update properties
-                    context.Entry(existingFunction).CurrentValues.SetValues(function);
+                    // Update properties manually to avoid modifying primary keys
+                    foreach (var property in typeof(Function).GetProperties())
+                    {
+                        // Skip primary key fields and navigation properties
+                        if (property.Name == "Index" || property.Name == "ProcessID" ||
+                            property.Name == "Process")
+                            continue;
+
+                        // Skip read-only properties
+                        if (!property.CanWrite)
+                            continue;
+
+                        var newValue = property.GetValue(function);
+                        property.SetValue(existingFunction, newValue);
+                    }
+
                     await context.SaveChangesAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Function #{function.Index} updated successfully");

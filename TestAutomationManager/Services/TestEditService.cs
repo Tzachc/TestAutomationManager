@@ -44,8 +44,10 @@ namespace TestAutomationManager.Services
                 if (test == null)
                     return EditResult.Failed("Test is null");
 
-                if (string.IsNullOrWhiteSpace(newValue))
-                    return EditResult.Failed($"{fieldName} cannot be empty");
+                // Use reflection to set any property
+                var property = typeof(Test).GetProperty(fieldName);
+                if (property == null)
+                    return EditResult.Failed($"Unknown field: {fieldName}");
 
                 // Special validation for TestID
                 if (fieldName == "TestID")
@@ -62,35 +64,41 @@ namespace TestAutomationManager.Services
                         }
                     }
 
-                    test.TestID = newTestId;
-                }
-                else if (fieldName == "TestName")
-                {
-                    test.TestName = newValue;
-                }
-                else if (fieldName == "Bugs")
-                {
-                    test.Bugs = newValue;
-                }
-                else if (fieldName == "RecipientsEmailsList" || fieldName == "Recipients")
-                {
-                    test.RecipientsEmailsList = newValue;
-                }
-                else if (fieldName == "ExceptionMessage")
-                {
-                    test.ExceptionMessage = newValue;
-                }
-                else if (fieldName == "LastRunning")
-                {
-                    test.LastRunning = newValue;
-                }
-                else if (fieldName == "LastTimePass")
-                {
-                    test.LastTimePass = newValue;
+                    property.SetValue(test, newTestId);
                 }
                 else
                 {
-                    return EditResult.Failed($"Unknown field: {fieldName}");
+                    // Handle different property types
+                    if (property.PropertyType == typeof(string))
+                    {
+                        property.SetValue(test, newValue);
+                    }
+                    else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                    {
+                        if (bool.TryParse(newValue, out bool boolValue))
+                            property.SetValue(test, boolValue);
+                        else
+                            return EditResult.Failed($"{fieldName} must be true or false");
+                    }
+                    else if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
+                    {
+                        if (int.TryParse(newValue, out int intValue))
+                            property.SetValue(test, intValue);
+                        else
+                            return EditResult.Failed($"{fieldName} must be a number");
+                    }
+                    else if (property.PropertyType == typeof(double) || property.PropertyType == typeof(double?))
+                    {
+                        if (double.TryParse(newValue, out double doubleValue))
+                            property.SetValue(test, doubleValue);
+                        else
+                            return EditResult.Failed($"{fieldName} must be a number");
+                    }
+                    else
+                    {
+                        // Default: try to set as string
+                        property.SetValue(test, newValue);
+                    }
                 }
 
                 // Show confirmation dialog
@@ -103,7 +111,7 @@ namespace TestAutomationManager.Services
                 if (!confirmed)
                 {
                     // User cancelled - revert changes
-                    RevertTestField(test, fieldName, oldValue);
+                    property.SetValue(test, ConvertValue(oldValue, property.PropertyType));
                     return EditResult.Cancelled();
                 }
 
@@ -122,24 +130,20 @@ namespace TestAutomationManager.Services
         }
 
         /// <summary>
-        /// Revert a test field to its original value
+        /// Convert string value to the target type
         /// </summary>
-        private void RevertTestField(Test test, string fieldName, string oldValue)
+        private object ConvertValue(string value, Type targetType)
         {
-            if (fieldName == "TestID" && double.TryParse(oldValue, out double testId))
-                test.TestID = testId;
-            else if (fieldName == "TestName")
-                test.TestName = oldValue;
-            else if (fieldName == "Bugs")
-                test.Bugs = oldValue;
-            else if (fieldName == "RecipientsEmailsList" || fieldName == "Recipients")
-                test.RecipientsEmailsList = oldValue;
-            else if (fieldName == "ExceptionMessage")
-                test.ExceptionMessage = oldValue;
-            else if (fieldName == "LastRunning")
-                test.LastRunning = oldValue;
-            else if (fieldName == "LastTimePass")
-                test.LastTimePass = oldValue;
+            if (targetType == typeof(string))
+                return value;
+            else if (targetType == typeof(bool) || targetType == typeof(bool?))
+                return bool.TryParse(value, out bool b) ? b : (object)null;
+            else if (targetType == typeof(int) || targetType == typeof(int?))
+                return int.TryParse(value, out int i) ? i : (object)null;
+            else if (targetType == typeof(double) || targetType == typeof(double?))
+                return double.TryParse(value, out double d) ? d : (object)null;
+            else
+                return value;
         }
 
         // ================================================
@@ -156,29 +160,45 @@ namespace TestAutomationManager.Services
                 if (process == null)
                     return EditResult.Failed("Process is null");
 
-                // Handle both regular fields and parameters
-                if (fieldName.StartsWith("Param"))
+                // Use reflection to set any property
+                var property = typeof(Process).GetProperty(fieldName);
+                if (property == null)
+                    return EditResult.Failed($"Unknown field: {fieldName}");
+
+                // Don't allow editing primary keys
+                if (fieldName == "Index" || fieldName == "ProcessID")
+                    return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
+
+                // Handle different property types
+                if (property.PropertyType == typeof(string))
                 {
-                    // Parameter field (Param1-Param46)
-                    var property = typeof(Process).GetProperty(fieldName);
-                    if (property != null)
-                    {
-                        property.SetValue(process, newValue);
-                    }
-                    else
-                    {
-                        return EditResult.Failed($"Unknown parameter: {fieldName}");
-                    }
+                    property.SetValue(process, newValue);
                 }
-                else if (fieldName == "ProcessName")
+                else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
                 {
-                    if (string.IsNullOrWhiteSpace(newValue))
-                        return EditResult.Failed("ProcessName cannot be empty");
-                    process.ProcessName = newValue;
+                    if (bool.TryParse(newValue, out bool boolValue))
+                        property.SetValue(process, boolValue);
+                    else
+                        return EditResult.Failed($"{fieldName} must be true or false");
+                }
+                else if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
+                {
+                    if (int.TryParse(newValue, out int intValue))
+                        property.SetValue(process, intValue);
+                    else
+                        return EditResult.Failed($"{fieldName} must be a number");
+                }
+                else if (property.PropertyType == typeof(double) || property.PropertyType == typeof(double?))
+                {
+                    if (double.TryParse(newValue, out double doubleValue))
+                        property.SetValue(process, doubleValue);
+                    else
+                        return EditResult.Failed($"{fieldName} must be a number");
                 }
                 else
                 {
-                    return EditResult.Failed($"Unknown field: {fieldName}");
+                    // Default: try to set as string
+                    property.SetValue(process, newValue);
                 }
 
                 // Show confirmation dialog
@@ -190,6 +210,8 @@ namespace TestAutomationManager.Services
                 bool confirmed = EditConfirmationDialog.ShowConfirmation(changes, owner);
                 if (!confirmed)
                 {
+                    // Revert changes
+                    property.SetValue(process, ConvertValue(oldValue, property.PropertyType));
                     return EditResult.Cancelled();
                 }
 
@@ -221,29 +243,45 @@ namespace TestAutomationManager.Services
                 if (function == null)
                     return EditResult.Failed("Function is null");
 
-                // Handle both regular fields and parameters
-                if (fieldName.StartsWith("Param"))
+                // Use reflection to set any property
+                var property = typeof(Function).GetProperty(fieldName);
+                if (property == null)
+                    return EditResult.Failed($"Unknown field: {fieldName}");
+
+                // Don't allow editing primary keys
+                if (fieldName == "Index" || fieldName == "ProcessID")
+                    return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
+
+                // Handle different property types
+                if (property.PropertyType == typeof(string))
                 {
-                    // Parameter field (Param1-Param30)
-                    var property = typeof(Function).GetProperty(fieldName);
-                    if (property != null)
-                    {
-                        property.SetValue(function, newValue);
-                    }
-                    else
-                    {
-                        return EditResult.Failed($"Unknown parameter: {fieldName}");
-                    }
+                    property.SetValue(function, newValue);
                 }
-                else if (fieldName == "FunctionName")
+                else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
                 {
-                    if (string.IsNullOrWhiteSpace(newValue))
-                        return EditResult.Failed("FunctionName cannot be empty");
-                    function.FunctionName = newValue;
+                    if (bool.TryParse(newValue, out bool boolValue))
+                        property.SetValue(function, boolValue);
+                    else
+                        return EditResult.Failed($"{fieldName} must be true or false");
+                }
+                else if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
+                {
+                    if (int.TryParse(newValue, out int intValue))
+                        property.SetValue(function, intValue);
+                    else
+                        return EditResult.Failed($"{fieldName} must be a number");
+                }
+                else if (property.PropertyType == typeof(double) || property.PropertyType == typeof(double?))
+                {
+                    if (double.TryParse(newValue, out double doubleValue))
+                        property.SetValue(function, doubleValue);
+                    else
+                        return EditResult.Failed($"{fieldName} must be a number");
                 }
                 else
                 {
-                    return EditResult.Failed($"Unknown field: {fieldName}");
+                    // Default: try to set as string
+                    property.SetValue(function, newValue);
                 }
 
                 // Show confirmation dialog
@@ -255,6 +293,8 @@ namespace TestAutomationManager.Services
                 bool confirmed = EditConfirmationDialog.ShowConfirmation(changes, owner);
                 if (!confirmed)
                 {
+                    // Revert changes
+                    property.SetValue(function, ConvertValue(oldValue, property.PropertyType));
                     return EditResult.Cancelled();
                 }
 

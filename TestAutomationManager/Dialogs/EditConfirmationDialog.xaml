@@ -73,46 +73,47 @@
                                               Foreground="{DynamicResource TextPrimaryBrush}"
                                               Margin="0,0,0,6"/>
 
-                                    <!-- Old Value -->
-                                    <StackPanel Grid.Row="1"
-                                               Orientation="Horizontal"
-                                               Margin="0,0,0,4">
-                                        <TextBlock Text="Old:"
-                                                  FontSize="12"
-                                                  Foreground="{DynamicResource TextSecondaryBrush}"
-                                                  Width="50"/>
-                                        <Border Background="{DynamicResource ErrorBrush}"
-                                               Opacity="0.1"
-                                               CornerRadius="4"
-                                               Padding="8,4"
-                                               Margin="0,0,0,0">
-                                            <TextBlock Text="{Binding OldValue}"
-                                                      FontSize="12"
-                                                      Foreground="{DynamicResource TextPrimaryBrush}"
-                                                      TextWrapping="Wrap"
-                                                      FontFamily="Consolas"/>
+                                    <!-- Change Display: Old → New -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
+                                        <!-- Old Value (strikethrough, red) -->
+                                        <Border BorderBrush="#E74C3C" BorderThickness="2"
+                                               CornerRadius="4" Padding="10,6" Margin="0,0,12,0">
+                                            <TextBlock FontSize="14" FontFamily="Consolas" TextWrapping="Wrap">
+                                                <TextBlock.Text>
+                                                    <Binding Path="OldValue"/>
+                                                </TextBlock.Text>
+                                                <TextBlock.TextDecorations>
+                                                    <TextDecoration Location="Strikethrough">
+                                                        <TextDecoration.Pen>
+                                                            <Pen Brush="#E74C3C" Thickness="2"/>
+                                                        </TextDecoration.Pen>
+                                                    </TextDecoration>
+                                                </TextBlock.TextDecorations>
+                                                <TextBlock.Foreground>
+                                                    <SolidColorBrush Color="#E74C3C" Opacity="0.7"/>
+                                                </TextBlock.Foreground>
+                                            </TextBlock>
+                                        </Border>
+
+                                        <!-- Arrow -->
+                                        <TextBlock Text="→" FontSize="24" FontWeight="Bold"
+                                                  Foreground="{DynamicResource PrimaryBlueBrush}"
+                                                  VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                                        <!-- New Value (bold, green) -->
+                                        <Border BorderBrush="#27AE60" BorderThickness="2"
+                                               Background="#27AE60" Opacity="0.15"
+                                               CornerRadius="4" Padding="10,6">
+                                            <TextBlock Text="{Binding NewValue}"
+                                                      FontSize="15" FontWeight="Bold"
+                                                      FontFamily="Consolas"
+                                                      Foreground="#27AE60"
+                                                      TextWrapping="Wrap"/>
                                         </Border>
                                     </StackPanel>
 
-                                    <!-- New Value -->
-                                    <StackPanel Grid.Row="2"
-                                               Orientation="Horizontal">
-                                        <TextBlock Text="New:"
-                                                  FontSize="12"
-                                                  Foreground="{DynamicResource TextSecondaryBrush}"
-                                                  Width="50"/>
-                                        <Border Background="{DynamicResource SuccessBrush}"
-                                               Opacity="0.1"
-                                               CornerRadius="4"
-                                               Padding="8,4">
-                                            <TextBlock Text="{Binding NewValue}"
-                                                      FontSize="12"
-                                                      Foreground="{DynamicResource TextPrimaryBrush}"
-                                                      TextWrapping="Wrap"
-                                                      FontFamily="Consolas"
-                                                      FontWeight="SemiBold"/>
-                                        </Border>
-                                    </StackPanel>
+                                    <!-- Empty row to maintain spacing -->
+                                    <Grid Grid.Row="2"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
