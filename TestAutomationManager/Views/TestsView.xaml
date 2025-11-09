@@ -350,7 +350,7 @@
         <!-- Scrollable Body with VIRTUALIZATION for fast loading (693 tests) -->
         <ListBox Grid.Row="1"
                  x:Name="TestsItemsControl"
-                 Margin="10,5,24,24"
+                 Margin="10,5,0,8"
                  BorderThickness="0"
                  Background="Transparent"
                  HorizontalContentAlignment="Stretch"
@@ -731,7 +731,7 @@
                                                       MouseEnter="ScrollArea_MouseEnter"
                                                       MouseLeave="ScrollArea_MouseLeave"
                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
-                                                      MaxHeight="450">
+                                                      MaxHeight="750">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
