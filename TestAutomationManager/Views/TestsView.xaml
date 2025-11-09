@@ -356,7 +356,7 @@
                  HorizontalContentAlignment="Stretch"
                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 ScrollViewer.CanContentScroll="False"
+                 ScrollViewer.CanContentScroll="True"
                  ScrollViewer.ScrollChanged="MainScrollViewer_ScrollChanged"
                  RequestBringIntoView="TestsItemsControl_RequestBringIntoView"
                  VirtualizingPanel.IsVirtualizing="True"
