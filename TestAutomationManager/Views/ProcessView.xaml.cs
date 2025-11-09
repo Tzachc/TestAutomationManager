@@ -285,19 +285,23 @@ namespace TestAutomationManager.Views
                 // ⭐ SORT: Sort processes by ProcessID (low to high)
                 var sortedProcesses = processesFromDb.OrderBy(p => p.ProcessID).ToList();
 
-                // ⭐ SINGLE UI UPDATE: Replace entire collection in one operation
-                // This triggers only ONE UI update instead of 21k+ individual updates!
-                System.Diagnostics.Debug.WriteLine($"📊 Replacing collections with {totalProcesses} processes in single operation...");
+                // ⭐ CRITICAL FIX: Clear and reuse existing collections instead of creating new ones
+                // This ensures FilterManager maintains valid references to the collections
+                System.Diagnostics.Debug.WriteLine($"📊 Updating collections with {totalProcesses} processes...");
 
-                // Update UI on UI thread - single operation
+                // Update UI on UI thread - clear and add to existing collections
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    // Create NEW ObservableCollections from the sorted list (single operation)
-                    Processes = new ObservableCollection<Process>(sortedProcesses);
-                    _allProcesses = new ObservableCollection<Process>(sortedProcesses);
+                    // Clear existing collections
+                    Processes.Clear();
+                    _allProcesses.Clear();
 
-                    // Update ItemsControl to use new collection
-                    ProcessesItemsControl.ItemsSource = Processes;
+                    // Add sorted processes to existing collections
+                    foreach (var process in sortedProcesses)
+                    {
+                        Processes.Add(process);
+                        _allProcesses.Add(process);
+                    }
                 });
 
                 UpdateLoadingProgress($"Loaded {Processes.Count} processes!", 100);
