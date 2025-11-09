@@ -389,7 +389,7 @@ namespace TestAutomationManager.Views
             if (canScrollDown || canScrollUp)
             {
                 const double lineHeightPx = 16.0;
-                const double linesPerNotch = 0.5;         // Smooth scrolling - half line per notch (8px)
+                const double linesPerNotch = 2.5;         // Smooth scrolling - 2.5 lines per notch (40px)
                 double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
                 double newOffset = MainScrollViewer.VerticalOffset + scrollAmount;
 
@@ -1057,7 +1057,7 @@ namespace TestAutomationManager.Views
             if (canScrollDown || canScrollUp)
             {
                 const double lineHeightPx = 16.0;
-                const double linesPerNotch = 1.0;         // Reduced from 2 to 1 for smoother scrolling
+                const double linesPerNotch = 2.0;         // Smooth but responsive scrolling
                 double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
                 double newOffset = scrollViewer.VerticalOffset + scrollAmount;
 

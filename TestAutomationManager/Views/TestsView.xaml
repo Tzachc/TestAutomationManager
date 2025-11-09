@@ -361,6 +361,7 @@
                  RequestBringIntoView="TestsItemsControl_RequestBringIntoView"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
+                 VirtualizingPanel.ScrollUnit="Pixel"
                  VirtualizingPanel.CacheLength="20,20"
                  VirtualizingPanel.CacheLengthUnit="Item"
                  PreviewMouseDown="MainScrollViewer_PreviewMouseDown"
