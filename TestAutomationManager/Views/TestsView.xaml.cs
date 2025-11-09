@@ -389,7 +389,7 @@ namespace TestAutomationManager.Views
             if (canScrollDown || canScrollUp)
             {
                 const double lineHeightPx = 16.0;
-                const double linesPerNotch = 1.0;         // Smooth scrolling - 1 line per notch
+                const double linesPerNotch = 0.5;         // Smooth scrolling - half line per notch (8px)
                 double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
                 double newOffset = MainScrollViewer.VerticalOffset + scrollAmount;
 
