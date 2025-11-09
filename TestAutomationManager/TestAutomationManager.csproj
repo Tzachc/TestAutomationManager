@@ -41,10 +41,4 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
 
-  <!-- Explicitly include edit functionality files -->
-  <ItemGroup>
-    <Compile Include="Helpers\InlineEditHelper.cs" />
-    <Compile Include="Services\TestEditService.cs" />
-  </ItemGroup>
-
 </Project>
