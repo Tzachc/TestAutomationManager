@@ -29,6 +29,16 @@ namespace TestAutomationManager.Views
         private readonly ITestRepository _repository;
 
         /// <summary>
+        /// Process repository for database operations
+        /// </summary>
+        private readonly ProcessRepository _processRepository;
+
+        /// <summary>
+        /// Edit service for inline editing
+        /// </summary>
+        private readonly TestEditService _editService;
+
+        /// <summary>
         /// Observable collection for UI binding
         /// </summary>
         public ObservableCollection<Test> Tests { get; set; }
@@ -87,6 +97,10 @@ namespace TestAutomationManager.Views
 
             // Initialize repository
             _repository = new TestRepository();
+            _processRepository = new ProcessRepository();
+
+            // Initialize edit service
+            _editService = new TestEditService(_repository, _processRepository);
 
             // Initialize collections
             Tests = new ObservableCollection<Test>();
@@ -97,6 +111,9 @@ namespace TestAutomationManager.Views
 
             // Set data context
             TestsItemsControl.ItemsSource = Tests;
+
+            // Wire up inline edit handlers
+            WireUpInlineEditHandlers();
 
             // Load initial data from database
             LoadTestsFromDatabase();
@@ -1378,6 +1395,163 @@ namespace TestAutomationManager.Views
             UpdateStatistics();
 
             System.Diagnostics.Debug.WriteLine("✓ Filter cleared");
+        }
+
+        // ================================================
+        // INLINE EDITING
+        // ================================================
+
+        /// <summary>
+        /// Wire up inline edit handlers for all editable fields
+        /// </summary>
+        private void WireUpInlineEditHandlers()
+        {
+            // Subscribe to the Loaded event to attach handlers after visual tree is ready
+            this.Loaded += (s, e) =>
+            {
+                // Find all TextBlocks with InlineEditHelper attached
+                AttachEditHandlersRecursive(this);
+            };
+        }
+
+        /// <summary>
+        /// Recursively attach edit handlers to all editable TextBlocks
+        /// </summary>
+        private void AttachEditHandlersRecursive(DependencyObject parent)
+        {
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is TextBlock textBlock && InlineEditHelper.GetIsEditable(textBlock))
+                {
+                    // Attach the edit confirmed handler
+                    InlineEditHelper.SetEditConfirmedHandler(textBlock, OnFieldEditConfirmed);
+                }
+
+                // Recursively process children
+                AttachEditHandlersRecursive(child);
+            }
+        }
+
+        /// <summary>
+        /// Handle when a field edit is confirmed
+        /// </summary>
+        private async void OnFieldEditConfirmed(object sender, EditConfirmedEventArgs e)
+        {
+            try
+            {
+                // Determine the data type and route to appropriate handler
+                if (e.DataContext is Test test)
+                {
+                    await HandleTestEdit(test, e);
+                }
+                else if (e.DataContext is Process process)
+                {
+                    await HandleProcessEdit(process, e);
+                }
+                else if (e.DataContext is Function function)
+                {
+                    await HandleFunctionEdit(function, e);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"⚠️ Unknown data context type: {e.DataContext?.GetType().Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling edit: {ex.Message}");
+                MessageBox.Show($"Failed to save changes.\n\nError: {ex.Message}", "Edit Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handle test field edit
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleTestEdit(Test test, EditConfirmedEventArgs e)
+        {
+            var result = await _editService.EditTestFieldAsync(
+                test,
+                e.FieldName,
+                e.OldValue,
+                e.NewValue,
+                Window.GetWindow(this));
+
+            if (!result.IsSuccess)
+            {
+                e.Cancel = true;
+                e.CancelReason = result.Message;
+
+                if (!result.IsCancelled)
+                {
+                    // Show error message
+                    ModernMessageDialog.ShowError(result.Message, "Edit Failed", Window.GetWindow(this));
+                }
+            }
+            else
+            {
+                // Show success message briefly
+                System.Diagnostics.Debug.WriteLine($"✓ {result.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handle process field edit
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleProcessEdit(Process process, EditConfirmedEventArgs e)
+        {
+            var result = await _editService.EditProcessFieldAsync(
+                process,
+                e.FieldName,
+                e.OldValue,
+                e.NewValue,
+                Window.GetWindow(this));
+
+            if (!result.IsSuccess)
+            {
+                e.Cancel = true;
+                e.CancelReason = result.Message;
+
+                if (!result.IsCancelled)
+                {
+                    ModernMessageDialog.ShowError(result.Message, "Edit Failed", Window.GetWindow(this));
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ {result.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handle function field edit
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleFunctionEdit(Function function, EditConfirmedEventArgs e)
+        {
+            var result = await _editService.EditFunctionFieldAsync(
+                function,
+                e.FieldName,
+                e.OldValue,
+                e.NewValue,
+                Window.GetWindow(this));
+
+            if (!result.IsSuccess)
+            {
+                e.Cancel = true;
+                e.CancelReason = result.Message;
+
+                if (!result.IsCancelled)
+                {
+                    ModernMessageDialog.ShowError(result.Message, "Edit Failed", Window.GetWindow(this));
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ {result.Message}");
+            }
         }
 
     }

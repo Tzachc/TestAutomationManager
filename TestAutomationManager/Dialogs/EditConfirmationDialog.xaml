@@ -1,0 +1,147 @@
+<Window x:Class="TestAutomationManager.Dialogs.EditConfirmationDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Confirm Changes"
+        Height="400"
+        Width="600"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource PrimaryBackgroundBrush}"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <!-- Card style -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Change row style -->
+        <Style x:Key="ChangeRow" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="⚠️ Confirm Your Changes"
+                      FontSize="20"
+                      FontWeight="Bold"
+                      Foreground="{DynamicResource TextPrimaryBrush}"
+                      Margin="0,0,0,8"/>
+            <TextBlock Text="Review the changes below before saving to the database."
+                      FontSize="13"
+                      Foreground="{DynamicResource TextSecondaryBrush}"/>
+        </StackPanel>
+
+        <!-- Changes List -->
+        <Border Grid.Row="1"
+                Style="{StaticResource CardBorder}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="ChangesItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource ChangeRow}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Field Name -->
+                                    <TextBlock Grid.Row="0"
+                                              Text="{Binding FieldName}"
+                                              FontWeight="SemiBold"
+                                              FontSize="13"
+                                              Foreground="{DynamicResource TextPrimaryBrush}"
+                                              Margin="0,0,0,6"/>
+
+                                    <!-- Old Value -->
+                                    <StackPanel Grid.Row="1"
+                                               Orientation="Horizontal"
+                                               Margin="0,0,0,4">
+                                        <TextBlock Text="Old:"
+                                                  FontSize="12"
+                                                  Foreground="{DynamicResource TextSecondaryBrush}"
+                                                  Width="50"/>
+                                        <Border Background="{DynamicResource ErrorBrush}"
+                                               Opacity="0.1"
+                                               CornerRadius="4"
+                                               Padding="8,4"
+                                               Margin="0,0,0,0">
+                                            <TextBlock Text="{Binding OldValue}"
+                                                      FontSize="12"
+                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                      TextWrapping="Wrap"
+                                                      FontFamily="Consolas"/>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <!-- New Value -->
+                                    <StackPanel Grid.Row="2"
+                                               Orientation="Horizontal">
+                                        <TextBlock Text="New:"
+                                                  FontSize="12"
+                                                  Foreground="{DynamicResource TextSecondaryBrush}"
+                                                  Width="50"/>
+                                        <Border Background="{DynamicResource SuccessBrush}"
+                                               Opacity="0.1"
+                                               CornerRadius="4"
+                                               Padding="8,4">
+                                            <TextBlock Text="{Binding NewValue}"
+                                                      FontSize="12"
+                                                      Foreground="{DynamicResource TextPrimaryBrush}"
+                                                      TextWrapping="Wrap"
+                                                      FontFamily="Consolas"
+                                                      FontWeight="SemiBold"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Action Buttons -->
+        <StackPanel Grid.Row="2"
+                   Orientation="Horizontal"
+                   HorizontalAlignment="Right"
+                   Margin="0,16,0,0">
+            <Button x:Name="CancelButton"
+                   Content="✗ Cancel"
+                   Width="120"
+                   Height="36"
+                   Margin="0,0,12,0"
+                   Click="CancelButton_Click"
+                   Background="{DynamicResource SecondaryBackgroundBrush}"
+                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+            <Button x:Name="SaveButton"
+                   Content="✓ Save Changes"
+                   Width="140"
+                   Height="36"
+                   Click="SaveButton_Click"
+                   Background="{DynamicResource SuccessBrush}"
+                   Foreground="White"
+                   FontWeight="SemiBold"/>
+        </StackPanel>
+    </Grid>
+</Window>

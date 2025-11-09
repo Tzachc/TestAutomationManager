@@ -1,0 +1,87 @@
+<UserControl x:Class="TestAutomationManager.Controls.EditableTextBlock"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="30" d:DesignWidth="200"
+             Background="Transparent">
+
+    <Grid>
+        <!-- Display Mode: TextBlock -->
+        <Border x:Name="DisplayBorder"
+                Background="Transparent"
+                BorderThickness="1"
+                BorderBrush="Transparent"
+                Padding="4,2"
+                CornerRadius="4"
+                Cursor="Hand">
+            <TextBlock x:Name="DisplayTextBlock"
+                       Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       TextWrapping="Wrap"
+                       TextTrimming="CharacterEllipsis"
+                       TextAlignment="Center"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Foreground="{Binding TextColor, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       FontWeight="{Binding FontWeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       ToolTip="Double-click to edit"/>
+        </Border>
+
+        <!-- Edit Mode: TextBox -->
+        <Border x:Name="EditBorder"
+                Visibility="Collapsed"
+                Background="{DynamicResource PrimaryBackgroundBrush}"
+                BorderBrush="{DynamicResource PrimaryBlueBrush}"
+                BorderThickness="2"
+                Padding="4,2"
+                CornerRadius="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="EditTextBox"
+                         Grid.Column="0"
+                         Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="Wrap"
+                         TextAlignment="Center"
+                         VerticalAlignment="Center"
+                         HorizontalContentAlignment="Center"
+                         VerticalContentAlignment="Center"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         FontSize="{Binding FontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                         AcceptsReturn="True"
+                         SelectionBrush="{DynamicResource PrimaryBlueBrush}"/>
+
+                <!-- Edit hint icons -->
+                <StackPanel Grid.Column="1"
+                           Orientation="Horizontal"
+                           VerticalAlignment="Center"
+                           Margin="4,0,0,0">
+                    <TextBlock Text="✓"
+                              FontSize="10"
+                              Foreground="{DynamicResource SuccessBrush}"
+                              ToolTip="Press Enter to save"
+                              Margin="0,0,2,0"/>
+                    <TextBlock Text="✗"
+                              FontSize="10"
+                              Foreground="{DynamicResource ErrorBrush}"
+                              ToolTip="Press Esc to cancel"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Hover effect overlay -->
+        <Border x:Name="HoverOverlay"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource PrimaryBlueBrush}"
+                CornerRadius="4"
+                Opacity="0"
+                IsHitTestVisible="False"/>
+    </Grid>
+</UserControl>

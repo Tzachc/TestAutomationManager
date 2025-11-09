@@ -218,6 +218,37 @@ namespace TestAutomationManager.Repositories
             }
         }
 
+        /// <summary>
+        /// Update an existing function
+        /// </summary>
+        public async Task UpdateFunctionAsync(Function function)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var existingFunction = await context.Set<Function>()
+                        .FirstOrDefaultAsync(f => f.FunctionID == function.FunctionID);
+
+                    if (existingFunction == null)
+                    {
+                        throw new InvalidOperationException($"Function with ID {function.FunctionID} not found");
+                    }
+
+                    // Update properties
+                    context.Entry(existingFunction).CurrentValues.SetValues(function);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Function #{function.FunctionID} updated successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error updating function: {ex.Message}");
+                throw new Exception("Failed to update function", ex);
+            }
+        }
+
         // ================================================
         // DELETE OPERATIONS
         // ================================================

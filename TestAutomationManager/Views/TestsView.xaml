@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:TestAutomationManager.Views"
              xmlns:converters="clr-namespace:TestAutomationManager.Converters"
              xmlns:controls="clr-namespace:TestAutomationManager.Controls"
+             xmlns:helpers="clr-namespace:TestAutomationManager.Helpers"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
              mc:Ignorable="d"
@@ -451,17 +452,21 @@
                                                       HorizontalAlignment="Center"
                                                       Margin="0,0,-10,4"/>
 
-                                    <TextBlock Grid.Column="3" Text="{Binding TestID}" 
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                    <TextBlock Grid.Column="3" Text="{Binding TestID}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center" TextAlignment="Center"/>
+                                                   HorizontalAlignment="Center" TextAlignment="Center"
+                                                   helpers:InlineEditHelper.IsEditable="True"
+                                                   helpers:InlineEditHelper.FieldName="TestID"/>
 
-                                    <TextBlock Grid.Column="4" Text="{Binding TestName}" 
-                                                   Foreground="{DynamicResource TextPrimaryBrush}" 
+                                    <TextBlock Grid.Column="4" Text="{Binding TestName}"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
                                                    FontSize="13" FontWeight="SemiBold"
                                                    VerticalAlignment="Center" HorizontalAlignment="Left"
                                                    TextAlignment="Left" TextWrapping="Wrap"
-                                                   ToolTip="{Binding TestName}"/>
+                                                   ToolTip="{Binding TestName}"
+                                                   helpers:InlineEditHelper.IsEditable="True"
+                                                   helpers:InlineEditHelper.FieldName="TestName"/>
 
                                     <TextBlock Grid.Column="5" Text="{Binding LastRunning}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
@@ -492,25 +497,31 @@
                                                        TextAlignment="Center"/>
                                     </Border>
 
-                                    <TextBlock Grid.Column="8" Text="{Binding Bugs}" 
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                    <TextBlock Grid.Column="8" Text="{Binding Bugs}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Bugs}"/>
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Bugs}"
+                                                   helpers:InlineEditHelper.IsEditable="True"
+                                                   helpers:InlineEditHelper.FieldName="Bugs"/>
 
-                                    <TextBlock Grid.Column="9" Text="{Binding RecipientsEmailsList}" 
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                    <TextBlock Grid.Column="9" Text="{Binding Recipients}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" TextWrapping="Wrap"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding RecipientsEmailsList}"/>
+                                                   ToolTip="{Binding Recipients}"
+                                                   helpers:InlineEditHelper.IsEditable="True"
+                                                   helpers:InlineEditHelper.FieldName="Recipients"/>
 
-                                    <TextBlock Grid.Column="10" Text="{Binding ExceptionMessage}" 
-                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                    <TextBlock Grid.Column="10" Text="{Binding ExceptionMessage}"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
                                                    HorizontalAlignment="Center" TextAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis" 
-                                                   ToolTip="{Binding ExceptionMessage}"/>
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding ExceptionMessage}"
+                                                   helpers:InlineEditHelper.IsEditable="True"
+                                                   helpers:InlineEditHelper.FieldName="ExceptionMessage"/>
 
                                     <TextBlock Grid.Column="11" Text="{Binding SendEmailReport}" 
                                                    Foreground="{DynamicResource TextSecondaryBrush}" 
