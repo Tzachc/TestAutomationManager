@@ -175,9 +175,9 @@ namespace TestAutomationManager.Controls
 
         private void EditTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && !Keyboard.IsKeyDown(Key.Shift))
+            if (e.Key == Key.Enter && (Keyboard.Modifiers & ModifierKeys.Shift) != ModifierKeys.Shift)
             {
-                // Enter pressed - attempt to confirm edit
+                // Enter pressed without Shift - attempt to confirm edit
                 ConfirmEdit();
                 e.Handled = true;
             }

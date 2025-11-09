@@ -148,7 +148,7 @@ namespace TestAutomationManager.Helpers
                 Background = (Brush)Application.Current.Resources["PrimaryBackgroundBrush"],
                 BorderBrush = (Brush)Application.Current.Resources["PrimaryBlueBrush"],
                 BorderThickness = new Thickness(2),
-                Padding = new Thickness(4, 2),
+                Padding = new Thickness(4, 2, 4, 2),
                 TextWrapping = TextWrapping.Wrap,
                 AcceptsReturn = false,
                 VerticalAlignment = textBlock.VerticalAlignment,
