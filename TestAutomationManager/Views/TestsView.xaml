@@ -112,41 +112,6 @@
         </Style>
 
         <!-- ScrollBar -->
-        <!-- Arrow button style for scrollbar -->
-        <Style x:Key="ScrollBarButton" TargetType="{x:Type RepeatButton}">
-            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type RepeatButton}">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="4"
-                                Margin="2">
-                            <Path x:Name="Arrow"
-                                  Data="{TemplateBinding Content}"
-                                  Fill="{TemplateBinding Foreground}"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"
-                                  Stretch="Uniform"
-                                  Width="8"
-                                  Height="8"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <Style x:Key="ModernScrollBar" TargetType="{x:Type ScrollBar}">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -154,20 +119,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
                         <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="18"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="18"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Up/Left Arrow Button -->
-                            <RepeatButton Grid.Row="0"
-                                          Style="{StaticResource ScrollBarButton}"
-                                          Command="ScrollBar.LineUpCommand"
-                                          Content="M 0 4 L 4 0 L 8 4 Z"/>
-
-                            <!-- Track with Thumb -->
-                            <Border Grid.Row="1" Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="4" Margin="4,2">
+                            <Border Background="{DynamicResource SecondaryBackgroundBrush}" CornerRadius="4" Margin="4">
                                 <Track x:Name="PART_Track"
                                        Orientation="{TemplateBinding Orientation}"
                                        Minimum="{TemplateBinding Minimum}"
@@ -206,21 +158,15 @@
                                     </Track.Thumb>
                                 </Track>
                             </Border>
-
-                            <!-- Down/Right Arrow Button -->
-                            <RepeatButton Grid.Row="2"
-                                          Style="{StaticResource ScrollBarButton}"
-                                          Command="ScrollBar.LineDownCommand"
-                                          Content="M 0 0 L 4 4 L 8 0 Z"/>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="Orientation" Value="Vertical">
                                 <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="True"/>
-                                <Setter Property="Width" Value="18"/>
+                                <Setter Property="Width" Value="14"/>
                             </Trigger>
                             <Trigger Property="Orientation" Value="Horizontal">
                                 <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
-                                <Setter Property="Height" Value="18"/>
+                                <Setter Property="Height" Value="14"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -234,22 +180,21 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollViewer}">
                         <Grid>
-                            <!-- Content layer -->
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
                             <ScrollContentPresenter Grid.Column="0"/>
-
-                            <!-- Overlay scrollbar (always visible on right edge) -->
                             <ScrollBar x:Name="PART_VerticalScrollBar"
                                        Style="{StaticResource ModernScrollBar}"
                                        Orientation="Vertical"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Stretch"
+                                       Grid.Column="1"
                                        Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
                                        Value="{TemplateBinding VerticalOffset}"
                                        Minimum="0"
                                        Maximum="{TemplateBinding ScrollableHeight}"
                                        ViewportSize="{TemplateBinding ViewportHeight}"
-                                       Margin="0,0,2,0"
-                                       Opacity="0.9"/>
+                                       Margin="4,0,0,0"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
@@ -261,36 +206,40 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollViewer}">
                         <Grid>
-                            <!-- Content layer -->
-                            <ScrollContentPresenter/>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                            <!-- Overlay horizontal scrollbar (always visible on bottom edge) -->
+                            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+
                             <ScrollBar x:Name="PART_HorizontalScrollBar"
                                        Style="{StaticResource ModernScrollBar}"
                                        Orientation="Horizontal"
-                                       HorizontalAlignment="Stretch"
-                                       VerticalAlignment="Bottom"
+                                       Grid.Row="1"
+                                       Grid.Column="0"
                                        Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
                                        Value="{TemplateBinding HorizontalOffset}"
                                        Minimum="0"
                                        Maximum="{TemplateBinding ScrollableWidth}"
                                        ViewportSize="{TemplateBinding ViewportWidth}"
-                                       Margin="0,0,20,2"
-                                       Opacity="0.9"/>
+                                       Margin="0,4,0,0"/>
 
-                            <!-- Overlay vertical scrollbar (always visible on right edge) -->
                             <ScrollBar x:Name="PART_VerticalScrollBar"
                                        Style="{StaticResource ModernScrollBar}"
                                        Orientation="Vertical"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Stretch"
+                                       Grid.Row="0"
+                                       Grid.Column="1"
                                        Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
                                        Value="{TemplateBinding VerticalOffset}"
                                        Minimum="0"
                                        Maximum="{TemplateBinding ScrollableHeight}"
                                        ViewportSize="{TemplateBinding ViewportHeight}"
-                                       Margin="0,0,2,20"
-                                       Opacity="0.9"/>
+                                       Margin="4,0,0,0"/>
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
@@ -775,7 +724,6 @@
                                             Padding="4"
                                             Background="Transparent">
                                         <ScrollViewer x:Name="ProcRowsScrollViewer"
-                                                      Style="{StaticResource ModernScrollViewerVerticalOnly}"
                                                       VerticalScrollBarVisibility="Auto"
                                                       HorizontalScrollBarVisibility="Disabled"
                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
@@ -1076,7 +1024,6 @@
                                                                             Padding="4"
                                                                             Background="Transparent">
                                                                         <ScrollViewer x:Name="FuncRowsScrollViewer"
-                                                                                      Style="{StaticResource ModernScrollViewerVerticalOnly}"
                                                                                       VerticalScrollBarVisibility="Auto"
                                                                                       HorizontalScrollBarVisibility="Disabled"
                                                                                       PreviewMouseWheel="ProcRowsScrollViewer_PreviewMouseWheel"
