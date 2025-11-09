@@ -731,7 +731,7 @@
                                                       MouseEnter="ScrollArea_MouseEnter"
                                                       MouseLeave="ScrollArea_MouseLeave"
                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
-                                                      MaxHeight="750">
+                                                      MaxHeight="800">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -739,7 +739,7 @@
                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                 BorderThickness="1"
                                                                 CornerRadius="6"
-                                                                Padding="16,12"
+                                                                Padding="16,8"
                                                                 Margin="42,0,0,4">
                                                         <Grid>
                                                             <Grid.RowDefinitions>
@@ -1050,8 +1050,8 @@
                                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                                 BorderThickness="1"
                                                                                                 CornerRadius="6"
-                                                                                                Padding="40,10"
-                                                                                                Margin="0,0,0,8">
+                                                                                                Padding="30,4"
+                                                                                                Margin="0,0,0,6">
                                                                                         <Grid Grid.IsSharedSizeScope="True" MinWidth="6200">
                                                                                             <Grid.ColumnDefinitions>
                                                                                                 <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPositionColumnMinWidth}" SharedSizeGroup="funcPosition"/>
