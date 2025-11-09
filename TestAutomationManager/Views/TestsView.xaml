@@ -580,8 +580,8 @@
                                                 Background="{DynamicResource SecondaryBackgroundBrush}"
                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                 BorderThickness="0,0,0,1"
-                                                Padding="20,8,16,8"
-                                                Margin="42,0,0,6">
+                                                Padding="23,8,16,8"
+                                                Margin="42,0,0,1">
                                         <Grid Grid.IsSharedSizeScope="True" MinWidth="6600">
                                             <Grid.ColumnDefinitions>
                                                 <!-- order: expand, position, web3 operator, process name, process id, pass/fail, last running, params... -->
