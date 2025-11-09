@@ -1070,16 +1070,37 @@ namespace TestAutomationManager.Views
             if (sender is not ScrollViewer scrollViewer)
                 return;
 
-            // FOCUS CHECK: If there's a focused ScrollViewer, only handle if this is it
-            if (_focusedScrollViewer != null && _focusedScrollViewer != scrollViewer)
-            {
-                // Not the focused one, don't handle - let it bubble up
-                return;
-            }
-
             // Only handle if this ScrollViewer actually has scrollable content
             if (scrollViewer.ScrollableHeight <= 0)
                 return;
+
+            // ⚡ NEW LOGIC: Check if mouse is directly over THIS ScrollViewer (not a child ScrollViewer)
+            // This ensures nested scroll areas work independently
+            var mousePos = e.GetPosition(scrollViewer);
+            var isMouseOver = mousePos.X >= 0 && mousePos.X <= scrollViewer.ActualWidth &&
+                              mousePos.Y >= 0 && mousePos.Y <= scrollViewer.ActualHeight;
+
+            if (!isMouseOver)
+                return;
+
+            // Check if there's a child ScrollViewer under the mouse that should handle this instead
+            var elementUnderMouse = scrollViewer.InputHitTest(mousePos) as DependencyObject;
+            if (elementUnderMouse != null)
+            {
+                // Walk up the visual tree to see if there's a ScrollViewer between the element and this one
+                var current = elementUnderMouse;
+                while (current != null && current != scrollViewer)
+                {
+                    if (current is ScrollViewer childScrollViewer &&
+                        childScrollViewer != scrollViewer &&
+                        childScrollViewer.ScrollableHeight > 0)
+                    {
+                        // There's a child ScrollViewer with scrollable content - let it handle this
+                        return;
+                    }
+                    current = VisualTreeHelper.GetParent(current);
+                }
+            }
 
             var delta = e.Delta;
 
