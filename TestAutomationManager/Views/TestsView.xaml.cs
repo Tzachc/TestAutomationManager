@@ -66,6 +66,8 @@ namespace TestAutomationManager.Views
         private Point _lastPanPoint;
         private double _startH;
         private double _startV;
+        private DateTime _lastPanTime;
+        private double _panVelocity;
 
         // ----- Scroll area focus tracking -----
         private ScrollViewer _focusedScrollViewer = null;
@@ -312,6 +314,8 @@ namespace TestAutomationManager.Views
                 _lastPanPoint = e.GetPosition(MainScrollViewer);
                 _startH = MainScrollViewer.HorizontalOffset;
                 _startV = MainScrollViewer.VerticalOffset;
+                _lastPanTime = DateTime.Now;
+                _panVelocity = 0;
 
                 MainScrollViewer.CaptureMouse();
                 e.Handled = true;
@@ -325,6 +329,40 @@ namespace TestAutomationManager.Views
             var current = e.GetPosition(MainScrollViewer);
             var dx = current.X - _lastPanPoint.X;
             var dy = current.Y - _lastPanPoint.Y;
+
+            // ⚡ Calculate velocity (pixels per millisecond)
+            var currentTime = DateTime.Now;
+            var elapsedMs = (currentTime - _lastPanTime).TotalMilliseconds;
+            if (elapsedMs > 0)
+            {
+                var distance = Math.Sqrt(dx * dx + dy * dy);
+                _panVelocity = distance / elapsedMs;
+                _lastPanTime = currentTime;
+            }
+
+            // 🎯 Smart adaptive damping based on velocity
+            // Slow movements (< 0.5 px/ms): 0.2x speed (precise control)
+            // Medium movements (0.5-2 px/ms): 0.4-1.0x speed (smooth ramping)
+            // Fast movements (> 2 px/ms): 1.0-2.0x speed (responsive)
+            double dampingFactor;
+            if (_panVelocity < 0.5)
+            {
+                // Very slow = very precise (20% speed)
+                dampingFactor = 0.2;
+            }
+            else if (_panVelocity < 2.0)
+            {
+                // Medium speed = linear ramp from 0.4 to 1.0
+                dampingFactor = 0.4 + (_panVelocity - 0.5) * 0.4;
+            }
+            else
+            {
+                // Fast speed = accelerated (up to 2x for very fast movements)
+                dampingFactor = Math.Min(2.0, 1.0 + (_panVelocity - 2.0) * 0.3);
+            }
+
+            dx *= dampingFactor;
+            dy *= dampingFactor;
 
             // ✅ Natural panning: drag RIGHT -> scroll RIGHT, drag DOWN -> scroll DOWN
             var targetH = _startH + dx;
@@ -356,6 +394,43 @@ namespace TestAutomationManager.Views
             {
                 _isPanning = false;
                 MainScrollViewer.ReleaseMouseCapture();
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse wheel scrolling for the main view with reduced speed
+        /// </summary>
+        private void MainScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (MainScrollViewer == null)
+                return;
+
+            // Only handle if there's no focused inner ScrollViewer
+            if (_focusedScrollViewer != null)
+                return;
+
+            // Only handle if this ScrollViewer actually has scrollable content
+            if (MainScrollViewer.ScrollableHeight <= 0)
+                return;
+
+            var delta = e.Delta;
+
+            // Check if we can scroll in the requested direction
+            bool canScrollDown = delta < 0 && MainScrollViewer.VerticalOffset < MainScrollViewer.ScrollableHeight;
+            bool canScrollUp = delta > 0 && MainScrollViewer.VerticalOffset > 0;
+
+            if (canScrollDown || canScrollUp)
+            {
+                const double lineHeightPx = 16.0;
+                const double linesPerNotch = 2.5;         // Smooth scrolling - 2.5 lines per notch (40px)
+                double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
+                double newOffset = MainScrollViewer.VerticalOffset + scrollAmount;
+
+                // Clamp to valid range
+                newOffset = Math.Max(0, Math.Min(newOffset, MainScrollViewer.ScrollableHeight));
+
+                MainScrollViewer.ScrollToVerticalOffset(newOffset);
+                e.Handled = true;
             }
         }
 
@@ -995,16 +1070,37 @@ namespace TestAutomationManager.Views
             if (sender is not ScrollViewer scrollViewer)
                 return;
 
-            // FOCUS CHECK: If there's a focused ScrollViewer, only handle if this is it
-            if (_focusedScrollViewer != null && _focusedScrollViewer != scrollViewer)
-            {
-                // Not the focused one, don't handle - let it bubble up
-                return;
-            }
-
             // Only handle if this ScrollViewer actually has scrollable content
             if (scrollViewer.ScrollableHeight <= 0)
                 return;
+
+            // ⚡ NEW LOGIC: Check if mouse is directly over THIS ScrollViewer (not a child ScrollViewer)
+            // This ensures nested scroll areas work independently
+            var mousePos = e.GetPosition(scrollViewer);
+            var isMouseOver = mousePos.X >= 0 && mousePos.X <= scrollViewer.ActualWidth &&
+                              mousePos.Y >= 0 && mousePos.Y <= scrollViewer.ActualHeight;
+
+            if (!isMouseOver)
+                return;
+
+            // Check if there's a child ScrollViewer under the mouse that should handle this instead
+            var elementUnderMouse = scrollViewer.InputHitTest(mousePos) as DependencyObject;
+            if (elementUnderMouse != null)
+            {
+                // Walk up the visual tree to see if there's a ScrollViewer between the element and this one
+                var current = elementUnderMouse;
+                while (current != null && current != scrollViewer)
+                {
+                    if (current is ScrollViewer childScrollViewer &&
+                        childScrollViewer != scrollViewer &&
+                        childScrollViewer.ScrollableHeight > 0)
+                    {
+                        // There's a child ScrollViewer with scrollable content - let it handle this
+                        return;
+                    }
+                    current = VisualTreeHelper.GetParent(current);
+                }
+            }
 
             var delta = e.Delta;
 
@@ -1015,7 +1111,7 @@ namespace TestAutomationManager.Views
             if (canScrollDown || canScrollUp)
             {
                 const double lineHeightPx = 16.0;
-                const int linesPerNotch = 2;              // how many rows to scroll
+                const double linesPerNotch = 2.0;         // Smooth but responsive scrolling
                 double scrollAmount = -delta / 120.0 * (linesPerNotch * lineHeightPx);
                 double newOffset = scrollViewer.VerticalOffset + scrollAmount;
 

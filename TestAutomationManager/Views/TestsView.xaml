@@ -350,7 +350,7 @@
         <!-- Scrollable Body with VIRTUALIZATION for fast loading (693 tests) -->
         <ListBox Grid.Row="1"
                  x:Name="TestsItemsControl"
-                 Margin="10,5,24,24"
+                 Margin="10,5,0,8"
                  BorderThickness="0"
                  Background="Transparent"
                  HorizontalContentAlignment="Stretch"
@@ -361,11 +361,13 @@
                  RequestBringIntoView="TestsItemsControl_RequestBringIntoView"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
+                 VirtualizingPanel.ScrollUnit="Pixel"
                  VirtualizingPanel.CacheLength="20,20"
                  VirtualizingPanel.CacheLengthUnit="Item"
                  PreviewMouseDown="MainScrollViewer_PreviewMouseDown"
                  PreviewMouseMove="MainScrollViewer_PreviewMouseMove"
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
+                 PreviewMouseWheel="MainScrollViewer_PreviewMouseWheel"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
             <!-- Apply modern scrollbar styling WITHOUT breaking virtualization -->
@@ -729,7 +731,7 @@
                                                       MouseEnter="ScrollArea_MouseEnter"
                                                       MouseLeave="ScrollArea_MouseLeave"
                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
-                                                      MaxHeight="450">
+                                                      MaxHeight="800">
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -737,7 +739,7 @@
                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                 BorderThickness="1"
                                                                 CornerRadius="6"
-                                                                Padding="16,12"
+                                                                Padding="16,8"
                                                                 Margin="42,0,0,4">
                                                         <Grid>
                                                             <Grid.RowDefinitions>
@@ -1048,8 +1050,8 @@
                                                                                                 BorderBrush="{DynamicResource BorderBrush}"
                                                                                                 BorderThickness="1"
                                                                                                 CornerRadius="6"
-                                                                                                Padding="40,10"
-                                                                                                Margin="0,0,0,8">
+                                                                                                Padding="30,4"
+                                                                                                Margin="0,0,0,6">
                                                                                         <Grid Grid.IsSharedSizeScope="True" MinWidth="6200">
                                                                                             <Grid.ColumnDefinitions>
                                                                                                 <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionPositionColumnMinWidth}" SharedSizeGroup="funcPosition"/>

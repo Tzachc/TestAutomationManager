@@ -453,7 +453,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Process Row -->
-                                <Border Grid.Row="0" Padding="24,5" Background="Transparent" CornerRadius="8,8,0,0">
+                                <Border Grid.Row="0" Padding="20,5" Background="Transparent" CornerRadius="8,8,0,0">
                                     <Grid MinWidth="10000">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="cExpand"/>
@@ -840,7 +840,7 @@
                 VerticalAlignment="Bottom"
                 HorizontalAlignment="Stretch"
                 Panel.ZIndex="100"
-                Padding="16,8">
+                Padding="20,6">
             <TextBlock x:Name="RecordCountText"
                        Text="0 processes"
                        FontSize="12"
