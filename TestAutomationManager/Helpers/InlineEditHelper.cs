@@ -173,11 +173,15 @@ namespace TestAutomationManager.Helpers
             editBox.SelectAll();
             editBox.CaretIndex = editBox.Text.Length;
 
+            // Flag to prevent double-firing
+            bool isConfirming = false;
+
             // Handle Enter key
             editBox.KeyDown += (s, e) =>
             {
-                if (e.Key == Key.Enter)
+                if (e.Key == Key.Enter && !isConfirming)
                 {
+                    isConfirming = true;
                     ConfirmEdit(textBlock, editBox, fieldName, originalText);
                     e.Handled = true;
                 }
@@ -191,7 +195,12 @@ namespace TestAutomationManager.Helpers
             // Handle lost focus
             editBox.LostFocus += (s, e) =>
             {
-                ConfirmEdit(textBlock, editBox, fieldName, originalText);
+                // Only confirm if not already confirming (prevents double-fire on Enter)
+                if (!isConfirming)
+                {
+                    isConfirming = true;
+                    ConfirmEdit(textBlock, editBox, fieldName, originalText);
+                }
             };
 
             System.Diagnostics.Debug.WriteLine($"✏️ Started inline edit for '{fieldName}': '{originalText}'");
