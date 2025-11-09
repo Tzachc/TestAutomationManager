@@ -102,6 +102,9 @@ namespace TestAutomationManager.Views
             // Initialize edit service
             _editService = new TestEditService(_repository, _processRepository);
 
+            // Register global inline edit handler
+            InlineEditHelper.SetEditConfirmedHandler(this, OnInlineEditConfirmed);
+
             // Initialize collections
             Tests = new ObservableCollection<Test>();
             _allTests = new ObservableCollection<Test>();
@@ -1399,40 +1402,60 @@ namespace TestAutomationManager.Views
         // ================================================
 
         /// <summary>
-        /// Handle double-click on editable fields to open edit dialog
+        /// Global handler for inline edit confirmations (used by InlineEditHelper)
         /// </summary>
-        private async void EditableField_DoubleClick(object sender, MouseButtonEventArgs e)
+        private async void OnInlineEditConfirmed(object sender, Helpers.EditConfirmedEventArgs e)
         {
-            // Only handle double-click
-            if (e.ClickCount != 2) return;
-
-            if (sender is TextBlock textBlock && textBlock.DataContext is Test test)
+            // Handle Test editing
+            if (e.DataContext is Test test)
             {
-                string fieldName = textBlock.Tag?.ToString();
-                if (string.IsNullOrEmpty(fieldName)) return;
+                var result = await _editService.EditTestFieldAsync(test, e.FieldName, e.OldValue, e.NewValue, Window.GetWindow(this));
 
-                string oldValue = textBlock.Text;
-
-                // Show input dialog
-                var dialog = new SimpleInputDialog(
-                    $"Edit {fieldName}",
-                    $"Enter new value for {fieldName}:",
-                    oldValue,
-                    Window.GetWindow(this));
-
-                if (dialog.ShowDialog() == true)
+                if (!result.IsSuccess)
                 {
-                    string newValue = dialog.InputValue;
+                    e.Cancel = true;
+                    e.CancelReason = result.Message;
 
-                    var result = await _editService.EditTestFieldAsync(test, fieldName, oldValue, newValue, Window.GetWindow(this));
+                    if (!result.IsCancelled)
+                    {
+                        MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            // Handle Process editing
+            else if (e.DataContext is Process process)
+            {
+                var result = await _editService.EditProcessFieldAsync(process, e.FieldName, e.OldValue, e.NewValue, Window.GetWindow(this));
 
-                    if (!result.IsSuccess && !result.IsCancelled)
+                if (!result.IsSuccess)
+                {
+                    e.Cancel = true;
+                    e.CancelReason = result.Message;
+
+                    if (!result.IsCancelled)
+                    {
+                        MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            // Handle Function editing
+            else if (e.DataContext is Function function)
+            {
+                var result = await _editService.EditFunctionFieldAsync(function, e.FieldName, e.OldValue, e.NewValue, Window.GetWindow(this));
+
+                if (!result.IsSuccess)
+                {
+                    e.Cancel = true;
+                    e.CancelReason = result.Message;
+
+                    if (!result.IsCancelled)
                     {
                         MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
         }
+
 
     }
 }

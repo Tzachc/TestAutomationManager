@@ -213,8 +213,14 @@ namespace TestAutomationManager.Helpers
             // Check if changed
             if (newText != originalText)
             {
-                // Fire edit confirmed event
+                // Fire edit confirmed event - check TextBlock first, then parent UserControl
                 var handler = GetEditConfirmedHandler(textBlock);
+                if (handler == null)
+                {
+                    // Look for handler on parent UserControl
+                    handler = FindHandlerInParent(textBlock);
+                }
+
                 if (handler != null)
                 {
                     var args = new EditConfirmedEventArgs(
@@ -236,11 +242,33 @@ namespace TestAutomationManager.Helpers
                         System.Diagnostics.Debug.WriteLine($"⚠️ Inline edit rejected: {args.CancelReason}");
                     }
                 }
+                else
+                {
+                    // No handler found - just update the text
+                    textBlock.Text = newText;
+                    System.Diagnostics.Debug.WriteLine($"⚠️ No edit handler found for '{fieldName}'");
+                }
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine($"ℹ️ No changes made to '{fieldName}'");
             }
+        }
+
+        private static EventHandler<EditConfirmedEventArgs> FindHandlerInParent(DependencyObject element)
+        {
+            DependencyObject current = element;
+            while (current != null)
+            {
+                current = VisualTreeHelper.GetParent(current);
+                if (current is UserControl userControl)
+                {
+                    var handler = GetEditConfirmedHandler(userControl);
+                    if (handler != null)
+                        return handler;
+                }
+            }
+            return null;
         }
 
         private static void CancelEdit(TextBlock textBlock, TextBox editBox)
