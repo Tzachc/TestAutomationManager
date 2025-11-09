@@ -66,6 +66,8 @@ namespace TestAutomationManager.Views
         private Point _lastPanPoint;
         private double _startH;
         private double _startV;
+        private DateTime _lastPanTime;
+        private double _panVelocity;
 
         // ----- Scroll area focus tracking -----
         private ScrollViewer _focusedScrollViewer = null;
@@ -312,6 +314,8 @@ namespace TestAutomationManager.Views
                 _lastPanPoint = e.GetPosition(MainScrollViewer);
                 _startH = MainScrollViewer.HorizontalOffset;
                 _startV = MainScrollViewer.VerticalOffset;
+                _lastPanTime = DateTime.Now;
+                _panVelocity = 0;
 
                 MainScrollViewer.CaptureMouse();
                 e.Handled = true;
@@ -326,8 +330,37 @@ namespace TestAutomationManager.Views
             var dx = current.X - _lastPanPoint.X;
             var dy = current.Y - _lastPanPoint.Y;
 
-            // Apply damping factor for smoother, slower panning (0.3 = 30% of mouse movement speed)
-            const double dampingFactor = 0.3;
+            // ⚡ Calculate velocity (pixels per millisecond)
+            var currentTime = DateTime.Now;
+            var elapsedMs = (currentTime - _lastPanTime).TotalMilliseconds;
+            if (elapsedMs > 0)
+            {
+                var distance = Math.Sqrt(dx * dx + dy * dy);
+                _panVelocity = distance / elapsedMs;
+                _lastPanTime = currentTime;
+            }
+
+            // 🎯 Smart adaptive damping based on velocity
+            // Slow movements (< 0.5 px/ms): 0.2x speed (precise control)
+            // Medium movements (0.5-2 px/ms): 0.4-1.0x speed (smooth ramping)
+            // Fast movements (> 2 px/ms): 1.0-2.0x speed (responsive)
+            double dampingFactor;
+            if (_panVelocity < 0.5)
+            {
+                // Very slow = very precise (20% speed)
+                dampingFactor = 0.2;
+            }
+            else if (_panVelocity < 2.0)
+            {
+                // Medium speed = linear ramp from 0.4 to 1.0
+                dampingFactor = 0.4 + (_panVelocity - 0.5) * 0.4;
+            }
+            else
+            {
+                // Fast speed = accelerated (up to 2x for very fast movements)
+                dampingFactor = Math.Min(2.0, 1.0 + (_panVelocity - 2.0) * 0.3);
+            }
+
             dx *= dampingFactor;
             dy *= dampingFactor;
 
