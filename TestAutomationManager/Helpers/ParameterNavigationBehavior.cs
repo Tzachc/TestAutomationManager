@@ -85,30 +85,37 @@ namespace TestAutomationManager.Helpers
 
                 if (target != null)
                 {
-                    // Create context menu with modern styling
+                    // Create modern, compact context menu with rounded corners
                     var contextMenu = new ContextMenu
                     {
                         PlacementTarget = textBlock,
                         Background = (Brush)Application.Current.Resources["CardBackgroundBrush"],
-                        BorderBrush = (Brush)Application.Current.Resources["BorderBrush"],
-                        BorderThickness = new Thickness(1),
-                        Padding = new Thickness(4),
+                        BorderBrush = new SolidColorBrush(Color.FromArgb(60, 0, 0, 0)),
+                        BorderThickness = new Thickness(0.5),
+                        Padding = new Thickness(2),
                         HasDropShadow = true,
                         Effect = new System.Windows.Media.Effects.DropShadowEffect
                         {
                             Color = Colors.Black,
-                            BlurRadius = 10,
-                            ShadowDepth = 3,
-                            Opacity = 0.3
+                            BlurRadius = 8,
+                            ShadowDepth = 2,
+                            Opacity = 0.2
                         }
                     };
 
-                    // Create icon for the menu item
+                    // Apply rounded corner template
+                    var menuBorder = new Border
+                    {
+                        CornerRadius = new CornerRadius(6),
+                        Background = (Brush)Application.Current.Resources["CardBackgroundBrush"]
+                    };
+
+                    // Create compact icon
                     var icon = new TextBlock
                     {
                         Text = target.Type == ParameterNavigationHelper.NavigationType.ExtTest ? "📊" : "⚙️",
-                        FontSize = 16,
-                        Margin = new Thickness(0, 0, 8, 0),
+                        FontSize = 13,
+                        Margin = new Thickness(0, 0, 6, 0),
                         VerticalAlignment = VerticalAlignment.Center
                     };
 
@@ -121,30 +128,44 @@ namespace TestAutomationManager.Helpers
                     headerPanel.Children.Add(new TextBlock
                     {
                         Text = ParameterNavigationHelper.GetNavigationDescription(target),
-                        FontWeight = FontWeights.Medium,
+                        FontSize = 12,
+                        FontWeight = FontWeights.Normal,
                         VerticalAlignment = VerticalAlignment.Center
                     });
 
-                    // Add navigation menu item with enhanced styling
+                    // Add compact navigation menu item
                     var menuItem = new MenuItem
                     {
                         Header = headerPanel,
                         Tag = new NavigationMenuItemTag { Target = target, TextBlock = textBlock },
-                        FontSize = 13,
-                        Padding = new Thickness(12, 8, 12, 8),
+                        Padding = new Thickness(8, 5, 8, 5),
                         Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"]
                     };
 
-                    // Add hover effect style
+                    // Create modern style with rounded corners and smooth hover
                     var style = new Style(typeof(MenuItem));
+                    style.Setters.Add(new Setter(MenuItem.BackgroundProperty, Brushes.Transparent));
+
                     var hoverTrigger = new Trigger { Property = MenuItem.IsMouseOverProperty, Value = true };
-                    hoverTrigger.Setters.Add(new Setter(MenuItem.BackgroundProperty, new SolidColorBrush(Color.FromArgb(30, 0, 120, 215))));
+                    hoverTrigger.Setters.Add(new Setter(MenuItem.BackgroundProperty, new SolidColorBrush(Color.FromArgb(20, 0, 120, 215))));
+                    hoverTrigger.Setters.Add(new Setter(MenuItem.BorderBrushProperty, new SolidColorBrush(Color.FromArgb(40, 0, 120, 215))));
+                    hoverTrigger.Setters.Add(new Setter(MenuItem.BorderThicknessProperty, new Thickness(0)));
+
                     style.Triggers.Add(hoverTrigger);
                     menuItem.Style = style;
 
                     menuItem.Click += MenuItem_Navigate_Click;
 
                     contextMenu.Items.Add(menuItem);
+
+                    // Apply rounded corners to context menu
+                    contextMenu.Resources.Add(typeof(Border), new Style(typeof(Border))
+                    {
+                        Setters =
+                        {
+                            new Setter(Border.CornerRadiusProperty, new CornerRadius(6))
+                        }
+                    });
 
                     // Set and show context menu
                     textBlock.ContextMenu = contextMenu;
