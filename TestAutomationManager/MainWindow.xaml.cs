@@ -787,6 +787,55 @@ namespace TestAutomationManager
             );
         }
 
+        /// <summary>
+        /// Opens an ExtTable tab and scrolls to a specific column
+        /// Used for parameter navigation (From_ExtTest_ pattern)
+        /// </summary>
+        public void OpenExtTableTabWithColumn(string tableName, string columnName)
+        {
+            var tabId = $"exttable_{tableName}";
+            var existingTab = _openTabs.FirstOrDefault(t => t.Id == tabId);
+
+            if (existingTab != null)
+            {
+                // Tab already exists - switch to it and scroll to column
+                ContentTabControl.SelectedItem = existingTab.TabItem;
+
+                if (existingTab.Content is Views.ExtTableDetailView view)
+                {
+                    view.ScrollToColumn(columnName);
+                }
+            }
+            else
+            {
+                // Create new tab with column navigation
+                var view = new Views.ExtTableDetailView(tableName, columnName);
+                view.DataLoaded += (s, e) => UpdateRecordCount();
+
+                var tabItem = new TabItem
+                {
+                    Header = tableName,
+                    Content = view,
+                    Tag = new { Icon = "📊" }
+                };
+
+                var tabInfo = new TabInfo
+                {
+                    Id = tabId,
+                    Title = tableName,
+                    Icon = "📊",
+                    TabItem = tabItem,
+                    Content = view
+                };
+
+                _openTabs.Add(tabInfo);
+                ContentTabControl.Items.Add(tabItem);
+                ContentTabControl.SelectedItem = tabItem;
+
+                UpdatePageTitle();
+            }
+        }
+
         private void OpenProcessesTab()
         {
             OpenOrSwitchToTab(

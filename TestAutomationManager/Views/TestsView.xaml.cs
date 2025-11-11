@@ -757,6 +757,9 @@ namespace TestAutomationManager.Views
                     test.Processes.Clear();
                     foreach (var process in processes)
                     {
+                        // Set parent reference for navigation
+                        process.ParentTest = test;
+
                         test.Processes.Add(process);
 
                         // Subscribe to process expansion events for lazy loading functions
@@ -798,6 +801,9 @@ namespace TestAutomationManager.Views
                     process.Functions.Clear();
                     foreach (var function in functions)
                     {
+                        // Set parent reference for navigation
+                        function.ParentProcess = process;
+
                         process.Functions.Add(function);
                     }
 
@@ -1453,6 +1459,109 @@ namespace TestAutomationManager.Views
                         MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+            }
+        }
+
+        // ================================================
+        // PARAMETER NAVIGATION
+        // ================================================
+
+        /// <summary>
+        /// Scrolls to a specific parameter in a process
+        /// Called when navigating from From_Process_ pattern
+        /// </summary>
+        public void ScrollToProcessParameter(Test test, Process process, string paramName)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Navigating to Process Parameter: {paramName} in Process #{process.ProcessID}");
+
+                // Ensure the test is expanded
+                if (!test.IsExpanded)
+                {
+                    test.IsExpanded = true;
+                }
+
+                // Wait for processes to load if needed
+                if (!test.AreProcessesLoaded)
+                {
+                    // Subscribe to property changed to continue after processes load
+                    PropertyChangedEventHandler? handler = null;
+                    handler = (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(Test.AreProcessesLoaded) && test.AreProcessesLoaded)
+                        {
+                            test.PropertyChanged -= handler;
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                PerformProcessParameterScroll(test, process, paramName);
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    };
+                    test.PropertyChanged += handler;
+                    return;
+                }
+
+                PerformProcessParameterScroll(test, process, paramName);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navigating to process parameter: {ex.Message}");
+                MessageBox.Show($"Failed to navigate to parameter.\n\nError: {ex.Message}",
+                    "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Performs the actual scrolling to the process parameter
+        /// </summary>
+        private void PerformProcessParameterScroll(Test test, Process process, string paramName)
+        {
+            // Find the process in the visual tree
+            var listBoxItem = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+            if (listBoxItem == null)
+            {
+                System.Diagnostics.Debug.WriteLine("Could not find test in visual tree");
+                return;
+            }
+
+            // Highlight the parameter by showing a tooltip or message
+            MessageBox.Show($"Navigate to {paramName} in Process: {process.ProcessName ?? process.ProcessID.ToString()}",
+                "Parameter Navigation", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // TODO: Implement actual scrolling to the specific parameter column
+            // This would require finding the ScrollViewer and calculating the column position
+        }
+
+        /// <summary>
+        /// Navigates to the ExtTest table for a specific test and column
+        /// Called when navigating from From_ExtTest_ pattern
+        /// </summary>
+        public void NavigateToExtTest(int testId, string columnName)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Navigating to ExtTest{testId}, column: {columnName}");
+
+                // Find the MainWindow
+                var mainWindow = Window.GetWindow(this) as MainWindow;
+                if (mainWindow != null)
+                {
+                    // Open the ExtTest table with column navigation
+                    mainWindow.OpenExtTableTabWithColumn($"ExtTest{testId}", columnName);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Could not find MainWindow");
+                    MessageBox.Show($"Navigate to ExtTest{testId} → {columnName}",
+                        "ExtTest Navigation", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navigating to ExtTest: {ex.Message}");
+                MessageBox.Show($"Failed to navigate to ExtTest.\n\nError: {ex.Message}",
+                    "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

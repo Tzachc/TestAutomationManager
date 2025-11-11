@@ -38,13 +38,20 @@ namespace TestAutomationManager.Views
         private bool _hasUnsavedChanges = false;
         private bool _isLoadingLayout = false; // Prevent change tracking during layout load
 
+        // ⭐ Parameter navigation
+        private string _targetColumnName;
+
         public event EventHandler DataLoaded;
 
         // ================================================
         // CONSTRUCTOR
         // ================================================
 
-        public ExtTableDetailView(string tableName)
+        public ExtTableDetailView(string tableName) : this(tableName, null)
+        {
+        }
+
+        public ExtTableDetailView(string tableName, string targetColumnName)
         {
             InitializeComponent();
 
@@ -52,6 +59,7 @@ namespace TestAutomationManager.Views
             _dataRepository = new ExtTableDataRepository();
             _layoutRepository = new ExtTableLayoutRepository();
             TableName = tableName;
+            _targetColumnName = targetColumnName;
             _rowCount = 0;
             _defaultColumnWidths = new Dictionary<string, double>();
             _currentColumnWidths = new Dictionary<string, double>();
@@ -114,6 +122,15 @@ namespace TestAutomationManager.Views
 
                     // ⭐ Load saved layout after data is displayed
                     await LoadSavedLayoutAsync();
+
+                    // ⭐ Scroll to target column if navigation was requested
+                    if (!string.IsNullOrEmpty(_targetColumnName))
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            ScrollToColumn(_targetColumnName);
+                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    }
 
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {_rowCount} rows from {TableName}");
                     StatusText.Text = "Ready - Double-click to edit • Drag borders to resize • Changes tracked automatically";
@@ -1496,6 +1513,72 @@ namespace TestAutomationManager.Views
             {
                 StatusText.Text = $"Refresh failed: {ex.Message}";
                 System.Diagnostics.Debug.WriteLine($"Refresh error: {ex}");
+            }
+        }
+
+        // ================================================
+        // PARAMETER NAVIGATION
+        // ================================================
+
+        /// <summary>
+        /// Scrolls the DataGrid to make a specific column visible
+        /// Used for parameter navigation from From_ExtTest_ pattern
+        /// </summary>
+        public void ScrollToColumn(string columnName)
+        {
+            try
+            {
+                if (TableDataGrid == null || TableDataGrid.Columns == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("DataGrid not ready for column scrolling");
+                    return;
+                }
+
+                // Find the column by name
+                var column = TableDataGrid.Columns.FirstOrDefault(c =>
+                    c.Header?.ToString() == columnName);
+
+                if (column == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Column '{columnName}' not found in DataGrid");
+                    MessageBox.Show($"Column '{columnName}' not found in table {TableName}.",
+                        "Column Not Found", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Scroll to the column
+                var columnIndex = TableDataGrid.Columns.IndexOf(column);
+                if (columnIndex >= 0)
+                {
+                    // Bring the column into view
+                    TableDataGrid.ScrollIntoView(TableDataGrid.Items[0], column);
+
+                    // Highlight by selecting the first cell in that column (optional)
+                    TableDataGrid.CurrentCell = new DataGridCellInfo(TableDataGrid.Items[0], column);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Scrolled to column '{columnName}' (index {columnIndex})");
+
+                    // Show feedback to user
+                    StatusText.Text = $"Navigated to column: {columnName}";
+
+                    // Reset status text after 3 seconds
+                    var timer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromSeconds(3)
+                    };
+                    timer.Tick += (s, e) =>
+                    {
+                        StatusText.Text = "Ready - Double-click to edit • Drag borders to resize • Changes tracked automatically";
+                        timer.Stop();
+                    };
+                    timer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error scrolling to column: {ex.Message}");
+                MessageBox.Show($"Failed to scroll to column.\n\nError: {ex.Message}",
+                    "Scroll Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }

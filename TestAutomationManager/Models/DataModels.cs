@@ -303,6 +303,9 @@ namespace TestAutomationManager.Models
         private ObservableCollection<Function>? _functions;
         private bool _areFunctionsLoaded;
 
+        // Parent reference for navigation
+        private Test? _parentTest;
+
         // ================================================
         // DATABASE COLUMNS
         // ================================================
@@ -467,6 +470,17 @@ namespace TestAutomationManager.Models
             set { _areFunctionsLoaded = value; OnPropertyChanged(); }
         }
 
+        /// <summary>
+        /// Parent Test reference for navigation
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public Test? ParentTest
+        {
+            get => _parentTest;
+            set { _parentTest = value; OnPropertyChanged(); }
+        }
+
         // ================================================
         // INOTIFYPROPERTYCHANGED
         // ================================================
@@ -533,6 +547,9 @@ namespace TestAutomationManager.Models
         private string? _web3Operator;
 
         private string?[] _params = new string?[30];
+
+        // Parent reference for navigation
+        private Process? _parentProcess;
 
         // ================================================
         // DATABASE COLUMNS (Function_WEB3)
@@ -679,6 +696,21 @@ namespace TestAutomationManager.Models
         {
             get => FunctionPosition ?? 0;
             set => FunctionPosition = value;
+        }
+
+        // ================================================
+        // UI ONLY
+        // ================================================
+
+        /// <summary>
+        /// Parent Process reference for navigation
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public Process? ParentProcess
+        {
+            get => _parentProcess;
+            set { _parentProcess = value; OnPropertyChanged(); }
         }
 
         // ================================================
