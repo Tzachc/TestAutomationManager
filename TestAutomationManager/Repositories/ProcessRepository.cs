@@ -329,14 +329,78 @@ namespace TestAutomationManager.Repositories
         /// <summary>
         /// Get a process template by ProcessID (to copy its data for new instances)
         /// </summary>
-        public async Task<Process> GetProcessTemplateByProcessIDAsync(double processId)
+        public async Task<Process?> GetProcessTemplateByProcessIDAsync(double processId)
         {
             try
             {
                 using (var context = new TestAutomationDbContext())
                 {
+                    // Get the first process with this ProcessID as a template
                     var process = await context.Set<Process>()
-                        .FirstOrDefaultAsync(p => p.ProcessID == processId);
+                        .Where(p => p.ProcessID == processId)
+                        .Select(p => new Process
+                        {
+                            ProcessID = p.ProcessID,
+                            ProcessName = p.ProcessName,
+                            WEB3Operator = p.WEB3Operator,
+                            Pass_Fail_WEB3Operator = p.Pass_Fail_WEB3Operator,
+                            Comments = p.Comments,
+                            Module = p.Module,
+                            Repeat = p.Repeat,
+                            TempParam = p.TempParam,
+                            TempParam1 = p.TempParam1,
+                            TempParam11 = p.TempParam11,
+                            TempParam111 = p.TempParam111,
+                            TempParam1111 = p.TempParam1111,
+                            TempParam11111 = p.TempParam11111,
+                            Param1 = p.Param1,
+                            Param2 = p.Param2,
+                            Param3 = p.Param3,
+                            Param4 = p.Param4,
+                            Param5 = p.Param5,
+                            Param6 = p.Param6,
+                            Param7 = p.Param7,
+                            Param8 = p.Param8,
+                            Param9 = p.Param9,
+                            Param10 = p.Param10,
+                            Param11 = p.Param11,
+                            Param12 = p.Param12,
+                            Param13 = p.Param13,
+                            Param14 = p.Param14,
+                            Param15 = p.Param15,
+                            Param16 = p.Param16,
+                            Param17 = p.Param17,
+                            Param18 = p.Param18,
+                            Param19 = p.Param19,
+                            Param20 = p.Param20,
+                            Param21 = p.Param21,
+                            Param22 = p.Param22,
+                            Param23 = p.Param23,
+                            Param24 = p.Param24,
+                            Param25 = p.Param25,
+                            Param26 = p.Param26,
+                            Param27 = p.Param27,
+                            Param28 = p.Param28,
+                            Param29 = p.Param29,
+                            Param30 = p.Param30,
+                            Param31 = p.Param31,
+                            Param32 = p.Param32,
+                            Param33 = p.Param33,
+                            Param34 = p.Param34,
+                            Param35 = p.Param35,
+                            Param36 = p.Param36,
+                            Param37 = p.Param37,
+                            Param38 = p.Param38,
+                            Param39 = p.Param39,
+                            Param40 = p.Param40,
+                            Param41 = p.Param41,
+                            Param42 = p.Param42,
+                            Param43 = p.Param43,
+                            Param44 = p.Param44,
+                            Param45 = p.Param45,
+                            Param46 = p.Param46
+                        })
+                        .FirstOrDefaultAsync();
 
                     if (process != null)
                     {
