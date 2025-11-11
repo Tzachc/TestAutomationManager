@@ -473,12 +473,13 @@ namespace TestAutomationManager.Models
         /// <summary>
         /// Parent Test reference for navigation
         /// UI-only property - not mapped to database
+        /// No PropertyChanged notification needed - this is an internal reference
         /// </summary>
         [NotMapped]
         public Test? ParentTest
         {
             get => _parentTest;
-            set { _parentTest = value; OnPropertyChanged(); }
+            set => _parentTest = value;
         }
 
         // ================================================
@@ -705,12 +706,13 @@ namespace TestAutomationManager.Models
         /// <summary>
         /// Parent Process reference for navigation
         /// UI-only property - not mapped to database
+        /// No PropertyChanged notification needed - this is an internal reference
         /// </summary>
         [NotMapped]
         public Process? ParentProcess
         {
             get => _parentProcess;
-            set { _parentProcess = value; OnPropertyChanged(); }
+            set => _parentProcess = value;
         }
 
         // ================================================
