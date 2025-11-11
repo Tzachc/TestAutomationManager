@@ -38,13 +38,20 @@ namespace TestAutomationManager.Views
         private bool _hasUnsavedChanges = false;
         private bool _isLoadingLayout = false; // Prevent change tracking during layout load
 
+        // ⭐ Parameter navigation
+        private string _targetColumnName;
+
         public event EventHandler DataLoaded;
 
         // ================================================
         // CONSTRUCTOR
         // ================================================
 
-        public ExtTableDetailView(string tableName)
+        public ExtTableDetailView(string tableName) : this(tableName, null)
+        {
+        }
+
+        public ExtTableDetailView(string tableName, string targetColumnName)
         {
             InitializeComponent();
 
@@ -52,6 +59,7 @@ namespace TestAutomationManager.Views
             _dataRepository = new ExtTableDataRepository();
             _layoutRepository = new ExtTableLayoutRepository();
             TableName = tableName;
+            _targetColumnName = targetColumnName;
             _rowCount = 0;
             _defaultColumnWidths = new Dictionary<string, double>();
             _currentColumnWidths = new Dictionary<string, double>();
@@ -114,6 +122,15 @@ namespace TestAutomationManager.Views
 
                     // ⭐ Load saved layout after data is displayed
                     await LoadSavedLayoutAsync();
+
+                    // ⭐ Scroll to target column if navigation was requested
+                    if (!string.IsNullOrEmpty(_targetColumnName))
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            ScrollToColumn(_targetColumnName);
+                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    }
 
                     System.Diagnostics.Debug.WriteLine($"✓ Loaded {_rowCount} rows from {TableName}");
                     StatusText.Text = "Ready - Double-click to edit • Drag borders to resize • Changes tracked automatically";
@@ -1497,6 +1514,216 @@ namespace TestAutomationManager.Views
                 StatusText.Text = $"Refresh failed: {ex.Message}";
                 System.Diagnostics.Debug.WriteLine($"Refresh error: {ex}");
             }
+        }
+
+        // ================================================
+        // PARAMETER NAVIGATION
+        // ================================================
+
+        /// <summary>
+        /// Scrolls the DataGrid to make a specific column visible
+        /// Used for parameter navigation from From_ExtTest_ pattern
+        /// </summary>
+        public void ScrollToColumn(string columnName)
+        {
+            try
+            {
+                if (TableDataGrid == null || TableDataGrid.Columns == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("DataGrid not ready for column scrolling");
+                    return;
+                }
+
+                // Find the column by name
+                var column = TableDataGrid.Columns.FirstOrDefault(c =>
+                    c.Header?.ToString() == columnName);
+
+                if (column == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Column '{columnName}' not found in DataGrid");
+                    MessageBox.Show($"Column '{columnName}' not found in table {TableName}.",
+                        "Column Not Found", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Scroll to the column
+                var columnIndex = TableDataGrid.Columns.IndexOf(column);
+                if (columnIndex >= 0)
+                {
+                    // Bring the column into view
+                    TableDataGrid.ScrollIntoView(TableDataGrid.Items[0], column);
+
+                    // Highlight by selecting the first cell in that column
+                    TableDataGrid.CurrentCell = new DataGridCellInfo(TableDataGrid.Items[0], column);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Scrolled to column '{columnName}' (index {columnIndex})");
+
+                    // Force update layout to ensure visual tree is ready
+                    TableDataGrid.UpdateLayout();
+
+                    // Wait for visual tree to be ready, then highlight
+                    var highlightTimer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(300)
+                    };
+                    highlightTimer.Tick += (s, e) =>
+                    {
+                        HighlightColumn(column);
+                        highlightTimer.Stop();
+                    };
+                    highlightTimer.Start();
+
+                    // Show feedback to user
+                    StatusText.Text = $"Navigated to column: {columnName}";
+
+                    // Reset status text after 3 seconds
+                    var statusTimer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromSeconds(3)
+                    };
+                    statusTimer.Tick += (s, e) =>
+                    {
+                        StatusText.Text = "Ready - Double-click to edit • Drag borders to resize • Changes tracked automatically";
+                        statusTimer.Stop();
+                    };
+                    statusTimer.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error scrolling to column: {ex.Message}");
+                MessageBox.Show($"Failed to scroll to column.\n\nError: {ex.Message}",
+                    "Scroll Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Adds a temporary visual highlight to a column to help users see where they navigated
+        /// </summary>
+        private void HighlightColumn(DataGridColumn column)
+        {
+            try
+            {
+                // Find the actual DataGridColumnHeader visual element
+                var columnHeader = FindColumnHeader(TableDataGrid, column);
+                if (columnHeader == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Could not find column header visual element");
+                    return;
+                }
+
+                // Store original styling
+                var originalBackground = columnHeader.Background;
+                var originalBorderBrush = columnHeader.BorderBrush;
+                var originalBorderThickness = columnHeader.BorderThickness;
+                var originalFontWeight = columnHeader.FontWeight;
+
+                // Apply highlight
+                columnHeader.Background = new SolidColorBrush(Color.FromRgb(255, 255, 153)); // Light yellow
+                columnHeader.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 165, 0)); // Orange border
+                columnHeader.BorderThickness = new Thickness(3);
+                columnHeader.FontWeight = FontWeights.Bold;
+
+                System.Diagnostics.Debug.WriteLine($"✓ Applied highlight to column header");
+
+                // Remove highlight after 3 seconds
+                var timer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(3)
+                };
+                timer.Tick += (s, e) =>
+                {
+                    columnHeader.Background = originalBackground;
+                    columnHeader.BorderBrush = originalBorderBrush;
+                    columnHeader.BorderThickness = originalBorderThickness;
+                    columnHeader.FontWeight = originalFontWeight;
+                    timer.Stop();
+                };
+                timer.Start();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error highlighting column: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Finds the DataGridColumnHeader visual element for a given column
+        /// </summary>
+        private DataGridColumnHeader FindColumnHeader(DataGrid dataGrid, DataGridColumn column)
+        {
+            try
+            {
+                // Get the column headers presenter
+                var columnHeadersPresenter = GetVisualChild<DataGridColumnHeadersPresenter>(dataGrid);
+                if (columnHeadersPresenter == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("DataGridColumnHeadersPresenter not found");
+                    return null;
+                }
+
+                // Find the column header for our column - check direct children first
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(columnHeadersPresenter); i++)
+                {
+                    var child = VisualTreeHelper.GetChild(columnHeadersPresenter, i);
+                    if (child is DataGridColumnHeader header && header.Column == column)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Found column header at index {i}");
+                        return header;
+                    }
+                }
+
+                // If not found in direct children, search recursively
+                System.Diagnostics.Debug.WriteLine("Column header not in direct children, searching recursively...");
+                return FindColumnHeaderRecursive(columnHeadersPresenter, column);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in FindColumnHeader: {ex.Message}");
+                return null;
+            }
+        }
+
+        private DataGridColumnHeader FindColumnHeaderRecursive(DependencyObject parent, DataGridColumn column)
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is DataGridColumnHeader header && header.Column == column)
+                {
+                    return header;
+                }
+
+                var result = FindColumnHeaderRecursive(child, column);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Helper method to find a visual child of a specific type
+        /// </summary>
+        private T GetVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result)
+                    return result;
+
+                var descendant = GetVisualChild<T>(child);
+                if (descendant != null)
+                    return descendant;
+            }
+
+            return null;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -757,6 +758,9 @@ namespace TestAutomationManager.Views
                     test.Processes.Clear();
                     foreach (var process in processes)
                     {
+                        // Set parent reference for navigation
+                        process.ParentTest = test;
+
                         test.Processes.Add(process);
 
                         // Subscribe to process expansion events for lazy loading functions
@@ -798,6 +802,9 @@ namespace TestAutomationManager.Views
                     process.Functions.Clear();
                     foreach (var function in functions)
                     {
+                        // Set parent reference for navigation
+                        function.ParentProcess = process;
+
                         process.Functions.Add(function);
                     }
 
@@ -1453,6 +1460,293 @@ namespace TestAutomationManager.Views
                         MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+            }
+        }
+
+        // ================================================
+        // PARAMETER NAVIGATION
+        // ================================================
+
+        /// <summary>
+        /// Scrolls to a specific parameter in a process
+        /// Called when navigating from From_Process_ pattern
+        /// </summary>
+        public void ScrollToProcessParameter(Test test, Process process, string paramName)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Navigating to Process Parameter: {paramName} in Process #{process.ProcessID}");
+
+                // Ensure the test is expanded
+                if (!test.IsExpanded)
+                {
+                    test.IsExpanded = true;
+                }
+
+                // Wait for processes to load if needed
+                if (!test.AreProcessesLoaded)
+                {
+                    // Subscribe to property changed to continue after processes load
+                    PropertyChangedEventHandler? handler = null;
+                    handler = (s, e) =>
+                    {
+                        if (e.PropertyName == nameof(Test.AreProcessesLoaded) && test.AreProcessesLoaded)
+                        {
+                            test.PropertyChanged -= handler;
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                PerformProcessParameterScroll(test, process, paramName);
+                            }), System.Windows.Threading.DispatcherPriority.Background);
+                        }
+                    };
+                    test.PropertyChanged += handler;
+                    return;
+                }
+
+                PerformProcessParameterScroll(test, process, paramName);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navigating to process parameter: {ex.Message}");
+                MessageBox.Show($"Failed to navigate to parameter.\n\nError: {ex.Message}",
+                    "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Performs the actual scrolling to the process parameter
+        /// </summary>
+        private void PerformProcessParameterScroll(Test test, Process process, string paramName)
+        {
+            try
+            {
+                // Scroll to test first
+                TestsItemsControl.ScrollIntoView(test);
+
+                // Give UI time to render the test container
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    // Find the test container (for highlighting later)
+                    var testContainer = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                    if (testContainer == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not find test container");
+                        return;
+                    }
+
+                    // Find the MAIN horizontal ScrollViewer - it's the internal ScrollViewer of the TestsItemsControl ListBox
+                    // This ScrollViewer handles horizontal scrolling for ALL the wide grids (Tests, Processes, Functions)
+                    var mainScrollViewer = FindVisualChild<ScrollViewer>(TestsItemsControl);
+
+                    if (mainScrollViewer == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not find main horizontal ScrollViewer in TestsItemsControl");
+                        return;
+                    }
+
+                    // Calculate column position based on parameter name
+                    int paramNumber = ExtractParamNumber(paramName);
+                    if (paramNumber <= 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Invalid param number for {paramName}");
+                        return;
+                    }
+
+                    // Calculate horizontal scroll offset
+                    double offset = CalculateParamColumnOffset(paramNumber);
+
+                    System.Diagnostics.Debug.WriteLine($"Scrolling to {paramName} (offset: {offset}, current: {mainScrollViewer.HorizontalOffset})");
+
+                    // Perform the scroll on the main horizontal ScrollViewer
+                    mainScrollViewer.ScrollToHorizontalOffset(offset);
+
+                    // Force update the layout
+                    mainScrollViewer.UpdateLayout();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ After scroll: HorizontalOffset = {mainScrollViewer.HorizontalOffset}");
+
+                    // Wait for scroll to complete, then highlight
+                    var timer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(300)
+                    };
+                    timer.Tick += (s, e) =>
+                    {
+                        HighlightProcessParameter(testContainer, process, paramName);
+                        timer.Stop();
+                    };
+                    timer.Start();
+
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error scrolling to parameter: {ex.Message}");
+            }
+        }
+
+        private void HighlightProcessParameter(FrameworkElement testContainer, Process process, string paramName)
+        {
+            try
+            {
+                // Find all TextBlocks in the test container
+                var textBlocks = FindVisualChildren<TextBlock>(testContainer);
+
+                // Find the TextBlock that matches the process and parameter
+                foreach (var textBlock in textBlocks)
+                {
+                    if (textBlock.DataContext == process)
+                    {
+                        // Check if this TextBlock has the InlineEditHelper.FieldName set to our param
+                        var fieldName = Helpers.InlineEditHelper.GetFieldName(textBlock);
+                        if (fieldName == paramName)
+                        {
+                            // Store original styling
+                            var originalBackground = textBlock.Background;
+                            var originalBorderBrush = textBlock.Tag as Brush;
+
+                            // Apply highlight
+                            textBlock.Background = new SolidColorBrush(Color.FromRgb(255, 255, 153)); // Light yellow
+                            textBlock.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                            {
+                                Color = Color.FromRgb(255, 165, 0), // Orange glow
+                                BlurRadius = 10,
+                                ShadowDepth = 0,
+                                Opacity = 0.8
+                            };
+
+                            System.Diagnostics.Debug.WriteLine($"✓ Applied highlight to {paramName}");
+
+                            // Remove highlight after 3 seconds
+                            var timer = new System.Windows.Threading.DispatcherTimer
+                            {
+                                Interval = TimeSpan.FromSeconds(3)
+                            };
+                            timer.Tick += (s, e) =>
+                            {
+                                textBlock.Background = originalBackground;
+                                textBlock.Effect = null;
+                                timer.Stop();
+                            };
+                            timer.Start();
+
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error highlighting parameter: {ex.Message}");
+            }
+        }
+
+        private IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T typedChild)
+                {
+                    yield return typedChild;
+                }
+
+                foreach (var descendant in FindVisualChildren<T>(child))
+                {
+                    yield return descendant;
+                }
+            }
+        }
+
+        private int ExtractParamNumber(string paramName)
+        {
+            // Extract number from "Param1", "Param2", etc.
+            var match = System.Text.RegularExpressions.Regex.Match(paramName, @"Param(\d+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int number))
+            {
+                return number;
+            }
+            return 0;
+        }
+
+        private double CalculateParamColumnOffset(int paramNumber)
+        {
+            // Column widths from XAML:
+            // Columns 0-6: Various fixed widths (Position, Web3 Operator, ProcessName, etc.)
+            // Param1-23: 300px each
+            // Param24-46: 120px each
+
+            // Base offset (skip first 7 columns before params)
+            double baseOffset = 60 + 150 + 200 + 80 + 150 + 120 + 120; // Approximate total of first 7 columns
+
+            if (paramNumber <= 23)
+            {
+                // Params 1-23 are 300px wide
+                return baseOffset + ((paramNumber - 1) * 300);
+            }
+            else
+            {
+                // Params 24-46 are 120px wide
+                double offset23 = baseOffset + (23 * 300);
+                return offset23 + ((paramNumber - 24) * 120);
+            }
+        }
+
+        private T FindVisualChild<T>(DependencyObject parent, Func<T, bool> predicate = null) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T typedChild && (predicate == null || predicate(typedChild)))
+                {
+                    return typedChild;
+                }
+
+                var result = FindVisualChild(child, predicate);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Navigates to the ExtTest table for a specific test and column
+        /// Called when navigating from From_ExtTest_ pattern
+        /// </summary>
+        public void NavigateToExtTest(int testId, string columnName)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Navigating to ExtTest{testId}, column: {columnName}");
+
+                // Find the MainWindow
+                var mainWindow = Window.GetWindow(this) as MainWindow;
+                if (mainWindow != null)
+                {
+                    // Open the ExtTest table with column navigation
+                    mainWindow.OpenExtTableTabWithColumn($"ExtTest{testId}", columnName);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Could not find MainWindow");
+                    MessageBox.Show($"Navigate to ExtTest{testId} → {columnName}",
+                        "ExtTest Navigation", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navigating to ExtTest: {ex.Message}");
+                MessageBox.Show($"Failed to navigate to ExtTest.\n\nError: {ex.Message}",
+                    "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
