@@ -13,6 +13,16 @@ namespace TestAutomationManager.Helpers
     /// </summary>
     public static class ParameterNavigationBehavior
     {
+        #region Helper Classes
+
+        private class NavigationMenuItemTag
+        {
+            public ParameterNavigationHelper.NavigationTarget Target { get; set; }
+            public TextBlock TextBlock { get; set; }
+        }
+
+        #endregion
+
         #region Attached Properties
 
         public static readonly DependencyProperty IsEnabledProperty =
@@ -89,7 +99,7 @@ namespace TestAutomationManager.Helpers
                     var menuItem = new MenuItem
                     {
                         Header = ParameterNavigationHelper.GetNavigationDescription(target),
-                        Tag = new { Target = target, TextBlock = textBlock }
+                        Tag = new NavigationMenuItemTag { Target = target, TextBlock = textBlock }
                     };
                     menuItem.Click += MenuItem_Navigate_Click;
 
@@ -109,10 +119,10 @@ namespace TestAutomationManager.Helpers
 
         private static void MenuItem_Navigate_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem menuItem && menuItem.Tag is dynamic tag)
+            if (sender is MenuItem menuItem && menuItem.Tag is NavigationMenuItemTag tag)
             {
-                var target = tag.Target as ParameterNavigationHelper.NavigationTarget;
-                var textBlock = tag.TextBlock as TextBlock;
+                var target = tag.Target;
+                var textBlock = tag.TextBlock;
 
                 if (target != null && textBlock != null)
                 {
