@@ -1531,25 +1531,22 @@ namespace TestAutomationManager.Views
                     if (testContainer == null)
                     {
                         System.Diagnostics.Debug.WriteLine("Could not find test container");
-                        ShowProcessNavigationMessage(paramName, process);
                         return;
                     }
 
                     // Find the ScrollViewer for the process grid
-                    var scrollViewer = FindVisualChild<ScrollViewer>(testContainer, sv => sv.Name == "ProcessScrollViewer" || sv.MaxHeight == 800);
+                    var scrollViewer = FindVisualChild<ScrollViewer>(testContainer, sv => sv.MaxHeight == 800);
                     if (scrollViewer == null)
                     {
                         System.Diagnostics.Debug.WriteLine("Could not find process ScrollViewer");
-                        ShowProcessNavigationMessage(paramName, process);
                         return;
                     }
 
                     // Calculate approximate column position based on parameter name
-                    // Param columns start at column 7, with varying widths
                     int paramNumber = ExtractParamNumber(paramName);
                     if (paramNumber <= 0)
                     {
-                        ShowProcessNavigationMessage(paramName, process);
+                        System.Diagnostics.Debug.WriteLine($"Invalid param number for {paramName}");
                         return;
                     }
 
@@ -1558,21 +1555,95 @@ namespace TestAutomationManager.Views
                     scrollViewer.ScrollToHorizontalOffset(offset);
 
                     System.Diagnostics.Debug.WriteLine($"✓ Scrolled to {paramName} (offset: {offset})");
-                    ShowProcessNavigationMessage(paramName, process);
+
+                    // Find and highlight the parameter TextBlock
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        HighlightProcessParameter(testContainer, process, paramName);
+                    }), System.Windows.Threading.DispatcherPriority.Background);
 
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error scrolling to parameter: {ex.Message}");
-                ShowProcessNavigationMessage(paramName, process);
             }
         }
 
-        private void ShowProcessNavigationMessage(string paramName, Process process)
+        private void HighlightProcessParameter(FrameworkElement testContainer, Process process, string paramName)
         {
-            MessageBox.Show($"Navigated to {paramName} in Process: {process.ProcessName ?? process.ProcessID.ToString()}\n\nThe parameter should be visible in the scrolled view.",
-                "Parameter Navigation", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                // Find all TextBlocks in the test container
+                var textBlocks = FindVisualChildren<TextBlock>(testContainer);
+
+                // Find the TextBlock that matches the process and parameter
+                foreach (var textBlock in textBlocks)
+                {
+                    if (textBlock.DataContext == process)
+                    {
+                        // Check if this TextBlock has the InlineEditHelper.FieldName set to our param
+                        var fieldName = Helpers.InlineEditHelper.GetFieldName(textBlock);
+                        if (fieldName == paramName)
+                        {
+                            // Store original styling
+                            var originalBackground = textBlock.Background;
+                            var originalBorderBrush = textBlock.Tag as Brush;
+
+                            // Apply highlight
+                            textBlock.Background = new SolidColorBrush(Color.FromRgb(255, 255, 153)); // Light yellow
+                            textBlock.Effect = new System.Windows.Media.Effects.DropShadowEffect
+                            {
+                                Color = Color.FromRgb(255, 165, 0), // Orange glow
+                                BlurRadius = 10,
+                                ShadowDepth = 0,
+                                Opacity = 0.8
+                            };
+
+                            System.Diagnostics.Debug.WriteLine($"✓ Applied highlight to {paramName}");
+
+                            // Remove highlight after 3 seconds
+                            var timer = new System.Windows.Threading.DispatcherTimer
+                            {
+                                Interval = TimeSpan.FromSeconds(3)
+                            };
+                            timer.Tick += (s, e) =>
+                            {
+                                textBlock.Background = originalBackground;
+                                textBlock.Effect = null;
+                                timer.Stop();
+                            };
+                            timer.Start();
+
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error highlighting parameter: {ex.Message}");
+            }
+        }
+
+        private IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T typedChild)
+                {
+                    yield return typedChild;
+                }
+
+                foreach (var descendant in FindVisualChildren<T>(child))
+                {
+                    yield return descendant;
+                }
+            }
         }
 
         private int ExtractParamNumber(string paramName)

@@ -1592,19 +1592,27 @@ namespace TestAutomationManager.Views
         {
             try
             {
-                // Store original header style
-                var originalHeader = column.Header;
-                var originalHeaderStyle = column.HeaderStyle;
+                // Find the actual DataGridColumnHeader visual element
+                var columnHeader = FindColumnHeader(TableDataGrid, column);
+                if (columnHeader == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Could not find column header visual element");
+                    return;
+                }
 
-                // Create highlighted header with colored border
-                var highlightStyle = new Style(typeof(DataGridColumnHeader));
-                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(Color.FromRgb(255, 255, 153)))); // Light yellow
-                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.BorderBrushProperty, new SolidColorBrush(Color.FromRgb(255, 165, 0)))); // Orange border
-                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.BorderThicknessProperty, new Thickness(3)));
-                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.FontWeightProperty, FontWeights.Bold));
+                // Store original styling
+                var originalBackground = columnHeader.Background;
+                var originalBorderBrush = columnHeader.BorderBrush;
+                var originalBorderThickness = columnHeader.BorderThickness;
+                var originalFontWeight = columnHeader.FontWeight;
 
                 // Apply highlight
-                column.HeaderStyle = highlightStyle;
+                columnHeader.Background = new SolidColorBrush(Color.FromRgb(255, 255, 153)); // Light yellow
+                columnHeader.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 165, 0)); // Orange border
+                columnHeader.BorderThickness = new Thickness(3);
+                columnHeader.FontWeight = FontWeights.Bold;
+
+                System.Diagnostics.Debug.WriteLine($"✓ Applied highlight to column header");
 
                 // Remove highlight after 3 seconds
                 var timer = new System.Windows.Threading.DispatcherTimer
@@ -1613,17 +1621,62 @@ namespace TestAutomationManager.Views
                 };
                 timer.Tick += (s, e) =>
                 {
-                    column.HeaderStyle = originalHeaderStyle;
+                    columnHeader.Background = originalBackground;
+                    columnHeader.BorderBrush = originalBorderBrush;
+                    columnHeader.BorderThickness = originalBorderThickness;
+                    columnHeader.FontWeight = originalFontWeight;
                     timer.Stop();
                 };
                 timer.Start();
-
-                System.Diagnostics.Debug.WriteLine($"✓ Applied highlight to column header");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error highlighting column: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Finds the DataGridColumnHeader visual element for a given column
+        /// </summary>
+        private DataGridColumnHeader FindColumnHeader(DataGrid dataGrid, DataGridColumn column)
+        {
+            // Get the column headers presenter
+            var columnHeadersPresenter = GetVisualChild<DataGridColumnHeadersPresenter>(dataGrid);
+            if (columnHeadersPresenter == null)
+                return null;
+
+            // Find the column header for our column
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(columnHeadersPresenter); i++)
+            {
+                var child = VisualTreeHelper.GetChild(columnHeadersPresenter, i);
+                if (child is DataGridColumnHeader header && header.Column == column)
+                {
+                    return header;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Helper method to find a visual child of a specific type
+        /// </summary>
+        private T GetVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result)
+                    return result;
+
+                var descendant = GetVisualChild<T>(child);
+                if (descendant != null)
+                    return descendant;
+            }
+
+            return null;
         }
     }
 }
