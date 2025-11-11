@@ -27,6 +27,16 @@ namespace TestAutomationManager.Views
         private readonly ProcessRepository _repository;
 
         /// <summary>
+        /// Test repository for edit service
+        /// </summary>
+        private readonly ITestRepository _testRepository;
+
+        /// <summary>
+        /// Edit service for inline editing
+        /// </summary>
+        private readonly TestEditService _editService;
+
+        /// <summary>
         /// Observable collection for UI binding
         /// </summary>
         public ObservableCollection<Process> Processes { get; set; }
@@ -70,8 +80,15 @@ namespace TestAutomationManager.Views
         {
             InitializeComponent();
 
-            // Initialize repository
+            // Initialize repositories
             _repository = new ProcessRepository();
+            _testRepository = new TestRepository();
+
+            // Initialize edit service
+            _editService = new TestEditService(_testRepository, _repository);
+
+            // Register global inline edit handler
+            InlineEditHelper.SetEditConfirmedHandler(this, OnInlineEditConfirmed);
 
             // Initialize collections
             Processes = new ObservableCollection<Process>();
@@ -730,6 +747,49 @@ namespace TestAutomationManager.Views
             UpdateRecordCount();
 
             System.Diagnostics.Debug.WriteLine("✓ Filter cleared");
+        }
+
+        // ================================================
+        // INLINE EDITING
+        // ================================================
+
+        /// <summary>
+        /// Global handler for inline edit confirmations (used by InlineEditHelper)
+        /// </summary>
+        private async void OnInlineEditConfirmed(object sender, Helpers.EditConfirmedEventArgs e)
+        {
+            // Handle Process editing
+            if (e.DataContext is Process process)
+            {
+                var result = await _editService.EditProcessFieldAsync(process, e.FieldName, e.OldValue, e.NewValue, Window.GetWindow(this));
+
+                if (!result.IsSuccess)
+                {
+                    e.Cancel = true;
+                    e.CancelReason = result.Message;
+
+                    if (!result.IsCancelled)
+                    {
+                        MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            // Handle Function editing
+            else if (e.DataContext is Function function)
+            {
+                var result = await _editService.EditFunctionFieldAsync(function, e.FieldName, e.OldValue, e.NewValue, Window.GetWindow(this));
+
+                if (!result.IsSuccess)
+                {
+                    e.Cancel = true;
+                    e.CancelReason = result.Message;
+
+                    if (!result.IsCancelled)
+                    {
+                        MessageBox.Show(result.Message, "Edit Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
     }
 }
