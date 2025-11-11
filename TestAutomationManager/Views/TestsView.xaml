@@ -1281,10 +1281,12 @@
                                                                         </ItemsControl>
                                                                         </ScrollViewer>
                                                                     </Border>
-                                                                    </Grid>
-                                                                </Border>
+                                                                </Grid>
                                                             </Border>
                                                         </Grid>
+                                                    </Border>
+                                                </Border>
+                                            </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                         </ItemsControl>
