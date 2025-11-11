@@ -85,22 +85,63 @@ namespace TestAutomationManager.Helpers
 
                 if (target != null)
                 {
-                    // Create context menu
+                    // Create context menu with modern styling
                     var contextMenu = new ContextMenu
                     {
                         PlacementTarget = textBlock,
                         Background = (Brush)Application.Current.Resources["CardBackgroundBrush"],
                         BorderBrush = (Brush)Application.Current.Resources["BorderBrush"],
                         BorderThickness = new Thickness(1),
-                        Padding = new Thickness(4)
+                        Padding = new Thickness(4),
+                        HasDropShadow = true,
+                        Effect = new System.Windows.Media.Effects.DropShadowEffect
+                        {
+                            Color = Colors.Black,
+                            BlurRadius = 10,
+                            ShadowDepth = 3,
+                            Opacity = 0.3
+                        }
                     };
 
-                    // Add navigation menu item
+                    // Create icon for the menu item
+                    var icon = new TextBlock
+                    {
+                        Text = target.Type == ParameterNavigationHelper.NavigationType.ExtTest ? "📊" : "⚙️",
+                        FontSize = 16,
+                        Margin = new Thickness(0, 0, 8, 0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+
+                    // Create header with icon and text
+                    var headerPanel = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal
+                    };
+                    headerPanel.Children.Add(icon);
+                    headerPanel.Children.Add(new TextBlock
+                    {
+                        Text = ParameterNavigationHelper.GetNavigationDescription(target),
+                        FontWeight = FontWeights.Medium,
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+
+                    // Add navigation menu item with enhanced styling
                     var menuItem = new MenuItem
                     {
-                        Header = ParameterNavigationHelper.GetNavigationDescription(target),
-                        Tag = new NavigationMenuItemTag { Target = target, TextBlock = textBlock }
+                        Header = headerPanel,
+                        Tag = new NavigationMenuItemTag { Target = target, TextBlock = textBlock },
+                        FontSize = 13,
+                        Padding = new Thickness(12, 8, 12, 8),
+                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"]
                     };
+
+                    // Add hover effect style
+                    var style = new Style(typeof(MenuItem));
+                    var hoverTrigger = new Trigger { Property = MenuItem.IsMouseOverProperty, Value = true };
+                    hoverTrigger.Setters.Add(new Setter(MenuItem.BackgroundProperty, new SolidColorBrush(Color.FromArgb(30, 0, 120, 215))));
+                    style.Triggers.Add(hoverTrigger);
+                    menuItem.Style = style;
+
                     menuItem.Click += MenuItem_Navigate_Click;
 
                     contextMenu.Items.Add(menuItem);
