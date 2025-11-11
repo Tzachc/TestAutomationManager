@@ -155,14 +155,14 @@ namespace TestAutomationManager.Data
                 // Primary key - Index is the unique identifier for each process record
                 entity.HasKey(e => e.Index);
 
-                // Alternate key - ProcessID is used for Function relationships
-                // Multiple processes can share the same ProcessID (it's a template/definition ID)
-                entity.HasAlternateKey(e => e.ProcessID);
-
                 // Properties - map actual column names
                 entity.Property(e => e.TestID).HasColumnName("TestID");
                 entity.Property(e => e.Comments).HasColumnName("Comments");
-                entity.Property(e => e.Index).HasColumnName("Index");
+
+                // Configure Index as auto-generated (IDENTITY column)
+                entity.Property(e => e.Index)
+                    .HasColumnName("Index")
+                    .ValueGeneratedOnAdd();
                 entity.Property(e => e.LastRunning).HasColumnName("LastRunning");
                 entity.Property(e => e.Module).HasColumnName("Module");
                 entity.Property(e => e.Pass_Fail_WEB3Operator).HasColumnName("Pass_Fail_WEB3Operator");
@@ -182,17 +182,16 @@ namespace TestAutomationManager.Data
                 entity.Property(e => e.TempParam1111).HasColumnName("TempParam1111");
                 entity.Property(e => e.TempParam11111).HasColumnName("TempParam11111");
 
-                // Relationships
-                // Functions link to Process via ProcessID (not via the primary key Index)
-                entity.HasMany(p => p.Functions)
-                    .WithOne()
-                    .HasForeignKey(f => f.ProcessID)
-                    .HasPrincipalKey(p => p.ProcessID)  // Explicitly use ProcessID, not Index
-                    .OnDelete(DeleteBehavior.Cascade);
+                // Note: Functions navigation property is ignored because ProcessID is not unique
+                // (multiple process instances can share the same ProcessID)
+                // Functions are loaded separately via repository methods
 
                 // Ignore UI-only and compatibility properties
                 entity.Ignore(e => e.IsExpanded);
                 entity.Ignore(e => e.IsSelected);
+                entity.Ignore(e => e.Functions);  // UI-only navigation property
+                entity.Ignore(e => e.AreFunctionsLoaded);  // UI-only flag
+                entity.Ignore(e => e.ParentTest);  // UI-only navigation property
                 entity.Ignore(e => e.Id);
                 entity.Ignore(e => e.TestId);
                 entity.Ignore(e => e.Name);
