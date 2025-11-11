@@ -1523,7 +1523,7 @@ namespace TestAutomationManager.Views
                 // Scroll to test first
                 TestsItemsControl.ScrollIntoView(test);
 
-                // Give UI time to render
+                // Give UI time to render the test container
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     // Find the process row's ScrollViewer
@@ -1534,11 +1534,13 @@ namespace TestAutomationManager.Views
                         return;
                     }
 
-                    // Find the ScrollViewer for the process grid
-                    var scrollViewer = FindVisualChild<ScrollViewer>(testContainer, sv => sv.MaxHeight == 800);
+                    // Find ALL ScrollViewers and get the one for processes (has MaxHeight = 800)
+                    var scrollViewers = FindVisualChildren<ScrollViewer>(testContainer).ToList();
+                    var scrollViewer = scrollViewers.FirstOrDefault(sv => sv.MaxHeight == 800);
+
                     if (scrollViewer == null)
                     {
-                        System.Diagnostics.Debug.WriteLine("Could not find process ScrollViewer");
+                        System.Diagnostics.Debug.WriteLine($"Could not find process ScrollViewer. Found {scrollViewers.Count} ScrollViewers total");
                         return;
                     }
 
@@ -1552,15 +1554,28 @@ namespace TestAutomationManager.Views
 
                     // Calculate horizontal scroll offset
                     double offset = CalculateParamColumnOffset(paramNumber);
+
+                    System.Diagnostics.Debug.WriteLine($"Scrolling to {paramName} (offset: {offset}, current offset: {scrollViewer.HorizontalOffset})");
+
+                    // Perform the scroll
                     scrollViewer.ScrollToHorizontalOffset(offset);
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Scrolled to {paramName} (offset: {offset})");
+                    // Force update the layout
+                    scrollViewer.UpdateLayout();
 
-                    // Find and highlight the parameter TextBlock
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    System.Diagnostics.Debug.WriteLine($"✓ After scroll: HorizontalOffset = {scrollViewer.HorizontalOffset}");
+
+                    // Wait for scroll to complete, then highlight
+                    var timer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(300)
+                    };
+                    timer.Tick += (s, e) =>
                     {
                         HighlightProcessParameter(testContainer, process, paramName);
-                    }), System.Windows.Threading.DispatcherPriority.Background);
+                        timer.Stop();
+                    };
+                    timer.Start();
 
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }

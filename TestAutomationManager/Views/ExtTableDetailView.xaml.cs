@@ -1558,23 +1558,35 @@ namespace TestAutomationManager.Views
 
                     System.Diagnostics.Debug.WriteLine($"✓ Scrolled to column '{columnName}' (index {columnIndex})");
 
-                    // Add visual highlight to the column
-                    HighlightColumn(column);
+                    // Force update layout to ensure visual tree is ready
+                    TableDataGrid.UpdateLayout();
+
+                    // Wait for visual tree to be ready, then highlight
+                    var highlightTimer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(300)
+                    };
+                    highlightTimer.Tick += (s, e) =>
+                    {
+                        HighlightColumn(column);
+                        highlightTimer.Stop();
+                    };
+                    highlightTimer.Start();
 
                     // Show feedback to user
                     StatusText.Text = $"Navigated to column: {columnName}";
 
                     // Reset status text after 3 seconds
-                    var timer = new System.Windows.Threading.DispatcherTimer
+                    var statusTimer = new System.Windows.Threading.DispatcherTimer
                     {
                         Interval = TimeSpan.FromSeconds(3)
                     };
-                    timer.Tick += (s, e) =>
+                    statusTimer.Tick += (s, e) =>
                     {
                         StatusText.Text = "Ready - Double-click to edit • Drag borders to resize • Changes tracked automatically";
-                        timer.Stop();
+                        statusTimer.Stop();
                     };
-                    timer.Start();
+                    statusTimer.Start();
                 }
             }
             catch (Exception ex)
@@ -1640,19 +1652,54 @@ namespace TestAutomationManager.Views
         /// </summary>
         private DataGridColumnHeader FindColumnHeader(DataGrid dataGrid, DataGridColumn column)
         {
-            // Get the column headers presenter
-            var columnHeadersPresenter = GetVisualChild<DataGridColumnHeadersPresenter>(dataGrid);
-            if (columnHeadersPresenter == null)
-                return null;
-
-            // Find the column header for our column
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(columnHeadersPresenter); i++)
+            try
             {
-                var child = VisualTreeHelper.GetChild(columnHeadersPresenter, i);
+                // Get the column headers presenter
+                var columnHeadersPresenter = GetVisualChild<DataGridColumnHeadersPresenter>(dataGrid);
+                if (columnHeadersPresenter == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("DataGridColumnHeadersPresenter not found");
+                    return null;
+                }
+
+                // Find the column header for our column - check direct children first
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(columnHeadersPresenter); i++)
+                {
+                    var child = VisualTreeHelper.GetChild(columnHeadersPresenter, i);
+                    if (child is DataGridColumnHeader header && header.Column == column)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Found column header at index {i}");
+                        return header;
+                    }
+                }
+
+                // If not found in direct children, search recursively
+                System.Diagnostics.Debug.WriteLine("Column header not in direct children, searching recursively...");
+                return FindColumnHeaderRecursive(columnHeadersPresenter, column);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in FindColumnHeader: {ex.Message}");
+                return null;
+            }
+        }
+
+        private DataGridColumnHeader FindColumnHeaderRecursive(DependencyObject parent, DataGridColumn column)
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
                 if (child is DataGridColumnHeader header && header.Column == column)
                 {
                     return header;
                 }
+
+                var result = FindColumnHeaderRecursive(child, column);
+                if (result != null)
+                    return result;
             }
 
             return null;
