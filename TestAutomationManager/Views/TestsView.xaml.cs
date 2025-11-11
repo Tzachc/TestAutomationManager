@@ -1880,6 +1880,7 @@ namespace TestAutomationManager.Views
                         ["Comments"] = process.Comments,
                         ["Module"] = process.Module,
                         ["Repeat"] = process.Repeat,
+                        ["LastRunning"] = process.LastRunning,
                         ["TempParam"] = process.TempParam,
                         ["TempParam1"] = process.TempParam1,
                         ["TempParam11"] = process.TempParam11,
@@ -1993,6 +1994,8 @@ namespace TestAutomationManager.Views
                             newProcess.Module = processData["Module"].GetString();
                         if (processData.ContainsKey("Repeat") && processData["Repeat"].ValueKind == System.Text.Json.JsonValueKind.String)
                             newProcess.Repeat = processData["Repeat"].GetString();
+                        if (processData.ContainsKey("LastRunning") && processData["LastRunning"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.LastRunning = processData["LastRunning"].GetString();
                         if (processData.ContainsKey("TempParam") && processData["TempParam"].ValueKind == System.Text.Json.JsonValueKind.String)
                             newProcess.TempParam = processData["TempParam"].GetString();
                         if (processData.ContainsKey("TempParam1") && processData["TempParam1"].ValueKind == System.Text.Json.JsonValueKind.String)
@@ -2138,6 +2141,7 @@ namespace TestAutomationManager.Views
                         Comments = template.Comments,
                         Module = template.Module,
                         Repeat = template.Repeat,
+                        LastRunning = template.LastRunning,
                         TempParam = template.TempParam,
                         TempParam1 = template.TempParam1,
                         TempParam11 = template.TempParam11,
@@ -2196,7 +2200,7 @@ namespace TestAutomationManager.Views
                 }
                 else
                 {
-                    // Create a brand new process with only required fields
+                    // Create a brand new process with default values for NOT NULL fields
                     // User will fill in the rest later
                     newProcess = new Process
                     {
@@ -2204,6 +2208,12 @@ namespace TestAutomationManager.Views
                         TestID = targetTest.TestID,
                         ProcessID = processId,
                         ProcessName = "",  // Empty string instead of null (database doesn't allow NULL)
+                        WEB3Operator = "",  // Set to empty string to avoid NULL constraint
+                        Pass_Fail_WEB3Operator = "",  // Set to empty string to avoid NULL constraint
+                        LastRunning = "",  // Set to empty string to avoid NULL constraint
+                        Module = "",  // Set to empty string to avoid NULL constraint
+                        Comments = "",  // Set to empty string to avoid NULL constraint
+                        Repeat = "",  // Set to empty string to avoid NULL constraint
                         // All other fields will be null - user can edit them later
                     };
 

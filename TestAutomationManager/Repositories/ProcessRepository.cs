@@ -369,6 +369,7 @@ namespace TestAutomationManager.Repositories
                             Comments = p.Comments,
                             Module = p.Module,
                             Repeat = p.Repeat,
+                            LastRunning = p.LastRunning,
                             TempParam = p.TempParam,
                             TempParam1 = p.TempParam1,
                             TempParam11 = p.TempParam11,
