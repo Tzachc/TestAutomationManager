@@ -88,6 +88,10 @@ namespace TestAutomationManager.Views
         private FilterManager<Test> _filterManager;
         private Button _currentFilterButton;
 
+        // ----- Process selection for copy/paste -----
+        private List<Process> _selectedProcesses = new List<Process>();
+        private Process _lastSelectedProcess = null;
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -115,6 +119,9 @@ namespace TestAutomationManager.Views
 
             // Set data context
             TestsItemsControl.ItemsSource = Tests;
+
+            // Register keyboard shortcuts for copy/paste
+            this.PreviewKeyDown += TestsView_PreviewKeyDown;
 
             // Load initial data from database
             LoadTestsFromDatabase();
@@ -1747,6 +1754,465 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"Error navigating to ExtTest: {ex.Message}");
                 MessageBox.Show($"Failed to navigate to ExtTest.\n\nError: {ex.Message}",
                     "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        // ================================================
+        // PROCESS SELECTION AND COPY/PASTE
+        // ================================================
+
+        /// <summary>
+        /// Handle process row selection indicator click
+        /// Supports multi-selection with Ctrl key
+        /// </summary>
+        private void ProcessRow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                // Get the Process from the DataContext
+                if (sender is FrameworkElement element && element.DataContext is Process process)
+                {
+                    bool isCtrlPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+                    if (isCtrlPressed)
+                    {
+                        // Multi-selection mode: toggle selection
+                        process.IsSelected = !process.IsSelected;
+
+                        if (process.IsSelected)
+                        {
+                            if (!_selectedProcesses.Contains(process))
+                                _selectedProcesses.Add(process);
+                            _lastSelectedProcess = process;
+                        }
+                        else
+                        {
+                            _selectedProcesses.Remove(process);
+                        }
+                    }
+                    else
+                    {
+                        // Single selection mode: clear others and select this one
+                        ClearAllSelections();
+                        process.IsSelected = true;
+                        _selectedProcesses.Add(process);
+                        _lastSelectedProcess = process;
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"Selected {_selectedProcesses.Count} process(es)");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error selecting process row: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Clear all process selections
+        /// </summary>
+        private void ClearAllSelections()
+        {
+            foreach (var process in _selectedProcesses.ToList())
+            {
+                process.IsSelected = false;
+            }
+            _selectedProcesses.Clear();
+            _lastSelectedProcess = null;
+        }
+
+        /// <summary>
+        /// Handle keyboard shortcuts for copy/paste
+        /// </summary>
+        private void TestsView_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            try
+            {
+                bool isCtrlPressed = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+                if (isCtrlPressed)
+                {
+                    if (e.Key == Key.C)
+                    {
+                        // Copy selected processes
+                        CopySelectedProcesses();
+                        e.Handled = true;
+                    }
+                    else if (e.Key == Key.V)
+                    {
+                        // Paste processes
+                        PasteProcesses();
+                        e.Handled = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error handling keyboard shortcut: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Copy selected processes to clipboard as JSON
+        /// </summary>
+        private void CopySelectedProcesses()
+        {
+            try
+            {
+                if (_selectedProcesses.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No processes selected to copy");
+                    return;
+                }
+
+                // Serialize selected processes to JSON
+                var processData = new List<Dictionary<string, object>>();
+
+                foreach (var process in _selectedProcesses.OrderBy(p => p.ProcessPosition))
+                {
+                    var data = new Dictionary<string, object>
+                    {
+                        ["ProcessID"] = process.ProcessID,
+                        ["ProcessName"] = process.ProcessName,
+                        ["ProcessPosition"] = process.ProcessPosition,
+                        ["WEB3Operator"] = process.WEB3Operator,
+                        ["Pass_Fail_WEB3Operator"] = process.Pass_Fail_WEB3Operator,
+                        ["Comments"] = process.Comments,
+                        ["Module"] = process.Module,
+                        ["Repeat"] = process.Repeat,
+                        ["TempParam"] = process.TempParam,
+                        ["TempParam1"] = process.TempParam1,
+                        ["TempParam11"] = process.TempParam11,
+                        ["TempParam111"] = process.TempParam111,
+                        ["TempParam1111"] = process.TempParam1111,
+                        ["TempParam11111"] = process.TempParam11111
+                    };
+
+                    // Add all parameters
+                    for (int i = 1; i <= 46; i++)
+                    {
+                        data[$"Param{i}"] = process.GetType().GetProperty($"Param{i}")?.GetValue(process);
+                    }
+
+                    processData.Add(data);
+                }
+
+                // Serialize to JSON
+                string json = System.Text.Json.JsonSerializer.Serialize(processData, new System.Text.Json.JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+
+                // Copy to clipboard
+                Clipboard.SetText(json);
+
+                System.Diagnostics.Debug.WriteLine($"Copied {_selectedProcesses.Count} process(es) to clipboard");
+                MessageBox.Show($"Copied {_selectedProcesses.Count} process(es) to clipboard", "Copy Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error copying processes: {ex.Message}");
+                MessageBox.Show($"Failed to copy processes.\n\nError: {ex.Message}", "Copy Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Paste processes from clipboard
+        /// </summary>
+        private async void PasteProcesses()
+        {
+            try
+            {
+                if (!Clipboard.ContainsText())
+                {
+                    System.Diagnostics.Debug.WriteLine("Clipboard does not contain text");
+                    return;
+                }
+
+                string json = Clipboard.GetText();
+
+                // Deserialize from JSON
+                var processDataList = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, System.Text.Json.JsonElement>>>(json);
+
+                if (processDataList == null || processDataList.Count == 0)
+                {
+                    MessageBox.Show("No valid process data found in clipboard", "Paste Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Find the target test (where to paste)
+                Test targetTest = null;
+                if (_lastSelectedProcess != null && _lastSelectedProcess.ParentTest != null)
+                {
+                    targetTest = _lastSelectedProcess.ParentTest;
+                }
+                else
+                {
+                    // Find an expanded test
+                    targetTest = _allTests.FirstOrDefault(t => t.IsExpanded && t.AreProcessesLoaded);
+                }
+
+                if (targetTest == null)
+                {
+                    MessageBox.Show("Please expand a test and select where to paste the processes", "Paste Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Get the next ProcessPosition for the target test
+                double nextPosition = 1;
+                if (targetTest.Processes != null && targetTest.Processes.Count > 0)
+                {
+                    nextPosition = targetTest.Processes.Max(p => p.ProcessPosition ?? 0) + 1;
+                }
+
+                // Insert processes into database
+                int insertedCount = 0;
+                foreach (var processData in processDataList)
+                {
+                    try
+                    {
+                        // Create a new process instance
+                        var newProcess = new Process
+                        {
+                            TestID = targetTest.TestID,
+                            ProcessPosition = nextPosition++
+                        };
+
+                        // Copy properties from clipboard data
+                        if (processData.ContainsKey("ProcessID") && processData["ProcessID"].ValueKind == System.Text.Json.JsonValueKind.Number)
+                            newProcess.ProcessID = processData["ProcessID"].GetDouble();
+                        if (processData.ContainsKey("ProcessName") && processData["ProcessName"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.ProcessName = processData["ProcessName"].GetString();
+                        if (processData.ContainsKey("WEB3Operator") && processData["WEB3Operator"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.WEB3Operator = processData["WEB3Operator"].GetString();
+                        if (processData.ContainsKey("Pass_Fail_WEB3Operator") && processData["Pass_Fail_WEB3Operator"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.Pass_Fail_WEB3Operator = processData["Pass_Fail_WEB3Operator"].GetString();
+                        if (processData.ContainsKey("Comments") && processData["Comments"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.Comments = processData["Comments"].GetString();
+                        if (processData.ContainsKey("Module") && processData["Module"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.Module = processData["Module"].GetString();
+                        if (processData.ContainsKey("Repeat") && processData["Repeat"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.Repeat = processData["Repeat"].GetString();
+                        if (processData.ContainsKey("TempParam") && processData["TempParam"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.TempParam = processData["TempParam"].GetString();
+                        if (processData.ContainsKey("TempParam1") && processData["TempParam1"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.TempParam1 = processData["TempParam1"].GetString();
+                        if (processData.ContainsKey("TempParam11") && processData["TempParam11"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.TempParam11 = processData["TempParam11"].GetString();
+                        if (processData.ContainsKey("TempParam111") && processData["TempParam111"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.TempParam111 = processData["TempParam111"].GetString();
+                        if (processData.ContainsKey("TempParam1111") && processData["TempParam1111"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.TempParam1111 = processData["TempParam1111"].GetString();
+                        if (processData.ContainsKey("TempParam11111") && processData["TempParam11111"].ValueKind == System.Text.Json.JsonValueKind.String)
+                            newProcess.TempParam11111 = processData["TempParam11111"].GetString();
+
+                        // Copy all parameters
+                        for (int i = 1; i <= 46; i++)
+                        {
+                            string paramKey = $"Param{i}";
+                            if (processData.ContainsKey(paramKey) && processData[paramKey].ValueKind == System.Text.Json.JsonValueKind.String)
+                            {
+                                var value = processData[paramKey].GetString();
+                                newProcess.GetType().GetProperty(paramKey)?.SetValue(newProcess, value);
+                            }
+                        }
+
+                        // Set UI properties
+                        newProcess.ParentTest = targetTest;
+                        newProcess.Functions = new ObservableCollection<Function>();
+                        newProcess.AreFunctionsLoaded = false;
+
+                        // Insert into database
+                        await _processRepository.InsertProcessAsync(newProcess);
+
+                        // Add to UI collection
+                        targetTest.Processes.Add(newProcess);
+                        insertedCount++;
+
+                        System.Diagnostics.Debug.WriteLine($"Pasted process #{newProcess.ProcessID} to Test #{targetTest.TestID}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error pasting individual process: {ex.Message}");
+                    }
+                }
+
+                // Sort processes by position
+                var sortedProcesses = targetTest.Processes.OrderBy(p => p.ProcessPosition).ToList();
+                targetTest.Processes.Clear();
+                foreach (var p in sortedProcesses)
+                {
+                    targetTest.Processes.Add(p);
+                }
+
+                // Clear selections after paste
+                ClearAllSelections();
+
+                MessageBox.Show($"Successfully pasted {insertedCount} process(es) to Test #{targetTest.TestID}",
+                    "Paste Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                System.Diagnostics.Debug.WriteLine($"Pasted {insertedCount} process(es) to Test #{targetTest.TestID}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error pasting processes: {ex.Message}");
+                MessageBox.Show($"Failed to paste processes.\n\nError: {ex.Message}", "Paste Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // ================================================
+        // NEW PROCESS CREATION FROM "(New)" ROW
+        // ================================================
+
+        /// <summary>
+        /// Handle Enter key press in the new process ID textbox
+        /// </summary>
+        private void NewProcessID_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return || e.Key == Key.Enter)
+            {
+                ProcessNewProcessID(sender as TextBox);
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Handle focus loss from the new process ID textbox
+        /// </summary>
+        private void NewProcessID_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Process the new ProcessID when user leaves the field
+            ProcessNewProcessID(sender as TextBox);
+        }
+
+        /// <summary>
+        /// Process the new ProcessID entered by the user
+        /// </summary>
+        private async void ProcessNewProcessID(TextBox textBox)
+        {
+            if (textBox == null || string.IsNullOrWhiteSpace(textBox.Text))
+                return;
+
+            try
+            {
+                // Get the parent test from the DataContext (Tag binding)
+                if (textBox.Tag is not Test targetTest || targetTest.TestID == null)
+                {
+                    MessageBox.Show("Cannot determine which test to add the process to.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Parse the ProcessID
+                if (!double.TryParse(textBox.Text.Trim(), out double processId))
+                {
+                    MessageBox.Show("Please enter a valid numeric ProcessID.", "Invalid Input", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    textBox.Clear();
+                    return;
+                }
+
+                // Check if ProcessID exists
+                bool processExists = await _processRepository.ProcessIDExistsAsync(processId);
+
+                Process newProcess;
+
+                if (processExists)
+                {
+                    // Load existing process template
+                    var template = await _processRepository.GetProcessTemplateByProcessIDAsync(processId);
+                    if (template == null)
+                    {
+                        MessageBox.Show($"Failed to load process template for ProcessID {processId}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Create a new instance based on the template
+                    newProcess = new Process
+                    {
+                        TestID = targetTest.TestID,
+                        ProcessID = template.ProcessID,
+                        ProcessName = template.ProcessName,
+                        WEB3Operator = template.WEB3Operator,
+                        Pass_Fail_WEB3Operator = template.Pass_Fail_WEB3Operator,
+                        Comments = template.Comments,
+                        Module = template.Module,
+                        Repeat = template.Repeat,
+                        TempParam = template.TempParam,
+                        TempParam1 = template.TempParam1,
+                        TempParam11 = template.TempParam11,
+                        TempParam111 = template.TempParam111,
+                        TempParam1111 = template.TempParam1111,
+                        TempParam11111 = template.TempParam11111
+                    };
+
+                    // Copy all parameters
+                    for (int i = 1; i <= 46; i++)
+                    {
+                        var paramProp = typeof(Process).GetProperty($"Param{i}");
+                        if (paramProp != null)
+                        {
+                            var value = paramProp.GetValue(template);
+                            paramProp.SetValue(newProcess, value);
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"Loaded existing ProcessID {processId} template");
+                }
+                else
+                {
+                    // Create a brand new process
+                    newProcess = new Process
+                    {
+                        TestID = targetTest.TestID,
+                        ProcessID = processId,
+                        ProcessName = $"New Process {processId}",
+                        WEB3Operator = null
+                    };
+
+                    System.Diagnostics.Debug.WriteLine($"Creating new ProcessID {processId}");
+                }
+
+                // Get the next ProcessPosition
+                double nextPosition = 1;
+                if (targetTest.Processes != null && targetTest.Processes.Count > 0)
+                {
+                    nextPosition = targetTest.Processes.Max(p => p.ProcessPosition ?? 0) + 1;
+                }
+                newProcess.ProcessPosition = nextPosition;
+
+                // Set UI properties
+                newProcess.ParentTest = targetTest;
+                newProcess.Functions = new ObservableCollection<Function>();
+                newProcess.AreFunctionsLoaded = false;
+
+                // Insert into database
+                await _processRepository.InsertProcessAsync(newProcess);
+
+                // Add to UI collection
+                targetTest.Processes.Add(newProcess);
+
+                // Sort processes by position
+                var sortedProcesses = targetTest.Processes.OrderBy(p => p.ProcessPosition).ToList();
+                targetTest.Processes.Clear();
+                foreach (var p in sortedProcesses)
+                {
+                    targetTest.Processes.Add(p);
+                }
+
+                // Clear the textbox
+                textBox.Clear();
+
+                string message = processExists
+                    ? $"Added existing process {processId} to test {targetTest.TestID}"
+                    : $"Created new process {processId} and added to test {targetTest.TestID}";
+
+                System.Diagnostics.Debug.WriteLine(message);
+                MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error processing new ProcessID: {ex.Message}");
+                MessageBox.Show($"Failed to add process.\n\nError: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                textBox.Clear();
             }
         }
 

@@ -306,6 +306,9 @@ namespace TestAutomationManager.Models
         // Parent reference for navigation
         private Test? _parentTest;
 
+        // Selection state for copy/paste operations
+        private bool _isSelected;
+
         // ================================================
         // DATABASE COLUMNS
         // ================================================
@@ -480,6 +483,17 @@ namespace TestAutomationManager.Models
         {
             get => _parentTest;
             set => _parentTest = value;
+        }
+
+        /// <summary>
+        /// Indicates whether this process row is selected for copy/paste operations
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(); }
         }
 
         // ================================================

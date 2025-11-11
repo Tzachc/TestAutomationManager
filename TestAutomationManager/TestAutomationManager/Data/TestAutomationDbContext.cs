@@ -192,6 +192,7 @@ namespace TestAutomationManager.Data
 
                 // Ignore UI-only and compatibility properties
                 entity.Ignore(e => e.IsExpanded);
+                entity.Ignore(e => e.IsSelected);
                 entity.Ignore(e => e.Id);
                 entity.Ignore(e => e.TestId);
                 entity.Ignore(e => e.Name);

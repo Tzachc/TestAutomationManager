@@ -760,21 +760,60 @@
                                         <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Border Background="{DynamicResource CardBackgroundBrush}"
-                                                                BorderBrush="{DynamicResource BorderBrush}"
-                                                                BorderThickness="1"
-                                                                CornerRadius="6"
-                                                                Padding="16,8"
-                                                                Margin="42,0,0,4">
-                                                        <Grid>
-                                                            <Grid.RowDefinitions>
-                                                                <RowDefinition Height="Auto"/>
-                                                                <RowDefinition Height="Auto"/>
-                                                            </Grid.RowDefinitions>
+                                                    <Grid>
+                                                        <!-- Selection indicator button (left side) -->
+                                                        <Border Width="32"
+                                                                HorizontalAlignment="Left"
+                                                                Background="Transparent"
+                                                                Cursor="Hand"
+                                                                MouseLeftButtonDown="ProcessRow_MouseLeftButtonDown">
+                                                            <Path Width="16" Height="16"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Center"
+                                                                  Data="M8,2 L14,8 L8,14"
+                                                                  Stroke="{DynamicResource TextSecondaryBrush}"
+                                                                  StrokeThickness="2"
+                                                                  Opacity="0.3">
+                                                                <Path.Style>
+                                                                    <Style TargetType="Path">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                <Setter Property="Opacity" Value="1.0"/>
+                                                                                <Setter Property="Stroke" Value="#4A9EFF"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Path.Style>
+                                                            </Path>
+                                                        </Border>
 
-                                                            <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" MinWidth="6600">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
+                                                        <!-- Main process row border -->
+                                                        <Border Margin="42,0,0,4">
+                                                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                                    BorderThickness="1"
+                                                                    CornerRadius="6"
+                                                                    Padding="16,8">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                <Setter Property="BorderBrush" Value="#4A9EFF"/>
+                                                                                <Setter Property="BorderThickness" Value="2"/>
+                                                                                <Setter Property="Background" Value="#1A4A9EFF"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <Grid>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+
+                                                                    <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" MinWidth="6600">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
                                                                     <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
                                                                     <ColumnDefinition Width="120" SharedSizeGroup="procWeb3Operator"/>
                                                                     <ColumnDefinition Width="700" SharedSizeGroup="procName"/>
@@ -1242,13 +1281,82 @@
                                                                         </ItemsControl>
                                                                         </ScrollViewer>
                                                                     </Border>
-                                                                </Grid>
+                                                                    </Grid>
+                                                                </Border>
                                                             </Border>
                                                         </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
                                         </ItemsControl>
+
+                                        <!-- "(New)" row for adding new processes -->
+                                        <Grid Margin="42,4,0,4">
+                                            <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Padding="16,8"
+                                                    Opacity="0.7">
+                                                <Grid MinWidth="6600">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
+                                                        <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
+                                                        <ColumnDefinition Width="120" SharedSizeGroup="procWeb3Operator"/>
+                                                        <ColumnDefinition Width="700" SharedSizeGroup="procName"/>
+                                                        <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
+                                                        <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
+                                                        <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Empty expand button column -->
+                                                    <Border Grid.Column="0"/>
+
+                                                    <!-- Position column shows "(New)" -->
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="(New)"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               FontSize="11"
+                                                               FontStyle="Italic"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+
+                                                    <!-- Empty Web3Operator column -->
+                                                    <Border Grid.Column="2"/>
+
+                                                    <!-- Empty ProcessName column -->
+                                                    <TextBlock Grid.Column="3"
+                                                               Text="Enter ProcessID to add process..."
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               FontSize="11"
+                                                               FontStyle="Italic"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Left"
+                                                               Opacity="0.6"/>
+
+                                                    <!-- ProcessID input -->
+                                                    <TextBox Grid.Column="4"
+                                                             Name="NewProcessIDTextBox"
+                                                             Background="Transparent"
+                                                             Foreground="{DynamicResource TextPrimaryBrush}"
+                                                             BorderThickness="0"
+                                                             FontSize="11"
+                                                             VerticalAlignment="Center"
+                                                             HorizontalAlignment="Center"
+                                                             TextAlignment="Center"
+                                                             Tag="{Binding}"
+                                                             KeyDown="NewProcessID_KeyDown"
+                                                             LostFocus="NewProcessID_LostFocus"
+                                                             ToolTip="Enter ProcessID and press Enter"/>
+
+                                                    <!-- Empty remaining columns -->
+                                                    <Border Grid.Column="5"/>
+                                                    <Border Grid.Column="6"/>
+                                                    <Border Grid.Column="7"/>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
+
                                         </ScrollViewer>
                                     </Border>
                                 </Grid>
