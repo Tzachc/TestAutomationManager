@@ -61,8 +61,8 @@ namespace TestAutomationManager.Repositories
         }
 
         /// <summary>
-        /// Load processes for a specific test (optimized with stored procedure)
-        /// Uses schema-qualified stored procedure for faster performance
+        /// Load processes for a specific test (direct query with NULL handling)
+        /// Uses direct EF Core query to handle NULL values safely
         /// </summary>
         public async Task<List<Process>> GetProcessesForTestAsync(int testId)
         {
@@ -71,24 +71,31 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes for Test #{testId} via stored procedure from schema '{schemaName}'...");
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes for Test #{testId} via direct query from schema '{schemaName}'...");
 
-                    // ✅ Use schema-qualified stored procedure with parameter
-                    var testIdParam = new SqlParameter("@TestID", testId);
-                    var spName = $"EXEC [{schemaName}].[usp_GetProcessesByTestID] @TestID";
-
+                    // ✅ Use direct EF Core query with proper NULL handling
                     var processes = await context.Set<Process>()
-                        .FromSqlRaw(spName, testIdParam)
+                        .AsNoTracking()
+                        .Where(p => p.TestID == testId)
                         .ToListAsync();
 
-                    // Initialize empty functions collection for each process
+                    // Initialize empty functions collection for each process and handle NULLs
                     foreach (var process in processes)
                     {
+                        // Handle NULL values by replacing with empty strings
+                        process.ProcessName = process.ProcessName ?? "";
+                        process.WEB3Operator = process.WEB3Operator ?? "";
+                        process.Pass_Fail_WEB3Operator = process.Pass_Fail_WEB3Operator ?? "";
+                        process.Comments = process.Comments ?? "";
+                        process.Module = process.Module ?? "";
+                        process.Repeat = process.Repeat ?? "";
+                        process.LastRunning = process.LastRunning ?? "";
+
                         process.Functions = new ObservableCollection<Function>();
                         process.AreFunctionsLoaded = false;
                     }
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId} via SP");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId} via direct query");
                     return processes;
                 }
             }

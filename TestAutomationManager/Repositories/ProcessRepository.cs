@@ -21,8 +21,8 @@ namespace TestAutomationManager.Repositories
         // ================================================
 
         /// <summary>
-        /// Get all processes WITHOUT functions (optimized with stored procedure)
-        /// Uses schema-qualified stored procedure for 4-5x faster performance
+        /// Get all processes WITHOUT functions (direct query with NULL handling)
+        /// Uses direct EF Core query to handle NULL values safely
         /// OPTIMIZED FOR LARGE DATASETS (20000+ records)
         /// </summary>
         public async Task<List<Process>> GetAllProcessesAsync()
@@ -32,19 +32,27 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var schemaName = TestAutomationManager.Services.SchemaConfigService.Instance.CurrentSchema;
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes using stored procedure from schema '{schemaName}'...");
+                    System.Diagnostics.Debug.WriteLine($"⏳ Loading processes using direct query from schema '{schemaName}'...");
 
-                    // ✅ Use schema-qualified stored procedure for 4-5x faster performance
-                    var spName = $"EXEC [{schemaName}].[usp_GetAllProcesses]";
+                    // ✅ Use direct EF Core query with AsNoTracking for performance
                     var processes = await context.Set<Process>()
-                        .FromSqlRaw(spName)
+                        .AsNoTracking()
                         .ToListAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes via stored procedure");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes via direct query");
 
                     // Initialize empty collections for UI binding
                     foreach (var process in processes)
                     {
+                        // Handle NULL values by replacing with empty strings
+                        process.ProcessName = process.ProcessName ?? "";
+                        process.WEB3Operator = process.WEB3Operator ?? "";
+                        process.Pass_Fail_WEB3Operator = process.Pass_Fail_WEB3Operator ?? "";
+                        process.Comments = process.Comments ?? "";
+                        process.Module = process.Module ?? "";
+                        process.Repeat = process.Repeat ?? "";
+                        process.LastRunning = process.LastRunning ?? "";
+
                         process.Functions = new ObservableCollection<Function>();
                         process.AreFunctionsLoaded = false;  // Mark as not loaded yet
                     }
