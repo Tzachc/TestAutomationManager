@@ -1972,42 +1972,102 @@ namespace TestAutomationManager.Views
                 {
                     try
                     {
-                        // Create a new process instance
+                        // Create a new process instance with ALL fields initialized to empty strings
+                        // CRITICAL: NO NULL VALUES - EF Core can't materialize NULL values!
                         var newProcess = new Process
                         {
                             TestID = targetTest.TestID,
-                            ProcessPosition = nextPosition++
+                            ProcessPosition = nextPosition++,
+                            ProcessName = "",
+                            WEB3Operator = "",
+                            Pass_Fail_WEB3Operator = "",
+                            Comments = "",
+                            Module = "",
+                            Repeat = "",
+                            LastRunning = "",
+                            TempParam = "",
+                            TempParam1 = "",
+                            TempParam11 = "",
+                            TempParam111 = "",
+                            TempParam1111 = "",
+                            TempParam11111 = "",
+                            Param1 = "",
+                            Param2 = "",
+                            Param3 = "",
+                            Param4 = "",
+                            Param5 = "",
+                            Param6 = "",
+                            Param7 = "",
+                            Param8 = "",
+                            Param9 = "",
+                            Param10 = "",
+                            Param11 = "",
+                            Param12 = "",
+                            Param13 = "",
+                            Param14 = "",
+                            Param15 = "",
+                            Param16 = "",
+                            Param17 = "",
+                            Param18 = "",
+                            Param19 = "",
+                            Param20 = "",
+                            Param21 = "",
+                            Param22 = "",
+                            Param23 = "",
+                            Param24 = "",
+                            Param25 = "",
+                            Param26 = "",
+                            Param27 = "",
+                            Param28 = "",
+                            Param29 = "",
+                            Param30 = "",
+                            Param31 = "",
+                            Param32 = "",
+                            Param33 = "",
+                            Param34 = "",
+                            Param35 = "",
+                            Param36 = "",
+                            Param37 = "",
+                            Param38 = "",
+                            Param39 = "",
+                            Param40 = "",
+                            Param41 = "",
+                            Param42 = "",
+                            Param43 = "",
+                            Param44 = "",
+                            Param45 = "",
+                            Param46 = ""
                         };
 
-                        // Copy properties from clipboard data
+                        // Copy properties from clipboard data (overwrite defaults if present)
                         if (processData.ContainsKey("ProcessID") && processData["ProcessID"].ValueKind == System.Text.Json.JsonValueKind.Number)
                             newProcess.ProcessID = processData["ProcessID"].GetDouble();
                         if (processData.ContainsKey("ProcessName") && processData["ProcessName"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.ProcessName = processData["ProcessName"].GetString();
+                            newProcess.ProcessName = processData["ProcessName"].GetString() ?? "";
                         if (processData.ContainsKey("WEB3Operator") && processData["WEB3Operator"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.WEB3Operator = processData["WEB3Operator"].GetString();
+                            newProcess.WEB3Operator = processData["WEB3Operator"].GetString() ?? "";
                         if (processData.ContainsKey("Pass_Fail_WEB3Operator") && processData["Pass_Fail_WEB3Operator"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.Pass_Fail_WEB3Operator = processData["Pass_Fail_WEB3Operator"].GetString();
+                            newProcess.Pass_Fail_WEB3Operator = processData["Pass_Fail_WEB3Operator"].GetString() ?? "";
                         if (processData.ContainsKey("Comments") && processData["Comments"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.Comments = processData["Comments"].GetString();
+                            newProcess.Comments = processData["Comments"].GetString() ?? "";
                         if (processData.ContainsKey("Module") && processData["Module"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.Module = processData["Module"].GetString();
+                            newProcess.Module = processData["Module"].GetString() ?? "";
                         if (processData.ContainsKey("Repeat") && processData["Repeat"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.Repeat = processData["Repeat"].GetString();
+                            newProcess.Repeat = processData["Repeat"].GetString() ?? "";
                         if (processData.ContainsKey("LastRunning") && processData["LastRunning"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.LastRunning = processData["LastRunning"].GetString();
+                            newProcess.LastRunning = processData["LastRunning"].GetString() ?? "";
                         if (processData.ContainsKey("TempParam") && processData["TempParam"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.TempParam = processData["TempParam"].GetString();
+                            newProcess.TempParam = processData["TempParam"].GetString() ?? "";
                         if (processData.ContainsKey("TempParam1") && processData["TempParam1"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.TempParam1 = processData["TempParam1"].GetString();
+                            newProcess.TempParam1 = processData["TempParam1"].GetString() ?? "";
                         if (processData.ContainsKey("TempParam11") && processData["TempParam11"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.TempParam11 = processData["TempParam11"].GetString();
+                            newProcess.TempParam11 = processData["TempParam11"].GetString() ?? "";
                         if (processData.ContainsKey("TempParam111") && processData["TempParam111"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.TempParam111 = processData["TempParam111"].GetString();
+                            newProcess.TempParam111 = processData["TempParam111"].GetString() ?? "";
                         if (processData.ContainsKey("TempParam1111") && processData["TempParam1111"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.TempParam1111 = processData["TempParam1111"].GetString();
+                            newProcess.TempParam1111 = processData["TempParam1111"].GetString() ?? "";
                         if (processData.ContainsKey("TempParam11111") && processData["TempParam11111"].ValueKind == System.Text.Json.JsonValueKind.String)
-                            newProcess.TempParam11111 = processData["TempParam11111"].GetString();
+                            newProcess.TempParam11111 = processData["TempParam11111"].GetString() ?? "";
 
                         // Copy all parameters
                         for (int i = 1; i <= 46; i++)
@@ -2015,7 +2075,7 @@ namespace TestAutomationManager.Views
                             string paramKey = $"Param{i}";
                             if (processData.ContainsKey(paramKey) && processData[paramKey].ValueKind == System.Text.Json.JsonValueKind.String)
                             {
-                                var value = processData[paramKey].GetString();
+                                var value = processData[paramKey].GetString() ?? "";
                                 newProcess.GetType().GetProperty(paramKey)?.SetValue(newProcess, value);
                             }
                         }
@@ -2130,7 +2190,7 @@ namespace TestAutomationManager.Views
                     }
 
                     // Create a new instance based on the template (don't set Index - it's auto-generated)
-                    // Use null-coalescing operator to ensure no NULL values for fields with NOT NULL constraints
+                    // Use null-coalescing operator to ensure NO NULL values - EF Core can't materialize NULLs
                     newProcess = new Process
                     {
                         // Don't set Index - it's auto-generated by database
@@ -2143,79 +2203,130 @@ namespace TestAutomationManager.Views
                         Module = template.Module ?? "",
                         Repeat = template.Repeat ?? "",
                         LastRunning = template.LastRunning ?? "",
-                        TempParam = template.TempParam,
-                        TempParam1 = template.TempParam1,
-                        TempParam11 = template.TempParam11,
-                        TempParam111 = template.TempParam111,
-                        TempParam1111 = template.TempParam1111,
-                        TempParam11111 = template.TempParam11111,
-                        Param1 = template.Param1,
-                        Param2 = template.Param2,
-                        Param3 = template.Param3,
-                        Param4 = template.Param4,
-                        Param5 = template.Param5,
-                        Param6 = template.Param6,
-                        Param7 = template.Param7,
-                        Param8 = template.Param8,
-                        Param9 = template.Param9,
-                        Param10 = template.Param10,
-                        Param11 = template.Param11,
-                        Param12 = template.Param12,
-                        Param13 = template.Param13,
-                        Param14 = template.Param14,
-                        Param15 = template.Param15,
-                        Param16 = template.Param16,
-                        Param17 = template.Param17,
-                        Param18 = template.Param18,
-                        Param19 = template.Param19,
-                        Param20 = template.Param20,
-                        Param21 = template.Param21,
-                        Param22 = template.Param22,
-                        Param23 = template.Param23,
-                        Param24 = template.Param24,
-                        Param25 = template.Param25,
-                        Param26 = template.Param26,
-                        Param27 = template.Param27,
-                        Param28 = template.Param28,
-                        Param29 = template.Param29,
-                        Param30 = template.Param30,
-                        Param31 = template.Param31,
-                        Param32 = template.Param32,
-                        Param33 = template.Param33,
-                        Param34 = template.Param34,
-                        Param35 = template.Param35,
-                        Param36 = template.Param36,
-                        Param37 = template.Param37,
-                        Param38 = template.Param38,
-                        Param39 = template.Param39,
-                        Param40 = template.Param40,
-                        Param41 = template.Param41,
-                        Param42 = template.Param42,
-                        Param43 = template.Param43,
-                        Param44 = template.Param44,
-                        Param45 = template.Param45,
-                        Param46 = template.Param46
+                        TempParam = template.TempParam ?? "",
+                        TempParam1 = template.TempParam1 ?? "",
+                        TempParam11 = template.TempParam11 ?? "",
+                        TempParam111 = template.TempParam111 ?? "",
+                        TempParam1111 = template.TempParam1111 ?? "",
+                        TempParam11111 = template.TempParam11111 ?? "",
+                        Param1 = template.Param1 ?? "",
+                        Param2 = template.Param2 ?? "",
+                        Param3 = template.Param3 ?? "",
+                        Param4 = template.Param4 ?? "",
+                        Param5 = template.Param5 ?? "",
+                        Param6 = template.Param6 ?? "",
+                        Param7 = template.Param7 ?? "",
+                        Param8 = template.Param8 ?? "",
+                        Param9 = template.Param9 ?? "",
+                        Param10 = template.Param10 ?? "",
+                        Param11 = template.Param11 ?? "",
+                        Param12 = template.Param12 ?? "",
+                        Param13 = template.Param13 ?? "",
+                        Param14 = template.Param14 ?? "",
+                        Param15 = template.Param15 ?? "",
+                        Param16 = template.Param16 ?? "",
+                        Param17 = template.Param17 ?? "",
+                        Param18 = template.Param18 ?? "",
+                        Param19 = template.Param19 ?? "",
+                        Param20 = template.Param20 ?? "",
+                        Param21 = template.Param21 ?? "",
+                        Param22 = template.Param22 ?? "",
+                        Param23 = template.Param23 ?? "",
+                        Param24 = template.Param24 ?? "",
+                        Param25 = template.Param25 ?? "",
+                        Param26 = template.Param26 ?? "",
+                        Param27 = template.Param27 ?? "",
+                        Param28 = template.Param28 ?? "",
+                        Param29 = template.Param29 ?? "",
+                        Param30 = template.Param30 ?? "",
+                        Param31 = template.Param31 ?? "",
+                        Param32 = template.Param32 ?? "",
+                        Param33 = template.Param33 ?? "",
+                        Param34 = template.Param34 ?? "",
+                        Param35 = template.Param35 ?? "",
+                        Param36 = template.Param36 ?? "",
+                        Param37 = template.Param37 ?? "",
+                        Param38 = template.Param38 ?? "",
+                        Param39 = template.Param39 ?? "",
+                        Param40 = template.Param40 ?? "",
+                        Param41 = template.Param41 ?? "",
+                        Param42 = template.Param42 ?? "",
+                        Param43 = template.Param43 ?? "",
+                        Param44 = template.Param44 ?? "",
+                        Param45 = template.Param45 ?? "",
+                        Param46 = template.Param46 ?? ""
                     };
 
                     System.Diagnostics.Debug.WriteLine($"Loaded existing ProcessID {processId} template");
                 }
                 else
                 {
-                    // Create a brand new process with default values for NOT NULL fields
-                    // User will fill in the rest later
+                    // Create a brand new process with ALL fields set to empty strings
+                    // CRITICAL: NO NULL VALUES - EF Core can't materialize NULL values!
                     newProcess = new Process
                     {
                         // Don't set Index - it's auto-generated by database
                         TestID = targetTest.TestID,
                         ProcessID = processId,
-                        ProcessName = "",  // Empty string instead of null (database doesn't allow NULL)
-                        WEB3Operator = "",  // Set to empty string to avoid NULL constraint
-                        Pass_Fail_WEB3Operator = "",  // Set to empty string to avoid NULL constraint
-                        LastRunning = "",  // Set to empty string to avoid NULL constraint
-                        Module = "",  // Set to empty string to avoid NULL constraint
-                        Comments = "",  // Set to empty string to avoid NULL constraint
-                        Repeat = "",  // Set to empty string to avoid NULL constraint
-                        // All other fields will be null - user can edit them later
+                        ProcessName = "",
+                        WEB3Operator = "",
+                        Pass_Fail_WEB3Operator = "",
+                        LastRunning = "",
+                        Module = "",
+                        Comments = "",
+                        Repeat = "",
+                        TempParam = "",
+                        TempParam1 = "",
+                        TempParam11 = "",
+                        TempParam111 = "",
+                        TempParam1111 = "",
+                        TempParam11111 = "",
+                        Param1 = "",
+                        Param2 = "",
+                        Param3 = "",
+                        Param4 = "",
+                        Param5 = "",
+                        Param6 = "",
+                        Param7 = "",
+                        Param8 = "",
+                        Param9 = "",
+                        Param10 = "",
+                        Param11 = "",
+                        Param12 = "",
+                        Param13 = "",
+                        Param14 = "",
+                        Param15 = "",
+                        Param16 = "",
+                        Param17 = "",
+                        Param18 = "",
+                        Param19 = "",
+                        Param20 = "",
+                        Param21 = "",
+                        Param22 = "",
+                        Param23 = "",
+                        Param24 = "",
+                        Param25 = "",
+                        Param26 = "",
+                        Param27 = "",
+                        Param28 = "",
+                        Param29 = "",
+                        Param30 = "",
+                        Param31 = "",
+                        Param32 = "",
+                        Param33 = "",
+                        Param34 = "",
+                        Param35 = "",
+                        Param36 = "",
+                        Param37 = "",
+                        Param38 = "",
+                        Param39 = "",
+                        Param40 = "",
+                        Param41 = "",
+                        Param42 = "",
+                        Param43 = "",
+                        Param44 = "",
+                        Param45 = "",
+                        Param46 = ""
                     };
 
                     System.Diagnostics.Debug.WriteLine($"Creating new ProcessID {processId}");
