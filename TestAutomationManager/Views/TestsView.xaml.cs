@@ -1518,20 +1518,118 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void PerformProcessParameterScroll(Test test, Process process, string paramName)
         {
-            // Find the process in the visual tree
-            var listBoxItem = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
-            if (listBoxItem == null)
+            try
             {
-                System.Diagnostics.Debug.WriteLine("Could not find test in visual tree");
-                return;
+                // Scroll to test first
+                TestsItemsControl.ScrollIntoView(test);
+
+                // Give UI time to render
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    // Find the process row's ScrollViewer
+                    var testContainer = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                    if (testContainer == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not find test container");
+                        ShowProcessNavigationMessage(paramName, process);
+                        return;
+                    }
+
+                    // Find the ScrollViewer for the process grid
+                    var scrollViewer = FindVisualChild<ScrollViewer>(testContainer, sv => sv.Name == "ProcessScrollViewer" || sv.MaxHeight == 800);
+                    if (scrollViewer == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not find process ScrollViewer");
+                        ShowProcessNavigationMessage(paramName, process);
+                        return;
+                    }
+
+                    // Calculate approximate column position based on parameter name
+                    // Param columns start at column 7, with varying widths
+                    int paramNumber = ExtractParamNumber(paramName);
+                    if (paramNumber <= 0)
+                    {
+                        ShowProcessNavigationMessage(paramName, process);
+                        return;
+                    }
+
+                    // Calculate horizontal scroll offset
+                    double offset = CalculateParamColumnOffset(paramNumber);
+                    scrollViewer.ScrollToHorizontalOffset(offset);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Scrolled to {paramName} (offset: {offset})");
+                    ShowProcessNavigationMessage(paramName, process);
+
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error scrolling to parameter: {ex.Message}");
+                ShowProcessNavigationMessage(paramName, process);
+            }
+        }
+
+        private void ShowProcessNavigationMessage(string paramName, Process process)
+        {
+            MessageBox.Show($"Navigated to {paramName} in Process: {process.ProcessName ?? process.ProcessID.ToString()}\n\nThe parameter should be visible in the scrolled view.",
+                "Parameter Navigation", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private int ExtractParamNumber(string paramName)
+        {
+            // Extract number from "Param1", "Param2", etc.
+            var match = System.Text.RegularExpressions.Regex.Match(paramName, @"Param(\d+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (match.Success && int.TryParse(match.Groups[1].Value, out int number))
+            {
+                return number;
+            }
+            return 0;
+        }
+
+        private double CalculateParamColumnOffset(int paramNumber)
+        {
+            // Column widths from XAML:
+            // Columns 0-6: Various fixed widths (Position, Web3 Operator, ProcessName, etc.)
+            // Param1-23: 300px each
+            // Param24-46: 120px each
+
+            // Base offset (skip first 7 columns before params)
+            double baseOffset = 60 + 150 + 200 + 80 + 150 + 120 + 120; // Approximate total of first 7 columns
+
+            if (paramNumber <= 23)
+            {
+                // Params 1-23 are 300px wide
+                return baseOffset + ((paramNumber - 1) * 300);
+            }
+            else
+            {
+                // Params 24-46 are 120px wide
+                double offset23 = baseOffset + (23 * 300);
+                return offset23 + ((paramNumber - 24) * 120);
+            }
+        }
+
+        private T FindVisualChild<T>(DependencyObject parent, Func<T, bool> predicate = null) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T typedChild && (predicate == null || predicate(typedChild)))
+                {
+                    return typedChild;
+                }
+
+                var result = FindVisualChild(child, predicate);
+                if (result != null)
+                {
+                    return result;
+                }
             }
 
-            // Highlight the parameter by showing a tooltip or message
-            MessageBox.Show($"Navigate to {paramName} in Process: {process.ProcessName ?? process.ProcessID.ToString()}",
-                "Parameter Navigation", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            // TODO: Implement actual scrolling to the specific parameter column
-            // This would require finding the ScrollViewer and calculating the column position
+            return null;
         }
 
         /// <summary>

@@ -1553,10 +1553,13 @@ namespace TestAutomationManager.Views
                     // Bring the column into view
                     TableDataGrid.ScrollIntoView(TableDataGrid.Items[0], column);
 
-                    // Highlight by selecting the first cell in that column (optional)
+                    // Highlight by selecting the first cell in that column
                     TableDataGrid.CurrentCell = new DataGridCellInfo(TableDataGrid.Items[0], column);
 
                     System.Diagnostics.Debug.WriteLine($"✓ Scrolled to column '{columnName}' (index {columnIndex})");
+
+                    // Add visual highlight to the column
+                    HighlightColumn(column);
 
                     // Show feedback to user
                     StatusText.Text = $"Navigated to column: {columnName}";
@@ -1579,6 +1582,47 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"Error scrolling to column: {ex.Message}");
                 MessageBox.Show($"Failed to scroll to column.\n\nError: {ex.Message}",
                     "Scroll Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Adds a temporary visual highlight to a column to help users see where they navigated
+        /// </summary>
+        private void HighlightColumn(DataGridColumn column)
+        {
+            try
+            {
+                // Store original header style
+                var originalHeader = column.Header;
+                var originalHeaderStyle = column.HeaderStyle;
+
+                // Create highlighted header with colored border
+                var highlightStyle = new Style(typeof(DataGridColumnHeader));
+                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.BackgroundProperty, new SolidColorBrush(Color.FromRgb(255, 255, 153)))); // Light yellow
+                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.BorderBrushProperty, new SolidColorBrush(Color.FromRgb(255, 165, 0)))); // Orange border
+                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.BorderThicknessProperty, new Thickness(3)));
+                highlightStyle.Setters.Add(new Setter(DataGridColumnHeader.FontWeightProperty, FontWeights.Bold));
+
+                // Apply highlight
+                column.HeaderStyle = highlightStyle;
+
+                // Remove highlight after 3 seconds
+                var timer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(3)
+                };
+                timer.Tick += (s, e) =>
+                {
+                    column.HeaderStyle = originalHeaderStyle;
+                    timer.Stop();
+                };
+                timer.Start();
+
+                System.Diagnostics.Debug.WriteLine($"✓ Applied highlight to column header");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error highlighting column: {ex.Message}");
             }
         }
     }
