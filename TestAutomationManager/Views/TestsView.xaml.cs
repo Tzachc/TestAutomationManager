@@ -1526,7 +1526,7 @@ namespace TestAutomationManager.Views
                 // Give UI time to render the test container
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    // Find the process row's ScrollViewer
+                    // Find the test container
                     var testContainer = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
                     if (testContainer == null)
                     {
@@ -1534,17 +1534,35 @@ namespace TestAutomationManager.Views
                         return;
                     }
 
-                    // Find ALL ScrollViewers and get the one for processes (has MaxHeight = 800)
-                    var scrollViewers = FindVisualChildren<ScrollViewer>(testContainer).ToList();
-                    var scrollViewer = scrollViewers.FirstOrDefault(sv => sv.MaxHeight == 800);
+                    // Find the Process ScrollViewer by name "ProcRowsScrollViewer"
+                    var scrollViewer = FindVisualChild<ScrollViewer>(testContainer, sv => sv.Name == "ProcRowsScrollViewer");
 
                     if (scrollViewer == null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Could not find process ScrollViewer. Found {scrollViewers.Count} ScrollViewers total");
+                        // Fallback: try finding by MaxHeight = 800 and check it contains the process
+                        System.Diagnostics.Debug.WriteLine("ProcRowsScrollViewer not found by name, trying fallback...");
+                        var allScrollViewers = FindVisualChildren<ScrollViewer>(testContainer).ToList();
+
+                        foreach (var sv in allScrollViewers)
+                        {
+                            // Check if this ScrollViewer contains an ItemsControl bound to Processes
+                            var itemsControl = FindVisualChild<ItemsControl>(sv);
+                            if (itemsControl != null && itemsControl.ItemsSource == test.Processes)
+                            {
+                                scrollViewer = sv;
+                                System.Diagnostics.Debug.WriteLine("Found Process ScrollViewer via ItemsControl binding");
+                                break;
+                            }
+                        }
+                    }
+
+                    if (scrollViewer == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Could not find Process ScrollViewer");
                         return;
                     }
 
-                    // Calculate approximate column position based on parameter name
+                    // Calculate column position based on parameter name
                     int paramNumber = ExtractParamNumber(paramName);
                     if (paramNumber <= 0)
                     {
@@ -1555,7 +1573,7 @@ namespace TestAutomationManager.Views
                     // Calculate horizontal scroll offset
                     double offset = CalculateParamColumnOffset(paramNumber);
 
-                    System.Diagnostics.Debug.WriteLine($"Scrolling to {paramName} (offset: {offset}, current offset: {scrollViewer.HorizontalOffset})");
+                    System.Diagnostics.Debug.WriteLine($"Scrolling to {paramName} (offset: {offset}, current: {scrollViewer.HorizontalOffset})");
 
                     // Perform the scroll
                     scrollViewer.ScrollToHorizontalOffset(offset);
