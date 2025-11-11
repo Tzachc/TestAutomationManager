@@ -118,9 +118,10 @@ namespace TestAutomationManager.Helpers
 
         private static void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2 && sender is TextBlock textBlock)
+            // Single-click to edit (like AccessDB)
+            if (sender is TextBlock textBlock)
             {
-                // Double-click detected - create inline editor
+                // Create inline editor on single click
                 CreateInlineEditor(textBlock);
                 e.Handled = true;
             }

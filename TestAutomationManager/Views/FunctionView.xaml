@@ -247,7 +247,7 @@
                  PreviewMouseUp="MainScrollViewer_PreviewMouseUp"
                  MouseLeave="MainScrollViewer_MouseLeave">
 
-            <!-- Remove default ListBox selection visual -->
+            <!-- Enhanced ListBox item style with row highlighting -->
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Background" Value="Transparent"/>
@@ -258,7 +258,30 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
-                                <ContentPresenter/>
+                                <Border x:Name="SelectionBorder"
+                                        Background="Transparent"
+                                        CornerRadius="8"
+                                        Padding="0">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <!-- Selected state - AccessDB-style highlighting -->
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="SelectionBorder" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                    </Trigger>
+                                    <!-- Hover state -->
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="SelectionBorder" Property="Background" Value="{DynamicResource DataGridRowHoverBrush}"/>
+                                    </Trigger>
+                                    <!-- Selected + Hover state -->
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsSelected" Value="True"/>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter TargetName="SelectionBorder" Property="Background" Value="{DynamicResource DataGridRowSelectedBrush}"/>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
