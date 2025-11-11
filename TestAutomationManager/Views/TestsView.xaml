@@ -757,7 +757,8 @@
                                                       MouseLeave="ScrollArea_MouseLeave"
                                                       PreviewMouseDown="ScrollArea_PreviewMouseDown"
                                                       MaxHeight="800">
-                                        <ItemsControl ItemsSource="{Binding Processes}">
+                                            <StackPanel>
+                                                <ItemsControl ItemsSource="{Binding Processes}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <Grid>
@@ -1289,76 +1290,76 @@
                                             </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                                </ItemsControl>
 
-                                        <!-- "(New)" row for adding new processes -->
-                                        <Grid Margin="42,4,0,4">
-                                            <Border Background="{DynamicResource CardBackgroundBrush}"
-                                                    BorderBrush="{DynamicResource BorderBrush}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="6"
-                                                    Padding="16,8"
-                                                    Opacity="0.7">
-                                                <Grid MinWidth="6600">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
-                                                        <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
-                                                        <ColumnDefinition Width="120" SharedSizeGroup="procWeb3Operator"/>
-                                                        <ColumnDefinition Width="700" SharedSizeGroup="procName"/>
-                                                        <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
-                                                        <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
-                                                        <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
+                                                <!-- "(New)" row for adding new processes -->
+                                                <Grid Margin="42,4,0,4">
+                                                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource BorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="16,8"
+                                                            Opacity="0.7">
+                                                        <Grid MinWidth="6600">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
+                                                                <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
+                                                                <ColumnDefinition Width="120" SharedSizeGroup="procWeb3Operator"/>
+                                                                <ColumnDefinition Width="700" SharedSizeGroup="procName"/>
+                                                                <ColumnDefinition Width="140" SharedSizeGroup="procProcessId"/>
+                                                                <ColumnDefinition Width="180" SharedSizeGroup="procPassFail"/>
+                                                                <ColumnDefinition Width="180" SharedSizeGroup="procLastRunning"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
 
-                                                    <!-- Empty expand button column -->
-                                                    <Border Grid.Column="0"/>
+                                                            <!-- Empty expand button column -->
+                                                            <Border Grid.Column="0"/>
 
-                                                    <!-- Position column shows "(New)" -->
-                                                    <TextBlock Grid.Column="1"
-                                                               Text="(New)"
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                                               FontSize="11"
-                                                               FontStyle="Italic"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Center"/>
+                                                            <!-- Position column shows "(New)" -->
+                                                            <TextBlock Grid.Column="1"
+                                                                       Text="(New)"
+                                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                       FontSize="11"
+                                                                       FontStyle="Italic"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"/>
 
-                                                    <!-- Empty Web3Operator column -->
-                                                    <Border Grid.Column="2"/>
+                                                            <!-- Empty Web3Operator column -->
+                                                            <Border Grid.Column="2"/>
 
-                                                    <!-- Empty ProcessName column -->
-                                                    <TextBlock Grid.Column="3"
-                                                               Text="Enter ProcessID to add process..."
-                                                               Foreground="{DynamicResource TextSecondaryBrush}"
-                                                               FontSize="11"
-                                                               FontStyle="Italic"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Left"
-                                                               Opacity="0.6"/>
+                                                            <!-- Empty ProcessName column -->
+                                                            <TextBlock Grid.Column="3"
+                                                                       Text="Enter ProcessID to add process..."
+                                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                       FontSize="11"
+                                                                       FontStyle="Italic"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Left"
+                                                                       Opacity="0.6"/>
 
-                                                    <!-- ProcessID input -->
-                                                    <TextBox Grid.Column="4"
-                                                             Name="NewProcessIDTextBox"
-                                                             Background="Transparent"
-                                                             Foreground="{DynamicResource TextPrimaryBrush}"
-                                                             BorderThickness="0"
-                                                             FontSize="11"
-                                                             VerticalAlignment="Center"
-                                                             HorizontalAlignment="Center"
-                                                             TextAlignment="Center"
-                                                             Tag="{Binding}"
-                                                             KeyDown="NewProcessID_KeyDown"
-                                                             LostFocus="NewProcessID_LostFocus"
-                                                             ToolTip="Enter ProcessID and press Enter"/>
+                                                            <!-- ProcessID input -->
+                                                            <TextBox Grid.Column="4"
+                                                                     Name="NewProcessIDTextBox"
+                                                                     Background="Transparent"
+                                                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                     BorderThickness="0"
+                                                                     FontSize="11"
+                                                                     VerticalAlignment="Center"
+                                                                     HorizontalAlignment="Center"
+                                                                     TextAlignment="Center"
+                                                                     Tag="{Binding}"
+                                                                     KeyDown="NewProcessID_KeyDown"
+                                                                     LostFocus="NewProcessID_LostFocus"
+                                                                     ToolTip="Enter ProcessID and press Enter"/>
 
-                                                    <!-- Empty remaining columns -->
-                                                    <Border Grid.Column="5"/>
-                                                    <Border Grid.Column="6"/>
-                                                    <Border Grid.Column="7"/>
+                                                            <!-- Empty remaining columns -->
+                                                            <Border Grid.Column="5"/>
+                                                            <Border Grid.Column="6"/>
+                                                            <Border Grid.Column="7"/>
+                                                        </Grid>
+                                                    </Border>
                                                 </Grid>
-                                            </Border>
-                                        </Grid>
-
+                                            </StackPanel>
                                         </ScrollViewer>
                                     </Border>
                                 </Grid>
