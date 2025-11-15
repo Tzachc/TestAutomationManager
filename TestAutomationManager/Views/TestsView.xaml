@@ -868,7 +868,7 @@
                                                                                helpers:InlineEditHelper.IsEditable="True"
                                                                                helpers:InlineEditHelper.FieldName="ProcessName"/>
 
-                                                                <TextBlock Grid.Column="4" Text="{Binding ProcessID, StringFormat='{}{0:0.##}'}"
+                                                                <TextBlock Grid.Column="4" Text="{Binding ProcessIDDisplay}"
                                                                                Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                                                                                VerticalAlignment="Center" HorizontalAlignment="Center"
                                                                                TextAlignment="Center" TextTrimming="CharacterEllipsis"

@@ -353,6 +353,7 @@ namespace TestAutomationManager.Models
             {
                 _processID = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(ProcessIDDisplay));  // Update display when ProcessID changes
                 OnPropertyChanged(nameof(ProcessIDTooltip));  // Update tooltip when ProcessID changes
             }
         }
@@ -507,6 +508,8 @@ namespace TestAutomationManager.Models
                 _isPlaceholder = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DisplayIndex));  // Update display when placeholder state changes
+                OnPropertyChanged(nameof(ProcessIDDisplay));  // Update ProcessID display when placeholder state changes
+                OnPropertyChanged(nameof(ProcessIDTooltip));  // Update ProcessID tooltip when placeholder state changes
             }
         }
 
@@ -518,6 +521,21 @@ namespace TestAutomationManager.Models
         public string DisplayIndex
         {
             get => IsPlaceholder ? "(New)" : (ProcessPosition.HasValue ? ProcessPosition.Value.ToString("0.##") : string.Empty);
+        }
+
+        /// <summary>
+        /// Display text for ProcessID column - shows clickable placeholder text on new rows
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string ProcessIDDisplay
+        {
+            get
+            {
+                if (IsPlaceholder && !ProcessID.HasValue)
+                    return "[Click to enter ProcessID]";
+                return ProcessID.HasValue ? ProcessID.Value.ToString("0.##") : string.Empty;
+            }
         }
 
         /// <summary>
