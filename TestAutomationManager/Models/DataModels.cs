@@ -349,7 +349,12 @@ namespace TestAutomationManager.Models
         public double? ProcessID
         {
             get => _processID;
-            set { _processID = value; OnPropertyChanged(); }
+            set
+            {
+                _processID = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ProcessIDTooltip));  // Update tooltip when ProcessID changes
+            }
         }
 
         public string? ProcessName
@@ -513,6 +518,18 @@ namespace TestAutomationManager.Models
         public string DisplayIndex
         {
             get => IsPlaceholder ? "(New)" : (ProcessPosition.HasValue ? ProcessPosition.Value.ToString("0.##") : string.Empty);
+        }
+
+        /// <summary>
+        /// Tooltip for ProcessID column - shows helpful hint for placeholder rows
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string ProcessIDTooltip
+        {
+            get => IsPlaceholder && !ProcessID.HasValue
+                ? "👉 Click here to enter a ProcessID number to create a new process"
+                : (ProcessID.HasValue ? ProcessID.Value.ToString("0.##") : string.Empty);
         }
 
         // ================================================

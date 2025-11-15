@@ -169,6 +169,10 @@ namespace TestAutomationManager.Services
                 if (fieldName == "Index")
                     return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
 
+                // Block all edits on placeholder rows except ProcessID
+                if (process.IsPlaceholder && fieldName != "ProcessID")
+                    return EditResult.Failed($"To create a new process, please click on the ProcessID column and enter a ProcessID number.");
+
                 // Allow ProcessID editing only on placeholder rows
                 if (fieldName == "ProcessID" && !process.IsPlaceholder)
                     return EditResult.Failed($"Cannot edit ProcessID on existing process. Use placeholder '(New)' row to create new process.");
