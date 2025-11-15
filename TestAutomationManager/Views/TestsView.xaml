@@ -830,13 +830,53 @@
                                                                     <ColumnDefinition Width="120" SharedSizeGroup="procParam46"/>
                                                                 </Grid.ColumnDefinitions>
 
-                                                                <ToggleButton Grid.Column="0"
+                                                                <!-- Selection + Expand Column -->
+                                                                <Grid Grid.Column="0">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="18"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <!-- Selection Area -->
+                                                                    <Border Grid.Column="0"
+                                                                            Background="Transparent"
+                                                                            Cursor="Arrow"
+                                                                            ToolTip="Click to select row for copy/paste">
+                                                                        <Border.Style>
+                                                                            <Style TargetType="Border">
+                                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                                <Style.Triggers>
+                                                                                    <!-- Hover effect -->
+                                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                                        <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                                                    </Trigger>
+                                                                                    <!-- Selected effect -->
+                                                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                        <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                                                                    </DataTrigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Border.Style>
+
+                                                                        <!-- Selection indicator (checkmark when selected) -->
+                                                                        <TextBlock Text="✓"
+                                                                                   Foreground="White"
+                                                                                   FontSize="10"
+                                                                                   FontWeight="Bold"
+                                                                                   HorizontalAlignment="Center"
+                                                                                   VerticalAlignment="Center"
+                                                                                   Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                                    </Border>
+
+                                                                    <!-- Expand Button -->
+                                                                    <ToggleButton Grid.Column="1"
                                                                                   Style="{StaticResource ExpandToggle}"
                                                                                   IsChecked="{Binding IsExpanded, Mode=TwoWay}"
                                                                                   Focusable="False"
                                                                                   Width="20" Height="20"
                                                                                   VerticalAlignment="Center"
                                                                                   HorizontalAlignment="Center"/>
+                                                                </Grid>
 
                                                                 <TextBlock Grid.Column="1"
                                                                                Text="{Binding DisplayIndex}"
@@ -1129,7 +1169,43 @@
                                                                                                 <ColumnDefinition Width="Auto" MinWidth="{StaticResource FunctionParameterColumnMinWidth}" SharedSizeGroup="funcParam30"/>
                                                                                             </Grid.ColumnDefinitions>
 
-                                                                                            <TextBlock Grid.Column="0"
+                                                                                            <!-- Selection + Position Column -->
+                                                                                            <Grid Grid.Column="0">
+                                                                                                <Grid.ColumnDefinitions>
+                                                                                                    <ColumnDefinition Width="18"/>
+                                                                                                    <ColumnDefinition Width="*"/>
+                                                                                                </Grid.ColumnDefinitions>
+
+                                                                                                <!-- Selection Area -->
+                                                                                                <Border Grid.Column="0"
+                                                                                                        Background="Transparent"
+                                                                                                        Cursor="Arrow"
+                                                                                                        ToolTip="Click to select row for copy/paste">
+                                                                                                    <Border.Style>
+                                                                                                        <Style TargetType="Border">
+                                                                                                            <Setter Property="Background" Value="Transparent"/>
+                                                                                                            <Style.Triggers>
+                                                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                                                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                                                                                                                </Trigger>
+                                                                                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                                                                    <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                                                                                                </DataTrigger>
+                                                                                                            </Style.Triggers>
+                                                                                                        </Style>
+                                                                                                    </Border.Style>
+
+                                                                                                    <TextBlock Text="✓"
+                                                                                                               Foreground="White"
+                                                                                                               FontSize="10"
+                                                                                                               FontWeight="Bold"
+                                                                                                               HorizontalAlignment="Center"
+                                                                                                               VerticalAlignment="Center"
+                                                                                                               Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                                                                </Border>
+
+                                                                                                <!-- Function Position -->
+                                                                                                <TextBlock Grid.Column="1"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            VerticalAlignment="Center"
@@ -1137,12 +1213,13 @@
                                                                                                            TextAlignment="Center"
                                                                                                            TextTrimming="CharacterEllipsis"
                                                                                                            ToolTip="{Binding FunctionPosition, StringFormat='{}{0}'}">
-                                                                                                <TextBlock.Text>
-                                                                                                    <Binding Path="FunctionPosition"
-                                                                                                                 StringFormat="{}{0}"
-                                                                                                                 TargetNullValue=""/>
-                                                                                                </TextBlock.Text>
-                                                                                            </TextBlock>
+                                                                                                    <TextBlock.Text>
+                                                                                                        <Binding Path="FunctionPosition"
+                                                                                                                     StringFormat="{}{0}"
+                                                                                                                     TargetNullValue=""/>
+                                                                                                    </TextBlock.Text>
+                                                                                                </TextBlock>
+                                                                                            </Grid>
 
                                                                                             <TextBlock Grid.Column="1"
                                                                                                            Text="{Binding WEB3Operator}"

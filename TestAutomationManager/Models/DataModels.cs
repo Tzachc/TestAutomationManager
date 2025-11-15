@@ -300,6 +300,7 @@ namespace TestAutomationManager.Models
         private string?[] _params = new string?[46];
 
         private bool _isExpanded;
+        private bool _isSelected;
         private ObservableCollection<Function>? _functions;
         private bool _areFunctionsLoaded;
 
@@ -464,6 +465,13 @@ namespace TestAutomationManager.Models
             set { _isExpanded = value; OnPropertyChanged(); }
         }
 
+        [NotMapped]
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<Function> Functions
         {
             get => _functions ??= new ObservableCollection<Function>();
@@ -616,6 +624,8 @@ namespace TestAutomationManager.Models
         private string? _web3Operator;
 
         private string?[] _params = new string?[30];
+
+        private bool _isSelected;
 
         // Parent reference for navigation
         private Process? _parentProcess;
@@ -770,6 +780,17 @@ namespace TestAutomationManager.Models
         // ================================================
         // UI ONLY
         // ================================================
+
+        /// <summary>
+        /// Selection state for copy/paste operations
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(); }
+        }
 
         /// <summary>
         /// Parent Process reference for navigation

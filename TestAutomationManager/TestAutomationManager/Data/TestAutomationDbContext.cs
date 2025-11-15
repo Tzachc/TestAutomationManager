@@ -193,6 +193,7 @@ namespace TestAutomationManager.Data
 
                 // Ignore UI-only and compatibility properties
                 entity.Ignore(e => e.IsExpanded);
+                entity.Ignore(e => e.IsSelected);
                 entity.Ignore(e => e.AreFunctionsLoaded);
                 entity.Ignore(e => e.ParentTest);
                 entity.Ignore(e => e.IsPlaceholder);
@@ -234,7 +235,9 @@ namespace TestAutomationManager.Data
 
                 // Param columns (Param1-Param30) are mapped automatically by convention
 
-                // Ignore compatibility properties
+                // Ignore UI-only and compatibility properties
+                entity.Ignore(e => e.IsSelected);
+                entity.Ignore(e => e.ParentProcess);
                 entity.Ignore(e => e.Id);
                 entity.Ignore(e => e.ProcessId);
                 entity.Ignore(e => e.Name);
