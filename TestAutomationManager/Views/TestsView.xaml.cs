@@ -703,17 +703,122 @@ namespace TestAutomationManager.Views
 
         /// <summary>
         /// Handle Process property changes to detect expansion and lazy load functions
-        /// Functions are still lazy loaded on-demand (too many to preload all at once)
+        /// Also handles ProcessID changes to reload template data
         /// </summary>
         private async void Process_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Process.IsExpanded) && sender is Process process)
+            if (sender is not Process process)
+                return;
+
+            // Handle expansion - lazy load functions
+            if (e.PropertyName == nameof(Process.IsExpanded))
             {
                 // Only load if expanded and not already loaded
                 if (process.IsExpanded && !process.AreFunctionsLoaded)
                 {
                     await LoadFunctionsForProcessAsync(process);
                 }
+            }
+
+            // Handle ProcessID change on existing process - reload template data
+            if (e.PropertyName == nameof(Process.ProcessID) && !process.IsPlaceholder && process.ProcessID.HasValue)
+            {
+                await HandleProcessIdChange(process, process.ProcessID.Value);
+            }
+        }
+
+        /// <summary>
+        /// Handle ProcessID change on an existing process
+        /// Reloads template data and functions from the new ProcessID
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleProcessIdChange(Process process, double newProcessId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🔄 ProcessID changed to {newProcessId} on existing process (Index: {process.Index})");
+
+                // Check if new ProcessID exists in database
+                bool exists = await _processRepository.ProcessIdExistsAsync(newProcessId);
+
+                if (exists)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✓ ProcessID {newProcessId} exists - loading template and functions...");
+
+                    // Get the template process (for copying parameters, etc.)
+                    var templateProcess = await _processRepository.GetProcessTemplateByIdAsync(newProcessId);
+
+                    if (templateProcess == null)
+                    {
+                        MessageBox.Show($"ProcessID {newProcessId} not found in database.",
+                            "Process Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // Load all functions for this ProcessID
+                    var functions = await _processRepository.GetFunctionsForProcessAsync(newProcessId);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded template process and {functions.Count} functions for ProcessID {newProcessId}");
+
+                    // Update process with template data (keep TestID and Index, but update everything else)
+                    process.WEB3Operator = templateProcess.WEB3Operator;
+                    process.Pass_Fail_WEB3Operator = templateProcess.Pass_Fail_WEB3Operator;
+                    process.Comments = templateProcess.Comments;
+                    process.Module = templateProcess.Module;
+                    process.Repeat = templateProcess.Repeat;
+
+                    // Copy all parameters
+                    for (int i = 1; i <= 46; i++)
+                    {
+                        var paramProp = typeof(Process).GetProperty($"Param{i}");
+                        if (paramProp != null)
+                        {
+                            var paramValue = paramProp.GetValue(templateProcess);
+                            paramProp.SetValue(process, paramValue);
+                        }
+                    }
+
+                    // Update database
+                    await _processRepository.UpdateProcessAsync(process);
+
+                    // Update functions in UI
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        process.Functions.Clear();
+                        foreach (var function in functions)
+                        {
+                            function.ParentProcess = process;
+                            process.Functions.Add(function);
+                        }
+                        process.AreFunctionsLoaded = true;
+
+                        System.Diagnostics.Debug.WriteLine($"✅ Updated process with ProcessID {newProcessId} and loaded {functions.Count} functions");
+
+                        // Expand to show the new functions
+                        process.IsExpanded = true;
+                    });
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"ℹ ProcessID {newProcessId} is new - updating database with new ID (keeping existing data)");
+
+                    // Just update the ProcessID in database, keep all other data
+                    await _processRepository.UpdateProcessAsync(process);
+
+                    // Clear functions since this is a new ProcessID with no functions
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        process.Functions.Clear();
+                        process.AreFunctionsLoaded = true;
+
+                        System.Diagnostics.Debug.WriteLine($"✅ Updated process to new ProcessID {newProcessId}");
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling ProcessID change: {ex.Message}");
+                MessageBox.Show($"Failed to update process with new ProcessID.\n\nError: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

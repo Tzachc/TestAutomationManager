@@ -173,11 +173,7 @@ namespace TestAutomationManager.Services
                 if (process.IsPlaceholder && fieldName != "ProcessID")
                     return EditResult.Failed($"To create a new process, please click on the ProcessID column and enter a ProcessID number.");
 
-                // Allow ProcessID editing only on placeholder rows
-                if (fieldName == "ProcessID" && !process.IsPlaceholder)
-                    return EditResult.Failed($"Cannot edit ProcessID on existing process. Use placeholder '(New)' row to create new process.");
-
-                // Special handling for ProcessID on placeholder rows
+                // Special handling for ProcessID on placeholder rows - creates new process
                 if (fieldName == "ProcessID" && process.IsPlaceholder)
                 {
                     // Parse and validate ProcessID
@@ -191,6 +187,22 @@ namespace TestAutomationManager.Services
 
                     // Return success without saving (the PropertyChanged handler will handle creation)
                     return EditResult.Success($"Processing new ProcessID {processIdValue}...");
+                }
+
+                // Special handling for ProcessID on existing processes - reloads template data
+                if (fieldName == "ProcessID" && !process.IsPlaceholder)
+                {
+                    // Parse and validate ProcessID
+                    if (!double.TryParse(newValue, out double processIdValue))
+                        return EditResult.Failed("ProcessID must be a valid number");
+
+                    // Set the value (this will trigger Process_PropertyChanged which handles the rest)
+                    property.SetValue(process, processIdValue);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ ProcessID changed to {processIdValue} on existing process - PropertyChanged handler will reload template");
+
+                    // Return success without saving (the PropertyChanged handler will handle reload and save)
+                    return EditResult.Success($"Reloading data for ProcessID {processIdValue}...");
                 }
 
                 // Handle different property types for normal fields
