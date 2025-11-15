@@ -300,6 +300,7 @@ namespace TestAutomationManager.Models
         private string?[] _params = new string?[46];
 
         private bool _isExpanded;
+        private bool _isSelected;
         private ObservableCollection<Function>? _functions;
         private bool _areFunctionsLoaded;
 
@@ -349,7 +350,13 @@ namespace TestAutomationManager.Models
         public double? ProcessID
         {
             get => _processID;
-            set { _processID = value; OnPropertyChanged(); }
+            set
+            {
+                _processID = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ProcessIDDisplay));  // Update display when ProcessID changes
+                OnPropertyChanged(nameof(ProcessIDTooltip));  // Update tooltip when ProcessID changes
+            }
         }
 
         public string? ProcessName
@@ -361,7 +368,12 @@ namespace TestAutomationManager.Models
         public double? ProcessPosition
         {
             get => _processPosition;
-            set { _processPosition = value; OnPropertyChanged(); }
+            set
+            {
+                _processPosition = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));  // Update display when position changes
+            }
         }
 
         public string? Repeat
@@ -453,6 +465,13 @@ namespace TestAutomationManager.Models
             set { _isExpanded = value; OnPropertyChanged(); }
         }
 
+        [NotMapped]
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(); }
+        }
+
         public ObservableCollection<Function> Functions
         {
             get => _functions ??= new ObservableCollection<Function>();
@@ -480,6 +499,63 @@ namespace TestAutomationManager.Models
         {
             get => _parentTest;
             set => _parentTest = value;
+        }
+
+        private bool _isPlaceholder;
+
+        /// <summary>
+        /// Indicates whether this is a placeholder "(New)" row for adding new processes
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsPlaceholder
+        {
+            get => _isPlaceholder;
+            set
+            {
+                _isPlaceholder = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));  // Update display when placeholder state changes
+                OnPropertyChanged(nameof(ProcessIDDisplay));  // Update ProcessID display when placeholder state changes
+                OnPropertyChanged(nameof(ProcessIDTooltip));  // Update ProcessID tooltip when placeholder state changes
+            }
+        }
+
+        /// <summary>
+        /// Display text for the Index column - shows "(New)" for placeholder rows, ProcessPosition otherwise
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string DisplayIndex
+        {
+            get => IsPlaceholder ? "(New)" : (ProcessPosition.HasValue ? ProcessPosition.Value.ToString("0.##") : string.Empty);
+        }
+
+        /// <summary>
+        /// Display text for ProcessID column - shows clickable placeholder text on new rows
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string ProcessIDDisplay
+        {
+            get
+            {
+                if (IsPlaceholder && !ProcessID.HasValue)
+                    return "[Click to enter ProcessID]";
+                return ProcessID.HasValue ? ProcessID.Value.ToString("0.##") : string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Tooltip for ProcessID column - shows helpful hint for placeholder rows
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string ProcessIDTooltip
+        {
+            get => IsPlaceholder && !ProcessID.HasValue
+                ? "👉 Click here to enter a ProcessID number to create a new process"
+                : (ProcessID.HasValue ? ProcessID.Value.ToString("0.##") : string.Empty);
         }
 
         // ================================================
@@ -548,6 +624,8 @@ namespace TestAutomationManager.Models
         private string? _web3Operator;
 
         private string?[] _params = new string?[30];
+
+        private bool _isSelected;
 
         // Parent reference for navigation
         private Process? _parentProcess;
@@ -702,6 +780,17 @@ namespace TestAutomationManager.Models
         // ================================================
         // UI ONLY
         // ================================================
+
+        /// <summary>
+        /// Selection state for copy/paste operations
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set { _isSelected = value; OnPropertyChanged(); }
+        }
 
         /// <summary>
         /// Parent Process reference for navigation

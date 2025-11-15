@@ -165,11 +165,47 @@ namespace TestAutomationManager.Services
                 if (property == null)
                     return EditResult.Failed($"Unknown field: {fieldName}");
 
-                // Don't allow editing primary keys
-                if (fieldName == "Index" || fieldName == "ProcessID")
+                // Don't allow editing primary keys (except ProcessID on placeholder rows for new process creation)
+                if (fieldName == "Index")
                     return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
 
-                // Handle different property types
+                // Block all edits on placeholder rows except ProcessID
+                if (process.IsPlaceholder && fieldName != "ProcessID")
+                    return EditResult.Failed($"To create a new process, please click on the ProcessID column and enter a ProcessID number.");
+
+                // Special handling for ProcessID on placeholder rows - creates new process
+                if (fieldName == "ProcessID" && process.IsPlaceholder)
+                {
+                    // Parse and validate ProcessID
+                    if (!double.TryParse(newValue, out double processIdValue))
+                        return EditResult.Failed("ProcessID must be a valid number");
+
+                    // Set the value (this will trigger PlaceholderProcess_PropertyChanged which handles the rest)
+                    property.SetValue(process, processIdValue);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ ProcessID {processIdValue} set on placeholder - PropertyChanged handler will create process");
+
+                    // Return success without saving (the PropertyChanged handler will handle creation)
+                    return EditResult.Success($"Processing new ProcessID {processIdValue}...");
+                }
+
+                // Special handling for ProcessID on existing processes - reloads template data
+                if (fieldName == "ProcessID" && !process.IsPlaceholder)
+                {
+                    // Parse and validate ProcessID
+                    if (!double.TryParse(newValue, out double processIdValue))
+                        return EditResult.Failed("ProcessID must be a valid number");
+
+                    // Set the value (this will trigger Process_PropertyChanged which handles the rest)
+                    property.SetValue(process, processIdValue);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ ProcessID changed to {processIdValue} on existing process - PropertyChanged handler will reload template");
+
+                    // Return success without saving (the PropertyChanged handler will handle reload and save)
+                    return EditResult.Success($"Reloading data for ProcessID {processIdValue}...");
+                }
+
+                // Handle different property types for normal fields
                 if (property.PropertyType == typeof(string))
                 {
                     property.SetValue(process, newValue);

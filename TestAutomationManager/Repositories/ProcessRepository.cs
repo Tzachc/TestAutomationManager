@@ -183,6 +183,148 @@ namespace TestAutomationManager.Repositories
             }
         }
 
+        /// <summary>
+        /// Check if a ProcessID exists in the database
+        /// </summary>
+        public async Task<bool> ProcessIdExistsAsync(double processId)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    return await context.Set<Process>().AnyAsync(p => p.ProcessID == processId);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error checking if process exists: {ex.Message}");
+                throw new Exception("Failed to check if process exists", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get the first process matching a ProcessID (for copying data when creating new process from existing ID)
+        /// This gets the process structure/template but not the specific test linkage
+        /// </summary>
+        public async Task<Process> GetProcessTemplateByIdAsync(double processId)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    // Get the first process with this ID (there might be multiple with same ProcessID in different tests)
+                    var process = await context.Set<Process>()
+                        .FirstOrDefaultAsync(p => p.ProcessID == processId);
+
+                    if (process != null)
+                    {
+                        // Initialize functions collection
+                        process.Functions = new ObservableCollection<Function>();
+                        process.AreFunctionsLoaded = false;
+                    }
+
+                    return process;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting process template: {ex.Message}");
+                throw new Exception("Failed to get process template", ex);
+            }
+        }
+
+        // ================================================
+        // CREATE OPERATIONS
+        // ================================================
+
+        /// <summary>
+        /// Insert a new process into the database
+        /// </summary>
+        public async Task<Process> InsertProcessAsync(Process process)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    // Manually generate Index value since database column might not be IDENTITY
+                    var maxIndex = await context.Set<Process>().MaxAsync(p => (int?)p.Index) ?? 0;
+                    process.Index = maxIndex + 1;
+
+                    // Log what we're trying to insert
+                    System.Diagnostics.Debug.WriteLine($"⏳ Attempting to insert process:");
+                    System.Diagnostics.Debug.WriteLine($"   TestID: {process.TestID}");
+                    System.Diagnostics.Debug.WriteLine($"   ProcessID: {process.ProcessID}");
+                    System.Diagnostics.Debug.WriteLine($"   ProcessPosition: {process.ProcessPosition}");
+                    System.Diagnostics.Debug.WriteLine($"   Index: {process.Index} (manually generated as max+1)");
+
+                    // Add the new process
+                    await context.Set<Process>().AddAsync(process);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Process added to context, calling SaveChangesAsync...");
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} inserted successfully with Index #{process.Index}");
+                    return process;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log DETAILED error information including inner exceptions
+                System.Diagnostics.Debug.WriteLine($"✗ ========== DATABASE INSERT ERROR ==========");
+                System.Diagnostics.Debug.WriteLine($"✗ Main Exception: {ex.GetType().Name}");
+                System.Diagnostics.Debug.WriteLine($"✗ Main Message: {ex.Message}");
+
+                var innerEx = ex.InnerException;
+                int level = 1;
+                while (innerEx != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Inner Exception {level}: {innerEx.GetType().Name}");
+                    System.Diagnostics.Debug.WriteLine($"✗ Inner Message {level}: {innerEx.Message}");
+                    if (innerEx.StackTrace != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✗ Inner StackTrace {level}: {innerEx.StackTrace}");
+                    }
+                    innerEx = innerEx.InnerException;
+                    level++;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"✗ Full Exception: {ex}");
+                System.Diagnostics.Debug.WriteLine($"✗ ==========================================");
+
+                throw new Exception($"Failed to insert process. Error: {ex.Message}. Inner: {ex.InnerException?.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Insert a new function into the database
+        /// </summary>
+        public async Task<Function> InsertFunctionAsync(Function function)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    // Manually generate Index value
+                    var maxIndex = await context.Set<Function>().MaxAsync(f => (int?)f.Index) ?? 0;
+                    function.Index = maxIndex + 1;
+
+                    System.Diagnostics.Debug.WriteLine($"⏳ Inserting function: {function.FunctionName} with Index #{function.Index}");
+
+                    // Add the new function
+                    await context.Set<Function>().AddAsync(function);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Function #{function.Index} inserted successfully");
+                    return function;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error inserting function: {ex.Message}");
+                throw;
+            }
+        }
+
         // ================================================
         // UPDATE OPERATIONS
         // ================================================
@@ -196,12 +338,14 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
+                    // CRITICAL: Must find by Index (primary key), NOT ProcessID
+                    // Multiple processes can share the same ProcessID!
                     var existingProcess = await context.Set<Process>()
-                        .FirstOrDefaultAsync(p => p.ProcessID == process.ProcessID);
+                        .FirstOrDefaultAsync(p => p.Index == process.Index);
 
                     if (existingProcess == null)
                     {
-                        throw new InvalidOperationException($"Process with ID {process.ProcessID} not found");
+                        throw new InvalidOperationException($"Process with Index {process.Index} not found");
                     }
 
                     // Update properties manually to avoid modifying primary keys
@@ -222,7 +366,7 @@ namespace TestAutomationManager.Repositories
 
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} updated successfully");
+                    System.Diagnostics.Debug.WriteLine($"✓ Process Index #{process.Index} updated successfully");
                 }
             }
             catch (Exception ex)
@@ -308,6 +452,66 @@ namespace TestAutomationManager.Repositories
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error deleting process: {ex.Message}");
                 throw new Exception("Failed to delete process", ex);
+            }
+        }
+
+        /// <summary>
+        /// Delete process from database by Index (primary key)
+        /// </summary>
+        public async Task DeleteProcessAsync(int index)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var process = await context.Set<Process>()
+                        .FirstOrDefaultAsync(p => p.Index == index);
+
+                    if (process == null)
+                    {
+                        throw new InvalidOperationException($"Process with Index {index} not found");
+                    }
+
+                    context.Set<Process>().Remove(process);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Process Index #{index} deleted successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error deleting process: {ex.Message}");
+                throw new Exception("Failed to delete process", ex);
+            }
+        }
+
+        /// <summary>
+        /// Delete function from database by Index (primary key)
+        /// </summary>
+        public async Task DeleteFunctionAsync(int index)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var function = await context.Set<Function>()
+                        .FirstOrDefaultAsync(f => f.Index == index);
+
+                    if (function == null)
+                    {
+                        throw new InvalidOperationException($"Function with Index {index} not found");
+                    }
+
+                    context.Set<Function>().Remove(function);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Function Index #{index} deleted successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error deleting function: {ex.Message}");
+                throw new Exception("Failed to delete function", ex);
             }
         }
     }

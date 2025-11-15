@@ -75,6 +75,13 @@ namespace TestAutomationManager.Views
         // ----- Middle-mouse panning state -----
         private bool _isPanning = false;
         private Point _lastPanPoint;
+
+        // ----- Copy/Paste selection state -----
+        private bool _isSelecting = false;
+        private Process? _selectionStartProcess = null;
+        private Function? _selectionStartFunction = null;
+        private List<Process> _copiedProcesses = new();
+        private List<Function> _copiedFunctions = new();
         private double _startH;
         private double _startV;
         private DateTime _lastPanTime;
@@ -121,6 +128,10 @@ namespace TestAutomationManager.Views
 
             // ⭐ START DATABASE WATCHER for live updates
             StartLiveUpdates();
+
+            // Register keyboard shortcuts for copy/paste
+            this.KeyDown += TestsView_KeyDown;
+            this.Focusable = true;
         }
 
         // ================================================
@@ -703,17 +714,339 @@ namespace TestAutomationManager.Views
 
         /// <summary>
         /// Handle Process property changes to detect expansion and lazy load functions
-        /// Functions are still lazy loaded on-demand (too many to preload all at once)
+        /// Also handles ProcessID changes to reload template data
         /// </summary>
         private async void Process_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Process.IsExpanded) && sender is Process process)
+            if (sender is not Process process)
+                return;
+
+            // Handle expansion - lazy load functions
+            if (e.PropertyName == nameof(Process.IsExpanded))
             {
                 // Only load if expanded and not already loaded
                 if (process.IsExpanded && !process.AreFunctionsLoaded)
                 {
                     await LoadFunctionsForProcessAsync(process);
                 }
+            }
+
+            // Handle ProcessID change on existing process - reload template data
+            if (e.PropertyName == nameof(Process.ProcessID) && !process.IsPlaceholder && process.ProcessID.HasValue)
+            {
+                await HandleProcessIdChange(process, process.ProcessID.Value);
+            }
+        }
+
+        /// <summary>
+        /// Handle ProcessID change on an existing process
+        /// Reloads template data and functions from the new ProcessID
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleProcessIdChange(Process process, double newProcessId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"🔄 ProcessID changed to {newProcessId} on existing process (Index: {process.Index})");
+
+                // Check if new ProcessID exists in database
+                bool exists = await _processRepository.ProcessIdExistsAsync(newProcessId);
+
+                if (exists)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✓ ProcessID {newProcessId} exists - loading template and functions...");
+
+                    // Get the template process (for copying parameters, etc.)
+                    var templateProcess = await _processRepository.GetProcessTemplateByIdAsync(newProcessId);
+
+                    if (templateProcess == null)
+                    {
+                        MessageBox.Show($"ProcessID {newProcessId} not found in database.",
+                            "Process Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // Load all functions for this ProcessID
+                    var functions = await _processRepository.GetFunctionsForProcessAsync(newProcessId);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded template process and {functions.Count} functions for ProcessID {newProcessId}");
+
+                    // Update process with template data (keep TestID and Index, but update everything else)
+                    process.WEB3Operator = templateProcess.WEB3Operator;
+                    process.Pass_Fail_WEB3Operator = templateProcess.Pass_Fail_WEB3Operator;
+                    process.Comments = templateProcess.Comments;
+                    process.Module = templateProcess.Module;
+                    process.Repeat = templateProcess.Repeat;
+
+                    // NOTE: Params 1-46 are intentionally left as-is (not copied from template)
+                    // The C# automation framework will load these values
+
+                    // Update database
+                    await _processRepository.UpdateProcessAsync(process);
+
+                    // Update functions in UI
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        process.Functions.Clear();
+                        foreach (var function in functions)
+                        {
+                            function.ParentProcess = process;
+                            process.Functions.Add(function);
+                        }
+                        process.AreFunctionsLoaded = true;
+
+                        System.Diagnostics.Debug.WriteLine($"✅ Updated process with ProcessID {newProcessId} and loaded {functions.Count} functions");
+
+                        // Expand to show the new functions
+                        process.IsExpanded = true;
+                    });
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"ℹ ProcessID {newProcessId} is new - updating database with new ID (keeping existing data)");
+
+                    // Just update the ProcessID in database, keep all other data
+                    await _processRepository.UpdateProcessAsync(process);
+
+                    // Clear functions since this is a new ProcessID with no functions
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        process.Functions.Clear();
+                        process.AreFunctionsLoaded = true;
+
+                        System.Diagnostics.Debug.WriteLine($"✅ Updated process to new ProcessID {newProcessId}");
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling ProcessID change: {ex.Message}");
+                MessageBox.Show($"Failed to update process with new ProcessID.\n\nError: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handle placeholder process property changes to detect when user enters ProcessID
+        /// This implements the "New" process adding functionality
+        /// </summary>
+        private async void PlaceholderProcess_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Process.ProcessID) && sender is Process placeholder)
+            {
+                // Only handle if this is still a placeholder and ProcessID is not null
+                if (!placeholder.IsPlaceholder || !placeholder.ProcessID.HasValue)
+                    return;
+
+                try
+                {
+                    var enteredProcessId = placeholder.ProcessID.Value;
+                    System.Diagnostics.Debug.WriteLine($"🆕 User entered ProcessID {enteredProcessId} in placeholder row");
+
+                    // Check if ProcessID exists in database
+                    bool exists = await _processRepository.ProcessIdExistsAsync(enteredProcessId);
+
+                    if (exists)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ ProcessID {enteredProcessId} exists - loading template and functions...");
+                        await HandleExistingProcessId(placeholder, enteredProcessId);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ℹ ProcessID {enteredProcessId} is new - creating empty process...");
+                        await HandleNewProcessId(placeholder, enteredProcessId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Error handling placeholder ProcessID: {ex.Message}");
+                    MessageBox.Show($"Failed to create process.\n\nError: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Reset placeholder
+                    if (sender is Process p)
+                    {
+                        p.ProcessID = null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle when user enters an EXISTING ProcessID in the placeholder
+        /// Load all functions from that ProcessID and create a new process record
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleExistingProcessId(Process placeholder, double processId)
+        {
+            try
+            {
+                // Get the template process (for copying parameters, etc.)
+                var templateProcess = await _processRepository.GetProcessTemplateByIdAsync(processId);
+
+                if (templateProcess == null)
+                {
+                    MessageBox.Show($"ProcessID {processId} not found in database.",
+                        "Process Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    placeholder.ProcessID = null;
+                    return;
+                }
+
+                // Load all functions for this ProcessID
+                var functions = await _processRepository.GetFunctionsForProcessAsync(processId);
+
+                System.Diagnostics.Debug.WriteLine($"✓ Loaded template process and {functions.Count} functions for ProcessID {processId}");
+
+                // Create new process record with the same ProcessID but linked to current test
+                var newProcess = new Process
+                {
+                    TestID = placeholder.TestID,
+                    ProcessID = processId,
+                    ProcessPosition = placeholder.ProcessPosition,
+                    // Leave ProcessName and all Params empty - the automation framework will load them
+                    ProcessName = null,
+                    WEB3Operator = templateProcess.WEB3Operator,
+                    Pass_Fail_WEB3Operator = templateProcess.Pass_Fail_WEB3Operator,
+                    Comments = templateProcess.Comments,
+                    Module = templateProcess.Module,
+                    Repeat = templateProcess.Repeat,
+                    IsPlaceholder = false,
+                    ParentTest = placeholder.ParentTest,
+                    Functions = new ObservableCollection<Function>(),
+                    AreFunctionsLoaded = true
+                };
+
+                // NOTE: Params 1-46 are intentionally left empty (null)
+                // The C# automation framework will load these values
+
+                // Insert into database
+                var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
+
+                // Add functions to UI (these are loaded from existing ProcessID, not newly created)
+                foreach (var function in functions)
+                {
+                    function.ParentProcess = insertedProcess;
+                    insertedProcess.Functions.Add(function);
+                }
+
+                // Update UI - use Remove/Insert instead of array indexer to force WPF to re-render
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    var test = placeholder.ParentTest;
+                    if (test != null)
+                    {
+                        // Find placeholder index
+                        int placeholderIndex = test.Processes.IndexOf(placeholder);
+
+                        if (placeholderIndex >= 0)
+                        {
+                            // Unsubscribe from placeholder events
+                            placeholder.PropertyChanged -= PlaceholderProcess_PropertyChanged;
+
+                            // Remove placeholder and insert real process at same position
+                            // This forces WPF to re-render the row and attach InlineEditHelper
+                            test.Processes.RemoveAt(placeholderIndex);
+                            test.Processes.Insert(placeholderIndex, insertedProcess);
+
+                            // Subscribe to real process events
+                            insertedProcess.PropertyChanged += Process_PropertyChanged;
+
+                            // Add new placeholder at the end
+                            var newPlaceholder = new Process
+                            {
+                                IsPlaceholder = true,
+                                ParentTest = test,
+                                TestID = test.TestID,
+                                ProcessPosition = insertedProcess.ProcessPosition + 1,
+                                Functions = new ObservableCollection<Function>(),
+                                AreFunctionsLoaded = true
+                            };
+
+                            newPlaceholder.PropertyChanged += PlaceholderProcess_PropertyChanged;
+                            test.Processes.Add(newPlaceholder);
+
+                            System.Diagnostics.Debug.WriteLine($"✅ Added process with existing ProcessID {processId} and {functions.Count} functions to Test #{test.TestID}");
+
+                            // Expand the new process to show functions
+                            insertedProcess.IsExpanded = true;
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling existing ProcessID: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Handle when user enters a NEW ProcessID in the placeholder
+        /// Create an empty process record
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleNewProcessId(Process placeholder, double processId)
+        {
+            try
+            {
+                // Create new empty process
+                var newProcess = new Process
+                {
+                    TestID = placeholder.TestID,
+                    ProcessID = processId,
+                    ProcessPosition = placeholder.ProcessPosition,
+                    ProcessName = null,  // Empty as per requirements
+                    IsPlaceholder = false,
+                    ParentTest = placeholder.ParentTest,
+                    Functions = new ObservableCollection<Function>(),
+                    AreFunctionsLoaded = true  // No functions to load for new process
+                };
+
+                // Insert into database
+                var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
+
+                // Update UI
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    var test = placeholder.ParentTest;
+                    if (test != null)
+                    {
+                        // Find placeholder index
+                        int placeholderIndex = test.Processes.IndexOf(placeholder);
+
+                        if (placeholderIndex >= 0)
+                        {
+                            // Unsubscribe from placeholder events
+                            placeholder.PropertyChanged -= PlaceholderProcess_PropertyChanged;
+
+                            // Remove placeholder and insert real process at same position
+                            // This forces WPF to re-render the row and attach InlineEditHelper
+                            test.Processes.RemoveAt(placeholderIndex);
+                            test.Processes.Insert(placeholderIndex, insertedProcess);
+
+                            // Subscribe to real process events
+                            insertedProcess.PropertyChanged += Process_PropertyChanged;
+
+                            // Add new placeholder at the end
+                            var newPlaceholder = new Process
+                            {
+                                IsPlaceholder = true,
+                                ParentTest = test,
+                                TestID = test.TestID,
+                                ProcessPosition = insertedProcess.ProcessPosition + 1,
+                                Functions = new ObservableCollection<Function>(),
+                                AreFunctionsLoaded = true
+                            };
+
+                            newPlaceholder.PropertyChanged += PlaceholderProcess_PropertyChanged;
+                            test.Processes.Add(newPlaceholder);
+
+                            System.Diagnostics.Debug.WriteLine($"✅ Added new empty process with ProcessID {processId} to Test #{test.TestID}");
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling new ProcessID: {ex.Message}");
+                throw;
             }
         }
 
@@ -767,8 +1100,24 @@ namespace TestAutomationManager.Views
                         process.PropertyChanged += Process_PropertyChanged;
                     }
 
+                    // ⭐ STEP 4: Add placeholder "(New)" row at the bottom
+                    var placeholderProcess = new Process
+                    {
+                        IsPlaceholder = true,
+                        ParentTest = test,
+                        TestID = test.TestID,
+                        ProcessPosition = (processes.Any() ? processes.Max(p => p.ProcessPosition ?? 0) + 1 : 1),
+                        Functions = new ObservableCollection<Function>(),
+                        AreFunctionsLoaded = true
+                    };
+
+                    // Subscribe to property changes to detect when user enters ProcessID
+                    placeholderProcess.PropertyChanged += PlaceholderProcess_PropertyChanged;
+
+                    test.Processes.Add(placeholderProcess);
+
                     test.AreProcessesLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId} + 1 placeholder row");
                 });
             }
             catch (Exception ex)
@@ -1747,6 +2096,561 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"Error navigating to ExtTest: {ex.Message}");
                 MessageBox.Show($"Failed to navigate to ExtTest.\n\nError: {ex.Message}",
                     "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        // ================================================
+        // COPY/PASTE SELECTION HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle mouse click on process selection border
+        /// </summary>
+        private void ProcessSelectionBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Process process)
+            {
+                // Toggle selection on click
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    // CTRL+Click: toggle individual selection
+                    process.IsSelected = !process.IsSelected;
+                }
+                else
+                {
+                    // Regular click: clear all and select this one
+                    ClearAllSelections();
+                    process.IsSelected = true;
+                }
+
+                _isSelecting = true;
+                _selectionStartProcess = process;
+                _selectionStartFunction = null;
+
+                System.Diagnostics.Debug.WriteLine($"Process {process.ProcessID} selection: {process.IsSelected}");
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse move on process selection border (for drag multi-select)
+        /// </summary>
+        private void ProcessSelectionBorder_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isSelecting && e.LeftButton == MouseButtonState.Pressed && _selectionStartProcess != null)
+            {
+                if (sender is Border border && border.DataContext is Process currentProcess)
+                {
+                    // Find the test that contains both processes
+                    var test = _allTests.FirstOrDefault(t => t.Processes.Contains(_selectionStartProcess) && t.Processes.Contains(currentProcess));
+                    if (test != null)
+                    {
+                        // Get indices
+                        int startIndex = test.Processes.IndexOf(_selectionStartProcess);
+                        int currentIndex = test.Processes.IndexOf(currentProcess);
+
+                        // Clear current selections in this test
+                        foreach (var p in test.Processes)
+                        {
+                            p.IsSelected = false;
+                        }
+
+                        // Select range
+                        int min = Math.Min(startIndex, currentIndex);
+                        int max = Math.Max(startIndex, currentIndex);
+                        for (int i = min; i <= max; i++)
+                        {
+                            if (!test.Processes[i].IsPlaceholder)
+                            {
+                                test.Processes[i].IsSelected = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse click on function selection border
+        /// </summary>
+        private void FunctionSelectionBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Function function)
+            {
+                // Toggle selection on click
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    // CTRL+Click: toggle individual selection
+                    function.IsSelected = !function.IsSelected;
+                }
+                else
+                {
+                    // Regular click: clear all and select this one
+                    ClearAllSelections();
+                    function.IsSelected = true;
+                }
+
+                _isSelecting = true;
+                _selectionStartFunction = function;
+                _selectionStartProcess = null;
+
+                System.Diagnostics.Debug.WriteLine($"Function {function.FunctionName} selection: {function.IsSelected}");
+            }
+        }
+
+        /// <summary>
+        /// Handle right-click on process selection border
+        /// </summary>
+        private void ProcessSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Process process)
+            {
+                // If right-clicking on an unselected row, select it first
+                if (!process.IsSelected)
+                {
+                    ClearAllSelections();
+                    process.IsSelected = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle right-click on function selection border
+        /// </summary>
+        private void FunctionSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Function function)
+            {
+                // If right-clicking on an unselected row, select it first
+                if (!function.IsSelected)
+                {
+                    ClearAllSelections();
+                    function.IsSelected = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse move on function selection border (for drag multi-select)
+        /// </summary>
+        private void FunctionSelectionBorder_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isSelecting && e.LeftButton == MouseButtonState.Pressed && _selectionStartFunction != null)
+            {
+                if (sender is Border border && border.DataContext is Function currentFunction)
+                {
+                    // Find the process that contains both functions
+                    var process = _allTests
+                        .SelectMany(t => t.Processes)
+                        .FirstOrDefault(p => p.Functions.Contains(_selectionStartFunction) && p.Functions.Contains(currentFunction));
+
+                    if (process != null)
+                    {
+                        // Get indices
+                        int startIndex = process.Functions.IndexOf(_selectionStartFunction);
+                        int currentIndex = process.Functions.IndexOf(currentFunction);
+
+                        // Clear current selections in this process
+                        foreach (var f in process.Functions)
+                        {
+                            f.IsSelected = false;
+                        }
+
+                        // Select range
+                        int min = Math.Min(startIndex, currentIndex);
+                        int max = Math.Max(startIndex, currentIndex);
+                        for (int i = min; i <= max; i++)
+                        {
+                            process.Functions[i].IsSelected = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle keyboard shortcuts (CTRL+C, CTRL+V, Delete)
+        /// </summary>
+        private async void TestsView_KeyDown(object sender, KeyEventArgs e)
+        {
+            // CTRL+C: Copy selected processes/functions
+            if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                await CopySelectedItems();
+                e.Handled = true;
+            }
+            // CTRL+V: Paste copied processes/functions
+            else if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                await PasteItems();
+                e.Handled = true;
+            }
+            // Delete: Delete selected items
+            else if (e.Key == Key.Delete)
+            {
+                await DeleteSelectedItems();
+                e.Handled = true;
+            }
+            // ESC: Clear selections
+            else if (e.Key == Key.Escape)
+            {
+                ClearAllSelections();
+                _isSelecting = false;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Copy selected processes and functions to clipboard
+        /// </summary>
+        private async Task CopySelectedItems()
+        {
+            // Get selected processes
+            _copiedProcesses = _allTests
+                .SelectMany(t => t.Processes)
+                .Where(p => p.IsSelected && !p.IsPlaceholder)
+                .ToList();
+
+            // Get selected functions
+            _copiedFunctions = _allTests
+                .SelectMany(t => t.Processes)
+                .SelectMany(p => p.Functions)
+                .Where(f => f.IsSelected)
+                .ToList();
+
+            if (_copiedProcesses.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ Copied {_copiedProcesses.Count} process(es)");
+                MessageBox.Show($"Copied {_copiedProcesses.Count} process(es)",
+                    "Copy", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else if (_copiedFunctions.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ Copied {_copiedFunctions.Count} function(s)");
+                MessageBox.Show($"Copied {_copiedFunctions.Count} function(s)",
+                    "Copy", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Paste copied processes/functions
+        /// </summary>
+        private async Task PasteItems()
+        {
+            try
+            {
+                if (_copiedProcesses.Any())
+                {
+                    await PasteProcesses();
+                }
+                else if (_copiedFunctions.Any())
+                {
+                    await PasteFunctions();
+                }
+                else
+                {
+                    MessageBox.Show("Nothing to paste. Please copy some processes or functions first.",
+                        "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error pasting: {ex.Message}");
+                MessageBox.Show($"Failed to paste.\n\nError: {ex.Message}",
+                    "Paste Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Paste processes to the currently selected test
+        /// </summary>
+        private async Task PasteProcesses()
+        {
+            // Find which test to paste into (use the test of the currently selected process, or first test)
+            var targetTest = _allTests
+                .FirstOrDefault(t => t.Processes.Any(p => p.IsSelected));
+
+            if (targetTest == null)
+            {
+                MessageBox.Show("Please select a process row in the test where you want to paste.",
+                    "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            int pastedCount = 0;
+            foreach (var copiedProcess in _copiedProcesses)
+            {
+                // Create a deep copy of the process
+                var newProcess = new Process
+                {
+                    TestID = targetTest.TestID,
+                    ProcessID = copiedProcess.ProcessID,
+                    ProcessName = copiedProcess.ProcessName,
+                    WEB3Operator = copiedProcess.WEB3Operator,
+                    Pass_Fail_WEB3Operator = copiedProcess.Pass_Fail_WEB3Operator,
+                    Comments = copiedProcess.Comments,
+                    Module = copiedProcess.Module,
+                    Repeat = copiedProcess.Repeat,
+                    ProcessPosition = targetTest.Processes.Count(p => !p.IsPlaceholder) + 1,
+                    ParentTest = targetTest,
+                    Functions = new ObservableCollection<Function>(),
+                    AreFunctionsLoaded = true
+                };
+
+                // Copy all parameters
+                for (int i = 1; i <= 46; i++)
+                {
+                    var paramProp = typeof(Process).GetProperty($"Param{i}");
+                    if (paramProp != null)
+                    {
+                        var paramValue = paramProp.GetValue(copiedProcess);
+                        paramProp.SetValue(newProcess, paramValue);
+                    }
+                }
+
+                // Insert into database
+                var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
+
+                if (insertedProcess != null)
+                {
+                    // Load functions if the original process had any
+                    if (copiedProcess.ProcessID.HasValue)
+                    {
+                        var functions = await _processRepository.GetFunctionsForProcessAsync(copiedProcess.ProcessID.Value);
+                        foreach (var function in functions)
+                        {
+                            function.ParentProcess = insertedProcess;
+                            insertedProcess.Functions.Add(function);
+                        }
+                    }
+
+                    // Add to UI (insert before placeholder)
+                    var placeholderIndex = targetTest.Processes.ToList().FindIndex(p => p.IsPlaceholder);
+                    if (placeholderIndex >= 0)
+                    {
+                        targetTest.Processes.Insert(placeholderIndex, insertedProcess);
+                    }
+                    else
+                    {
+                        targetTest.Processes.Add(insertedProcess);
+                    }
+
+                    pastedCount++;
+                    System.Diagnostics.Debug.WriteLine($"✓ Pasted process {insertedProcess.ProcessID}");
+                }
+            }
+
+            MessageBox.Show($"Successfully pasted {pastedCount} process(es) to Test #{targetTest.TestID}",
+                "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Clear selections
+            ClearAllSelections();
+        }
+
+        /// <summary>
+        /// Paste functions to the currently selected process
+        /// </summary>
+        private async Task PasteFunctions()
+        {
+            // Find which process to paste into
+            var targetProcess = _allTests
+                .SelectMany(t => t.Processes)
+                .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+
+            if (targetProcess == null || !targetProcess.ProcessID.HasValue)
+            {
+                MessageBox.Show("Please select a process row where you want to paste the functions.",
+                    "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            int pastedCount = 0;
+            foreach (var copiedFunction in _copiedFunctions)
+            {
+                // Create a deep copy of the function
+                var newFunction = new Function
+                {
+                    ProcessID = targetProcess.ProcessID.Value,
+                    FunctionName = copiedFunction.FunctionName,
+                    FunctionDescription = copiedFunction.FunctionDescription,
+                    WEB3Operator = copiedFunction.WEB3Operator,
+                    Pass_Fail_WEB3Operator = copiedFunction.Pass_Fail_WEB3Operator,
+                    ActualValue = copiedFunction.ActualValue,
+                    BreakPoint = copiedFunction.BreakPoint,
+                    Comments = copiedFunction.Comments,
+                    FunctionPosition = targetProcess.Functions.Count + 1,
+                    ParentProcess = targetProcess
+                };
+
+                // Copy all parameters
+                for (int i = 1; i <= 30; i++)
+                {
+                    var paramProp = typeof(Function).GetProperty($"Param{i}");
+                    if (paramProp != null)
+                    {
+                        var paramValue = paramProp.GetValue(copiedFunction);
+                        paramProp.SetValue(newFunction, paramValue);
+                    }
+                }
+
+                // Insert into database
+                var insertedFunction = await _processRepository.InsertFunctionAsync(newFunction);
+
+                if (insertedFunction != null)
+                {
+                    targetProcess.Functions.Add(insertedFunction);
+                    pastedCount++;
+                    System.Diagnostics.Debug.WriteLine($"✓ Pasted function {insertedFunction.FunctionName}");
+                }
+            }
+
+            MessageBox.Show($"Successfully pasted {pastedCount} function(s) to Process #{targetProcess.ProcessID}",
+                "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Clear selections
+            ClearAllSelections();
+        }
+
+        // ================================================
+        // CONTEXT MENU HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle Copy from context menu
+        /// </summary>
+        private async void ContextMenu_Copy(object sender, RoutedEventArgs e)
+        {
+            await CopySelectedItems();
+        }
+
+        /// <summary>
+        /// Handle Paste from context menu
+        /// </summary>
+        private async void ContextMenu_Paste(object sender, RoutedEventArgs e)
+        {
+            await PasteItems();
+        }
+
+        /// <summary>
+        /// Handle Delete from context menu
+        /// </summary>
+        private async void ContextMenu_Delete(object sender, RoutedEventArgs e)
+        {
+            await DeleteSelectedItems();
+        }
+
+        /// <summary>
+        /// Delete selected processes and functions
+        /// </summary>
+        private async Task DeleteSelectedItems()
+        {
+            try
+            {
+                // Get selected processes and functions
+                var selectedProcesses = _allTests
+                    .SelectMany(t => t.Processes)
+                    .Where(p => p.IsSelected && !p.IsPlaceholder)
+                    .ToList();
+
+                var selectedFunctions = _allTests
+                    .SelectMany(t => t.Processes)
+                    .SelectMany(p => p.Functions)
+                    .Where(f => f.IsSelected)
+                    .ToList();
+
+                if (!selectedProcesses.Any() && !selectedFunctions.Any())
+                {
+                    MessageBox.Show("No items selected to delete.",
+                        "Delete", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Confirm deletion
+                string message;
+                if (selectedProcesses.Any() && selectedFunctions.Any())
+                {
+                    message = $"Are you sure you want to delete {selectedProcesses.Count} process(es) and {selectedFunctions.Count} function(s)?";
+                }
+                else if (selectedProcesses.Any())
+                {
+                    message = $"Are you sure you want to delete {selectedProcesses.Count} process(es)?";
+                }
+                else
+                {
+                    message = $"Are you sure you want to delete {selectedFunctions.Count} function(s)?";
+                }
+
+                var result = MessageBox.Show(message, "Confirm Delete",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                    return;
+
+                int deletedCount = 0;
+
+                // Delete processes
+                foreach (var process in selectedProcesses)
+                {
+                    await _processRepository.DeleteProcessAsync(process.Index.Value);
+
+                    // Remove from UI
+                    var test = _allTests.FirstOrDefault(t => t.Processes.Contains(process));
+                    if (test != null)
+                    {
+                        test.Processes.Remove(process);
+                        deletedCount++;
+                        System.Diagnostics.Debug.WriteLine($"✓ Deleted process Index #{process.Index}");
+                    }
+                }
+
+                // Delete functions
+                foreach (var function in selectedFunctions)
+                {
+                    await _processRepository.DeleteFunctionAsync(function.Index.Value);
+
+                    // Remove from UI
+                    var process = _allTests
+                        .SelectMany(t => t.Processes)
+                        .FirstOrDefault(p => p.Functions.Contains(function));
+
+                    if (process != null)
+                    {
+                        process.Functions.Remove(function);
+                        deletedCount++;
+                        System.Diagnostics.Debug.WriteLine($"✓ Deleted function Index #{function.Index}");
+                    }
+                }
+
+                MessageBox.Show($"Successfully deleted {deletedCount} item(s).",
+                    "Delete", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Clear selections
+                ClearAllSelections();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error deleting: {ex.Message}");
+                MessageBox.Show($"Failed to delete items.\n\nError: {ex.Message}",
+                    "Delete Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Clear all selections
+        /// </summary>
+        private void ClearAllSelections()
+        {
+            foreach (var test in _allTests)
+            {
+                foreach (var process in test.Processes)
+                {
+                    process.IsSelected = false;
+                    foreach (var function in process.Functions)
+                    {
+                        function.IsSelected = false;
+                    }
+                }
             }
         }
 
