@@ -447,18 +447,6 @@
                                 CornerRadius="8"
                                 Margin="0,0,0,6"
                                 Padding="0">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Style.Triggers>
-                                        <!-- Highlight row when selected - VERY VISIBLE -->
-                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Background" Value="#FFF9C4"/>
-                                            <Setter Property="BorderBrush" Value="#FF9800"/>
-                                            <Setter Property="BorderThickness" Value="3"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -526,88 +514,17 @@
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="cActions"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Selection + Expand Column -->
-                                        <Grid Grid.Column="0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="18"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                        <ToggleButton Grid.Column="0" 
+                                                      Style="{StaticResource ExpandToggle}"
+                                                      IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"
+                                                      Margin="0,0,-10,4"/>
 
-                                            <!-- Selection Area -->
-                                            <Border Grid.Column="0"
-                                                    Background="Transparent"
-                                                    Cursor="Hand"
-                                                    ToolTip="Click to select row | Right-click for options"
-                                                    MouseLeftButtonDown="ProcessSelectionBorder_MouseLeftButtonDown"
-                                                    MouseMove="ProcessSelectionBorder_MouseMove"
-                                                    MouseRightButtonDown="ProcessSelectionBorder_MouseRightButtonDown">
-                                                <Border.ContextMenu>
-                                                    <ContextMenu>
-                                                        <MenuItem Header="Copy"
-                                                                  Click="ContextMenu_Copy"
-                                                                  InputGestureText="Ctrl+C">
-                                                            <MenuItem.Icon>
-                                                                <TextBlock Text="📋" FontSize="14"/>
-                                                            </MenuItem.Icon>
-                                                        </MenuItem>
-                                                        <MenuItem Header="Paste"
-                                                                  Click="ContextMenu_Paste"
-                                                                  InputGestureText="Ctrl+V">
-                                                            <MenuItem.Icon>
-                                                                <TextBlock Text="📄" FontSize="14"/>
-                                                            </MenuItem.Icon>
-                                                        </MenuItem>
-                                                        <Separator/>
-                                                        <MenuItem Header="Delete"
-                                                                  Click="ContextMenu_Delete"
-                                                                  InputGestureText="Del">
-                                                            <MenuItem.Icon>
-                                                                <TextBlock Text="🗑️" FontSize="14"/>
-                                                            </MenuItem.Icon>
-                                                        </MenuItem>
-                                                    </ContextMenu>
-                                                </Border.ContextMenu>
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="Transparent"/>
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
-                                                            </Trigger>
-                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-
-                                                <!-- Selection indicator (checkmark when selected) -->
-                                                <TextBlock Text="✓"
-                                                           Foreground="White"
-                                                           FontSize="10"
-                                                           FontWeight="Bold"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"
-                                                           Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                            </Border>
-
-                                            <!-- Expand Button -->
-                                            <ToggleButton Grid.Column="1"
-                                                          Style="{StaticResource ExpandToggle}"
-                                                          IsChecked="{Binding IsExpanded, Mode=TwoWay}"
-                                                          VerticalAlignment="Center"
-                                                          HorizontalAlignment="Center"
-                                                          Margin="0,0,-10,4"/>
-                                        </Grid>
-
-                                        <TextBlock Grid.Column="1" Text="{Binding ProcessIDDisplay}"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                        <TextBlock Grid.Column="1" Text="{Binding ProcessID}" 
+                                                   Foreground="{DynamicResource TextSecondaryBrush}" 
                                                    FontSize="12" VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center" TextAlignment="Center"
-                                                   MinWidth="50" MinHeight="18"
-                                                   ToolTip="{Binding ProcessIDTooltip}"
-                                                   helpers:InlineEditHelper.IsEditable="True"
-                                                   helpers:InlineEditHelper.FieldName="ProcessID"/>
+                                                   HorizontalAlignment="Center" TextAlignment="Center"/>
 
                                         <TextBlock Grid.Column="2" Text="{Binding WEB3Operator}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
@@ -628,10 +545,7 @@
                                         <TextBlock Grid.Column="4" Text="{Binding TestID}"
                                                    Foreground="{DynamicResource TextSecondaryBrush}"
                                                    FontSize="12" VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center" TextAlignment="Center"
-                                                   MinWidth="50" MinHeight="18"
-                                                   helpers:InlineEditHelper.IsEditable="True"
-                                                   helpers:InlineEditHelper.FieldName="TestID"/>
+                                                   HorizontalAlignment="Center" TextAlignment="Center"/>
 
                                         <TextBlock Grid.Column="5" Text="{Binding ProcessName}"
                                                    Foreground="{DynamicResource TextPrimaryBrush}"
