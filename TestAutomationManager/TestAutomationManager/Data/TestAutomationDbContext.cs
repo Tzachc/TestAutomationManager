@@ -162,7 +162,9 @@ namespace TestAutomationManager.Data
                 // Properties - map actual column names
                 entity.Property(e => e.TestID).HasColumnName("TestID");
                 entity.Property(e => e.Comments).HasColumnName("Comments");
-                entity.Property(e => e.Index).HasColumnName("Index");
+                entity.Property(e => e.Index)
+                    .HasColumnName("Index")
+                    .ValueGeneratedOnAdd();  // Index is auto-increment/identity column
                 entity.Property(e => e.LastRunning).HasColumnName("LastRunning");
                 entity.Property(e => e.Module).HasColumnName("Module");
                 entity.Property(e => e.Pass_Fail_WEB3Operator).HasColumnName("Pass_Fail_WEB3Operator");
@@ -192,6 +194,12 @@ namespace TestAutomationManager.Data
 
                 // Ignore UI-only and compatibility properties
                 entity.Ignore(e => e.IsExpanded);
+                entity.Ignore(e => e.AreFunctionsLoaded);
+                entity.Ignore(e => e.ParentTest);
+                entity.Ignore(e => e.IsPlaceholder);
+                entity.Ignore(e => e.DisplayIndex);
+                entity.Ignore(e => e.ProcessIDDisplay);
+                entity.Ignore(e => e.ProcessIDTooltip);
                 entity.Ignore(e => e.Id);
                 entity.Ignore(e => e.TestId);
                 entity.Ignore(e => e.Name);
