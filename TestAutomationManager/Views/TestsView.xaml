@@ -841,7 +841,9 @@
                                                                     <Border Grid.Column="0"
                                                                             Background="Transparent"
                                                                             Cursor="Arrow"
-                                                                            ToolTip="Click to select row for copy/paste">
+                                                                            ToolTip="Click to select row for copy/paste"
+                                                                            MouseLeftButtonDown="ProcessSelectionBorder_MouseLeftButtonDown"
+                                                                            MouseMove="ProcessSelectionBorder_MouseMove">
                                                                         <Border.Style>
                                                                             <Style TargetType="Border">
                                                                                 <Setter Property="Background" Value="Transparent"/>
@@ -1180,7 +1182,9 @@
                                                                                                 <Border Grid.Column="0"
                                                                                                         Background="Transparent"
                                                                                                         Cursor="Arrow"
-                                                                                                        ToolTip="Click to select row for copy/paste">
+                                                                                                        ToolTip="Click to select row for copy/paste"
+                                                                                                        MouseLeftButtonDown="FunctionSelectionBorder_MouseLeftButtonDown"
+                                                                                                        MouseMove="FunctionSelectionBorder_MouseMove">
                                                                                                     <Border.Style>
                                                                                                         <Style TargetType="Border">
                                                                                                             <Setter Property="Background" Value="Transparent"/>

@@ -295,6 +295,36 @@ namespace TestAutomationManager.Repositories
             }
         }
 
+        /// <summary>
+        /// Insert a new function into the database
+        /// </summary>
+        public async Task<Function> InsertFunctionAsync(Function function)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    // Manually generate Index value
+                    var maxIndex = await context.Set<Function>().MaxAsync(f => (int?)f.Index) ?? 0;
+                    function.Index = maxIndex + 1;
+
+                    System.Diagnostics.Debug.WriteLine($"⏳ Inserting function: {function.FunctionName} with Index #{function.Index}");
+
+                    // Add the new function
+                    await context.Set<Function>().AddAsync(function);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Function #{function.Index} inserted successfully");
+                    return function;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error inserting function: {ex.Message}");
+                throw;
+            }
+        }
+
         // ================================================
         // UPDATE OPERATIONS
         // ================================================

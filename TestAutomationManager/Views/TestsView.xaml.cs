@@ -75,6 +75,13 @@ namespace TestAutomationManager.Views
         // ----- Middle-mouse panning state -----
         private bool _isPanning = false;
         private Point _lastPanPoint;
+
+        // ----- Copy/Paste selection state -----
+        private bool _isSelecting = false;
+        private Process? _selectionStartProcess = null;
+        private Function? _selectionStartFunction = null;
+        private List<Process> _copiedProcesses = new();
+        private List<Function> _copiedFunctions = new();
         private double _startH;
         private double _startV;
         private DateTime _lastPanTime;
@@ -121,6 +128,10 @@ namespace TestAutomationManager.Views
 
             // ⭐ START DATABASE WATCHER for live updates
             StartLiveUpdates();
+
+            // Register keyboard shortcuts for copy/paste
+            this.KeyDown += TestsView_KeyDown;
+            this.Focusable = true;
         }
 
         // ================================================
@@ -2085,6 +2096,399 @@ namespace TestAutomationManager.Views
                 System.Diagnostics.Debug.WriteLine($"Error navigating to ExtTest: {ex.Message}");
                 MessageBox.Show($"Failed to navigate to ExtTest.\n\nError: {ex.Message}",
                     "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        // ================================================
+        // COPY/PASTE SELECTION HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle mouse click on process selection border
+        /// </summary>
+        private void ProcessSelectionBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Process process)
+            {
+                // Toggle selection on click
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    // CTRL+Click: toggle individual selection
+                    process.IsSelected = !process.IsSelected;
+                }
+                else
+                {
+                    // Regular click: clear all and select this one
+                    ClearAllSelections();
+                    process.IsSelected = true;
+                }
+
+                _isSelecting = true;
+                _selectionStartProcess = process;
+                _selectionStartFunction = null;
+
+                System.Diagnostics.Debug.WriteLine($"Process {process.ProcessID} selection: {process.IsSelected}");
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse move on process selection border (for drag multi-select)
+        /// </summary>
+        private void ProcessSelectionBorder_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isSelecting && e.LeftButton == MouseButtonState.Pressed && _selectionStartProcess != null)
+            {
+                if (sender is Border border && border.DataContext is Process currentProcess)
+                {
+                    // Find the test that contains both processes
+                    var test = _allTests.FirstOrDefault(t => t.Processes.Contains(_selectionStartProcess) && t.Processes.Contains(currentProcess));
+                    if (test != null)
+                    {
+                        // Get indices
+                        int startIndex = test.Processes.IndexOf(_selectionStartProcess);
+                        int currentIndex = test.Processes.IndexOf(currentProcess);
+
+                        // Clear current selections in this test
+                        foreach (var p in test.Processes)
+                        {
+                            p.IsSelected = false;
+                        }
+
+                        // Select range
+                        int min = Math.Min(startIndex, currentIndex);
+                        int max = Math.Max(startIndex, currentIndex);
+                        for (int i = min; i <= max; i++)
+                        {
+                            if (!test.Processes[i].IsPlaceholder)
+                            {
+                                test.Processes[i].IsSelected = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse click on function selection border
+        /// </summary>
+        private void FunctionSelectionBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Function function)
+            {
+                // Toggle selection on click
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    // CTRL+Click: toggle individual selection
+                    function.IsSelected = !function.IsSelected;
+                }
+                else
+                {
+                    // Regular click: clear all and select this one
+                    ClearAllSelections();
+                    function.IsSelected = true;
+                }
+
+                _isSelecting = true;
+                _selectionStartFunction = function;
+                _selectionStartProcess = null;
+
+                System.Diagnostics.Debug.WriteLine($"Function {function.FunctionName} selection: {function.IsSelected}");
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse move on function selection border (for drag multi-select)
+        /// </summary>
+        private void FunctionSelectionBorder_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isSelecting && e.LeftButton == MouseButtonState.Pressed && _selectionStartFunction != null)
+            {
+                if (sender is Border border && border.DataContext is Function currentFunction)
+                {
+                    // Find the process that contains both functions
+                    var process = _allTests
+                        .SelectMany(t => t.Processes)
+                        .FirstOrDefault(p => p.Functions.Contains(_selectionStartFunction) && p.Functions.Contains(currentFunction));
+
+                    if (process != null)
+                    {
+                        // Get indices
+                        int startIndex = process.Functions.IndexOf(_selectionStartFunction);
+                        int currentIndex = process.Functions.IndexOf(currentFunction);
+
+                        // Clear current selections in this process
+                        foreach (var f in process.Functions)
+                        {
+                            f.IsSelected = false;
+                        }
+
+                        // Select range
+                        int min = Math.Min(startIndex, currentIndex);
+                        int max = Math.Max(startIndex, currentIndex);
+                        for (int i = min; i <= max; i++)
+                        {
+                            process.Functions[i].IsSelected = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle keyboard shortcuts (CTRL+C, CTRL+V)
+        /// </summary>
+        private async void TestsView_KeyDown(object sender, KeyEventArgs e)
+        {
+            // CTRL+C: Copy selected processes/functions
+            if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                await CopySelectedItems();
+                e.Handled = true;
+            }
+            // CTRL+V: Paste copied processes/functions
+            else if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                await PasteItems();
+                e.Handled = true;
+            }
+            // ESC: Clear selections
+            else if (e.Key == Key.Escape)
+            {
+                ClearAllSelections();
+                _isSelecting = false;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Copy selected processes and functions to clipboard
+        /// </summary>
+        private async Task CopySelectedItems()
+        {
+            // Get selected processes
+            _copiedProcesses = _allTests
+                .SelectMany(t => t.Processes)
+                .Where(p => p.IsSelected && !p.IsPlaceholder)
+                .ToList();
+
+            // Get selected functions
+            _copiedFunctions = _allTests
+                .SelectMany(t => t.Processes)
+                .SelectMany(p => p.Functions)
+                .Where(f => f.IsSelected)
+                .ToList();
+
+            if (_copiedProcesses.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ Copied {_copiedProcesses.Count} process(es)");
+                MessageBox.Show($"Copied {_copiedProcesses.Count} process(es)",
+                    "Copy", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else if (_copiedFunctions.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ Copied {_copiedFunctions.Count} function(s)");
+                MessageBox.Show($"Copied {_copiedFunctions.Count} function(s)",
+                    "Copy", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Paste copied processes/functions
+        /// </summary>
+        private async Task PasteItems()
+        {
+            try
+            {
+                if (_copiedProcesses.Any())
+                {
+                    await PasteProcesses();
+                }
+                else if (_copiedFunctions.Any())
+                {
+                    await PasteFunctions();
+                }
+                else
+                {
+                    MessageBox.Show("Nothing to paste. Please copy some processes or functions first.",
+                        "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error pasting: {ex.Message}");
+                MessageBox.Show($"Failed to paste.\n\nError: {ex.Message}",
+                    "Paste Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Paste processes to the currently selected test
+        /// </summary>
+        private async Task PasteProcesses()
+        {
+            // Find which test to paste into (use the test of the currently selected process, or first test)
+            var targetTest = _allTests
+                .FirstOrDefault(t => t.Processes.Any(p => p.IsSelected));
+
+            if (targetTest == null)
+            {
+                MessageBox.Show("Please select a process row in the test where you want to paste.",
+                    "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            int pastedCount = 0;
+            foreach (var copiedProcess in _copiedProcesses)
+            {
+                // Create a deep copy of the process
+                var newProcess = new Process
+                {
+                    TestID = targetTest.TestID,
+                    ProcessID = copiedProcess.ProcessID,
+                    ProcessName = copiedProcess.ProcessName,
+                    WEB3Operator = copiedProcess.WEB3Operator,
+                    Pass_Fail_WEB3Operator = copiedProcess.Pass_Fail_WEB3Operator,
+                    Comments = copiedProcess.Comments,
+                    Module = copiedProcess.Module,
+                    Repeat = copiedProcess.Repeat,
+                    ProcessPosition = targetTest.Processes.Count(p => !p.IsPlaceholder) + 1,
+                    ParentTest = targetTest,
+                    Functions = new ObservableCollection<Function>(),
+                    AreFunctionsLoaded = true
+                };
+
+                // Copy all parameters
+                for (int i = 1; i <= 46; i++)
+                {
+                    var paramProp = typeof(Process).GetProperty($"Param{i}");
+                    if (paramProp != null)
+                    {
+                        var paramValue = paramProp.GetValue(copiedProcess);
+                        paramProp.SetValue(newProcess, paramValue);
+                    }
+                }
+
+                // Insert into database
+                var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
+
+                if (insertedProcess != null)
+                {
+                    // Load functions if the original process had any
+                    if (copiedProcess.ProcessID.HasValue)
+                    {
+                        var functions = await _processRepository.GetFunctionsForProcessAsync(copiedProcess.ProcessID.Value);
+                        foreach (var function in functions)
+                        {
+                            function.ParentProcess = insertedProcess;
+                            insertedProcess.Functions.Add(function);
+                        }
+                    }
+
+                    // Add to UI (insert before placeholder)
+                    var placeholderIndex = targetTest.Processes.ToList().FindIndex(p => p.IsPlaceholder);
+                    if (placeholderIndex >= 0)
+                    {
+                        targetTest.Processes.Insert(placeholderIndex, insertedProcess);
+                    }
+                    else
+                    {
+                        targetTest.Processes.Add(insertedProcess);
+                    }
+
+                    pastedCount++;
+                    System.Diagnostics.Debug.WriteLine($"✓ Pasted process {insertedProcess.ProcessID}");
+                }
+            }
+
+            MessageBox.Show($"Successfully pasted {pastedCount} process(es) to Test #{targetTest.TestID}",
+                "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Clear selections
+            ClearAllSelections();
+        }
+
+        /// <summary>
+        /// Paste functions to the currently selected process
+        /// </summary>
+        private async Task PasteFunctions()
+        {
+            // Find which process to paste into
+            var targetProcess = _allTests
+                .SelectMany(t => t.Processes)
+                .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+
+            if (targetProcess == null || !targetProcess.ProcessID.HasValue)
+            {
+                MessageBox.Show("Please select a process row where you want to paste the functions.",
+                    "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            int pastedCount = 0;
+            foreach (var copiedFunction in _copiedFunctions)
+            {
+                // Create a deep copy of the function
+                var newFunction = new Function
+                {
+                    ProcessID = targetProcess.ProcessID.Value,
+                    FunctionName = copiedFunction.FunctionName,
+                    FunctionDescription = copiedFunction.FunctionDescription,
+                    WEB3Operator = copiedFunction.WEB3Operator,
+                    Pass_Fail_WEB3Operator = copiedFunction.Pass_Fail_WEB3Operator,
+                    ActualValue = copiedFunction.ActualValue,
+                    BreakPoint = copiedFunction.BreakPoint,
+                    Comments = copiedFunction.Comments,
+                    FunctionPosition = targetProcess.Functions.Count + 1,
+                    ParentProcess = targetProcess
+                };
+
+                // Copy all parameters
+                for (int i = 1; i <= 30; i++)
+                {
+                    var paramProp = typeof(Function).GetProperty($"Param{i}");
+                    if (paramProp != null)
+                    {
+                        var paramValue = paramProp.GetValue(copiedFunction);
+                        paramProp.SetValue(newFunction, paramValue);
+                    }
+                }
+
+                // Insert into database
+                var insertedFunction = await _processRepository.InsertFunctionAsync(newFunction);
+
+                if (insertedFunction != null)
+                {
+                    targetProcess.Functions.Add(insertedFunction);
+                    pastedCount++;
+                    System.Diagnostics.Debug.WriteLine($"✓ Pasted function {insertedFunction.FunctionName}");
+                }
+            }
+
+            MessageBox.Show($"Successfully pasted {pastedCount} function(s) to Process #{targetProcess.ProcessID}",
+                "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            // Clear selections
+            ClearAllSelections();
+        }
+
+        /// <summary>
+        /// Clear all selections
+        /// </summary>
+        private void ClearAllSelections()
+        {
+            foreach (var test in _allTests)
+            {
+                foreach (var process in test.Processes)
+                {
+                    process.IsSelected = false;
+                    foreach (var function in process.Functions)
+                    {
+                        function.IsSelected = false;
+                    }
+                }
             }
         }
 
