@@ -718,6 +718,235 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle placeholder process property changes to detect when user enters ProcessID
+        /// This implements the "New" process adding functionality
+        /// </summary>
+        private async void PlaceholderProcess_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Process.ProcessID) && sender is Process placeholder)
+            {
+                // Only handle if this is still a placeholder and ProcessID is not null
+                if (!placeholder.IsPlaceholder || !placeholder.ProcessID.HasValue)
+                    return;
+
+                try
+                {
+                    var enteredProcessId = placeholder.ProcessID.Value;
+                    System.Diagnostics.Debug.WriteLine($"🆕 User entered ProcessID {enteredProcessId} in placeholder row");
+
+                    // Check if ProcessID exists in database
+                    bool exists = await _processRepository.ProcessIdExistsAsync(enteredProcessId);
+
+                    if (exists)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ ProcessID {enteredProcessId} exists - loading template and functions...");
+                        await HandleExistingProcessId(placeholder, enteredProcessId);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ℹ ProcessID {enteredProcessId} is new - creating empty process...");
+                        await HandleNewProcessId(placeholder, enteredProcessId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Error handling placeholder ProcessID: {ex.Message}");
+                    MessageBox.Show($"Failed to create process.\n\nError: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Reset placeholder
+                    if (sender is Process p)
+                    {
+                        p.ProcessID = null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle when user enters an EXISTING ProcessID in the placeholder
+        /// Load all functions from that ProcessID and create a new process record
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleExistingProcessId(Process placeholder, double processId)
+        {
+            try
+            {
+                // Get the template process (for copying parameters, etc.)
+                var templateProcess = await _processRepository.GetProcessTemplateByIdAsync(processId);
+
+                if (templateProcess == null)
+                {
+                    MessageBox.Show($"ProcessID {processId} not found in database.",
+                        "Process Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    placeholder.ProcessID = null;
+                    return;
+                }
+
+                // Load all functions for this ProcessID
+                var functions = await _processRepository.GetFunctionsForProcessAsync(processId);
+
+                System.Diagnostics.Debug.WriteLine($"✓ Loaded template process and {functions.Count} functions for ProcessID {processId}");
+
+                // Create new process record with the same ProcessID but linked to current test
+                var newProcess = new Process
+                {
+                    TestID = placeholder.TestID,
+                    ProcessID = processId,
+                    ProcessPosition = placeholder.ProcessPosition,
+                    // Copy other fields from template but leave ProcessName empty as per requirements
+                    ProcessName = null,
+                    WEB3Operator = templateProcess.WEB3Operator,
+                    Pass_Fail_WEB3Operator = templateProcess.Pass_Fail_WEB3Operator,
+                    Comments = templateProcess.Comments,
+                    Module = templateProcess.Module,
+                    Repeat = templateProcess.Repeat,
+                    IsPlaceholder = false,
+                    ParentTest = placeholder.ParentTest,
+                    Functions = new ObservableCollection<Function>(),
+                    AreFunctionsLoaded = true
+                };
+
+                // Copy all parameters
+                for (int i = 1; i <= 46; i++)
+                {
+                    var paramProp = typeof(Process).GetProperty($"Param{i}");
+                    if (paramProp != null)
+                    {
+                        var paramValue = paramProp.GetValue(templateProcess);
+                        paramProp.SetValue(newProcess, paramValue);
+                    }
+                }
+
+                // Insert into database
+                var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
+
+                // Add functions to UI (these are loaded from existing ProcessID, not newly created)
+                foreach (var function in functions)
+                {
+                    function.ParentProcess = insertedProcess;
+                    insertedProcess.Functions.Add(function);
+                }
+
+                // Update UI
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    var test = placeholder.ParentTest;
+                    if (test != null)
+                    {
+                        // Find placeholder index
+                        int placeholderIndex = test.Processes.IndexOf(placeholder);
+
+                        if (placeholderIndex >= 0)
+                        {
+                            // Unsubscribe from placeholder events
+                            placeholder.PropertyChanged -= PlaceholderProcess_PropertyChanged;
+
+                            // Replace placeholder with real process
+                            test.Processes[placeholderIndex] = insertedProcess;
+
+                            // Subscribe to real process events
+                            insertedProcess.PropertyChanged += Process_PropertyChanged;
+
+                            // Add new placeholder at the end
+                            var newPlaceholder = new Process
+                            {
+                                IsPlaceholder = true,
+                                ParentTest = test,
+                                TestID = test.TestID,
+                                ProcessPosition = insertedProcess.ProcessPosition + 1,
+                                Functions = new ObservableCollection<Function>(),
+                                AreFunctionsLoaded = true
+                            };
+
+                            newPlaceholder.PropertyChanged += PlaceholderProcess_PropertyChanged;
+                            test.Processes.Add(newPlaceholder);
+
+                            System.Diagnostics.Debug.WriteLine($"✅ Added process with existing ProcessID {processId} and {functions.Count} functions to Test #{test.TestID}");
+
+                            // Expand the new process to show functions
+                            insertedProcess.IsExpanded = true;
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling existing ProcessID: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Handle when user enters a NEW ProcessID in the placeholder
+        /// Create an empty process record
+        /// </summary>
+        private async System.Threading.Tasks.Task HandleNewProcessId(Process placeholder, double processId)
+        {
+            try
+            {
+                // Create new empty process
+                var newProcess = new Process
+                {
+                    TestID = placeholder.TestID,
+                    ProcessID = processId,
+                    ProcessPosition = placeholder.ProcessPosition,
+                    ProcessName = null,  // Empty as per requirements
+                    IsPlaceholder = false,
+                    ParentTest = placeholder.ParentTest,
+                    Functions = new ObservableCollection<Function>(),
+                    AreFunctionsLoaded = true  // No functions to load for new process
+                };
+
+                // Insert into database
+                var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
+
+                // Update UI
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    var test = placeholder.ParentTest;
+                    if (test != null)
+                    {
+                        // Find placeholder index
+                        int placeholderIndex = test.Processes.IndexOf(placeholder);
+
+                        if (placeholderIndex >= 0)
+                        {
+                            // Unsubscribe from placeholder events
+                            placeholder.PropertyChanged -= PlaceholderProcess_PropertyChanged;
+
+                            // Replace placeholder with real process
+                            test.Processes[placeholderIndex] = insertedProcess;
+
+                            // Subscribe to real process events
+                            insertedProcess.PropertyChanged += Process_PropertyChanged;
+
+                            // Add new placeholder at the end
+                            var newPlaceholder = new Process
+                            {
+                                IsPlaceholder = true,
+                                ParentTest = test,
+                                TestID = test.TestID,
+                                ProcessPosition = insertedProcess.ProcessPosition + 1,
+                                Functions = new ObservableCollection<Function>(),
+                                AreFunctionsLoaded = true
+                            };
+
+                            newPlaceholder.PropertyChanged += PlaceholderProcess_PropertyChanged;
+                            test.Processes.Add(newPlaceholder);
+
+                            System.Diagnostics.Debug.WriteLine($"✅ Added new empty process with ProcessID {processId} to Test #{test.TestID}");
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error handling new ProcessID: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Load processes for a specific test (CACHE-FIRST strategy!)
         /// 1. Check cache first (INSTANT - from background preload)
         /// 2. Fallback to database if not in cache (lazy load)
@@ -767,8 +996,24 @@ namespace TestAutomationManager.Views
                         process.PropertyChanged += Process_PropertyChanged;
                     }
 
+                    // ⭐ STEP 4: Add placeholder "(New)" row at the bottom
+                    var placeholderProcess = new Process
+                    {
+                        IsPlaceholder = true,
+                        ParentTest = test,
+                        TestID = test.TestID,
+                        ProcessPosition = (processes.Any() ? processes.Max(p => p.ProcessPosition ?? 0) + 1 : 1),
+                        Functions = new ObservableCollection<Function>(),
+                        AreFunctionsLoaded = true
+                    };
+
+                    // Subscribe to property changes to detect when user enters ProcessID
+                    placeholderProcess.PropertyChanged += PlaceholderProcess_PropertyChanged;
+
+                    test.Processes.Add(placeholderProcess);
+
                     test.AreProcessesLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {processes.Count} processes for Test #{testId} + 1 placeholder row");
                 });
             }
             catch (Exception ex)

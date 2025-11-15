@@ -165,11 +165,31 @@ namespace TestAutomationManager.Services
                 if (property == null)
                     return EditResult.Failed($"Unknown field: {fieldName}");
 
-                // Don't allow editing primary keys
-                if (fieldName == "Index" || fieldName == "ProcessID")
+                // Don't allow editing primary keys (except ProcessID on placeholder rows for new process creation)
+                if (fieldName == "Index")
                     return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
 
-                // Handle different property types
+                // Allow ProcessID editing only on placeholder rows
+                if (fieldName == "ProcessID" && !process.IsPlaceholder)
+                    return EditResult.Failed($"Cannot edit ProcessID on existing process. Use placeholder '(New)' row to create new process.");
+
+                // Special handling for ProcessID on placeholder rows
+                if (fieldName == "ProcessID" && process.IsPlaceholder)
+                {
+                    // Parse and validate ProcessID
+                    if (!double.TryParse(newValue, out double processIdValue))
+                        return EditResult.Failed("ProcessID must be a valid number");
+
+                    // Set the value (this will trigger PlaceholderProcess_PropertyChanged which handles the rest)
+                    property.SetValue(process, processIdValue);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ ProcessID {processIdValue} set on placeholder - PropertyChanged handler will create process");
+
+                    // Return success without saving (the PropertyChanged handler will handle creation)
+                    return EditResult.Success($"Processing new ProcessID {processIdValue}...");
+                }
+
+                // Handle different property types for normal fields
                 if (property.PropertyType == typeof(string))
                 {
                     property.SetValue(process, newValue);

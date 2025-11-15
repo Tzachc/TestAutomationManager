@@ -839,11 +839,11 @@
                                                                                   HorizontalAlignment="Center"/>
 
                                                                 <TextBlock Grid.Column="1"
-                                                                               Text="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"
+                                                                               Text="{Binding DisplayIndex}"
                                                                                Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                                                                                VerticalAlignment="Center" HorizontalAlignment="Center"
                                                                                TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                                               ToolTip="{Binding ProcessPosition, StringFormat='{}{0:0.##}'}"
+                                                                               ToolTip="{Binding DisplayIndex}"
                                                                                helpers:InlineEditHelper.IsEditable="True"
                                                                                helpers:InlineEditHelper.FieldName="ProcessPosition"/>
 
@@ -872,7 +872,9 @@
                                                                                Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                                                                                VerticalAlignment="Center" HorizontalAlignment="Center"
                                                                                TextAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                                               ToolTip="{Binding ProcessID, StringFormat='{}{0:0.##}'}"/>
+                                                                               ToolTip="{Binding ProcessID, StringFormat='{}{0:0.##}'}"
+                                                                               helpers:InlineEditHelper.IsEditable="True"
+                                                                               helpers:InlineEditHelper.FieldName="ProcessID"/>
 
                                                                 <TextBlock Grid.Column="5" Text="{Binding Pass_Fail_WEB3Operator}"
                                                                                Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"

@@ -183,6 +183,84 @@ namespace TestAutomationManager.Repositories
             }
         }
 
+        /// <summary>
+        /// Check if a ProcessID exists in the database
+        /// </summary>
+        public async Task<bool> ProcessIdExistsAsync(double processId)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    return await context.Set<Process>().AnyAsync(p => p.ProcessID == processId);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error checking if process exists: {ex.Message}");
+                throw new Exception("Failed to check if process exists", ex);
+            }
+        }
+
+        /// <summary>
+        /// Get the first process matching a ProcessID (for copying data when creating new process from existing ID)
+        /// This gets the process structure/template but not the specific test linkage
+        /// </summary>
+        public async Task<Process> GetProcessTemplateByIdAsync(double processId)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    // Get the first process with this ID (there might be multiple with same ProcessID in different tests)
+                    var process = await context.Set<Process>()
+                        .FirstOrDefaultAsync(p => p.ProcessID == processId);
+
+                    if (process != null)
+                    {
+                        // Initialize functions collection
+                        process.Functions = new ObservableCollection<Function>();
+                        process.AreFunctionsLoaded = false;
+                    }
+
+                    return process;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error getting process template: {ex.Message}");
+                throw new Exception("Failed to get process template", ex);
+            }
+        }
+
+        // ================================================
+        // CREATE OPERATIONS
+        // ================================================
+
+        /// <summary>
+        /// Insert a new process into the database
+        /// </summary>
+        public async Task<Process> InsertProcessAsync(Process process)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    // Add the new process
+                    await context.Set<Process>().AddAsync(process);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} inserted successfully with Index #{process.Index}");
+                    return process;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error inserting process: {ex.Message}");
+                throw new Exception("Failed to insert process", ex);
+            }
+        }
+
         // ================================================
         // UPDATE OPERATIONS
         // ================================================

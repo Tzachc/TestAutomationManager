@@ -361,7 +361,12 @@ namespace TestAutomationManager.Models
         public double? ProcessPosition
         {
             get => _processPosition;
-            set { _processPosition = value; OnPropertyChanged(); }
+            set
+            {
+                _processPosition = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));  // Update display when position changes
+            }
         }
 
         public string? Repeat
@@ -480,6 +485,34 @@ namespace TestAutomationManager.Models
         {
             get => _parentTest;
             set => _parentTest = value;
+        }
+
+        private bool _isPlaceholder;
+
+        /// <summary>
+        /// Indicates whether this is a placeholder "(New)" row for adding new processes
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsPlaceholder
+        {
+            get => _isPlaceholder;
+            set
+            {
+                _isPlaceholder = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));  // Update display when placeholder state changes
+            }
+        }
+
+        /// <summary>
+        /// Display text for the Index column - shows "(New)" for placeholder rows, ProcessPosition otherwise
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string DisplayIndex
+        {
+            get => IsPlaceholder ? "(New)" : (ProcessPosition.HasValue ? ProcessPosition.Value.ToString("0.##") : string.Empty);
         }
 
         // ================================================
