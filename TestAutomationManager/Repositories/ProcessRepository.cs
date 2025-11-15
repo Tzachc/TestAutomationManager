@@ -246,8 +246,17 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
+                    // Log what we're trying to insert
+                    System.Diagnostics.Debug.WriteLine($"⏳ Attempting to insert process:");
+                    System.Diagnostics.Debug.WriteLine($"   TestID: {process.TestID}");
+                    System.Diagnostics.Debug.WriteLine($"   ProcessID: {process.ProcessID}");
+                    System.Diagnostics.Debug.WriteLine($"   ProcessPosition: {process.ProcessPosition}");
+                    System.Diagnostics.Debug.WriteLine($"   Index: {process.Index}");
+
                     // Add the new process
                     await context.Set<Process>().AddAsync(process);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Process added to context, calling SaveChangesAsync...");
                     await context.SaveChangesAsync();
 
                     System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} inserted successfully with Index #{process.Index}");
@@ -256,8 +265,29 @@ namespace TestAutomationManager.Repositories
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error inserting process: {ex.Message}");
-                throw new Exception("Failed to insert process", ex);
+                // Log DETAILED error information including inner exceptions
+                System.Diagnostics.Debug.WriteLine($"✗ ========== DATABASE INSERT ERROR ==========");
+                System.Diagnostics.Debug.WriteLine($"✗ Main Exception: {ex.GetType().Name}");
+                System.Diagnostics.Debug.WriteLine($"✗ Main Message: {ex.Message}");
+
+                var innerEx = ex.InnerException;
+                int level = 1;
+                while (innerEx != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Inner Exception {level}: {innerEx.GetType().Name}");
+                    System.Diagnostics.Debug.WriteLine($"✗ Inner Message {level}: {innerEx.Message}");
+                    if (innerEx.StackTrace != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✗ Inner StackTrace {level}: {innerEx.StackTrace}");
+                    }
+                    innerEx = innerEx.InnerException;
+                    level++;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"✗ Full Exception: {ex}");
+                System.Diagnostics.Debug.WriteLine($"✗ ==========================================");
+
+                throw new Exception($"Failed to insert process. Error: {ex.Message}. Inner: {ex.InnerException?.Message}", ex);
             }
         }
 
