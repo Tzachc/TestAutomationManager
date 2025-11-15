@@ -452,5 +452,65 @@ namespace TestAutomationManager.Repositories
                 throw new Exception("Failed to delete process", ex);
             }
         }
+
+        /// <summary>
+        /// Delete process from database by Index (primary key)
+        /// </summary>
+        public async Task DeleteProcessAsync(int index)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var process = await context.Set<Process>()
+                        .FirstOrDefaultAsync(p => p.Index == index);
+
+                    if (process == null)
+                    {
+                        throw new InvalidOperationException($"Process with Index {index} not found");
+                    }
+
+                    context.Set<Process>().Remove(process);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Process Index #{index} deleted successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error deleting process: {ex.Message}");
+                throw new Exception("Failed to delete process", ex);
+            }
+        }
+
+        /// <summary>
+        /// Delete function from database by Index (primary key)
+        /// </summary>
+        public async Task DeleteFunctionAsync(int index)
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var function = await context.Set<Function>()
+                        .FirstOrDefaultAsync(f => f.Index == index);
+
+                    if (function == null)
+                    {
+                        throw new InvalidOperationException($"Function with Index {index} not found");
+                    }
+
+                    context.Set<Function>().Remove(function);
+                    await context.SaveChangesAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Function Index #{index} deleted successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error deleting function: {ex.Message}");
+                throw new Exception("Failed to delete function", ex);
+            }
+        }
     }
 }

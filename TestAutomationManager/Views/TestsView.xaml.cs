@@ -2198,6 +2198,38 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle right-click on process selection border
+        /// </summary>
+        private void ProcessSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Process process)
+            {
+                // If right-clicking on an unselected row, select it first
+                if (!process.IsSelected)
+                {
+                    ClearAllSelections();
+                    process.IsSelected = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle right-click on function selection border
+        /// </summary>
+        private void FunctionSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is Function function)
+            {
+                // If right-clicking on an unselected row, select it first
+                if (!function.IsSelected)
+                {
+                    ClearAllSelections();
+                    function.IsSelected = true;
+                }
+            }
+        }
+
+        /// <summary>
         /// Handle mouse move on function selection border (for drag multi-select)
         /// </summary>
         private void FunctionSelectionBorder_MouseMove(object sender, MouseEventArgs e)
@@ -2236,7 +2268,7 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Handle keyboard shortcuts (CTRL+C, CTRL+V)
+        /// Handle keyboard shortcuts (CTRL+C, CTRL+V, Delete)
         /// </summary>
         private async void TestsView_KeyDown(object sender, KeyEventArgs e)
         {
@@ -2250,6 +2282,12 @@ namespace TestAutomationManager.Views
             else if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 await PasteItems();
+                e.Handled = true;
+            }
+            // Delete: Delete selected items
+            else if (e.Key == Key.Delete)
+            {
+                await DeleteSelectedItems();
                 e.Handled = true;
             }
             // ESC: Clear selections
@@ -2472,6 +2510,130 @@ namespace TestAutomationManager.Views
 
             // Clear selections
             ClearAllSelections();
+        }
+
+        // ================================================
+        // CONTEXT MENU HANDLERS
+        // ================================================
+
+        /// <summary>
+        /// Handle Copy from context menu
+        /// </summary>
+        private async void ContextMenu_Copy(object sender, RoutedEventArgs e)
+        {
+            await CopySelectedItems();
+        }
+
+        /// <summary>
+        /// Handle Paste from context menu
+        /// </summary>
+        private async void ContextMenu_Paste(object sender, RoutedEventArgs e)
+        {
+            await PasteItems();
+        }
+
+        /// <summary>
+        /// Handle Delete from context menu
+        /// </summary>
+        private async void ContextMenu_Delete(object sender, RoutedEventArgs e)
+        {
+            await DeleteSelectedItems();
+        }
+
+        /// <summary>
+        /// Delete selected processes and functions
+        /// </summary>
+        private async Task DeleteSelectedItems()
+        {
+            try
+            {
+                // Get selected processes and functions
+                var selectedProcesses = _allTests
+                    .SelectMany(t => t.Processes)
+                    .Where(p => p.IsSelected && !p.IsPlaceholder)
+                    .ToList();
+
+                var selectedFunctions = _allTests
+                    .SelectMany(t => t.Processes)
+                    .SelectMany(p => p.Functions)
+                    .Where(f => f.IsSelected)
+                    .ToList();
+
+                if (!selectedProcesses.Any() && !selectedFunctions.Any())
+                {
+                    MessageBox.Show("No items selected to delete.",
+                        "Delete", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Confirm deletion
+                string message;
+                if (selectedProcesses.Any() && selectedFunctions.Any())
+                {
+                    message = $"Are you sure you want to delete {selectedProcesses.Count} process(es) and {selectedFunctions.Count} function(s)?";
+                }
+                else if (selectedProcesses.Any())
+                {
+                    message = $"Are you sure you want to delete {selectedProcesses.Count} process(es)?";
+                }
+                else
+                {
+                    message = $"Are you sure you want to delete {selectedFunctions.Count} function(s)?";
+                }
+
+                var result = MessageBox.Show(message, "Confirm Delete",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                    return;
+
+                int deletedCount = 0;
+
+                // Delete processes
+                foreach (var process in selectedProcesses)
+                {
+                    await _processRepository.DeleteProcessAsync(process.Index.Value);
+
+                    // Remove from UI
+                    var test = _allTests.FirstOrDefault(t => t.Processes.Contains(process));
+                    if (test != null)
+                    {
+                        test.Processes.Remove(process);
+                        deletedCount++;
+                        System.Diagnostics.Debug.WriteLine($"✓ Deleted process Index #{process.Index}");
+                    }
+                }
+
+                // Delete functions
+                foreach (var function in selectedFunctions)
+                {
+                    await _processRepository.DeleteFunctionAsync(function.Index.Value);
+
+                    // Remove from UI
+                    var process = _allTests
+                        .SelectMany(t => t.Processes)
+                        .FirstOrDefault(p => p.Functions.Contains(function));
+
+                    if (process != null)
+                    {
+                        process.Functions.Remove(function);
+                        deletedCount++;
+                        System.Diagnostics.Debug.WriteLine($"✓ Deleted function Index #{function.Index}");
+                    }
+                }
+
+                MessageBox.Show($"Successfully deleted {deletedCount} item(s).",
+                    "Delete", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                // Clear selections
+                ClearAllSelections();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error deleting: {ex.Message}");
+                MessageBox.Show($"Failed to delete items.\n\nError: {ex.Message}",
+                    "Delete Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>
