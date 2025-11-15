@@ -766,16 +766,8 @@ namespace TestAutomationManager.Views
                     process.Module = templateProcess.Module;
                     process.Repeat = templateProcess.Repeat;
 
-                    // Copy all parameters
-                    for (int i = 1; i <= 46; i++)
-                    {
-                        var paramProp = typeof(Process).GetProperty($"Param{i}");
-                        if (paramProp != null)
-                        {
-                            var paramValue = paramProp.GetValue(templateProcess);
-                            paramProp.SetValue(process, paramValue);
-                        }
-                    }
+                    // NOTE: Params 1-46 are intentionally left as-is (not copied from template)
+                    // The C# automation framework will load these values
 
                     // Update database
                     await _processRepository.UpdateProcessAsync(process);
@@ -898,7 +890,7 @@ namespace TestAutomationManager.Views
                     TestID = placeholder.TestID,
                     ProcessID = processId,
                     ProcessPosition = placeholder.ProcessPosition,
-                    // Copy other fields from template but leave ProcessName empty as per requirements
+                    // Leave ProcessName and all Params empty - the automation framework will load them
                     ProcessName = null,
                     WEB3Operator = templateProcess.WEB3Operator,
                     Pass_Fail_WEB3Operator = templateProcess.Pass_Fail_WEB3Operator,
@@ -911,16 +903,8 @@ namespace TestAutomationManager.Views
                     AreFunctionsLoaded = true
                 };
 
-                // Copy all parameters
-                for (int i = 1; i <= 46; i++)
-                {
-                    var paramProp = typeof(Process).GetProperty($"Param{i}");
-                    if (paramProp != null)
-                    {
-                        var paramValue = paramProp.GetValue(templateProcess);
-                        paramProp.SetValue(newProcess, paramValue);
-                    }
-                }
+                // NOTE: Params 1-46 are intentionally left empty (null)
+                // The C# automation framework will load these values
 
                 // Insert into database
                 var insertedProcess = await _processRepository.InsertProcessAsync(newProcess);
@@ -1021,8 +1005,10 @@ namespace TestAutomationManager.Views
                             // Unsubscribe from placeholder events
                             placeholder.PropertyChanged -= PlaceholderProcess_PropertyChanged;
 
-                            // Replace placeholder with real process
-                            test.Processes[placeholderIndex] = insertedProcess;
+                            // Remove placeholder and insert real process at same position
+                            // This forces WPF to re-render the row and attach InlineEditHelper
+                            test.Processes.RemoveAt(placeholderIndex);
+                            test.Processes.Insert(placeholderIndex, insertedProcess);
 
                             // Subscribe to real process events
                             insertedProcess.PropertyChanged += Process_PropertyChanged;
