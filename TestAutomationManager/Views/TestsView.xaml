@@ -769,11 +769,11 @@
                                                         <Border.Style>
                                                             <Style TargetType="Border">
                                                                 <Style.Triggers>
-                                                                    <!-- Highlight row when selected -->
+                                                                    <!-- Highlight row when selected - VERY VISIBLE -->
                                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                        <Setter Property="Background" Value="#BBDEFB"/>
-                                                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
-                                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                                        <Setter Property="Background" Value="#FFF9C4"/>
+                                                                        <Setter Property="BorderBrush" Value="#FF9800"/>
+                                                                        <Setter Property="BorderThickness" Value="3"/>
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -852,7 +852,7 @@
                                                                     <!-- Selection Area -->
                                                                     <Border Grid.Column="0"
                                                                             Background="Transparent"
-                                                                            Cursor="Arrow"
+                                                                            Cursor="Hand"
                                                                             ToolTip="Click to select row | Right-click for options"
                                                                             MouseLeftButtonDown="ProcessSelectionBorder_MouseLeftButtonDown"
                                                                             MouseMove="ProcessSelectionBorder_MouseMove"
@@ -1173,11 +1173,11 @@
                                                                                         <Border.Style>
                                                                                             <Style TargetType="Border">
                                                                                                 <Style.Triggers>
-                                                                                                    <!-- Highlight row when selected -->
+                                                                                                    <!-- Highlight row when selected - VERY VISIBLE -->
                                                                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                                                        <Setter Property="Background" Value="#BBDEFB"/>
-                                                                                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
-                                                                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                                                                        <Setter Property="Background" Value="#FFF9C4"/>
+                                                                                                        <Setter Property="BorderBrush" Value="#FF9800"/>
+                                                                                                        <Setter Property="BorderThickness" Value="3"/>
                                                                                                     </DataTrigger>
                                                                                                 </Style.Triggers>
                                                                                             </Style>
@@ -1232,7 +1232,7 @@
                                                                                                 <!-- Selection Area -->
                                                                                                 <Border Grid.Column="0"
                                                                                                         Background="Transparent"
-                                                                                                        Cursor="Arrow"
+                                                                                                        Cursor="Hand"
                                                                                                         ToolTip="Click to select row | Right-click for options"
                                                                                                         MouseLeftButtonDown="FunctionSelectionBorder_MouseLeftButtonDown"
                                                                                                         MouseMove="FunctionSelectionBorder_MouseMove"
