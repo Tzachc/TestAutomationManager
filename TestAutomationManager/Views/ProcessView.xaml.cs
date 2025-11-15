@@ -881,7 +881,7 @@ namespace TestAutomationManager.Views
         /// <summary>
         /// Handle existing ProcessID - load template and create new record
         /// </summary>
-        private async Task HandleExistingProcessId(Process placeholder, int testId, double processId)
+        private async Task HandleExistingProcessId(Process placeholder, double testId, double processId)
         {
             System.Diagnostics.Debug.WriteLine($"ProcessID {processId} exists - loading template");
 
@@ -937,7 +937,7 @@ namespace TestAutomationManager.Views
         /// <summary>
         /// Handle new ProcessID - create empty process
         /// </summary>
-        private async Task HandleNewProcessId(Process placeholder, int testId, double processId)
+        private async Task HandleNewProcessId(Process placeholder, double testId, double processId)
         {
             System.Diagnostics.Debug.WriteLine($"ProcessID {processId} is new - creating empty process");
 
