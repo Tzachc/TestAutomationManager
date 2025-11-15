@@ -246,12 +246,16 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
+                    // Manually generate Index value since database column might not be IDENTITY
+                    var maxIndex = await context.Set<Process>().MaxAsync(p => (int?)p.Index) ?? 0;
+                    process.Index = maxIndex + 1;
+
                     // Log what we're trying to insert
                     System.Diagnostics.Debug.WriteLine($"⏳ Attempting to insert process:");
                     System.Diagnostics.Debug.WriteLine($"   TestID: {process.TestID}");
                     System.Diagnostics.Debug.WriteLine($"   ProcessID: {process.ProcessID}");
                     System.Diagnostics.Debug.WriteLine($"   ProcessPosition: {process.ProcessPosition}");
-                    System.Diagnostics.Debug.WriteLine($"   Index: {process.Index}");
+                    System.Diagnostics.Debug.WriteLine($"   Index: {process.Index} (manually generated as max+1)");
 
                     // Add the new process
                     await context.Set<Process>().AddAsync(process);
