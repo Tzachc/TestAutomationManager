@@ -932,7 +932,7 @@ namespace TestAutomationManager.Views
                     insertedProcess.Functions.Add(function);
                 }
 
-                // Update UI
+                // Update UI - use Remove/Insert instead of array indexer to force WPF to re-render
                 await Dispatcher.InvokeAsync(() =>
                 {
                     var test = placeholder.ParentTest;
@@ -946,8 +946,10 @@ namespace TestAutomationManager.Views
                             // Unsubscribe from placeholder events
                             placeholder.PropertyChanged -= PlaceholderProcess_PropertyChanged;
 
-                            // Replace placeholder with real process
-                            test.Processes[placeholderIndex] = insertedProcess;
+                            // Remove placeholder and insert real process at same position
+                            // This forces WPF to re-render the row and attach InlineEditHelper
+                            test.Processes.RemoveAt(placeholderIndex);
+                            test.Processes.Insert(placeholderIndex, insertedProcess);
 
                             // Subscribe to real process events
                             insertedProcess.PropertyChanged += Process_PropertyChanged;
