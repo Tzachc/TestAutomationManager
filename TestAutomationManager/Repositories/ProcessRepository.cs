@@ -338,12 +338,14 @@ namespace TestAutomationManager.Repositories
             {
                 using (var context = new TestAutomationDbContext())
                 {
+                    // CRITICAL: Must find by Index (primary key), NOT ProcessID
+                    // Multiple processes can share the same ProcessID!
                     var existingProcess = await context.Set<Process>()
-                        .FirstOrDefaultAsync(p => p.ProcessID == process.ProcessID);
+                        .FirstOrDefaultAsync(p => p.Index == process.Index);
 
                     if (existingProcess == null)
                     {
-                        throw new InvalidOperationException($"Process with ID {process.ProcessID} not found");
+                        throw new InvalidOperationException($"Process with Index {process.Index} not found");
                     }
 
                     // Update properties manually to avoid modifying primary keys
@@ -364,7 +366,7 @@ namespace TestAutomationManager.Repositories
 
                     await context.SaveChangesAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} updated successfully");
+                    System.Diagnostics.Debug.WriteLine($"✓ Process Index #{process.Index} updated successfully");
                 }
             }
             catch (Exception ex)

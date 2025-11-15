@@ -771,7 +771,7 @@
                                                                 <Style.Triggers>
                                                                     <!-- Highlight row when selected -->
                                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                        <Setter Property="Background" Value="#E3F2FD"/>
+                                                                        <Setter Property="Background" Value="#BBDEFB"/>
                                                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                                                                         <Setter Property="BorderThickness" Value="2"/>
                                                                     </DataTrigger>
@@ -852,7 +852,7 @@
                                                                     <!-- Selection Area -->
                                                                     <Border Grid.Column="0"
                                                                             Background="Transparent"
-                                                                            Cursor="SizeWE"
+                                                                            Cursor="Arrow"
                                                                             ToolTip="Click to select row | Right-click for options"
                                                                             MouseLeftButtonDown="ProcessSelectionBorder_MouseLeftButtonDown"
                                                                             MouseMove="ProcessSelectionBorder_MouseMove"
@@ -1175,7 +1175,7 @@
                                                                                                 <Style.Triggers>
                                                                                                     <!-- Highlight row when selected -->
                                                                                                     <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                                                                        <Setter Property="Background" Value="#E3F2FD"/>
+                                                                                                        <Setter Property="Background" Value="#BBDEFB"/>
                                                                                                         <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
                                                                                                         <Setter Property="BorderThickness" Value="2"/>
                                                                                                     </DataTrigger>
@@ -1232,7 +1232,7 @@
                                                                                                 <!-- Selection Area -->
                                                                                                 <Border Grid.Column="0"
                                                                                                         Background="Transparent"
-                                                                                                        Cursor="SizeWE"
+                                                                                                        Cursor="Arrow"
                                                                                                         ToolTip="Click to select row | Right-click for options"
                                                                                                         MouseLeftButtonDown="FunctionSelectionBorder_MouseLeftButtonDown"
                                                                                                         MouseMove="FunctionSelectionBorder_MouseMove"
