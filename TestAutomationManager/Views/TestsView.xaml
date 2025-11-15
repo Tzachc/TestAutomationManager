@@ -862,10 +862,10 @@
                                                                 <TextBlock Grid.Column="3"
                                                                                Text="{Binding ProcessName, TargetNullValue=''}"
                                                                                Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"
-                                                                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                                               VerticalAlignment="Center" HorizontalAlignment="Stretch"
                                                                                TextAlignment="Left" TextTrimming="CharacterEllipsis"
                                                                                TextWrapping="Wrap"
-                                                                               MinWidth="100" MinHeight="20"
+                                                                               MinHeight="20"
                                                                                ToolTip="{Binding ProcessName}"
                                                                                helpers:InlineEditHelper.IsEditable="True"
                                                                                helpers:InlineEditHelper.FieldName="ProcessName"/>
