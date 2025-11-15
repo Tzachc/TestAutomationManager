@@ -155,9 +155,9 @@ namespace TestAutomationManager.Data
                 // Primary key - Index is the unique identifier for each process record
                 entity.HasKey(e => e.Index);
 
-                // Alternate key - ProcessID is used for Function relationships
-                // Multiple processes can share the same ProcessID (it's a template/definition ID)
-                entity.HasAlternateKey(e => e.ProcessID);
+                // NOTE: ProcessID is NOT unique - multiple processes can share the same ProcessID
+                // ProcessID is used to link to functions, but it's not enforced by a foreign key relationship
+                // Functions are loaded manually based on ProcessID in the repository
 
                 // Properties - map actual column names
                 entity.Property(e => e.TestID).HasColumnName("TestID");
@@ -185,12 +185,11 @@ namespace TestAutomationManager.Data
                 entity.Property(e => e.TempParam11111).HasColumnName("TempParam11111");
 
                 // Relationships
-                // Functions link to Process via ProcessID (not via the primary key Index)
-                entity.HasMany(p => p.Functions)
-                    .WithOne()
-                    .HasForeignKey(f => f.ProcessID)
-                    .HasPrincipalKey(p => p.ProcessID)  // Explicitly use ProcessID, not Index
-                    .OnDelete(DeleteBehavior.Cascade);
+                // NOTE: Functions are loaded manually based on ProcessID in the repository
+                // We don't configure a navigation property relationship here because:
+                // 1. Multiple processes can share the same ProcessID
+                // 2. Functions belong to the ProcessID, not to a specific Process record
+                // 3. The Process.Functions collection is populated manually in code
 
                 // Ignore UI-only and compatibility properties
                 entity.Ignore(e => e.IsExpanded);
@@ -200,6 +199,7 @@ namespace TestAutomationManager.Data
                 entity.Ignore(e => e.DisplayIndex);
                 entity.Ignore(e => e.ProcessIDDisplay);
                 entity.Ignore(e => e.ProcessIDTooltip);
+                entity.Ignore(e => e.Functions);  // Functions collection is loaded manually, not via EF navigation
                 entity.Ignore(e => e.Id);
                 entity.Ignore(e => e.TestId);
                 entity.Ignore(e => e.Name);
