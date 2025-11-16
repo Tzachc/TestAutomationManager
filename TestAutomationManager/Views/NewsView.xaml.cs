@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using TestAutomationManager.Models;
 using TestAutomationManager.Services;
@@ -91,33 +92,33 @@ namespace TestAutomationManager.Views
 
         private void UpdateFilterButtonStyles(string activeFilter)
         {
-            // Reset all buttons
-            FilterAll.Tag = null;
-            FilterAutomation.Tag = null;
-            FilterAI.Tag = null;
-            FilterDevOps.Tag = null;
+            // Uncheck all buttons
+            FilterAll.IsChecked = false;
+            FilterAutomation.IsChecked = false;
+            FilterAI.IsChecked = false;
+            FilterDevOps.IsChecked = false;
 
-            // Set active button
+            // Check active button
             switch (activeFilter)
             {
                 case "All":
-                    FilterAll.Tag = "Active";
+                    FilterAll.IsChecked = true;
                     break;
                 case "Test Automation":
-                    FilterAutomation.Tag = "Active";
+                    FilterAutomation.IsChecked = true;
                     break;
                 case "AI & ML":
-                    FilterAI.Tag = "Active";
+                    FilterAI.IsChecked = true;
                     break;
                 case "DevOps":
-                    FilterDevOps.Tag = "Active";
+                    FilterDevOps.IsChecked = true;
                     break;
             }
         }
 
         private void FilterButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button)
+            if (sender is ToggleButton button)
             {
                 string filter = button.Name switch
                 {
