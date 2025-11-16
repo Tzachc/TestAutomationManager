@@ -3,11 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:converters="clr-namespace:TestAutomationManager.Converters"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1200"
              Background="{DynamicResource PrimaryBackgroundBrush}">
 
     <UserControl.Resources>
+        <converters:ImageUrlConverter x:Key="ImageUrlConverter"/>
         <!-- Category Color Brushes -->
         <SolidColorBrush x:Key="AutomationCategoryBrush" Color="#FF6366F1"/>
         <SolidColorBrush x:Key="AICategoryBrush" Color="#FF10B981"/>
@@ -276,7 +278,7 @@
                                             Background="#FF1E293B">
                                         <Grid>
                                             <!-- Image -->
-                                            <Image Source="{Binding ImageUrl}"
+                                            <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrlConverter}}"
                                                    Stretch="UniformToFill"
                                                    VerticalAlignment="Center"
                                                    HorizontalAlignment="Center"/>
