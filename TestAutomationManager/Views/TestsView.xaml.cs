@@ -2599,28 +2599,56 @@ namespace TestAutomationManager.Views
         /// </summary>
         private async Task PasteFunctions()
         {
-            // Debug: Check all selected processes
-            var allSelected = _allTests.SelectMany(t => t.Processes).Where(p => p.IsSelected).ToList();
-            System.Diagnostics.Debug.WriteLine($"📋 PasteFunctions: Found {allSelected.Count} selected processes");
-            foreach (var p in allSelected)
+            Process targetProcess = null;
+
+            // Strategy 1: Check if any function is selected (user is working inside a process)
+            var selectedFunction = _allTests
+                .SelectMany(t => t.Processes)
+                .SelectMany(p => p.Functions)
+                .FirstOrDefault(f => f.IsSelected && !f.IsPlaceholder);
+
+            if (selectedFunction != null && selectedFunction.ParentProcess != null)
             {
-                System.Diagnostics.Debug.WriteLine($"   Process: ProcessID={p.ProcessID}, IsPlaceholder={p.IsPlaceholder}, Index={p.Index}");
+                targetProcess = selectedFunction.ParentProcess;
+                System.Diagnostics.Debug.WriteLine($"📋 Found target process from selected function: Process #{targetProcess.ProcessID}");
             }
 
-            // Find which process to paste into
-            var targetProcess = _allTests
-                .SelectMany(t => t.Processes)
-                .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+            // Strategy 2: Check if there's an expanded process with loaded functions (user is inside a process)
+            if (targetProcess == null)
+            {
+                targetProcess = _allTests
+                    .SelectMany(t => t.Processes)
+                    .FirstOrDefault(p => p.IsExpanded && p.AreFunctionsLoaded && !p.IsPlaceholder && p.ProcessID.HasValue);
 
+                if (targetProcess != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"📋 Found target process from expanded process: Process #{targetProcess.ProcessID}");
+                }
+            }
+
+            // Strategy 3: Check if a process row is explicitly selected
+            if (targetProcess == null)
+            {
+                targetProcess = _allTests
+                    .SelectMany(t => t.Processes)
+                    .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder && p.ProcessID.HasValue);
+
+                if (targetProcess != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"📋 Found target process from selected process: Process #{targetProcess.ProcessID}");
+                }
+            }
+
+            // No valid target found
             if (targetProcess == null || !targetProcess.ProcessID.HasValue)
             {
                 System.Diagnostics.Debug.WriteLine($"❌ No valid process found for pasting");
-                MessageBox.Show("Please select a process row where you want to paste the functions.",
+                MessageBox.Show("Please expand a process or select a process row to paste functions.",
                     "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            System.Diagnostics.Debug.WriteLine($"✓ Pasting functions to Process #{targetProcess.ProcessID}");
+            System.Diagnostics.Debug.WriteLine($"✓ Pasting {_copiedFunctions.Count} functions to Process #{targetProcess.ProcessID}");
 
             // Ensure functions are loaded for this process
             if (!targetProcess.AreFunctionsLoaded)
