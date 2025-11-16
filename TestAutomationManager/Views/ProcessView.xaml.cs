@@ -401,50 +401,42 @@ namespace TestAutomationManager.Views
                     // Insert into database
                     var insertedFunction = await _repository.InsertFunctionAsync(newFunction);
 
-                    // Ensure properties are set correctly (in case repository returns a new object)
-                    insertedFunction.IsPlaceholder = false;
-                    insertedFunction.ParentProcess = placeholder.ParentProcess;
+                    System.Diagnostics.Debug.WriteLine($"✓ Inserted function '{insertedFunction.FunctionName}' with Index #{insertedFunction.Index}");
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Inserted function '{insertedFunction.FunctionName}' with Index #{insertedFunction.Index}, IsPlaceholder={insertedFunction.IsPlaceholder}");
-
-                    // Reload all functions from database to get fresh data
-                    var allFunctions = await _repository.GetFunctionsForProcessAsync(placeholder.ProcessID.Value);
-
-                    // Update cache with fresh data
-                    var cache = ProcessCacheService.Instance;
-                    cache.AddFunctions(placeholder.ProcessID.Value, allFunctions);
-
-                    // Update UI - Force complete refresh by reloading all functions
+                    // Update UI - simple replace exactly like Process does
                     await Dispatcher.InvokeAsync(() =>
                     {
                         var parentProcess = placeholder.ParentProcess;
                         if (parentProcess != null)
                         {
-                            System.Diagnostics.Debug.WriteLine($"🔄 Forcing complete refresh of functions for Process #{parentProcess.ProcessID}");
+                            // Find placeholder index
+                            int placeholderIndex = parentProcess.Functions.IndexOf(placeholder);
 
-                            // Clear the entire collection to force WPF to recreate all visual elements
-                            parentProcess.Functions.Clear();
-
-                            // Re-add all functions
-                            foreach (var func in allFunctions.OrderBy(f => f.FunctionPosition))
+                            if (placeholderIndex >= 0)
                             {
-                                func.ParentProcess = parentProcess;
-                                parentProcess.Functions.Add(func);
+                                // Set properties on inserted function
+                                insertedFunction.ParentProcess = parentProcess;
+
+                                // Remove placeholder
+                                parentProcess.Functions.RemoveAt(placeholderIndex);
+
+                                // Insert real function at same position
+                                parentProcess.Functions.Insert(placeholderIndex, insertedFunction);
+
+                                // Create new placeholder
+                                var newPlaceholder = new Function
+                                {
+                                    ProcessID = parentProcess.ProcessID,
+                                    FunctionPosition = (insertedFunction.FunctionPosition ?? 0) + 1,
+                                    ParentProcess = parentProcess
+                                };
+                                newPlaceholder.IsPlaceholder = true; // Set AFTER other properties
+
+                                newPlaceholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
+                                parentProcess.Functions.Add(newPlaceholder);
+
+                                System.Diagnostics.Debug.WriteLine($"✅ Added function '{insertedFunction.FunctionName}' (IsPlaceholder={insertedFunction.IsPlaceholder}) and new placeholder");
                             }
-
-                            // Add new placeholder at the end
-                            var newPlaceholder = new Function
-                            {
-                                IsPlaceholder = true,
-                                ParentProcess = parentProcess,
-                                ProcessID = parentProcess.ProcessID,
-                                FunctionPosition = allFunctions.Any() ? allFunctions.Max(f => f.FunctionPosition ?? 0) + 1 : 1
-                            };
-
-                            newPlaceholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
-                            parentProcess.Functions.Add(newPlaceholder);
-
-                            System.Diagnostics.Debug.WriteLine($"✅ Refreshed {allFunctions.Count} functions + 1 placeholder for Process #{parentProcess.ProcessID}");
                         }
                     });
                 }
