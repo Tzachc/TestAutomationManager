@@ -1294,10 +1294,11 @@
                                                                                                            HorizontalAlignment="Left"
                                                                                                            TextAlignment="Center"
                                                                                                            TextTrimming="CharacterEllipsis"
-                                                                                                           ToolTip="{Binding FunctionPosition, StringFormat='{}{0}'}">
+                                                                                                           ToolTip="{Binding DisplayPosition}"
+                                                                                                           helpers:InlineEditHelper.IsEditable="True"
+                                                                                                           helpers:InlineEditHelper.FieldName="FunctionPosition">
                                                                                                     <TextBlock.Text>
-                                                                                                        <Binding Path="FunctionPosition"
-                                                                                                                     StringFormat="{}{0}"
+                                                                                                        <Binding Path="DisplayPosition"
                                                                                                                      TargetNullValue=""/>
                                                                                                     </TextBlock.Text>
                                                                                                 </TextBlock>
