@@ -279,6 +279,8 @@ namespace TestAutomationManager.Services
                 if (function == null)
                     return EditResult.Failed("Function is null");
 
+                System.Diagnostics.Debug.WriteLine($"🔍 EditFunctionFieldAsync: fieldName='{fieldName}', IsPlaceholder={function.IsPlaceholder}, Index={function.Index}, FunctionName='{function.FunctionName}'");
+
                 // Use reflection to set any property
                 var property = typeof(Function).GetProperty(fieldName);
                 if (property == null)
@@ -292,6 +294,7 @@ namespace TestAutomationManager.Services
                 // Block editing all fields except FunctionName on placeholder rows
                 if (function.IsPlaceholder && fieldName != "FunctionName")
                 {
+                    System.Diagnostics.Debug.WriteLine($"❌ Blocked edit on placeholder: IsPlaceholder={function.IsPlaceholder}, fieldName={fieldName}");
                     return EditResult.Failed("To create a new function, click FunctionName and enter a name");
                 }
 

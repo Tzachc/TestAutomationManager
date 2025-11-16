@@ -2599,6 +2599,14 @@ namespace TestAutomationManager.Views
         /// </summary>
         private async Task PasteFunctions()
         {
+            // Debug: Check all selected processes
+            var allSelected = _allTests.SelectMany(t => t.Processes).Where(p => p.IsSelected).ToList();
+            System.Diagnostics.Debug.WriteLine($"📋 PasteFunctions: Found {allSelected.Count} selected processes");
+            foreach (var p in allSelected)
+            {
+                System.Diagnostics.Debug.WriteLine($"   Process: ProcessID={p.ProcessID}, IsPlaceholder={p.IsPlaceholder}, Index={p.Index}");
+            }
+
             // Find which process to paste into
             var targetProcess = _allTests
                 .SelectMany(t => t.Processes)
@@ -2606,9 +2614,19 @@ namespace TestAutomationManager.Views
 
             if (targetProcess == null || !targetProcess.ProcessID.HasValue)
             {
+                System.Diagnostics.Debug.WriteLine($"❌ No valid process found for pasting");
                 MessageBox.Show("Please select a process row where you want to paste the functions.",
                     "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"✓ Pasting functions to Process #{targetProcess.ProcessID}");
+
+            // Ensure functions are loaded for this process
+            if (!targetProcess.AreFunctionsLoaded)
+            {
+                System.Diagnostics.Debug.WriteLine($"⏳ Loading functions for process before pasting...");
+                await LoadFunctionsForProcessAsync(targetProcess);
             }
 
             int pastedCount = 0;
@@ -2645,9 +2663,25 @@ namespace TestAutomationManager.Views
 
                 if (insertedFunction != null)
                 {
-                    targetProcess.Functions.Add(insertedFunction);
+                    // Ensure it's not marked as placeholder
+                    insertedFunction.IsPlaceholder = false;
+                    insertedFunction.ParentProcess = targetProcess;
+
+                    // Find the placeholder row (should be last)
+                    var placeholderIndex = targetProcess.Functions.ToList().FindIndex(f => f.IsPlaceholder);
+                    if (placeholderIndex >= 0)
+                    {
+                        // Insert before the placeholder
+                        targetProcess.Functions.Insert(placeholderIndex, insertedFunction);
+                    }
+                    else
+                    {
+                        // No placeholder, just add to end
+                        targetProcess.Functions.Add(insertedFunction);
+                    }
+
                     pastedCount++;
-                    System.Diagnostics.Debug.WriteLine($"✓ Pasted function {insertedFunction.FunctionName}");
+                    System.Diagnostics.Debug.WriteLine($"✓ Pasted function {insertedFunction.FunctionName}, IsPlaceholder={insertedFunction.IsPlaceholder}");
                 }
             }
 
