@@ -14,24 +14,17 @@
         <SolidColorBrush x:Key="DevOpsCategoryBrush" Color="#FFF59E0B"/>
         <SolidColorBrush x:Key="SetupCategoryBrush" Color="#FFEC4899"/>
 
-        <!-- Gradient Brushes -->
-        <LinearGradientBrush x:Key="HeroGradientBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#FF6366F1" Offset="0"/>
-            <GradientStop Color="#FF8B5CF6" Offset="0.5"/>
-            <GradientStop Color="#FFEC4899" Offset="1"/>
-        </LinearGradientBrush>
-
         <!-- Modern Card Style -->
         <Style x:Key="ModernNewsCardStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="Margin" Value="12"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Margin" Value="16"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="16" ShadowDepth="0"/>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="20" ShadowDepth="0"/>
                 </Setter.Value>
             </Setter>
             <Setter Property="RenderTransform">
@@ -45,12 +38,12 @@
                     <Trigger.EnterActions>
                         <BeginStoryboard>
                             <Storyboard>
-                                <DoubleAnimation Duration="0:0:0.3"
-                                               To="1.02"
+                                <DoubleAnimation Duration="0:0:0.25"
+                                               To="1.03"
                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
                                                DecelerationRatio="0.7"/>
-                                <DoubleAnimation Duration="0:0:0.3"
-                                               To="1.02"
+                                <DoubleAnimation Duration="0:0:0.25"
+                                               To="1.03"
                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
                                                DecelerationRatio="0.7"/>
                             </Storyboard>
@@ -59,11 +52,11 @@
                     <Trigger.ExitActions>
                         <BeginStoryboard>
                             <Storyboard>
-                                <DoubleAnimation Duration="0:0:0.3"
+                                <DoubleAnimation Duration="0:0:0.25"
                                                To="1"
                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
                                                DecelerationRatio="0.7"/>
-                                <DoubleAnimation Duration="0:0:0.3"
+                                <DoubleAnimation Duration="0:0:0.25"
                                                To="1"
                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
                                                DecelerationRatio="0.7"/>
@@ -72,7 +65,7 @@
                     </Trigger.ExitActions>
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="32" ShadowDepth="0"/>
+                            <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="40" ShadowDepth="0"/>
                         </Setter.Value>
                     </Setter>
                 </Trigger>
@@ -81,9 +74,14 @@
 
         <!-- Category Badge Style -->
         <Style x:Key="CategoryPillStyle" TargetType="Border">
-            <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="16,8"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="8" ShadowDepth="2"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Filter Pill Style -->
@@ -92,9 +90,9 @@
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="Padding" Value="24,12"/>
-            <Setter Property="Margin" Value="0,0,12,0"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -103,7 +101,7 @@
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="24"
+                                CornerRadius="20"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -129,50 +127,68 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Stunning Header with Gradient -->
+        <!-- Compact Header -->
         <Border Grid.Row="0"
-                Background="{StaticResource HeroGradientBrush}"
-                Padding="50,40">
+                Background="{DynamicResource SecondaryBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="40,20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="📰 Tech News"
-                               FontSize="42"
+                <!-- Title and Filters Combined -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📰"
+                               FontSize="28"
+                               Margin="0,0,12,0"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="Tech News"
+                               FontSize="24"
                                FontWeight="Bold"
-                               Foreground="White"
-                               Margin="0,0,0,8">
-                        <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="10" ShadowDepth="2"/>
-                        </TextBlock.Effect>
-                    </TextBlock>
-                    <TextBlock Text="Stay updated with the latest in Test Automation, AI, and DevOps"
-                               FontSize="16"
-                               Foreground="White"
-                               Opacity="0.95"/>
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="0,0,30,0"
+                               VerticalAlignment="Center"/>
+
+                    <ToggleButton x:Name="FilterAll"
+                                Content="All"
+                                Style="{StaticResource FilterPillStyle}"
+                                IsChecked="True"
+                                Click="FilterButton_Click"/>
+                    <ToggleButton x:Name="FilterAutomation"
+                                Content="🧪 Testing"
+                                Style="{StaticResource FilterPillStyle}"
+                                Click="FilterButton_Click"/>
+                    <ToggleButton x:Name="FilterAI"
+                                Content="🤖 AI"
+                                Style="{StaticResource FilterPillStyle}"
+                                Click="FilterButton_Click"/>
+                    <ToggleButton x:Name="FilterDevOps"
+                                Content="⚙️ DevOps"
+                                Style="{StaticResource FilterPillStyle}"
+                                Click="FilterButton_Click"/>
                 </StackPanel>
 
                 <Button Grid.Column="1"
                         x:Name="RefreshButton"
                         Click="RefreshButton_Click"
                         VerticalAlignment="Center"
-                        Background="White"
-                        Foreground="#FF6366F1"
+                        Background="{DynamicResource PrimaryBlueBrush}"
+                        Foreground="White"
                         BorderThickness="0"
-                        Padding="28,14"
-                        FontSize="15"
+                        Padding="20,10"
+                        FontSize="13"
                         FontWeight="SemiBold"
                         Cursor="Hand">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}"
-                                    CornerRadius="12"
+                                    CornerRadius="20"
                                     Padding="{TemplateBinding Padding}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🔄" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="🔄" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Refresh" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}"/>
                                 </StackPanel>
                             </Border>
@@ -180,11 +196,6 @@
                     </Button.Template>
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Effect">
-                                <Setter.Value>
-                                    <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="10" ShadowDepth="2"/>
-                                </Setter.Value>
-                            </Setter>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Opacity" Value="0.9"/>
@@ -202,39 +213,6 @@
                       HorizontalScrollBarVisibility="Disabled"
                       Background="{DynamicResource PrimaryBackgroundBrush}">
             <StackPanel>
-                <!-- Filters Section -->
-                <Border Background="{DynamicResource SecondaryBackgroundBrush}"
-                        Padding="50,30"
-                        BorderBrush="{DynamicResource BorderBrush}"
-                        BorderThickness="0,0,0,1">
-                    <StackPanel>
-                        <TextBlock Text="FILTER BY CATEGORY"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextTertiaryBrush}"
-                                   Margin="0,0,0,16"/>
-                        <StackPanel Orientation="Horizontal">
-                            <ToggleButton x:Name="FilterAll"
-                                        Content="✨ All News"
-                                        Style="{StaticResource FilterPillStyle}"
-                                        IsChecked="True"
-                                        Click="FilterButton_Click"/>
-                            <ToggleButton x:Name="FilterAutomation"
-                                        Content="🧪 Test Automation"
-                                        Style="{StaticResource FilterPillStyle}"
-                                        Click="FilterButton_Click"/>
-                            <ToggleButton x:Name="FilterAI"
-                                        Content="🤖 AI &amp; ML"
-                                        Style="{StaticResource FilterPillStyle}"
-                                        Click="FilterButton_Click"/>
-                            <ToggleButton x:Name="FilterDevOps"
-                                        Content="⚙️ DevOps"
-                                        Style="{StaticResource FilterPillStyle}"
-                                        Click="FilterButton_Click"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
                 <!-- Loading State -->
                 <Grid x:Name="LoadingPanel"
                       Visibility="Visible"
@@ -242,7 +220,7 @@
                     <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
                         <TextBlock Text="⏳" FontSize="64" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                        <TextBlock Text="Loading amazing tech news..."
+                        <TextBlock Text="Loading the latest tech news..."
                                    FontSize="18"
                                    FontWeight="Medium"
                                    Foreground="{DynamicResource TextSecondaryBrush}"
@@ -273,7 +251,7 @@
                 <!-- News Grid -->
                 <ItemsControl x:Name="NewsItemsControl"
                               Visibility="Collapsed"
-                              Padding="38,30,38,50">
+                              Padding="24,20,24,40">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Columns="2"/>
@@ -287,13 +265,13 @@
                                     Tag="{Binding Url}">
                                 <Grid>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="220"/>
+                                        <RowDefinition Height="300"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Article Image -->
+                                    <!-- MASSIVE Article Image -->
                                     <Border Grid.Row="0"
-                                            CornerRadius="16,16,0,0"
+                                            CornerRadius="20,20,0,0"
                                             ClipToBounds="True"
                                             Background="#FF1E293B">
                                         <Grid>
@@ -319,19 +297,20 @@
                                                     </Style>
                                                 </Grid.Style>
                                                 <TextBlock Text="📰"
-                                                           FontSize="72"
+                                                           FontSize="120"
                                                            HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"
-                                                           Opacity="0.3"/>
+                                                           Opacity="0.2"/>
                                             </Grid>
 
-                                            <!-- Gradient Overlay -->
-                                            <Border VerticalAlignment="Bottom"
-                                                    Height="100">
+                                            <!-- Dark Gradient Overlay -->
+                                            <Border VerticalAlignment="Stretch"
+                                                    HorizontalAlignment="Stretch">
                                                 <Border.Background>
                                                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                                         <GradientStop Color="Transparent" Offset="0"/>
-                                                        <GradientStop Color="#AA000000" Offset="1"/>
+                                                        <GradientStop Color="#55000000" Offset="0.7"/>
+                                                        <GradientStop Color="#CC000000" Offset="1"/>
                                                     </LinearGradientBrush>
                                                 </Border.Background>
                                             </Border>
@@ -339,7 +318,7 @@
                                             <!-- Category Badge on Image -->
                                             <Border VerticalAlignment="Top"
                                                     HorizontalAlignment="Left"
-                                                    Margin="16">
+                                                    Margin="20,20">
                                                 <Border.Style>
                                                     <Style TargetType="Border" BasedOn="{StaticResource CategoryPillStyle}">
                                                         <Setter Property="Background" Value="#FF6366F1"/>
@@ -360,85 +339,83 @@
                                                     </Style>
                                                 </Border.Style>
                                                 <TextBlock Text="{Binding Category}"
-                                                           FontSize="11"
+                                                           FontSize="12"
                                                            FontWeight="Bold"
                                                            Foreground="White"/>
                                             </Border>
-                                        </Grid>
-                                    </Border>
 
-                                    <!-- Content Area -->
-                                    <Border Grid.Row="1"
-                                            Padding="24,20,24,24">
-                                        <StackPanel>
-                                        <!-- Title -->
-                                        <TextBlock Text="{Binding Title}"
-                                                   FontSize="19"
-                                                   FontWeight="Bold"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}"
-                                                   TextWrapping="Wrap"
-                                                   LineHeight="26"
-                                                   MaxHeight="78"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,0,0,12"/>
-
-                                        <!-- Description -->
-                                        <TextBlock Text="{Binding Description}"
-                                                   FontSize="14"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   TextWrapping="Wrap"
-                                                   LineHeight="22"
-                                                   MaxHeight="66"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,0,0,20"/>
-
-                                        <!-- Footer -->
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-
-                                            <!-- Source Info -->
-                                            <StackPanel Grid.Column="0"
-                                                        Orientation="Horizontal"
-                                                        VerticalAlignment="Center">
-                                                <Border Width="32"
-                                                        Height="32"
-                                                        CornerRadius="16"
+                                            <!-- Source Badge at Bottom -->
+                                            <StackPanel Orientation="Horizontal"
+                                                        VerticalAlignment="Bottom"
+                                                        Margin="20,0,20,20">
+                                                <Border Width="36"
+                                                        Height="36"
+                                                        CornerRadius="18"
                                                         Background="{DynamicResource PrimaryBlueBrush}"
-                                                        Margin="0,0,10,0">
+                                                        Margin="0,0,12,0">
                                                     <TextBlock Text="📰"
-                                                               FontSize="16"
+                                                               FontSize="18"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Center"/>
                                                 </Border>
                                                 <StackPanel VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Source}"
-                                                               FontSize="13"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                                               FontSize="14"
+                                                               FontWeight="Bold"
+                                                               Foreground="White"/>
                                                     <TextBlock Text="{Binding TimeAgo}"
                                                                FontSize="12"
-                                                               Foreground="{DynamicResource TextTertiaryBrush}"/>
+                                                               Foreground="White"
+                                                               Opacity="0.8"/>
                                                 </StackPanel>
                                             </StackPanel>
+                                        </Grid>
+                                    </Border>
 
-                                            <!-- Read More Arrow -->
-                                            <Border Grid.Column="1"
-                                                    Width="40"
-                                                    Height="40"
-                                                    CornerRadius="20"
-                                                    Background="{DynamicResource PrimaryBlueBrush}"
-                                                    VerticalAlignment="Center">
+                                    <!-- Content Area -->
+                                    <Border Grid.Row="1"
+                                            Padding="26,24,26,26">
+                                        <StackPanel>
+                                        <!-- Title -->
+                                        <TextBlock Text="{Binding Title}"
+                                                   FontSize="22"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   TextWrapping="Wrap"
+                                                   LineHeight="30"
+                                                   MaxHeight="90"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Margin="0,0,0,14"/>
+
+                                        <!-- Description -->
+                                        <TextBlock Text="{Binding Description}"
+                                                   FontSize="15"
+                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                   TextWrapping="Wrap"
+                                                   LineHeight="24"
+                                                   MaxHeight="72"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Margin="0,0,0,20"/>
+
+                                        <!-- Read More Button -->
+                                        <Border Background="{DynamicResource PrimaryBlueBrush}"
+                                                CornerRadius="12"
+                                                Padding="20,12"
+                                                HorizontalAlignment="Left">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="Read Full Story"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
                                                 <TextBlock Text="→"
-                                                           FontSize="20"
+                                                           FontSize="16"
                                                            FontWeight="Bold"
                                                            Foreground="White"
-                                                           HorizontalAlignment="Center"
+                                                           Margin="10,0,0,0"
                                                            VerticalAlignment="Center"/>
-                                            </Border>
-                                        </Grid>
+                                            </StackPanel>
+                                        </Border>
                                         </StackPanel>
                                     </Border>
                                 </Grid>

@@ -16,6 +16,10 @@ namespace TestAutomationManager.Services
         // Get your free key at: https://newsapi.org/register
         private const string API_KEY = "YOUR_API_KEY_HERE";
         private const string BASE_URL = "https://newsapi.org/v2/everything";
+        private const string TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines";
+
+        // Top tech news sources for quality content
+        private const string TECH_SOURCES = "techcrunch,the-verge,wired,ars-technica,engadget,hacker-news,the-next-web";
 
         static NewsService()
         {
@@ -36,23 +40,21 @@ namespace TestAutomationManager.Services
 
                 var articles = new List<NewsArticle>();
 
-                // Simplified queries - NewsAPI free tier has limitations on complex OR queries
-                // Using separate simpler queries instead
+                // Get REAL tech news stories from top sources
+                // Focus on interesting articles, not library releases
                 var queries = new[]
                 {
-                    ("selenium", "Test Automation"),
-                    ("playwright", "Test Automation"),
-                    ("test automation", "Test Automation"),
-                    ("artificial intelligence", "AI & ML"),
-                    ("machine learning", "AI & ML"),
-                    ("kubernetes", "DevOps"),
-                    ("docker", "DevOps"),
-                    ("devops", "DevOps")
+                    ("ChatGPT OR OpenAI OR Claude OR \"generative AI\"", "AI & ML"),
+                    ("\"artificial intelligence\" OR \"AI model\" OR \"machine learning\"", "AI & ML"),
+                    ("automation testing OR QA automation OR \"test automation\"", "Test Automation"),
+                    ("Selenium OR Playwright OR Cypress testing", "Test Automation"),
+                    ("Kubernetes OR \"container orchestration\" OR cloud-native", "DevOps"),
+                    ("Docker OR DevOps OR CI/CD pipeline", "DevOps")
                 };
 
                 foreach (var (keyword, category) in queries)
                 {
-                    var categoryArticles = await FetchArticlesByKeyword(keyword, category);
+                    var categoryArticles = await FetchArticlesByKeywordWithSources(keyword, category);
                     articles.AddRange(categoryArticles);
                 }
 
@@ -69,6 +71,69 @@ namespace TestAutomationManager.Services
                 System.Diagnostics.Debug.WriteLine($"Error fetching news: {ex.Message}");
                 return GetSampleNews();
             }
+        }
+
+        private async Task<List<NewsArticle>> FetchArticlesByKeywordWithSources(string keyword, string category)
+        {
+            var articles = new List<NewsArticle>();
+
+            try
+            {
+                // Get articles from the last 30 days from TOP tech sources only
+                var fromDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
+                var url = $"{BASE_URL}?q={Uri.EscapeDataString(keyword)}&sources={TECH_SOURCES}&from={fromDate}&sortBy=publishedAt&language=en&pageSize=5&apiKey={API_KEY}";
+
+                var response = await _httpClient.GetAsync(url);
+
+                // Better error handling
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Error for '{keyword}': {response.StatusCode} - {errorContent}");
+                    return articles;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var jsonDoc = JsonDocument.Parse(content);
+
+                // Check for API errors in response
+                if (jsonDoc.RootElement.TryGetProperty("status", out var status) && status.GetString() == "error")
+                {
+                    if (jsonDoc.RootElement.TryGetProperty("message", out var message))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"NewsAPI Error: {message.GetString()}");
+                    }
+                    return articles;
+                }
+
+                if (jsonDoc.RootElement.TryGetProperty("articles", out var articlesArray))
+                {
+                    foreach (var article in articlesArray.EnumerateArray())
+                    {
+                        var newsArticle = new NewsArticle
+                        {
+                            Title = GetJsonString(article, "title"),
+                            Description = GetJsonString(article, "description"),
+                            Author = GetJsonString(article, "author"),
+                            Url = GetJsonString(article, "url"),
+                            ImageUrl = GetJsonString(article, "urlToImage"),
+                            PublishedAt = GetJsonDateTime(article, "publishedAt"),
+                            Source = article.TryGetProperty("source", out var source)
+                                ? GetJsonString(source, "name")
+                                : "Unknown",
+                            Category = category
+                        };
+
+                        articles.Add(newsArticle);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error fetching articles for keyword '{keyword}': {ex.Message}");
+            }
+
+            return articles;
         }
 
         private async Task<List<NewsArticle>> FetchArticlesByKeyword(string keyword, string category)
