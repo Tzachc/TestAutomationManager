@@ -29,17 +29,23 @@ namespace TestAutomationManager.Services
 
                 var articles = new List<NewsArticle>();
 
-                // Keywords for automation, AI, and DevOps
-                var keywords = new[]
+                // Simplified queries - NewsAPI free tier has limitations on complex OR queries
+                // Using separate simpler queries instead
+                var queries = new[]
                 {
-                    "selenium OR playwright OR cypress OR test automation",
-                    "artificial intelligence OR machine learning OR AI",
-                    "devops OR kubernetes OR docker OR CI/CD"
+                    ("selenium", "Test Automation"),
+                    ("playwright", "Test Automation"),
+                    ("test automation", "Test Automation"),
+                    ("artificial intelligence", "AI & ML"),
+                    ("machine learning", "AI & ML"),
+                    ("kubernetes", "DevOps"),
+                    ("docker", "DevOps"),
+                    ("devops", "DevOps")
                 };
 
-                foreach (var keyword in keywords)
+                foreach (var (keyword, category) in queries)
                 {
-                    var categoryArticles = await FetchArticlesByKeyword(keyword);
+                    var categoryArticles = await FetchArticlesByKeyword(keyword, category);
                     articles.AddRange(categoryArticles);
                 }
 
@@ -58,21 +64,38 @@ namespace TestAutomationManager.Services
             }
         }
 
-        private async Task<List<NewsArticle>> FetchArticlesByKeyword(string keyword)
+        private async Task<List<NewsArticle>> FetchArticlesByKeyword(string keyword, string category)
         {
             var articles = new List<NewsArticle>();
 
             try
             {
-                // Get articles from the last 7 days
-                var fromDate = DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd");
-                var url = $"{BASE_URL}?q={Uri.EscapeDataString(keyword)}&from={fromDate}&sortBy=publishedAt&language=en&apiKey={API_KEY}";
+                // Get articles from the last 30 days (more results)
+                var fromDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
+                var url = $"{BASE_URL}?q={Uri.EscapeDataString(keyword)}&from={fromDate}&sortBy=publishedAt&language=en&pageSize=10&apiKey={API_KEY}";
 
                 var response = await _httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
+
+                // Better error handling
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Error for '{keyword}': {response.StatusCode} - {errorContent}");
+                    return articles;
+                }
 
                 var content = await response.Content.ReadAsStringAsync();
                 var jsonDoc = JsonDocument.Parse(content);
+
+                // Check for API errors in response
+                if (jsonDoc.RootElement.TryGetProperty("status", out var status) && status.GetString() == "error")
+                {
+                    if (jsonDoc.RootElement.TryGetProperty("message", out var message))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"NewsAPI Error: {message.GetString()}");
+                    }
+                    return articles;
+                }
 
                 if (jsonDoc.RootElement.TryGetProperty("articles", out var articlesArray))
                 {
@@ -88,16 +111,9 @@ namespace TestAutomationManager.Services
                             PublishedAt = GetJsonDateTime(article, "publishedAt"),
                             Source = article.TryGetProperty("source", out var source)
                                 ? GetJsonString(source, "name")
-                                : "Unknown"
+                                : "Unknown",
+                            Category = category
                         };
-
-                        // Categorize based on keyword
-                        if (keyword.Contains("selenium") || keyword.Contains("playwright"))
-                            newsArticle.Category = "Test Automation";
-                        else if (keyword.Contains("artificial intelligence") || keyword.Contains("AI"))
-                            newsArticle.Category = "AI & ML";
-                        else if (keyword.Contains("devops"))
-                            newsArticle.Category = "DevOps";
 
                         articles.Add(newsArticle);
                     }
