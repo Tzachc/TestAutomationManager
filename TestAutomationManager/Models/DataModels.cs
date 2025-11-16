@@ -626,6 +626,7 @@ namespace TestAutomationManager.Models
         private string?[] _params = new string?[30];
 
         private bool _isSelected;
+        private bool _isPlaceholder;
 
         // Parent reference for navigation
         private Process? _parentProcess;
@@ -802,6 +803,32 @@ namespace TestAutomationManager.Models
         {
             get => _parentProcess;
             set => _parentProcess = value;
+        }
+
+        /// <summary>
+        /// Indicates this is a placeholder row for creating new functions
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsPlaceholder
+        {
+            get => _isPlaceholder;
+            set
+            {
+                _isPlaceholder = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));  // Update display when placeholder state changes
+            }
+        }
+
+        /// <summary>
+        /// Display text for Index column - shows "(New)" for placeholder rows
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string DisplayIndex
+        {
+            get => IsPlaceholder ? "(New)" : (Index.HasValue ? Index.Value.ToString() : string.Empty);
         }
 
         // ================================================

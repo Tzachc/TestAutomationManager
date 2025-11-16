@@ -370,6 +370,85 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle placeholder function property changes to detect when user enters FunctionName
+        /// This implements the "New" function adding functionality
+        /// </summary>
+        private async void PlaceholderFunction_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Function.FunctionName) && sender is Function placeholder)
+            {
+                // Only handle if this is still a placeholder and FunctionName is not null/empty
+                if (!placeholder.IsPlaceholder || string.IsNullOrWhiteSpace(placeholder.FunctionName))
+                    return;
+
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"🆕 User entered FunctionName '{placeholder.FunctionName}' in placeholder row");
+
+                    // Unsubscribe from placeholder events to prevent re-triggering
+                    placeholder.PropertyChanged -= PlaceholderFunction_PropertyChanged;
+
+                    // Create new function record with the entered FunctionName
+                    var newFunction = new Function
+                    {
+                        ProcessID = placeholder.ProcessID,
+                        FunctionName = placeholder.FunctionName,
+                        FunctionPosition = placeholder.FunctionPosition,
+                        IsPlaceholder = false,
+                        ParentProcess = placeholder.ParentProcess
+                    };
+
+                    // Insert into database
+                    var insertedFunction = await _repository.InsertFunctionAsync(newFunction);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Inserted function '{insertedFunction.FunctionName}' with Index #{insertedFunction.Index}");
+
+                    // Update UI
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        var parentProcess = placeholder.ParentProcess;
+                        if (parentProcess != null)
+                        {
+                            // Find placeholder index
+                            int placeholderIndex = parentProcess.Functions.IndexOf(placeholder);
+
+                            if (placeholderIndex >= 0)
+                            {
+                                // Remove placeholder and insert real function at same position
+                                parentProcess.Functions.RemoveAt(placeholderIndex);
+                                parentProcess.Functions.Insert(placeholderIndex, insertedFunction);
+
+                                // Add new placeholder at the end
+                                var newPlaceholder = new Function
+                                {
+                                    IsPlaceholder = true,
+                                    ParentProcess = parentProcess,
+                                    ProcessID = parentProcess.ProcessID,
+                                    FunctionPosition = insertedFunction.FunctionPosition + 1
+                                };
+
+                                newPlaceholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
+                                parentProcess.Functions.Add(newPlaceholder);
+
+                                System.Diagnostics.Debug.WriteLine($"✅ Added new function '{insertedFunction.FunctionName}' to Process #{parentProcess.ProcessID}");
+                            }
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Error creating new function: {ex.Message}");
+                    MessageBox.Show($"Failed to create function.\n\nError: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Revert the placeholder
+                    placeholder.FunctionName = null;
+                    placeholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
+                }
+            }
+        }
+
+        /// <summary>
         /// Lazy load functions for a specific process
         /// PREVENTS DUPLICATE LOADS for same ProcessID (handles duplicates + virtualization)
         /// </summary>
@@ -419,6 +498,19 @@ namespace TestAutomationManager.Views
                     {
                         process.Functions.Add(function);
                     }
+
+                    // ⭐ Add placeholder "(New)" row for creating new functions
+                    var placeholderFunction = new Function
+                    {
+                        IsPlaceholder = true,
+                        ParentProcess = process,
+                        ProcessID = process.ProcessID,
+                        FunctionPosition = functions.Any() ? functions.Max(f => f.FunctionPosition ?? 0) + 1 : 1
+                    };
+
+                    // Subscribe to PropertyChanged to detect when user enters FunctionName
+                    placeholderFunction.PropertyChanged += PlaceholderFunction_PropertyChanged;
+                    process.Functions.Add(placeholderFunction);
 
                     process.AreFunctionsLoaded = true;
                 });

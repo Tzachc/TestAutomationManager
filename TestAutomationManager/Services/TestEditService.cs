@@ -288,6 +288,29 @@ namespace TestAutomationManager.Services
                 if (fieldName == "Index" || fieldName == "ProcessID")
                     return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
 
+                // ⭐ PLACEHOLDER ROW HANDLING
+                // Block editing all fields except FunctionName on placeholder rows
+                if (function.IsPlaceholder && fieldName != "FunctionName")
+                {
+                    return EditResult.Failed("To create a new function, click FunctionName and enter a name");
+                }
+
+                // Special handling for FunctionName on placeholder rows - creates new function
+                if (fieldName == "FunctionName" && function.IsPlaceholder)
+                {
+                    // Validate that FunctionName is not empty
+                    if (string.IsNullOrWhiteSpace(newValue))
+                        return EditResult.Failed("FunctionName cannot be empty");
+
+                    // Set the value (this will trigger PlaceholderFunction_PropertyChanged which handles the rest)
+                    property.SetValue(function, newValue);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ FunctionName '{newValue}' set on placeholder - PropertyChanged handler will create function");
+
+                    // Return success without saving (the PropertyChanged handler will handle creation)
+                    return EditResult.Success($"Creating new function '{newValue}'...");
+                }
+
                 // Handle different property types
                 if (property.PropertyType == typeof(string))
                 {
