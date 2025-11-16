@@ -3,13 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:converters="clr-namespace:TestAutomationManager.Converters"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1200"
              Background="{DynamicResource PrimaryBackgroundBrush}">
 
     <UserControl.Resources>
-        <converters:InitialConverter x:Key="InitialConverter"/>
         <!-- Category Color Brushes -->
         <SolidColorBrush x:Key="AutomationCategoryBrush" Color="#FF6366F1"/>
         <SolidColorBrush x:Key="AICategoryBrush" Color="#FF10B981"/>
@@ -370,8 +368,9 @@
                                     </Border>
 
                                     <!-- Content Area -->
-                                    <StackPanel Grid.Row="1"
-                                                Padding="24,20,24,24">
+                                    <Border Grid.Row="1"
+                                            Padding="24,20,24,24">
+                                        <StackPanel>
                                         <!-- Title -->
                                         <TextBlock Text="{Binding Title}"
                                                    FontSize="19"
@@ -409,10 +408,8 @@
                                                         CornerRadius="16"
                                                         Background="{DynamicResource PrimaryBlueBrush}"
                                                         Margin="0,0,10,0">
-                                                    <TextBlock Text="{Binding Source, Converter={StaticResource InitialConverter}}"
-                                                               FontSize="13"
-                                                               FontWeight="Bold"
-                                                               Foreground="White"
+                                                    <TextBlock Text="📰"
+                                                               FontSize="16"
                                                                HorizontalAlignment="Center"
                                                                VerticalAlignment="Center"/>
                                                 </Border>
@@ -442,7 +439,8 @@
                                                            VerticalAlignment="Center"/>
                                             </Border>
                                         </Grid>
-                                    </StackPanel>
+                                        </StackPanel>
+                                    </Border>
                                 </Grid>
                             </Border>
                         </DataTemplate>
