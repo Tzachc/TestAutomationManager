@@ -200,7 +200,7 @@
                         Style="{StaticResource FilterButtonStyle}"
                         Click="FilterButton_Click"/>
                 <Button x:Name="FilterAI"
-                        Content="🤖 AI & ML"
+                        Content="🤖 AI &amp; ML"
                         Style="{StaticResource FilterButtonStyle}"
                         Click="FilterButton_Click"/>
                 <Button x:Name="FilterDevOps"
@@ -257,14 +257,14 @@
 
                                     <!-- Category and Time -->
                                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-                                        <Border Style="{StaticResource CategoryBadgeStyle}">
+                                        <Border>
                                             <Border.Style>
                                                 <Style TargetType="Border" BasedOn="{StaticResource CategoryBadgeStyle}">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Category}" Value="Test Automation">
                                                             <Setter Property="Background" Value="{StaticResource AutomationCategoryBrush}"/>
                                                         </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Category}" Value="AI & ML">
+                                                        <DataTrigger Binding="{Binding Category}" Value="AI &amp; ML">
                                                             <Setter Property="Background" Value="{StaticResource AICategoryBrush}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Category}" Value="DevOps">
