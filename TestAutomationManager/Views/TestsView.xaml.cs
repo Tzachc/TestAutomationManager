@@ -2547,26 +2547,44 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Paste functions to the currently selected process
+        /// Paste functions to the currently selected or expanded process
         /// </summary>
         private async Task PasteFunctions()
         {
             // Find which process to paste into
+            // Priority 1: Selected process
             var targetProcess = _allTests
                 .SelectMany(t => t.Processes)
                 .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
 
+            // Priority 2: If no process is selected, check for expanded process
+            if (targetProcess == null)
+            {
+                targetProcess = _allTests
+                    .SelectMany(t => t.Processes)
+                    .FirstOrDefault(p => p.IsExpanded && !p.IsPlaceholder);
+            }
+
             if (targetProcess == null || !targetProcess.ProcessID.HasValue)
             {
-                MessageBox.Show("Please select a process row where you want to paste the functions.",
+                MessageBox.Show("Please select or expand a process row where you want to paste the functions.",
                     "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             int pastedCount = 0;
+            int startPosition = targetProcess.Functions
+                .Where(f => !f.IsPlaceholder)
+                .Select(f => f.FunctionPosition ?? 0)
+                .DefaultIfEmpty(0)
+                .Max() + 1;
+
             foreach (var copiedFunction in _copiedFunctions)
             {
                 // Create a deep copy of the function
+                // Calculate next position for this function
+                var nextPosition = startPosition + pastedCount;
+
                 var newFunction = new Function
                 {
                     ProcessID = targetProcess.ProcessID.Value,
@@ -2577,7 +2595,7 @@ namespace TestAutomationManager.Views
                     ActualValue = copiedFunction.ActualValue,
                     BreakPoint = copiedFunction.BreakPoint,
                     Comments = copiedFunction.Comments,
-                    FunctionPosition = targetProcess.Functions.Count + 1,
+                    FunctionPosition = nextPosition,
                     ParentProcess = targetProcess
                 };
 

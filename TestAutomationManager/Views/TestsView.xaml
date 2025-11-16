@@ -1306,6 +1306,8 @@
 
                                                                                             <TextBlock Grid.Column="1"
                                                                                                            Text="{Binding WEB3Operator}"
+                                                                                                           MinWidth="50"
+                                                                                                           MinHeight="18"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            VerticalAlignment="Center"
@@ -1318,6 +1320,8 @@
 
                                                                                             <TextBlock Grid.Column="2"
                                                                                                            Text="{Binding Pass_Fail_WEB3Operator}"
+                                                                                                           MinWidth="50"
+                                                                                                           MinHeight="18"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            VerticalAlignment="Center"
@@ -1330,6 +1334,8 @@
 
                                                                                             <TextBlock Grid.Column="3"
                                                                                                            Text="{Binding FunctionDescription}"
+                                                                                                           MinWidth="100"
+                                                                                                           MinHeight="18"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            VerticalAlignment="Center"
@@ -1343,6 +1349,8 @@
 
                                                                                             <TextBlock Grid.Column="4"
                                                                                                            Text="{Binding FunctionName}"
+                                                                                                           MinWidth="100"
+                                                                                                           MinHeight="18"
                                                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            FontWeight="SemiBold"
@@ -1357,6 +1365,8 @@
 
                                                                                             <TextBlock Grid.Column="5"
                                                                                                            Text="{Binding Comments}"
+                                                                                                           MinWidth="100"
+                                                                                                           MinHeight="18"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            VerticalAlignment="Center"
