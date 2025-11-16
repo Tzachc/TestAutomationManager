@@ -729,24 +729,24 @@
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="FunctionPosition"/>
+                                                                           helpers:InlineEditHelper.FieldName="FunctionPosition"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="1" Text="{Binding WEB3Operator}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding WEB3Operator}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="WEB3Operator"/>
+                                                                           helpers:InlineEditHelper.FieldName="WEB3Operator"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="2" Text="{Binding Pass_Fail_WEB3Operator}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Pass_Fail_WEB3Operator}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Pass_Fail_WEB3Operator"/>
+                                                                           helpers:InlineEditHelper.FieldName="Pass_Fail_WEB3Operator"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="3" Text="{Binding DisplayFunctionName}"
                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
@@ -754,64 +754,64 @@
                                                                            VerticalAlignment="Center" HorizontalAlignment="Left"
                                                                            TextAlignment="Left" TextTrimming="CharacterEllipsis"
                                                                            ToolTip="{Binding DisplayFunctionName}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="FunctionName"/>
+                                                                           helpers:InlineEditHelper.FieldName="FunctionName"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="4" Text="{Binding FunctionDescription}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Left" TextAlignment="Left"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding FunctionDescription}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="FunctionDescription"/>
+                                                                           helpers:InlineEditHelper.FieldName="FunctionDescription"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="5" Text="{Binding Comments}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Left" TextAlignment="Left"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Comments}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Comments"/>
+                                                                           helpers:InlineEditHelper.FieldName="Comments"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="6" Text="{Binding Param1}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Param1}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Param1"/>
+                                                                           helpers:InlineEditHelper.FieldName="Param1"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="7" Text="{Binding Param2}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Param2}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Param2"/>
+                                                                           helpers:InlineEditHelper.FieldName="Param2"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="8" Text="{Binding Param3}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Param3}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Param3"/>
+                                                                           helpers:InlineEditHelper.FieldName="Param3"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="9" Text="{Binding Param4}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Param4}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Param4"/>
+                                                                           helpers:InlineEditHelper.FieldName="Param4"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
 
                                                                 <TextBlock Grid.Column="10" Text="{Binding Param5}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"
                                                                            TextTrimming="CharacterEllipsis" ToolTip="{Binding Param5}"
-                                                                           helpers:InlineEditHelper.IsEditable="True"
-                                                                           helpers:InlineEditHelper.FieldName="Param5"/>
+                                                                           helpers:InlineEditHelper.FieldName="Param5"
+                                                                           helpers:InlineEditHelper.IsEditable="True"/>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>
