@@ -1,0 +1,346 @@
+<UserControl x:Class="TestAutomationManager.Views.NewsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1200"
+             Background="{DynamicResource PrimaryBackgroundBrush}">
+
+    <UserControl.Resources>
+        <!-- Category Color Brushes -->
+        <SolidColorBrush x:Key="AutomationCategoryBrush" Color="#FF6B4CE6"/>
+        <SolidColorBrush x:Key="AICategoryBrush" Color="#FF00D9FF"/>
+        <SolidColorBrush x:Key="DevOpsCategoryBrush" Color="#FFFF6B6B"/>
+        <SolidColorBrush x:Key="SetupCategoryBrush" Color="#FFF59E42"/>
+
+        <!-- News Card Style -->
+        <Style x:Key="NewsCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ThicknessAnimation Duration="0:0:0.2"
+                                                  To="0,-4,0,24"
+                                                  Storyboard.TargetProperty="Margin"
+                                                  AccelerationRatio="0.3" DecelerationRatio="0.7"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ThicknessAnimation Duration="0:0:0.2"
+                                                  To="0,0,0,20"
+                                                  Storyboard.TargetProperty="Margin"
+                                                  AccelerationRatio="0.3" DecelerationRatio="0.7"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="20" ShadowDepth="4" Direction="270"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Category Badge Style -->
+        <Style x:Key="CategoryBadgeStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+
+        <!-- Filter Button Style -->
+        <Style x:Key="FilterButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="20"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                </Trigger>
+                <Trigger Property="Tag" Value="Active">
+                    <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Refresh Button Style -->
+        <Style x:Key="RefreshButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="24,12"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="🔄" FontSize="16" Margin="0,0,8,0"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header Section -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource SecondaryBackgroundBrush}"
+                Padding="40,30"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="📰 Tech News"
+                               FontSize="32"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="Latest updates on Test Automation, AI, and DevOps"
+                               FontSize="14"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        x:Name="RefreshButton"
+                        Content="Refresh News"
+                        Style="{StaticResource RefreshButtonStyle}"
+                        Click="RefreshButton_Click"
+                        VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- Filter Section -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource PrimaryBackgroundBrush}"
+                Padding="40,20"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Filter:"
+                           FontSize="14"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0"/>
+                <Button x:Name="FilterAll"
+                        Content="All News"
+                        Style="{StaticResource FilterButtonStyle}"
+                        Tag="Active"
+                        Click="FilterButton_Click"/>
+                <Button x:Name="FilterAutomation"
+                        Content="🧪 Test Automation"
+                        Style="{StaticResource FilterButtonStyle}"
+                        Click="FilterButton_Click"/>
+                <Button x:Name="FilterAI"
+                        Content="🤖 AI & ML"
+                        Style="{StaticResource FilterButtonStyle}"
+                        Click="FilterButton_Click"/>
+                <Button x:Name="FilterDevOps"
+                        Content="⚙️ DevOps"
+                        Style="{StaticResource FilterButtonStyle}"
+                        Click="FilterButton_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- News Content -->
+        <ScrollViewer Grid.Row="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="40,30">
+            <Grid>
+                <!-- Loading Indicator -->
+                <StackPanel x:Name="LoadingPanel"
+                            Visibility="Visible"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="⏳" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                    <TextBlock Text="Loading latest tech news..."
+                               FontSize="16"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Empty State -->
+                <StackPanel x:Name="EmptyPanel"
+                            Visibility="Collapsed"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="📭" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                    <TextBlock Text="No news articles found"
+                               FontSize="16"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- News List -->
+                <ItemsControl x:Name="NewsItemsControl" Visibility="Collapsed">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource NewsCardStyle}"
+                                    MouseLeftButtonDown="NewsCard_Click"
+                                    Tag="{Binding Url}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Category and Time -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                                        <Border Style="{StaticResource CategoryBadgeStyle}">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource CategoryBadgeStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Category}" Value="Test Automation">
+                                                            <Setter Property="Background" Value="{StaticResource AutomationCategoryBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Category}" Value="AI & ML">
+                                                            <Setter Property="Background" Value="{StaticResource AICategoryBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Category}" Value="DevOps">
+                                                            <Setter Property="Background" Value="{StaticResource DevOpsCategoryBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Category}" Value="Setup">
+                                                            <Setter Property="Background" Value="{StaticResource SetupCategoryBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Category}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="White"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding TimeAgo}"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Title -->
+                                    <TextBlock Grid.Row="1"
+                                               Text="{Binding Title}"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,12"/>
+
+                                    <!-- Description -->
+                                    <TextBlock Grid.Row="2"
+                                               Text="{Binding Description}"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               TextWrapping="Wrap"
+                                               LineHeight="22"
+                                               Margin="0,0,0,16"
+                                               MaxHeight="66"
+                                               TextTrimming="CharacterEllipsis"/>
+
+                                    <!-- Footer (Source and Author) -->
+                                    <Grid Grid.Row="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                            <TextBlock Text="📰" FontSize="14" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding Source}"
+                                                       FontSize="13"
+                                                       FontWeight="Medium"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <TextBlock Text=" • "
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                                       Margin="6,0"/>
+                                            <TextBlock Text="{Binding Author}"
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource TextTertiaryBrush}"/>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1"
+                                                   Text="Read more →"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource PrimaryBlueBrush}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
