@@ -10,12 +10,19 @@ namespace TestAutomationManager.Services
 {
     public class NewsService
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient;
 
         // Free API key for NewsAPI.org - Users should replace with their own
         // Get your free key at: https://newsapi.org/register
         private const string API_KEY = "YOUR_API_KEY_HERE";
         private const string BASE_URL = "https://newsapi.org/v2/everything";
+
+        static NewsService()
+        {
+            _httpClient = new HttpClient();
+            // NewsAPI requires a User-Agent header
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "TestAutomationManager/1.0 (Tech News Reader)");
+        }
 
         public async Task<List<NewsArticle>> GetTechNewsAsync()
         {
