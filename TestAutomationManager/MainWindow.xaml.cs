@@ -747,6 +747,9 @@ namespace TestAutomationManager
                     case "Functions":
                         OpenFunctionsTab();
                         break;
+                    case "News":
+                        OpenNewsTab();
+                        break;
                     case "Reports":
                         OpenReportsTab();
                         break;
@@ -860,6 +863,21 @@ namespace TestAutomationManager
                 () =>
                 {
                     var view = new Views.FunctionView();
+                    view.DataLoaded += (s, e) => UpdateRecordCount();
+                    return view;
+                }
+            );
+        }
+
+        private void OpenNewsTab()
+        {
+            OpenOrSwitchToTab(
+                "news",
+                "News",
+                "📰",
+                () =>
+                {
+                    var view = new Views.NewsView();
                     view.DataLoaded += (s, e) => UpdateRecordCount();
                     return view;
                 }

@@ -512,8 +512,28 @@
                                      Visibility="Collapsed"/>
                         </StackPanel>
 
-                        <Border Height="1" 
-                               Background="{DynamicResource BorderBrush}" 
+                        <Border Height="1"
+                               Background="{DynamicResource BorderBrush}"
+                               Margin="8,16"/>
+
+                        <TextBlock Text="UPDATES"
+                                 FontSize="10"
+                                 FontWeight="SemiBold"
+                                 Foreground="{DynamicResource TextTertiaryBrush}"
+                                 Margin="8,0,0,8"/>
+
+                        <RadioButton GroupName="Navigation"
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="News"
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📰" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="News" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+
+                        <Border Height="1"
+                               Background="{DynamicResource BorderBrush}"
                                Margin="8,16"/>
 
                         <TextBlock Text="INSIGHTS" 
