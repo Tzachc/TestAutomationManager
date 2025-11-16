@@ -14,7 +14,7 @@ namespace TestAutomationManager.Services
 
         // Free API key for NewsAPI.org - Users should replace with their own
         // Get your free key at: https://newsapi.org/register
-        private const string API_KEY = "YOUR_API_KEY_HERE";
+        private const string API_KEY = "3c33394983214fd3912e2005c374668e";
         private const string BASE_URL = "https://newsapi.org/v2/everything";
         private const string TOP_HEADLINES_URL = "https://newsapi.org/v2/top-headlines";
 
