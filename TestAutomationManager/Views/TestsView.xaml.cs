@@ -2579,6 +2579,9 @@ namespace TestAutomationManager.Views
                 .DefaultIfEmpty(0)
                 .Max() + 1;
 
+            // Find the placeholder row (so we can update its position at the end)
+            var placeholder = targetProcess.Functions.FirstOrDefault(f => f.IsPlaceholder);
+
             foreach (var copiedFunction in _copiedFunctions)
             {
                 // Create a deep copy of the function
@@ -2619,6 +2622,13 @@ namespace TestAutomationManager.Views
                     pastedCount++;
                     System.Diagnostics.Debug.WriteLine($"✓ Pasted function {insertedFunction.FunctionName}");
                 }
+            }
+
+            // Update placeholder position to be after all pasted functions (keep it at the bottom)
+            if (placeholder != null && pastedCount > 0)
+            {
+                placeholder.FunctionPosition = startPosition + pastedCount;
+                System.Diagnostics.Debug.WriteLine($"✓ Updated placeholder position to {placeholder.FunctionPosition}");
             }
 
             MessageBox.Show($"Successfully pasted {pastedCount} function(s) to Process #{targetProcess.ProcessID}",
