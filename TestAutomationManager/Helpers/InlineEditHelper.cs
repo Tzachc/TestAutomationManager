@@ -89,6 +89,9 @@ namespace TestAutomationManager.Helpers
         {
             if (d is TextBlock textBlock && (bool)e.NewValue)
             {
+                var fieldName = GetFieldName(textBlock);
+                System.Diagnostics.Debug.WriteLine($"📝 InlineEditHelper attached to field: '{fieldName}', Text='{textBlock.Text}'");
+
                 // Make the TextBlock editable
                 textBlock.Cursor = Cursors.Hand;
                 textBlock.MouseLeftButtonDown += TextBlock_MouseLeftButtonDown;
