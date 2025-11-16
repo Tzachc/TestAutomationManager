@@ -662,7 +662,12 @@ namespace TestAutomationManager.Models
         public string? FunctionName
         {
             get => _functionName;
-            set { _functionName = value; OnPropertyChanged(); }
+            set
+            {
+                _functionName = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayFunctionName));  // Update display when name changes
+            }
         }
 
         public int? FunctionPosition
@@ -818,6 +823,7 @@ namespace TestAutomationManager.Models
                 _isPlaceholder = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(DisplayIndex));  // Update display when placeholder state changes
+                OnPropertyChanged(nameof(DisplayFunctionName));  // Update FunctionName display when placeholder state changes
             }
         }
 
@@ -829,6 +835,21 @@ namespace TestAutomationManager.Models
         public string DisplayIndex
         {
             get => IsPlaceholder ? "(New)" : (Index.HasValue ? Index.Value.ToString() : string.Empty);
+        }
+
+        /// <summary>
+        /// Display text for FunctionName column - shows clickable placeholder text on new rows
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string DisplayFunctionName
+        {
+            get
+            {
+                if (IsPlaceholder && string.IsNullOrWhiteSpace(FunctionName))
+                    return "[Click to enter function name]";
+                return FunctionName ?? string.Empty;
+            }
         }
 
         // ================================================

@@ -1336,7 +1336,7 @@
                                                                                                            helpers:InlineEditHelper.FieldName="FunctionDescription"/>
 
                                                                                             <TextBlock Grid.Column="4"
-                                                                                                           Text="{Binding FunctionName}"
+                                                                                                           Text="{Binding DisplayFunctionName}"
                                                                                                            Foreground="{DynamicResource TextPrimaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            FontWeight="SemiBold"
@@ -1345,7 +1345,7 @@
                                                                                                            TextAlignment="Left"
                                                                                                            TextWrapping="Wrap"
                                                                                                            TextTrimming="CharacterEllipsis"
-                                                                                                           ToolTip="{Binding FunctionName}"
+                                                                                                           ToolTip="{Binding DisplayFunctionName}"
                                                                                                            helpers:InlineEditHelper.IsEditable="True"
                                                                                                            helpers:InlineEditHelper.FieldName="FunctionName"/>
 
