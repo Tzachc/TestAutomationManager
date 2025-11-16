@@ -146,7 +146,7 @@ namespace TestAutomationManager.Views
                     try
                     {
                         // Open URL in default browser
-                        Process.Start(new ProcessStartInfo
+                        System.Diagnostics.Process.Start(new ProcessStartInfo
                         {
                             FileName = url,
                             UseShellExecute = true
