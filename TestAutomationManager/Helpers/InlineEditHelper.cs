@@ -35,7 +35,7 @@ namespace TestAutomationManager.Helpers
                 "FieldName",
                 typeof(string),
                 typeof(InlineEditHelper),
-                new PropertyMetadata(string.Empty));
+                new PropertyMetadata(string.Empty, OnFieldNameChanged));
 
         /// <summary>
         /// Event handler for when edit is confirmed
@@ -89,15 +89,44 @@ namespace TestAutomationManager.Helpers
         {
             if (d is TextBlock textBlock && (bool)e.NewValue)
             {
-                var fieldName = GetFieldName(textBlock);
-                System.Diagnostics.Debug.WriteLine($"📝 InlineEditHelper attached to field: '{fieldName}', Text='{textBlock.Text}'");
-
-                // Make the TextBlock editable
-                textBlock.Cursor = Cursors.Hand;
-                textBlock.MouseLeftButtonDown += TextBlock_MouseLeftButtonDown;
-                textBlock.MouseEnter += TextBlock_MouseEnter;
-                textBlock.MouseLeave += TextBlock_MouseLeave;
+                // Try to attach immediately if FieldName is already set
+                TryAttachHandlers(textBlock);
             }
+        }
+
+        private static void OnFieldNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TextBlock textBlock && GetIsEditable(textBlock))
+            {
+                // Try to attach when FieldName is set and IsEditable is true
+                TryAttachHandlers(textBlock);
+            }
+        }
+
+        private static void TryAttachHandlers(TextBlock textBlock)
+        {
+            var fieldName = GetFieldName(textBlock);
+
+            // Only attach if we have a valid FieldName
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                // FieldName not set yet, will be called again when FieldName is set
+                return;
+            }
+
+            // Check if already attached (to avoid double-attaching)
+            if (textBlock.Cursor == Cursors.Hand)
+            {
+                return; // Already attached
+            }
+
+            System.Diagnostics.Debug.WriteLine($"📝 InlineEditHelper attached to field: '{fieldName}', Text='{textBlock.Text}'");
+
+            // Make the TextBlock editable
+            textBlock.Cursor = Cursors.Hand;
+            textBlock.MouseLeftButtonDown += TextBlock_MouseLeftButtonDown;
+            textBlock.MouseEnter += TextBlock_MouseEnter;
+            textBlock.MouseLeave += TextBlock_MouseLeave;
         }
 
         private static void TextBlock_MouseEnter(object sender, MouseEventArgs e)
