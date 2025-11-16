@@ -288,6 +288,26 @@ namespace TestAutomationManager.Services
                 if (fieldName == "Index" || fieldName == "ProcessID")
                     return EditResult.Failed($"Cannot edit primary key field: {fieldName}");
 
+                // Block all edits on placeholder rows except FunctionPosition
+                if (function.IsPlaceholder && fieldName != "FunctionPosition")
+                    return EditResult.Failed($"To create a new function, please click on the Position column and enter a position number.");
+
+                // Special handling for FunctionPosition on placeholder rows - creates new function
+                if (fieldName == "FunctionPosition" && function.IsPlaceholder)
+                {
+                    // Parse and validate FunctionPosition
+                    if (!int.TryParse(newValue, out int positionValue))
+                        return EditResult.Failed("FunctionPosition must be a valid number");
+
+                    // Set the value (this will trigger PlaceholderFunction_PropertyChanged which handles the rest)
+                    property.SetValue(function, positionValue);
+
+                    System.Diagnostics.Debug.WriteLine($"✓ FunctionPosition {positionValue} set on placeholder - PropertyChanged handler will create function");
+
+                    // Return success without saving (the PropertyChanged handler will handle creation)
+                    return EditResult.Success($"Processing new FunctionPosition {positionValue}...");
+                }
+
                 // Handle different property types
                 if (property.PropertyType == typeof(string))
                 {

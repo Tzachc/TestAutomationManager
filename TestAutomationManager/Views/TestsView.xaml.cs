@@ -1051,6 +1051,90 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle PropertyChanged event for placeholder function rows
+        /// When user enters a FunctionPosition, create a new function record
+        /// </summary>
+        private async void PlaceholderFunction_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Function.FunctionPosition) && sender is Function placeholder)
+            {
+                // Only handle if this is still a placeholder and FunctionPosition is not null
+                if (!placeholder.IsPlaceholder || !placeholder.FunctionPosition.HasValue)
+                    return;
+
+                try
+                {
+                    var enteredPosition = placeholder.FunctionPosition.Value;
+                    System.Diagnostics.Debug.WriteLine($"🆕 User entered FunctionPosition {enteredPosition} in placeholder row");
+
+                    // Create new empty function
+                    var newFunction = new Function
+                    {
+                        ProcessID = placeholder.ProcessID,
+                        FunctionPosition = enteredPosition,
+                        FunctionName = null,  // Empty as per requirements - user can edit after creation
+                        IsPlaceholder = false,
+                        ParentProcess = placeholder.ParentProcess
+                    };
+
+                    // Insert into database
+                    var insertedFunction = await _processRepository.InsertFunctionAsync(newFunction);
+
+                    if (insertedFunction != null)
+                    {
+                        // Update UI
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            var process = placeholder.ParentProcess;
+                            if (process != null)
+                            {
+                                // Unsubscribe from placeholder events
+                                placeholder.PropertyChanged -= PlaceholderFunction_PropertyChanged;
+
+                                // Set parent reference for the new function
+                                insertedFunction.ParentProcess = process;
+
+                                // IMPORTANT: Add the new function FIRST, then remove placeholder
+                                // This ensures WPF creates a completely new visual element with proper InlineEditHelper attachment
+                                // instead of reusing/recycling the placeholder's visual tree
+                                process.Functions.Add(insertedFunction);
+
+                                // Now remove the old placeholder
+                                process.Functions.Remove(placeholder);
+
+                                // Add new placeholder at the end
+                                var newPlaceholder = new Function
+                                {
+                                    IsPlaceholder = true,
+                                    ParentProcess = process,
+                                    ProcessID = process.ProcessID,
+                                    FunctionPosition = insertedFunction.FunctionPosition + 1
+                                };
+
+                                newPlaceholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
+                                process.Functions.Add(newPlaceholder);
+
+                                System.Diagnostics.Debug.WriteLine($"✅ Added new function with Position {enteredPosition} to Process #{process.ProcessID}");
+                            }
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ Error handling placeholder FunctionPosition: {ex.Message}");
+                    MessageBox.Show($"Failed to create function.\n\nError: {ex.Message}",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    // Reset placeholder
+                    if (sender is Function f)
+                    {
+                        f.FunctionPosition = null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Load processes for a specific test (CACHE-FIRST strategy!)
         /// 1. Check cache first (INSTANT - from background preload)
         /// 2. Fallback to database if not in cache (lazy load)
@@ -1157,8 +1241,22 @@ namespace TestAutomationManager.Views
                         process.Functions.Add(function);
                     }
 
+                    // ⭐ STEP 4: Add placeholder "(New)" row at the bottom
+                    var placeholderFunction = new Function
+                    {
+                        IsPlaceholder = true,
+                        ParentProcess = process,
+                        ProcessID = process.ProcessID,
+                        FunctionPosition = (functions.Any() ? functions.Max(f => f.FunctionPosition ?? 0) + 1 : 1)
+                    };
+
+                    // Subscribe to property changes to detect when user enters FunctionPosition
+                    placeholderFunction.PropertyChanged += PlaceholderFunction_PropertyChanged;
+
+                    process.Functions.Add(placeholderFunction);
+
                     process.AreFunctionsLoaded = true;
-                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID} (added to cache)");
+                    System.Diagnostics.Debug.WriteLine($"✓ Lazy loaded {functions.Count} functions for Process #{process.ProcessID} + 1 placeholder row (added to cache)");
                 });
             }
             catch (Exception ex)
@@ -2449,26 +2547,47 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
-        /// Paste functions to the currently selected process
+        /// Paste functions to the currently selected or expanded process
         /// </summary>
         private async Task PasteFunctions()
         {
             // Find which process to paste into
+            // Priority 1: Selected process
             var targetProcess = _allTests
                 .SelectMany(t => t.Processes)
                 .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
 
+            // Priority 2: If no process is selected, check for expanded process
+            if (targetProcess == null)
+            {
+                targetProcess = _allTests
+                    .SelectMany(t => t.Processes)
+                    .FirstOrDefault(p => p.IsExpanded && !p.IsPlaceholder);
+            }
+
             if (targetProcess == null || !targetProcess.ProcessID.HasValue)
             {
-                MessageBox.Show("Please select a process row where you want to paste the functions.",
+                MessageBox.Show("Please select or expand a process row where you want to paste the functions.",
                     "Paste", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             int pastedCount = 0;
+            int startPosition = targetProcess.Functions
+                .Where(f => !f.IsPlaceholder)
+                .Select(f => f.FunctionPosition ?? 0)
+                .DefaultIfEmpty(0)
+                .Max() + 1;
+
+            // Find the placeholder row (so we can update its position at the end)
+            var placeholder = targetProcess.Functions.FirstOrDefault(f => f.IsPlaceholder);
+
             foreach (var copiedFunction in _copiedFunctions)
             {
                 // Create a deep copy of the function
+                // Calculate next position for this function
+                var nextPosition = startPosition + pastedCount;
+
                 var newFunction = new Function
                 {
                     ProcessID = targetProcess.ProcessID.Value,
@@ -2479,7 +2598,7 @@ namespace TestAutomationManager.Views
                     ActualValue = copiedFunction.ActualValue,
                     BreakPoint = copiedFunction.BreakPoint,
                     Comments = copiedFunction.Comments,
-                    FunctionPosition = targetProcess.Functions.Count + 1,
+                    FunctionPosition = nextPosition,
                     ParentProcess = targetProcess
                 };
 
@@ -2503,6 +2622,13 @@ namespace TestAutomationManager.Views
                     pastedCount++;
                     System.Diagnostics.Debug.WriteLine($"✓ Pasted function {insertedFunction.FunctionName}");
                 }
+            }
+
+            // Update placeholder position to be after all pasted functions (keep it at the bottom)
+            if (placeholder != null && pastedCount > 0)
+            {
+                placeholder.FunctionPosition = startPosition + pastedCount;
+                System.Diagnostics.Debug.WriteLine($"✓ Updated placeholder position to {placeholder.FunctionPosition}");
             }
 
             MessageBox.Show($"Successfully pasted {pastedCount} function(s) to Process #{targetProcess.ProcessID}",

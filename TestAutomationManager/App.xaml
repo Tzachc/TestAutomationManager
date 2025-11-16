@@ -31,7 +31,7 @@
                                     Background="{TemplateBinding Background}"
                                     BorderThickness="0"
                                     CornerRadius="6"
-                                    Padding="10,10">
+                                    Padding="10,7">
                                 <Grid>
                                     <Border x:Name="SelectedIndicator" 
                                             Background="{DynamicResource PrimaryBlueBrush}"

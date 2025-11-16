@@ -237,7 +237,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Border Grid.Row="0" Padding="20,24">
+                <Border Grid.Row="0" Padding="20,5">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -310,68 +310,6 @@
                                 <TextBlock Text="Functions" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
                             </StackPanel>
                         </RadioButton>
-
-                        <Border x:Name="SchemaNavItem"
-                                Style="{StaticResource ExpandableNavItem}"
-                                MouseLeftButtonDown="SchemaNav_Click">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                    <TextBlock Text="🗃️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock x:Name="SchemaText" 
-                                             Text="Database Schema" 
-                                             FontSize="13" 
-                                             FontWeight="Medium" 
-                                             Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="{Binding CurrentSchema, Source={x:Static services:SchemaConfigService.Instance}, Mode=OneWay}"
-                                                   FontSize="10"
-                                                   FontWeight="Bold"
-                                                   Foreground="{DynamicResource PrimaryBlueBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-
-                                <TextBlock x:Name="SchemaArrow"
-                                         Grid.Column="1"
-                                         Text="▶" 
-                                         FontSize="10"
-                                         Foreground="{DynamicResource TextTertiaryBrush}"
-                                         VerticalAlignment="Center"
-                                         RenderTransformOrigin="0.5,0.5">
-                                    <TextBlock.RenderTransform>
-                                        <RotateTransform x:Name="SchemaArrowRotation" Angle="0"/>
-                                    </TextBlock.RenderTransform>
-                                </TextBlock>
-                            </Grid>
-                        </Border>
-
-                        <StackPanel x:Name="SchemaChildren" Visibility="Collapsed">
-                            <ItemsControl x:Name="SchemaItemsControl" ItemsSource="{Binding AvailableSchemas}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <RadioButton GroupName="SchemaSelection"
-                                                     Style="{StaticResource ChildSchemaRadioButton}"
-                                                     Tag="{Binding}"
-                                                     Checked="SchemaItem_Checked">
-                                            <RadioButton.IsChecked>
-                                                <Binding Path="." Mode="OneWay">
-                                                    <Binding.Converter>
-                                                        <converters:SchemaToBoolConverter />
-                                                    </Binding.Converter>
-                                                </Binding>
-                                            </RadioButton.IsChecked>
-                                            <TextBlock Text="{Binding}" 
-                                                       FontSize="11" 
-                                                       FontWeight="Medium"/>
-                                        </RadioButton>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
 
 
                         <Border x:Name="ExtTablesNavItem"
@@ -514,13 +452,86 @@
 
                         <Border Height="1"
                                Background="{DynamicResource BorderBrush}"
-                               Margin="8,16"/>
+                               Margin="8,8"/>
+
+                        <TextBlock Text="Database"
+                                 FontSize="10"
+                                 FontWeight="SemiBold"
+                                 Foreground="{DynamicResource TextTertiaryBrush}"
+                                 Margin="8,0,0,6"/>
+
+                        <Border x:Name="SchemaNavItem"
+                                Style="{StaticResource ExpandableNavItem}"
+                                MouseLeftButtonDown="SchemaNav_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <TextBlock Text="🗃️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock x:Name="SchemaText" 
+                                             Text="Database Schema" 
+                                             FontSize="13" 
+                                             FontWeight="Medium" 
+                                             Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding CurrentSchema, Source={x:Static services:SchemaConfigService.Instance}, Mode=OneWay}"
+                                                   FontSize="10"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource PrimaryBlueBrush}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <TextBlock x:Name="SchemaArrow"
+                                         Grid.Column="1"
+                                         Text="▶" 
+                                         FontSize="10"
+                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                         VerticalAlignment="Center"
+                                         RenderTransformOrigin="0.5,0.5">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform x:Name="SchemaArrowRotation" Angle="0"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel x:Name="SchemaChildren" Visibility="Collapsed">
+                            <ItemsControl x:Name="SchemaItemsControl" ItemsSource="{Binding AvailableSchemas}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="SchemaSelection"
+                                                     Style="{StaticResource ChildSchemaRadioButton}"
+                                                     Tag="{Binding}"
+                                                     Checked="SchemaItem_Checked">
+                                            <RadioButton.IsChecked>
+                                                <Binding Path="." Mode="OneWay">
+                                                    <Binding.Converter>
+                                                        <converters:SchemaToBoolConverter />
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </RadioButton.IsChecked>
+                                            <TextBlock Text="{Binding}" 
+                                                       FontSize="11" 
+                                                       FontWeight="Medium"/>
+                                        </RadioButton>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+
+                        <Border Height="1"
+                               Background="{DynamicResource BorderBrush}"
+                               Margin="8,8"/>
 
                         <TextBlock Text="UPDATES"
                                  FontSize="10"
                                  FontWeight="SemiBold"
                                  Foreground="{DynamicResource TextTertiaryBrush}"
-                                 Margin="8,0,0,8"/>
+                                 Margin="8,0,0,6"/>
 
                         <RadioButton GroupName="Navigation"
                                    Style="{StaticResource NavigationRadioButton}"
@@ -534,7 +545,7 @@
 
                         <Border Height="1"
                                Background="{DynamicResource BorderBrush}"
-                               Margin="8,16"/>
+                               Margin="8,8"/>
 
                         <TextBlock Text="INSIGHTS" 
                                  FontSize="10" 

@@ -630,6 +630,9 @@ namespace TestAutomationManager.Models
         // Parent reference for navigation
         private Process? _parentProcess;
 
+        // UI-only properties
+        private bool _isPlaceholder;
+
         // ================================================
         // DATABASE COLUMNS (Function_WEB3)
         // ================================================
@@ -667,7 +670,12 @@ namespace TestAutomationManager.Models
         public int? FunctionPosition
         {
             get => _functionPosition;
-            set { _functionPosition = value; OnPropertyChanged(); }
+            set
+            {
+                _functionPosition = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayPosition));  // Update display when position changes
+            }
         }
 
         public int? Index
@@ -802,6 +810,32 @@ namespace TestAutomationManager.Models
         {
             get => _parentProcess;
             set => _parentProcess = value;
+        }
+
+        /// <summary>
+        /// Indicates whether this is a placeholder "(New)" row for adding new functions
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public bool IsPlaceholder
+        {
+            get => _isPlaceholder;
+            set
+            {
+                _isPlaceholder = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayPosition));  // Update display when placeholder state changes
+            }
+        }
+
+        /// <summary>
+        /// Display text for the Position column - shows "(New)" for placeholder rows, FunctionPosition otherwise
+        /// UI-only property - not mapped to database
+        /// </summary>
+        [NotMapped]
+        public string DisplayPosition
+        {
+            get => IsPlaceholder ? "(New)" : (FunctionPosition.HasValue ? FunctionPosition.Value.ToString() : string.Empty);
         }
 
         // ================================================
