@@ -401,7 +401,11 @@ namespace TestAutomationManager.Views
                     // Insert into database
                     var insertedFunction = await _repository.InsertFunctionAsync(newFunction);
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Inserted function '{insertedFunction.FunctionName}' with Index #{insertedFunction.Index}");
+                    // Ensure properties are set correctly (in case repository returns a new object)
+                    insertedFunction.IsPlaceholder = false;
+                    insertedFunction.ParentProcess = placeholder.ParentProcess;
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Inserted function '{insertedFunction.FunctionName}' with Index #{insertedFunction.Index}, IsPlaceholder={insertedFunction.IsPlaceholder}");
 
                     // Update UI
                     await Dispatcher.InvokeAsync(() =>

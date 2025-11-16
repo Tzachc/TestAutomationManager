@@ -673,7 +673,12 @@ namespace TestAutomationManager.Models
         public int? FunctionPosition
         {
             get => _functionPosition;
-            set { _functionPosition = value; OnPropertyChanged(); }
+            set
+            {
+                _functionPosition = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayIndex));  // Update display when position changes
+            }
         }
 
         public int? Index
@@ -828,13 +833,13 @@ namespace TestAutomationManager.Models
         }
 
         /// <summary>
-        /// Display text for Index column - shows "(New)" for placeholder rows
+        /// Display text for Position column - shows "(New)" for placeholder rows
         /// UI-only property - not mapped to database
         /// </summary>
         [NotMapped]
         public string DisplayIndex
         {
-            get => IsPlaceholder ? "(New)" : (Index.HasValue ? Index.Value.ToString() : string.Empty);
+            get => IsPlaceholder ? "(New)" : (FunctionPosition.HasValue ? FunctionPosition.Value.ToString() : string.Empty);
         }
 
         /// <summary>
