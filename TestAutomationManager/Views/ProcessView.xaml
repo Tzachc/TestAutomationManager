@@ -725,7 +725,7 @@
                                                                     <ColumnDefinition Width="180" SharedSizeGroup="funcParam5"/>
                                                                 </Grid.ColumnDefinitions>
 
-                                                                <TextBlock Grid.Column="0" Text="{Binding FunctionPosition}"
+                                                                <TextBlock Grid.Column="0" Text="{Binding DisplayIndex}"
                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                            FontSize="11" VerticalAlignment="Center"
                                                                            HorizontalAlignment="Center" TextAlignment="Center"

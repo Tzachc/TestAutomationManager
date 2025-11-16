@@ -1288,19 +1288,14 @@
 
                                                                                                 <!-- Function Position -->
                                                                                                 <TextBlock Grid.Column="1"
+                                                                                                           Text="{Binding DisplayIndex}"
                                                                                                            Foreground="{DynamicResource TextSecondaryBrush}"
                                                                                                            FontSize="12"
                                                                                                            VerticalAlignment="Center"
                                                                                                            HorizontalAlignment="Left"
                                                                                                            TextAlignment="Center"
                                                                                                            TextTrimming="CharacterEllipsis"
-                                                                                                           ToolTip="{Binding FunctionPosition, StringFormat='{}{0}'}">
-                                                                                                    <TextBlock.Text>
-                                                                                                        <Binding Path="FunctionPosition"
-                                                                                                                     StringFormat="{}{0}"
-                                                                                                                     TargetNullValue=""/>
-                                                                                                    </TextBlock.Text>
-                                                                                                </TextBlock>
+                                                                                                           ToolTip="{Binding DisplayIndex}"/>
                                                                                             </Grid>
 
                                                                                             <TextBlock Grid.Column="1"
