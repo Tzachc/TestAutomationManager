@@ -1088,36 +1088,33 @@ namespace TestAutomationManager.Views
                             var process = placeholder.ParentProcess;
                             if (process != null)
                             {
-                                // Find placeholder index
-                                int placeholderIndex = process.Functions.IndexOf(placeholder);
+                                // Unsubscribe from placeholder events
+                                placeholder.PropertyChanged -= PlaceholderFunction_PropertyChanged;
 
-                                if (placeholderIndex >= 0)
+                                // Set parent reference for the new function
+                                insertedFunction.ParentProcess = process;
+
+                                // IMPORTANT: Add the new function FIRST, then remove placeholder
+                                // This ensures WPF creates a completely new visual element with proper InlineEditHelper attachment
+                                // instead of reusing/recycling the placeholder's visual tree
+                                process.Functions.Add(insertedFunction);
+
+                                // Now remove the old placeholder
+                                process.Functions.Remove(placeholder);
+
+                                // Add new placeholder at the end
+                                var newPlaceholder = new Function
                                 {
-                                    // Unsubscribe from placeholder events
-                                    placeholder.PropertyChanged -= PlaceholderFunction_PropertyChanged;
+                                    IsPlaceholder = true,
+                                    ParentProcess = process,
+                                    ProcessID = process.ProcessID,
+                                    FunctionPosition = insertedFunction.FunctionPosition + 1
+                                };
 
-                                    // Remove placeholder and insert real function at same position
-                                    // This forces WPF to re-render the row and attach InlineEditHelper
-                                    process.Functions.RemoveAt(placeholderIndex);
-                                    process.Functions.Insert(placeholderIndex, insertedFunction);
+                                newPlaceholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
+                                process.Functions.Add(newPlaceholder);
 
-                                    // Set parent reference
-                                    insertedFunction.ParentProcess = process;
-
-                                    // Add new placeholder at the end
-                                    var newPlaceholder = new Function
-                                    {
-                                        IsPlaceholder = true,
-                                        ParentProcess = process,
-                                        ProcessID = process.ProcessID,
-                                        FunctionPosition = insertedFunction.FunctionPosition + 1
-                                    };
-
-                                    newPlaceholder.PropertyChanged += PlaceholderFunction_PropertyChanged;
-                                    process.Functions.Add(newPlaceholder);
-
-                                    System.Diagnostics.Debug.WriteLine($"✅ Added new function with Position {enteredPosition} to Process #{process.ProcessID}");
-                                }
+                                System.Diagnostics.Debug.WriteLine($"✅ Added new function with Position {enteredPosition} to Process #{process.ProcessID}");
                             }
                         });
                     }
