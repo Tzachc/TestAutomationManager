@@ -40,8 +40,9 @@ namespace TestAutomationManager.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Get connection string from configuration
-                string connectionString = DbConnectionConfig.GetConnectionString();
+                // CRITICAL FIX: Use DatabaseConnectionService to get active connection
+                // This ensures preview mode uses the preview database, not live database
+                string connectionString = TestAutomationManager.Services.DatabaseConnectionService.Instance.ActiveConnectionString;
 
                 // Configure SQL Server connection
                 optionsBuilder.UseSqlServer(connectionString);
