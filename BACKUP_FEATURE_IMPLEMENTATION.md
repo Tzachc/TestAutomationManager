@@ -51,6 +51,26 @@ A comprehensive database backup mechanism has been implemented for your WPF appl
 5. **Backup All Now** ⚡
    - Immediately triggers backup for all schemas
 
+## Important Notes
+
+### SQL Server Compatibility
+The backup system is compatible with **all SQL Server editions**, including:
+- ✅ SQL Server Express
+- ✅ SQL Server LocalDB
+- ✅ SQL Server Standard
+- ✅ SQL Server Enterprise
+
+**Note:** Compression has been disabled to ensure compatibility with SQL Server Express/LocalDB editions. If you're using full SQL Server editions and want to enable compression for smaller backup files, you can add `COMPRESSION,` to the backup command in `DatabaseBackupService.cs` line 95.
+
+### Future Migration to Jenkins
+Currently, backups run only when the application is running. For production environments, consider migrating to a Jenkins job or SQL Server Agent job that runs independently of the application. This ensures:
+- ✅ Backups run 24/7 regardless of app state
+- ✅ Centralized backup management
+- ✅ Better monitoring and alerting
+- ✅ Integration with existing DevOps pipelines
+
+The current implementation provides a solid foundation and can be used as-is until Jenkins migration is ready.
+
 ## Configuration
 
 ### appsettings.json
