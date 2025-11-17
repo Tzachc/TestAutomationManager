@@ -3,12 +3,29 @@
 ## Overview
 A comprehensive database backup mechanism has been implemented for your WPF application with automated backups, retention management, and a modern UI for backup management.
 
+## Important: How Backups Work
+
+**What Gets Backed Up:**
+- The system backs up the **entire database** (e.g., `AutomationDB`), not individual schemas
+- SQL Server's `BACKUP DATABASE` command backs up the whole database - it cannot backup individual schemas
+- Schemas (like `SeleniumDB`, `PRODUCTION_Selenium`) are just logical containers **within** the same database
+
+**Folder Organization:**
+- Backups are organized into **schema-specific folders** for easy organization (e.g., `C:\SqlBackups\SeleniumDB\`)
+- The folder name represents which **schema was active** when the backup was taken
+- All backups contain the full database, regardless of which folder they're in
+
+**Example:**
+- Database: `AutomationDB` (contains all schemas)
+- Backup when SeleniumDB is active: `C:\SqlBackups\SeleniumDB\SeleniumDB_Backup_20251117_143022.bak` (150 MB - full database)
+- Backup when PRODUCTION_Selenium is active: `C:\SqlBackups\PRODUCTION_Selenium\PRODUCTION_Selenium_Backup_20251117_150000.bak` (150 MB - same full database)
+
 ## Features Implemented
 
 ### 1. **Automated Backup System**
 - ✅ **DatabaseBackupService** - Core service handling SQL Server backups
-  - Creates compressed `.bak` files using SQL Server's native BACKUP DATABASE command
-  - Organizes backups into schema-specific folders (e.g., `C:\SqlBackups\SeleniumDB\`, `C:\SqlBackups\PRODUCTION_Selenium\`)
+  - Creates `.bak` files using SQL Server's native BACKUP DATABASE command
+  - Organizes backups into schema-specific folders for easy navigation
   - File naming: `{Schema}_Backup_{yyyyMMdd_HHmmss}.bak`
   - Automatic cleanup of backups older than 7 days (configurable)
   - File size tracking and formatted display
@@ -16,7 +33,7 @@ A comprehensive database backup mechanism has been implemented for your WPF appl
 ### 2. **Backup Scheduler**
 - ✅ **BackupSchedulerService** - Automated hourly backups
   - Runs automatically every hour (configurable in `appsettings.json`)
-  - Backs up all configured schemas
+  - Backs up the entire database when triggered
   - Event-driven progress notifications
   - Manual trigger capability for immediate backups
   - Safe startup/shutdown lifecycle management

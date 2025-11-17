@@ -112,137 +112,55 @@ namespace TestAutomationManager.Services
         {
             try
             {
-                // Get all schemas that need backing up
-                var schemas = GetActiveSchemas();
+                // Get current schema for folder organization
+                var currentSchema = SchemaConfigService.Instance.CurrentSchema;
 
-                if (!schemas.Any())
+                System.Diagnostics.Debug.WriteLine($"Starting scheduled backup for database (current schema: {currentSchema})...");
+                BackupProgress?.Invoke(this, $"Starting database backup");
+
+                var connectionString = DbConnectionConfig.GetConnectionString();
+
+                var progress = new Progress<string>(msg =>
                 {
-                    System.Diagnostics.Debug.WriteLine("No schemas found for backup");
-                    return;
+                    System.Diagnostics.Debug.WriteLine($"[Backup] {msg}");
+                    BackupProgress?.Invoke(this, $"[Backup] {msg}");
+                });
+
+                // Backup the database once, organized by current schema folder
+                var result = await _backupService.CreateBackupAsync(currentSchema, connectionString, progress);
+
+                if (result.Success)
+                {
+                    _lastBackupTime = DateTime.Now;
+                    _nextBackupTime = DateTime.Now.AddMinutes(_intervalMinutes);
+
+                    BackupCompleted?.Invoke(this, new BackupSchedulerEventArgs
+                    {
+                        Schema = currentSchema,
+                        Success = true,
+                        BackupFilePath = result.FilePath,
+                        Timestamp = result.Timestamp
+                    });
+
+                    System.Diagnostics.Debug.WriteLine($"Backup completed: {result.FileName}");
+                }
+                else
+                {
+                    BackupFailed?.Invoke(this, new BackupSchedulerEventArgs
+                    {
+                        Schema = currentSchema,
+                        Success = false,
+                        ErrorMessage = result.ErrorMessage
+                    });
+
+                    System.Diagnostics.Debug.WriteLine($"Backup failed: {result.ErrorMessage}");
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Starting scheduled backup for {schemas.Count} schema(s)...");
-                BackupProgress?.Invoke(this, $"Starting backup for {schemas.Count} schema(s)");
-
-                foreach (var schema in schemas)
-                {
-                    try
-                    {
-                        var connectionString = GetConnectionStringForSchema(schema);
-
-                        var progress = new Progress<string>(msg =>
-                        {
-                            System.Diagnostics.Debug.WriteLine($"[{schema}] {msg}");
-                            BackupProgress?.Invoke(this, $"[{schema}] {msg}");
-                        });
-
-                        var result = await _backupService.CreateBackupAsync(schema, connectionString, progress);
-
-                        if (result.Success)
-                        {
-                            _lastBackupTime = DateTime.Now;
-                            _nextBackupTime = DateTime.Now.AddMinutes(_intervalMinutes);
-
-                            BackupCompleted?.Invoke(this, new BackupSchedulerEventArgs
-                            {
-                                Schema = schema,
-                                Success = true,
-                                BackupFilePath = result.FilePath,
-                                Timestamp = result.Timestamp
-                            });
-
-                            System.Diagnostics.Debug.WriteLine($"Backup completed for {schema}: {result.FileName}");
-                        }
-                        else
-                        {
-                            BackupFailed?.Invoke(this, new BackupSchedulerEventArgs
-                            {
-                                Schema = schema,
-                                Success = false,
-                                ErrorMessage = result.ErrorMessage
-                            });
-
-                            System.Diagnostics.Debug.WriteLine($"Backup failed for {schema}: {result.ErrorMessage}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Error backing up {schema}: {ex.Message}");
-                        BackupFailed?.Invoke(this, new BackupSchedulerEventArgs
-                        {
-                            Schema = schema,
-                            Success = false,
-                            ErrorMessage = ex.Message
-                        });
-                    }
-                }
-
-                System.Diagnostics.Debug.WriteLine("Scheduled backup completed for all schemas");
+                System.Diagnostics.Debug.WriteLine("Scheduled backup completed");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in PerformScheduledBackupAsync: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Gets list of active schemas that need backing up
-        /// </summary>
-        private List<string> GetActiveSchemas()
-        {
-            var schemas = new List<string>();
-
-            try
-            {
-                // Get configured schemas from SchemaConfigService
-                var currentSchema = SchemaConfigService.Instance.CurrentSchema;
-
-                // Always add the current schema
-                if (!string.IsNullOrEmpty(currentSchema))
-                {
-                    schemas.Add(currentSchema);
-                }
-
-                // Add other known schemas (you can make this more dynamic later)
-                var knownSchemas = new[] { "SeleniumDB", "PRODUCTION_Selenium" };
-                foreach (var schema in knownSchemas)
-                {
-                    if (!schemas.Contains(schema, StringComparer.OrdinalIgnoreCase))
-                    {
-                        schemas.Add(schema);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error getting schemas: {ex.Message}");
-            }
-
-            return schemas;
-        }
-
-        /// <summary>
-        /// Gets connection string for a specific schema
-        /// </summary>
-        private string GetConnectionStringForSchema(string schema)
-        {
-            try
-            {
-                // Temporarily switch to target schema to get its connection string
-                var originalSchema = SchemaConfigService.Instance.CurrentSchema;
-                SchemaConfigService.Instance.CurrentSchema = schema;
-
-                var connectionString = DbConnectionConfig.GetConnectionString();
-
-                // Restore original schema
-                SchemaConfigService.Instance.CurrentSchema = originalSchema;
-
-                return connectionString;
-            }
-            catch
-            {
-                // Fallback to default connection string
-                return DbConnectionConfig.GetConnectionString();
             }
         }
 

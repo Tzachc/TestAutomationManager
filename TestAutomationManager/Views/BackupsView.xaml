@@ -334,15 +334,15 @@
                                            Margin="0,0,0,8"/>
                                 <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4">
                                     <Run Text="Schema:"/>
-                                    <Run Text="{Binding SelectedBackup.Schema}" FontWeight="SemiBold"/>
+                                    <Run Text="{Binding SelectedBackup.Schema, Mode=OneWay}" FontWeight="SemiBold"/>
                                 </TextBlock>
                                 <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4">
                                     <Run Text="Date:"/>
-                                    <Run Text="{Binding SelectedBackup.DateTimeDisplay}" FontWeight="SemiBold"/>
+                                    <Run Text="{Binding SelectedBackup.DateTimeDisplay, Mode=OneWay}" FontWeight="SemiBold"/>
                                 </TextBlock>
                                 <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
                                     <Run Text="Size:"/>
-                                    <Run Text="{Binding SelectedBackup.SizeFormatted}" FontWeight="SemiBold"/>
+                                    <Run Text="{Binding SelectedBackup.SizeFormatted, Mode=OneWay}" FontWeight="SemiBold"/>
                                 </TextBlock>
                             </StackPanel>
                         </Border>
