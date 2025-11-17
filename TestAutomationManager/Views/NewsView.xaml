@@ -9,14 +9,25 @@
              Background="{DynamicResource PrimaryBackgroundBrush}">
 
     <UserControl.Resources>
+        <!-- This must match the namespace in your project -->
         <converters:ImageUrlConverter x:Key="ImageUrlConverter"/>
+
         <!-- Category Color Brushes -->
         <SolidColorBrush x:Key="AutomationCategoryBrush" Color="#FF6366F1"/>
         <SolidColorBrush x:Key="AICategoryBrush" Color="#FF10B981"/>
         <SolidColorBrush x:Key="DevOpsCategoryBrush" Color="#FFF59E0B"/>
         <SolidColorBrush x:Key="SetupCategoryBrush" Color="#FFEC4899"/>
 
-        <!-- Modern Card Style -->
+        <!-- Easing Function for smooth animations -->
+        <CubicEase x:Key="SmoothEase" EasingMode="EaseOut"/>
+
+        <!-- 
+        ============================================================
+        Modern Card Style
+        - Only handles background, shadow, and corner radius.
+        - Animations are moved INTO the DataTemplates for more control.
+        ============================================================
+        -->
         <Style x:Key="ModernNewsCardStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
@@ -26,55 +37,21 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="20" ShadowDepth="0"/>
+                    <DropShadowEffect Color="Black" Opacity="0.05" BlurRadius="15" ShadowDepth="0"/>
                 </Setter.Value>
             </Setter>
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Trigger.EnterActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Duration="0:0:0.25"
-                                               To="1.03"
-                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                               DecelerationRatio="0.7"/>
-                                <DoubleAnimation Duration="0:0:0.25"
-                                               To="1.03"
-                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                               DecelerationRatio="0.7"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.EnterActions>
-                    <Trigger.ExitActions>
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Duration="0:0:0.25"
-                                               To="1"
-                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
-                                               DecelerationRatio="0.7"/>
-                                <DoubleAnimation Duration="0:0:0.25"
-                                               To="1"
-                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
-                                               DecelerationRatio="0.7"/>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </Trigger.ExitActions>
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="40" ShadowDepth="0"/>
+                            <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="30" ShadowDepth="5"/>
                         </Setter.Value>
                     </Setter>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Category Badge Style -->
+        <!-- Category Badge Style (Unchanged) -->
         <Style x:Key="CategoryPillStyle" TargetType="Border">
             <Setter Property="CornerRadius" Value="18"/>
             <Setter Property="Padding" Value="16,8"/>
@@ -86,12 +63,12 @@
             </Setter>
         </Style>
 
-        <!-- Filter Pill Style -->
+        <!-- Filter Pill Style (Unchanged) -->
         <Style x:Key="FilterPillStyle" TargetType="ToggleButton">
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="20,10"/>
             <Setter Property="Margin" Value="0,0,10,0"/>
             <Setter Property="FontSize" Value="13"/>
@@ -112,7 +89,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource TertiaryBackgroundBrush}"/>
                 </Trigger>
                 <Trigger Property="IsChecked" Value="True">
                     <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
@@ -121,6 +98,412 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- 
+        ============================================================
+        NEW: Entrance Animation Style
+        - Makes the item fade-in and slide-up on load.
+        ============================================================
+        -->
+        <Style x:Key="EntranceAnimationStyle" TargetType="FrameworkElement">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform Y="20"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             To="1"
+                                             Duration="0:0:0.5"
+                                             DecelerationRatio="0.8" />
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                             To="0"
+                                             Duration="0:0:0.5"
+                                             EasingFunction="{StaticResource SmoothEase}" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 
+        ============================================================
+        Featured News Card Template - FIXED
+        - REMOVED DataType="{x:Type models:NewsArticle}" to prevent compile errors.
+        - Added x:Name attributes for animations.
+        ============================================================
+        -->
+        <DataTemplate x:Key="FeaturedNewsCardTemplate">
+            <Border Style="{StaticResource ModernNewsCardStyle}"
+                    MouseLeftButtonDown="NewsCard_Click"
+                    Tag="{Binding Url}"
+                    Margin="40,16,40,16"
+                    x:Name="FeaturedCardRoot">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.7*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Article Image Area -->
+                    <Border Grid.Column="0"
+                            CornerRadius="20,0,0,20"
+                            ClipToBounds="True"
+                            Background="#FF1E293B"
+                            MinHeight="400"
+                            x:Name="ImageContainer">
+
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1" CenterX="0.5" CenterY="0.5"/>
+                        </Border.RenderTransform>
+
+                        <Grid>
+                            <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrlConverter}}"
+                                   Stretch="UniformToFill"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"/>
+
+                            <!-- Fallback for no image -->
+                            <Grid>
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ImageUrl}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ImageUrl}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <TextBlock Text="📰"
+                                           FontSize="120"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Opacity="0.2"/>
+                            </Grid>
+
+                            <!-- Dark Gradient Overlay -->
+                            <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="Transparent" Offset="0"/>
+                                        <GradientStop Color="#55000000" Offset="0.7"/>
+                                        <GradientStop Color="#CC000000" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <!-- Category Badge on Image -->
+                            <Border VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,20">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource CategoryPillStyle}">
+                                        <Setter Property="Background" Value="#FF6366F1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Category}" Value="Test Automation">
+                                                <Setter Property="Background" Value="{StaticResource AutomationCategoryBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Category}" Value="AI &amp; ML">
+                                                <Setter Property="Background" Value="{StaticResource AICategoryBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Category}" Value="DevOps">
+                                                <Setter Property="Background" Value="{StaticResource DevOpsCategoryBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Category}" Value="Setup">
+                                                <Setter Property="Background" Value="{StaticResource SetupCategoryBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding Category}" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                            </Border>
+
+                            <!-- Source Badge at Bottom -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="20,0,20,20">
+                                <Border Width="36" Height="36" CornerRadius="18" Background="{DynamicResource PrimaryBlueBrush}" Margin="0,0,12,0">
+                                    <TextBlock Text="📰" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Source}" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock Text="{Binding TimeAgo}" FontSize="12" Foreground="White" Opacity="0.8"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Content Area -->
+                    <Border Grid.Column="1" Padding="32,32,32,32">
+                        <StackPanel VerticalAlignment="Center">
+                            <!-- Title -->
+                            <TextBlock Text="{Binding Title}"
+                                       FontSize="28" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="36" MaxHeight="180"
+                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,20"/>
+
+                            <!-- Description -->
+                            <TextBlock Text="{Binding Description}"
+                                       FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="26" MaxHeight="130"
+                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,30"/>
+
+                            <!-- Read More Button -->
+                            <Border Background="{DynamicResource PrimaryBlueBrush}"
+                                    CornerRadius="12" Padding="20,12"
+                                    HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Read Full Story"
+                                               FontSize="14" FontWeight="SemiBold"
+                                               Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="→"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="White" Margin="10,0,0,0"
+                                               VerticalAlignment="Center"
+                                               x:Name="ArrowText">
+                                        <TextBlock.RenderTransform>
+                                            <TranslateTransform X="0"/>
+                                        </TextBlock.RenderTransform>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Hover Animations for Featured Card -->
+            <DataTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True" SourceName="FeaturedCardRoot">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- Image Zoom In -->
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                 To="1.1" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                 To="1.1" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <!-- Arrow Slide Right -->
+                                <DoubleAnimation Storyboard.TargetName="ArrowText"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="5" Duration="0:0:0.3" EasingFunction="{StaticResource SmoothEase}"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- Image Zoom Out -->
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                 To="1.0" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                 To="1.0" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <!-- Arrow Slide Back -->
+                                <DoubleAnimation Storyboard.TargetName="ArrowText"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="0" Duration="0:0:0.3" EasingFunction="{StaticResource SmoothEase}"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </DataTemplate.Triggers>
+
+        </DataTemplate>
+
+        <!-- 
+        ============================================================
+        Regular News Card Template - FIXED
+        - REMOVED DataType="{x:Type models:NewsArticle}" to prevent compile errors.
+        - Added x:Name attributes for animations.
+        ============================================================
+        -->
+        <DataTemplate x:Key="RegularNewsCardTemplate">
+            <Border Style="{StaticResource ModernNewsCardStyle}"
+                    MouseLeftButtonDown="NewsCard_Click"
+                    Tag="{Binding Url}"
+                    x:Name="RegularCardRoot">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="200"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Article Image -->
+                    <Border Grid.Row="0"
+                            CornerRadius="20,20,0,0"
+                            ClipToBounds="True"
+                            Background="#FF1E293B"
+                            x:Name="ImageContainer">
+
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1" CenterX="0.5" CenterY="0.5"/>
+                        </Border.RenderTransform>
+
+                        <Grid>
+                            <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrlConverter}}"
+                                   Stretch="UniformToFill"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"/>
+
+                            <!-- Fallback for no image -->
+                            <Grid>
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ImageUrl}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ImageUrl}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <TextBlock Text="📰"
+                                           FontSize="80"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Opacity="0.2"/>
+                            </Grid>
+
+                            <!-- Dark Gradient Overlay -->
+                            <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="Transparent" Offset="0"/>
+                                        <GradientStop Color="#55000000" Offset="0.7"/>
+                                        <GradientStop Color="#CC000000" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <!-- Category Badge on Image -->
+                            <Border VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,20">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource CategoryPillStyle}">
+                                        <Setter Property="Background" Value="#FF6366F1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Category}" Value="Test Automation">
+                                                <Setter Property="Background" Value="{StaticResource AutomationCategoryBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Category}" Value="AI &amp; ML">
+                                                <Setter Property="Background" Value="{StaticResource AICategoryBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Category}" Value="DevOps">
+                                                <Setter Property="Background" Value="{StaticResource DevOpsCategoryBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Category}" Value="Setup">
+                                                <Setter Property="Background" Value="{StaticResource SetupCategoryBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding Category}" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                            </Border>
+
+                            <!-- Source Badge at Bottom -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Margin="20,0,20,20">
+                                <Border Width="30" Height="30" CornerRadius="15" Background="{DynamicResource PrimaryBlueBrush}" Margin="0,0,10,0">
+                                    <TextBlock Text="📰" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Source}" FontSize="13" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock Text="{Binding TimeAgo}" FontSize="11" Foreground="White" Opacity="0.8"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Content Area -->
+                    <Border Grid.Row="1" Padding="20,20,20,24">
+                        <StackPanel>
+                            <!-- Title -->
+                            <TextBlock Text="{Binding Title}"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="26" MaxHeight="78"
+                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,12"/>
+
+                            <!-- Description -->
+                            <TextBlock Text="{Binding Description}"
+                                       FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" LineHeight="22" MaxHeight="66"
+                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,16"/>
+
+                            <!-- Read More (Subtle) -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Cursor="Hand">
+                                <TextBlock Text="Read Story"
+                                             Foreground="{DynamicResource PrimaryBlueBrush}"
+                                             FontWeight="SemiBold"
+                                             FontSize="14"/>
+                                <TextBlock Text="→"
+                                           Foreground="{DynamicResource PrimaryBlueBrush}"
+                                           FontWeight="Bold"
+                                           FontSize="16"
+                                           Margin="6,0,0,0"
+                                           x:Name="ArrowText">
+                                    <TextBlock.RenderTransform>
+                                        <TranslateTransform X="0"/>
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Hover Animations for Regular Card -->
+            <DataTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True" SourceName="RegularCardRoot">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- Image Zoom In -->
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                 To="1.15" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                 To="1.15" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <!-- Arrow Slide Right -->
+                                <DoubleAnimation Storyboard.TargetName="ArrowText"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="5" Duration="0:0:0.3" EasingFunction="{StaticResource SmoothEase}"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- Image Zoom Out -->
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                 To="1.0" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <DoubleAnimation Storyboard.TargetName="ImageContainer"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                 To="1.0" Duration="0:0:0.4" EasingFunction="{StaticResource SmoothEase}"/>
+                                <!-- Arrow Slide Back -->
+                                <DoubleAnimation Storyboard.TargetName="ArrowText"
+                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                                 To="0" Duration="0:0:0.3" EasingFunction="{StaticResource SmoothEase}"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </DataTemplate.Triggers>
+
+        </DataTemplate>
+
     </UserControl.Resources>
 
     <Grid>
@@ -129,91 +512,106 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Compact Header -->
+        <!-- 
+        ============================================================
+        HEADER - REDESIGNED
+        - Filters are moved to a separate row for a "tab" feel
+        ============================================================
+        -->
         <Border Grid.Row="0"
                 Background="{DynamicResource SecondaryBackgroundBrush}"
                 BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="0,0,0,1"
-                Padding="40,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                BorderThickness="0,0,0,1">
+            <StackPanel>
+                <!-- Row 1: Title and Refresh -->
+                <!-- FIXED: Changed Padding to Margin on the Grid -->
+                <Grid Margin="40,20,40,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Title and Filters Combined -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="📰"
-                               FontSize="28"
-                               Margin="0,0,12,0"
-                               VerticalAlignment="Center"/>
-                    <TextBlock Text="Tech News"
-                               FontSize="24"
-                               FontWeight="Bold"
-                               Foreground="{DynamicResource TextPrimaryBrush}"
-                               Margin="0,0,30,0"
-                               VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="📰"
+                                   FontSize="28"
+                                   Margin="0,0,12,0"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Tech News"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
 
+                    <Button Grid.Column="1"
+                            x:Name="RefreshButton"
+                            Click="RefreshButton_Click"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource PrimaryBlueBrush}"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Padding="20,10"
+                            FontSize="13"
+                            FontWeight="SemiBold"
+                            Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}"
+                                        CornerRadius="20"
+                                        Padding="{TemplateBinding Padding}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🔄" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Refresh" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}"/>
+                                    </StackPanel>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="0.9"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Row 2: Filters -->
+                <StackPanel Orientation="Horizontal" Margin="40,0,40,20">
                     <ToggleButton x:Name="FilterAll"
-                                Content="All"
-                                Style="{StaticResource FilterPillStyle}"
-                                IsChecked="True"
-                                Click="FilterButton_Click"/>
+                                  Content="All"
+                                  Style="{StaticResource FilterPillStyle}"
+                                  IsChecked="True"
+                                  Click="FilterButton_Click"/>
                     <ToggleButton x:Name="FilterAutomation"
-                                Content="🧪 Testing"
-                                Style="{StaticResource FilterPillStyle}"
-                                Click="FilterButton_Click"/>
+                                  Content="🧪 Testing"
+                                  Style="{StaticResource FilterPillStyle}"
+                                  Click="FilterButton_Click"/>
                     <ToggleButton x:Name="FilterAI"
-                                Content="🤖 AI"
-                                Style="{StaticResource FilterPillStyle}"
-                                Click="FilterButton_Click"/>
+                                  Content="🤖 AI"
+                                  Style="{StaticResource FilterPillStyle}"
+                                  Click="FilterButton_Click"/>
                     <ToggleButton x:Name="FilterDevOps"
-                                Content="⚙️ DevOps"
-                                Style="{StaticResource FilterPillStyle}"
-                                Click="FilterButton_Click"/>
+                                  Content="⚙️ DevOps"
+                                  Style="{StaticResource FilterPillStyle}"
+                                  Click="FilterButton_Click"/>
                 </StackPanel>
-
-                <Button Grid.Column="1"
-                        x:Name="RefreshButton"
-                        Click="RefreshButton_Click"
-                        VerticalAlignment="Center"
-                        Background="{DynamicResource PrimaryBlueBrush}"
-                        Foreground="White"
-                        BorderThickness="0"
-                        Padding="20,10"
-                        FontSize="13"
-                        FontWeight="SemiBold"
-                        Cursor="Hand">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}"
-                                    CornerRadius="20"
-                                    Padding="{TemplateBinding Padding}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🔄" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="Refresh" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}"/>
-                                </StackPanel>
-                            </Border>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="0.9"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </Grid>
+            </StackPanel>
         </Border>
 
-        <!-- Main Content Area -->
+        <!-- 
+        ============================================================
+        Main Content Area
+        ============================================================
+        -->
         <ScrollViewer Grid.Row="1"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Background="{DynamicResource PrimaryBackgroundBrush}">
+
+            <!-- Overall StackPanel for all content states -->
             <StackPanel>
                 <!-- Loading State -->
                 <Grid x:Name="LoadingPanel"
@@ -250,181 +648,75 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- News Grid -->
-                <ItemsControl x:Name="NewsItemsControl"
-                              Visibility="Collapsed"
-                              Padding="24,20,24,40">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="2"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                <!-- Main Content Panel (holds featured + grid) -->
+                <StackPanel x:Name="ContentRootPanel" Visibility="Collapsed">
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource ModernNewsCardStyle}"
-                                    MouseLeftButtonDown="NewsCard_Click"
-                                    Tag="{Binding Url}">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="300"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
+                    <!-- Featured Section -->
+                    <TextBlock Text="🌟 Featured Story"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="40,32,40,0"/>
 
-                                    <!-- MASSIVE Article Image -->
-                                    <Border Grid.Row="0"
-                                            CornerRadius="20,20,0,0"
-                                            ClipToBounds="True"
-                                            Background="#FF1E293B">
-                                        <Grid>
-                                            <!-- Image -->
-                                            <Image Source="{Binding ImageUrl, Converter={StaticResource ImageUrlConverter}}"
-                                                   Stretch="UniformToFill"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"/>
+                    <!-- Entrance Animation Applied -->
+                    <ContentControl x:Name="FeaturedNewsControl"
+                                    ContentTemplate="{StaticResource FeaturedNewsCardTemplate}"
+                                    Style="{StaticResource EntranceAnimationStyle}"/>
 
-                                            <!-- Fallback for no image -->
-                                            <Grid>
-                                                <Grid.Style>
-                                                    <Style TargetType="Grid">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding ImageUrl}" Value="">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding ImageUrl}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Grid.Style>
-                                                <TextBlock Text="📰"
-                                                           FontSize="120"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"
-                                                           Opacity="0.2"/>
-                                            </Grid>
+                    <!-- Headlines Section -->
+                    <TextBlock Text="More Headlines"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="40,24,40,0"/>
 
-                                            <!-- Dark Gradient Overlay -->
-                                            <Border VerticalAlignment="Stretch"
-                                                    HorizontalAlignment="Stretch">
-                                                <Border.Background>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                        <GradientStop Color="Transparent" Offset="0"/>
-                                                        <GradientStop Color="#55000000" Offset="0.7"/>
-                                                        <GradientStop Color="#CC000000" Offset="1"/>
-                                                    </LinearGradientBrush>
-                                                </Border.Background>
-                                            </Border>
+                    <!-- News Grid -->
+                    <ItemsControl x:Name="RegularNewsItemsControl"
+                                  Padding="24,0,24,40">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <!-- Use the regular card template -->
+                        <ItemsControl.ItemTemplate>
+                            <StaticResource ResourceKey="RegularNewsCardTemplate"/>
+                        </ItemsControl.ItemTemplate>
 
-                                            <!-- Category Badge on Image -->
-                                            <Border VerticalAlignment="Top"
-                                                    HorizontalAlignment="Left"
-                                                    Margin="20,20">
-                                                <Border.Style>
-                                                    <Style TargetType="Border" BasedOn="{StaticResource CategoryPillStyle}">
-                                                        <Setter Property="Background" Value="#FF6366F1"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Category}" Value="Test Automation">
-                                                                <Setter Property="Background" Value="{StaticResource AutomationCategoryBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Category}" Value="AI &amp; ML">
-                                                                <Setter Property="Background" Value="{StaticResource AICategoryBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Category}" Value="DevOps">
-                                                                <Setter Property="Background" Value="{StaticResource DevOpsCategoryBrush}"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Category}" Value="Setup">
-                                                                <Setter Property="Background" Value="{StaticResource SetupCategoryBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock Text="{Binding Category}"
-                                                           FontSize="12"
-                                                           FontWeight="Bold"
-                                                           Foreground="White"/>
-                                            </Border>
+                        <!-- Entrance Animation Applied to each item -->
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Opacity" Value="0"/>
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="20"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <EventTrigger RoutedEvent="Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <!-- Added BeginTime for a staggered effect -->
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                 To="1"
+                                                                 Duration="0:0:0.5"
+                                                                 BeginTime="0:0:0.1"
+                                                                 DecelerationRatio="0.8" />
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                                                 To="0"
+                                                                 Duration="0:0:0.5"
+                                                                 BeginTime="0:0:0.1"
+                                                                 EasingFunction="{StaticResource SmoothEase}" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
 
-                                            <!-- Source Badge at Bottom -->
-                                            <StackPanel Orientation="Horizontal"
-                                                        VerticalAlignment="Bottom"
-                                                        Margin="20,0,20,20">
-                                                <Border Width="36"
-                                                        Height="36"
-                                                        CornerRadius="18"
-                                                        Background="{DynamicResource PrimaryBlueBrush}"
-                                                        Margin="0,0,12,0">
-                                                    <TextBlock Text="📰"
-                                                               FontSize="18"
-                                                               HorizontalAlignment="Center"
-                                                               VerticalAlignment="Center"/>
-                                                </Border>
-                                                <StackPanel VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source}"
-                                                               FontSize="14"
-                                                               FontWeight="Bold"
-                                                               Foreground="White"/>
-                                                    <TextBlock Text="{Binding TimeAgo}"
-                                                               FontSize="12"
-                                                               Foreground="White"
-                                                               Opacity="0.8"/>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
+                    </ItemsControl>
+                </StackPanel>
 
-                                    <!-- Content Area -->
-                                    <Border Grid.Row="1"
-                                            Padding="26,24,26,26">
-                                        <StackPanel>
-                                        <!-- Title -->
-                                        <TextBlock Text="{Binding Title}"
-                                                   FontSize="22"
-                                                   FontWeight="Bold"
-                                                   Foreground="{DynamicResource TextPrimaryBrush}"
-                                                   TextWrapping="Wrap"
-                                                   LineHeight="30"
-                                                   MaxHeight="90"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,0,0,14"/>
-
-                                        <!-- Description -->
-                                        <TextBlock Text="{Binding Description}"
-                                                   FontSize="15"
-                                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                                   TextWrapping="Wrap"
-                                                   LineHeight="24"
-                                                   MaxHeight="72"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,0,0,20"/>
-
-                                        <!-- Read More Button -->
-                                        <Border Background="{DynamicResource PrimaryBlueBrush}"
-                                                CornerRadius="12"
-                                                Padding="20,12"
-                                                HorizontalAlignment="Left">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="Read Full Story"
-                                                           FontSize="14"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                                <TextBlock Text="→"
-                                                           FontSize="16"
-                                                           FontWeight="Bold"
-                                                           Foreground="White"
-                                                           Margin="10,0,0,0"
-                                                           VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Border>
-                                        </StackPanel>
-                                    </Border>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
             </StackPanel>
         </ScrollViewer>
     </Grid>

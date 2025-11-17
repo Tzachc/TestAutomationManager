@@ -40,17 +40,20 @@ namespace TestAutomationManager.Services
 
                 var articles = new List<NewsArticle>();
 
-                // Get REAL tech news stories from top sources
-                // Focus on interesting articles, not library releases
+                // --- NEW: Improved Query Logic ---
+                // We create specific, high-signal queries and explicitly exclude hiring/job postings.
                 var queries = new[]
                 {
-                    ("ChatGPT OR OpenAI OR Claude OR \"generative AI\"", "AI & ML"),
-                    ("\"artificial intelligence\" OR \"AI model\" OR \"machine learning\"", "AI & ML"),
-                    ("automation testing OR QA automation OR \"test automation\"", "Test Automation"),
-                    ("Selenium OR Playwright OR Cypress testing", "Test Automation"),
-                    ("Kubernetes OR \"container orchestration\" OR cloud-native", "DevOps"),
-                    ("Docker OR DevOps OR CI/CD pipeline", "DevOps")
+                    // Query 1: Top AI models and companies
+                    ("(\"OpenAI GPT\" OR \"Google Gemini\" OR \"Anthropic Claude\" OR \"AI\") NOT (hiring OR job OR careers)", "AI & ML"),
+                    
+                    // Query 2: Test Automation topics
+                    ("(\"Playwright\" OR \"Automation\" OR \"Selenium 4\") NOT (hiring OR job OR careers)", "Automation"),
+                    
+                    // Query 3: DevOps and Cloud topics
+                    ("(\"AWS\" OR \"Azure DevOps\" OR \"GitOps\" OR \"Terraform\" OR \"DevOps\") NOT (hiring OR job OR careers)", "DevOps")
                 };
+                // --- END: Improved Query Logic ---
 
                 foreach (var (keyword, category) in queries)
                 {
@@ -81,7 +84,9 @@ namespace TestAutomationManager.Services
             {
                 // Get articles from the last 30 days from TOP tech sources only
                 var fromDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
-                var url = $"{BASE_URL}?q={Uri.EscapeDataString(keyword)}&sources={TECH_SOURCES}&from={fromDate}&sortBy=publishedAt&language=en&pageSize=5&apiKey={API_KEY}";
+
+                // --- UPDATED: pageSize changed from 5 to 10 ---
+                var url = $"{BASE_URL}?q={Uri.EscapeDataString(keyword)}&sources={TECH_SOURCES}&from={fromDate}&sortBy=publishedAt&language=en&pageSize=10&apiKey={API_KEY}";
 
                 var response = await _httpClient.GetAsync(url);
 
@@ -136,68 +141,7 @@ namespace TestAutomationManager.Services
             return articles;
         }
 
-        private async Task<List<NewsArticle>> FetchArticlesByKeyword(string keyword, string category)
-        {
-            var articles = new List<NewsArticle>();
-
-            try
-            {
-                // Get articles from the last 30 days (more results)
-                var fromDate = DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd");
-                var url = $"{BASE_URL}?q={Uri.EscapeDataString(keyword)}&from={fromDate}&sortBy=publishedAt&language=en&pageSize=10&apiKey={API_KEY}";
-
-                var response = await _httpClient.GetAsync(url);
-
-                // Better error handling
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    System.Diagnostics.Debug.WriteLine($"API Error for '{keyword}': {response.StatusCode} - {errorContent}");
-                    return articles;
-                }
-
-                var content = await response.Content.ReadAsStringAsync();
-                var jsonDoc = JsonDocument.Parse(content);
-
-                // Check for API errors in response
-                if (jsonDoc.RootElement.TryGetProperty("status", out var status) && status.GetString() == "error")
-                {
-                    if (jsonDoc.RootElement.TryGetProperty("message", out var message))
-                    {
-                        System.Diagnostics.Debug.WriteLine($"NewsAPI Error: {message.GetString()}");
-                    }
-                    return articles;
-                }
-
-                if (jsonDoc.RootElement.TryGetProperty("articles", out var articlesArray))
-                {
-                    foreach (var article in articlesArray.EnumerateArray())
-                    {
-                        var newsArticle = new NewsArticle
-                        {
-                            Title = GetJsonString(article, "title"),
-                            Description = GetJsonString(article, "description"),
-                            Author = GetJsonString(article, "author"),
-                            Url = GetJsonString(article, "url"),
-                            ImageUrl = GetJsonString(article, "urlToImage"),
-                            PublishedAt = GetJsonDateTime(article, "publishedAt"),
-                            Source = article.TryGetProperty("source", out var source)
-                                ? GetJsonString(source, "name")
-                                : "Unknown",
-                            Category = category
-                        };
-
-                        articles.Add(newsArticle);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error fetching articles for keyword '{keyword}': {ex.Message}");
-            }
-
-            return articles;
-        }
+        // --- REMOVED unused FetchArticlesByKeyword method ---
 
         private string GetJsonString(JsonElement element, string propertyName)
         {
