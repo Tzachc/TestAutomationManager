@@ -73,6 +73,9 @@ namespace TestAutomationManager.ViewModels
         public ICommand ApplyToRealDbCommand { get; }
         public ICommand DeleteBackupCommand { get; }
         public ICommand TriggerManualBackupCommand { get; }
+        public ICommand ReturnToLiveCommand { get; }
+
+        public event EventHandler<DatabaseConnectionChangedEventArgs> PreviewModeActivated;
 
         public BackupsViewModel()
         {
@@ -87,6 +90,7 @@ namespace TestAutomationManager.ViewModels
             ApplyToRealDbCommand = new RelayCommand(async () => await RestoreBackupAsync(true), () => SelectedBackup != null);
             DeleteBackupCommand = new RelayCommand(DeleteSelectedBackup, () => SelectedBackup != null);
             TriggerManualBackupCommand = new RelayCommand(async () => await TriggerManualBackupAsync());
+            ReturnToLiveCommand = new RelayCommand(ReturnToLive, () => DatabaseConnectionService.Instance.IsPreviewMode);
 
             // Subscribe to scheduler events
             _schedulerService.BackupCompleted += OnBackupCompleted;
@@ -230,23 +234,49 @@ namespace TestAutomationManager.ViewModels
                 {
                     if (applyToRealDb)
                     {
-                        StatusMessage = "Database restored successfully! Please restart the application to load the restored data.";
+                        StatusMessage = "Database restored successfully! Application will reload...";
+
+                        // Switch back to live database and reload
+                        DatabaseConnectionService.Instance.SwitchToLiveDatabase();
+
                         MessageBox.Show(
-                            "Database has been restored successfully!\n\nPlease restart the application to ensure all data is properly loaded.",
+                            "Database has been restored successfully!\n\nThe application will now reload with the restored data.",
                             "Restore Successful",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information
                         );
+
+                        // Notify to reload app
+                        PreviewModeActivated?.Invoke(this, new DatabaseConnectionChangedEventArgs
+                        {
+                            NewDatabase = restoreResult.RestoredDatabase,
+                            IsPreviewMode = false
+                        });
                     }
                     else
                     {
-                        StatusMessage = $"Preview database created: {restoreResult.RestoredDatabase}";
+                        StatusMessage = $"Preview mode activated: {restoreResult.RestoredDatabase}";
+
+                        // Switch to preview database
+                        DatabaseConnectionService.Instance.SwitchToPreviewDatabase(
+                            restoreResult.RestoredDatabase,
+                            SelectedBackup.CreatedDate,
+                            SelectedBackup.FileName
+                        );
+
                         MessageBox.Show(
-                            $"Preview database has been created:\n\n{restoreResult.RestoredDatabase}\n\nYou can connect to this database to review the backup data without affecting your live database.",
-                            "Preview Created",
+                            $"Preview mode activated!\n\nViewing backup from: {SelectedBackup.CreatedDate:yyyy-MM-dd HH:mm:ss}\n\nThe application will now reload with the backup data.\n\nYour live database is not affected. Click 'Return to Live Database' to go back.",
+                            "Preview Mode",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information
                         );
+
+                        // Notify to reload app in preview mode
+                        PreviewModeActivated?.Invoke(this, new DatabaseConnectionChangedEventArgs
+                        {
+                            NewDatabase = restoreResult.RestoredDatabase,
+                            IsPreviewMode = true
+                        });
                     }
                 }
                 else
@@ -330,6 +360,31 @@ namespace TestAutomationManager.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        private void ReturnToLive()
+        {
+            var result = MessageBox.Show(
+                "Return to live database?\n\nThis will close preview mode and switch back to the live database.",
+                "Return to Live Database",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            // Switch back to live database
+            DatabaseConnectionService.Instance.SwitchToLiveDatabase();
+
+            StatusMessage = "Returned to live database. Application will reload...";
+
+            // Notify to reload app
+            PreviewModeActivated?.Invoke(this, new DatabaseConnectionChangedEventArgs
+            {
+                NewDatabase = DatabaseConnectionService.Instance.ActiveDatabaseName,
+                IsPreviewMode = false
+            });
         }
 
         private void OnBackupCompleted(object sender, BackupSchedulerEventArgs e)

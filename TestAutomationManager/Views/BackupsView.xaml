@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:TestAutomationManager.Views"
              xmlns:vm="clr-namespace:TestAutomationManager.ViewModels"
+             xmlns:services="clr-namespace:TestAutomationManager.Services"
              mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1200"
              Background="{DynamicResource BackgroundBrush}">
@@ -150,6 +151,19 @@
                             Style="{StaticResource SecondaryButton}"
                             Padding="16,8"
                             ToolTip="Trigger immediate backup for all schemas"/>
+
+                    <!-- Return to Live button - only visible in preview mode -->
+                    <Button Content="🔴 Return to Live Database"
+                            Command="{Binding ReturnToLiveCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            Padding="16,8"
+                            Margin="16,0,0,0"
+                            Visibility="{Binding Source={x:Static services:DatabaseConnectionService.Instance}, Path=IsPreviewMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="Exit preview mode and return to live database">
+                        <Button.Background>
+                            <SolidColorBrush Color="#DA3633"/>
+                        </Button.Background>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>

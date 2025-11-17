@@ -142,7 +142,8 @@ namespace TestAutomationManager.Services
             {
                 var builder = new SqlConnectionStringBuilder(connectionString);
                 var originalDatabase = builder.InitialCatalog;
-                var targetDatabase = applyToRealDb ? originalDatabase : $"{originalDatabase}_Preview_{DateTime.Now:yyyyMMddHHmmss}";
+                // Use fixed preview database name - reuse same DB for all previews
+                var targetDatabase = applyToRealDb ? originalDatabase : $"{originalDatabase}_Preview";
 
                 progress?.Report($"Starting restore to: {targetDatabase}");
 
