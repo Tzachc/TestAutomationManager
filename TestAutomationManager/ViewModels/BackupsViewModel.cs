@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -255,28 +256,40 @@ namespace TestAutomationManager.ViewModels
                     }
                     else
                     {
-                        StatusMessage = $"Preview mode activated: {restoreResult.RestoredDatabase}";
+                        StatusMessage = $"Preview window opening...";
 
-                        // Switch to preview database
-                        DatabaseConnectionService.Instance.SwitchToPreviewDatabase(
-                            restoreResult.RestoredDatabase,
-                            SelectedBackup.CreatedDate,
-                            SelectedBackup.FileName
-                        );
-
-                        MessageBox.Show(
-                            $"Preview mode activated!\n\nViewing backup from: {SelectedBackup.CreatedDate:yyyy-MM-dd HH:mm:ss}\n\nThe application will now reload with the backup data.\n\nYour live database is not affected. Click 'Return to Live Database' to go back.",
-                            "Preview Mode",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information
-                        );
-
-                        // Notify to reload app in preview mode
-                        PreviewModeActivated?.Invoke(this, new DatabaseConnectionChangedEventArgs
+                        // Launch a new app window with the preview database
+                        try
                         {
-                            NewDatabase = restoreResult.RestoredDatabase,
-                            IsPreviewMode = true
-                        });
+                            var exePath = Process.GetCurrentProcess().MainModule.FileName;
+                            var previewArgs = $"/database:{restoreResult.RestoredDatabase} /preview:true /backupdate:\"{SelectedBackup.CreatedDate:yyyy-MM-dd HH:mm:ss}\"";
+
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = exePath,
+                                Arguments = previewArgs,
+                                UseShellExecute = true
+                            });
+
+                            StatusMessage = "Preview window launched successfully";
+
+                            MessageBox.Show(
+                                $"Preview window opened!\n\nA new window has been launched with backup data from:\n{SelectedBackup.CreatedDate:yyyy-MM-dd HH:mm:ss}\n\nYour current window shows live data.\nThe new window shows the backup preview.",
+                                "Preview Window Launched",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information
+                            );
+                        }
+                        catch (Exception launchEx)
+                        {
+                            StatusMessage = $"Failed to launch preview window: {launchEx.Message}";
+                            MessageBox.Show(
+                                $"Failed to launch preview window:\n\n{launchEx.Message}",
+                                "Launch Failed",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error
+                            );
+                        }
                     }
                 }
                 else

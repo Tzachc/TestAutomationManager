@@ -22,21 +22,36 @@
 
         <!-- Backup Item Template -->
         <DataTemplate x:Key="BackupItemTemplate">
-            <Border Background="{DynamicResource SurfaceBrush}"
+            <Border Background="{DynamicResource CardBackgroundBrush}"
                     BorderBrush="{DynamicResource BorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Margin="0,0,0,8"
-                    Padding="16,12">
+                    BorderThickness="2"
+                    CornerRadius="10"
+                    Margin="0,0,0,12"
+                    Padding="18,14"
+                    Cursor="Hand">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Opacity" Value="0.95"/>
+                        <Setter Property="Opacity" Value="1"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
-                                <Setter Property="Opacity" Value="1"/>
                                 <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                <Setter Property="BorderThickness" Value="2"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                           To="1"
+                                                           Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
                             </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter Property="Background" Value="#1A539BF5"/>
+                                <Setter Property="BorderBrush" Value="#539BF5"/>
+                                <Setter Property="BorderThickness" Value="3"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
@@ -50,54 +65,74 @@
 
                     <!-- Icon -->
                     <Border Grid.Column="0"
-                            Width="40"
-                            Height="40"
+                            Width="50"
+                            Height="50"
                             Background="{DynamicResource PrimaryBlueBrush}"
-                            CornerRadius="8"
-                            Margin="0,0,12,0"
+                            CornerRadius="12"
+                            Margin="0,0,16,0"
                             VerticalAlignment="Center">
                         <TextBlock Text="💾"
-                                   FontSize="20"
+                                   FontSize="24"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"/>
                     </Border>
 
                     <!-- Info -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding FileName}"
-                                   FontWeight="SemiBold"
-                                   FontSize="14"
+                        <TextBlock Text="{Binding DateTimeDisplay}"
+                                   FontWeight="Bold"
+                                   FontSize="16"
                                    Foreground="{DynamicResource TextPrimaryBrush}"
-                                   TextTrimming="CharacterEllipsis"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                            <TextBlock Text="📅"
-                                       FontSize="11"
-                                       Margin="0,0,4,0"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Text="{Binding DateTimeDisplay}"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                       Margin="0,0,16,0"/>
-                            <TextBlock Text="📦"
-                                       FontSize="11"
-                                       Margin="0,0,4,0"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                            <TextBlock Text="{Binding SizeFormatted}"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
-                        </StackPanel>
+                                   Margin="0,0,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- File Size Badge -->
+                            <Border Grid.Column="0"
+                                    Background="#1C2E4A"
+                                    CornerRadius="4"
+                                    Padding="8,4"
+                                    Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📦"
+                                               FontSize="10"
+                                               Margin="0,0,4,0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding SizeFormatted}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="#539BF5"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Schema Badge -->
+                            <Border Grid.Column="1"
+                                    Background="#0D1117"
+                                    CornerRadius="4"
+                                    Padding="8,4">
+                                <TextBlock Text="{Binding Schema}"
+                                           FontSize="10"
+                                           FontWeight="Medium"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </Border>
+                        </Grid>
                     </StackPanel>
 
                     <!-- Selection Indicator -->
                     <Border Grid.Column="2"
-                            Width="24"
-                            Height="24"
+                            Width="28"
+                            Height="28"
                             Background="#3FB950"
-                            CornerRadius="12"
+                            CornerRadius="14"
                             VerticalAlignment="Center"
                             Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="✓"
-                                   FontSize="14"
+                                   FontSize="16"
                                    FontWeight="Bold"
                                    Foreground="White"
                                    HorizontalAlignment="Center"
@@ -146,40 +181,26 @@
                             Style="{StaticResource PrimaryButton}"
                             Margin="0,0,8,0"
                             Padding="16,8"/>
-                    <Button Content="⚡ Backup All Now"
-                            Command="{Binding TriggerManualBackupCommand}"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="16,8"
-                            ToolTip="Trigger immediate backup for all schemas"/>
-
-                    <!-- Return to Live button - only visible in preview mode -->
-                    <Button Content="🔴 Return to Live Database"
-                            Command="{Binding ReturnToLiveCommand}"
-                            Style="{StaticResource PrimaryButton}"
-                            Padding="16,8"
-                            Margin="16,0,0,0"
-                            Visibility="{Binding Source={x:Static services:DatabaseConnectionService.Instance}, Path=IsPreviewMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            ToolTip="Exit preview mode and return to live database">
-                        <Button.Background>
-                            <SolidColorBrush Color="#DA3633"/>
-                        </Button.Background>
-                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Scheduler Status -->
+        <!-- Info Banner -->
         <Border Grid.Row="1" Margin="0,0,0,20" Style="{StaticResource ModernCard}" Padding="20" Background="#1C2E4A">
             <StackPanel>
-                <TextBlock Text="⏰ Automatic Backup Schedule"
+                <TextBlock Text="ℹ️ Backup Information"
                            FontSize="16"
                            FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           Foreground="#539BF5"
                            Margin="0,0,0,8"/>
-                <TextBlock Text="{Binding SchedulerStatus}"
-                           FontSize="13"
-                           Foreground="{DynamicResource TextSecondaryBrush}"
-                           TextWrapping="Wrap"/>
+                <TextBlock FontSize="13"
+                           Foreground="#C9D1D9"
+                           TextWrapping="Wrap">
+                    <Run Text="Automatic backups are currently disabled." FontWeight="SemiBold"/>
+                    <Run Text="Use the '➕ Create Backup' button above to manually create backups."/>
+                    <LineBreak/>
+                    <Run Text="For production environments, consider setting up Jenkins or SQL Server Agent for automated backups."/>
+                </TextBlock>
             </StackPanel>
         </Border>
 
@@ -388,33 +409,40 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Help Card -->
-                <Border Style="{StaticResource ModernCard}" Padding="20" Background="#1C2E4A">
+                <!-- Help Card - Always visible -->
+                <Border Style="{StaticResource ModernCard}"
+                        Padding="20"
+                        Background="#1C2E4A"
+                        Margin="0,0,0,16">
                     <StackPanel>
                         <TextBlock Text="💡 Quick Guide"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="#539BF5"
                                    Margin="0,0,0,12"/>
 
                         <TextBlock TextWrapping="Wrap"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   LineHeight="20">
-                            <Run Text="• " FontWeight="Bold"/>
-                            <Run Text="Backups are created automatically every hour"/>
+                                   FontSize="13"
+                                   Foreground="#C9D1D9"
+                                   LineHeight="22">
+                            <Run Text="📌 " FontWeight="Bold" Foreground="#539BF5"/>
+                            <Run Text="Create manual backups using '➕ Create Backup'" FontWeight="SemiBold"/>
                             <LineBreak/>
-                            <Run Text="• " FontWeight="Bold"/>
-                            <Run Text="Backups older than 7 days are deleted"/>
                             <LineBreak/>
-                            <Run Text="• " FontWeight="Bold"/>
-                            <Run Text="Preview creates a test database"/>
+                            <Run Text="👁️ " FontWeight="Bold" Foreground="#539BF5"/>
+                            <Run Text="Preview opens a NEW WINDOW with backup data" FontWeight="SemiBold"/>
                             <LineBreak/>
-                            <Run Text="• " FontWeight="Bold"/>
-                            <Run Text="Apply to Real DB replaces live data"/>
                             <LineBreak/>
-                            <Run Text="• " FontWeight="Bold"/>
-                            <Run Text="Always verify backups before applying"/>
+                            <Run Text="✅ " FontWeight="Bold" Foreground="#3FB950"/>
+                            <Run Text="Apply to Real DB replaces your live database" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="🗑️ " FontWeight="Bold" Foreground="#F85149"/>
+                            <Run Text="Delete old backups to free up space" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="⚠️ " FontWeight="Bold" Foreground="#D29922"/>
+                            <Run Text="Always verify backups before applying to production!" FontWeight="Bold"/>
                         </TextBlock>
                     </StackPanel>
                 </Border>

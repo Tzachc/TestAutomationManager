@@ -13,9 +13,10 @@ namespace TestAutomationManager
         {
             base.OnStartup(e);
 
-            // NEW: Check for command-line arguments to set schema
+            // Check for command-line arguments
             if (e.Args.Length > 0)
             {
+                // Check for schema argument
                 string schemaArg = e.Args.FirstOrDefault(arg => arg.StartsWith("/schema:", System.StringComparison.OrdinalIgnoreCase));
                 if (!string.IsNullOrEmpty(schemaArg))
                 {
@@ -30,20 +31,43 @@ namespace TestAutomationManager
                         System.Diagnostics.Debug.WriteLine($"⚠ Schema from args '{schemaName}' not found. Using default.");
                     }
                 }
+
+                // Check for preview database argument
+                string databaseArg = e.Args.FirstOrDefault(arg => arg.StartsWith("/database:", System.StringComparison.OrdinalIgnoreCase));
+                string previewArg = e.Args.FirstOrDefault(arg => arg.StartsWith("/preview:", System.StringComparison.OrdinalIgnoreCase));
+                string backupDateArg = e.Args.FirstOrDefault(arg => arg.StartsWith("/backupdate:", System.StringComparison.OrdinalIgnoreCase));
+
+                if (!string.IsNullOrEmpty(databaseArg) && !string.IsNullOrEmpty(previewArg))
+                {
+                    string databaseName = databaseArg.Substring(10); // Get text after "/database:"
+                    string backupDate = backupDateArg?.Substring(12).Trim('"') ?? "Unknown";
+
+                    // Set up preview mode
+                    if (System.DateTime.TryParse(backupDate, out var parsedDate))
+                    {
+                        DatabaseConnectionService.Instance.SwitchToPreviewDatabase(databaseName, parsedDate, "Preview");
+                    }
+                    else
+                    {
+                        DatabaseConnectionService.Instance.SwitchToPreviewDatabase(databaseName, System.DateTime.Now, "Preview");
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"🔵 App started in PREVIEW MODE - Database: {databaseName}, Backup Date: {backupDate}");
+                }
             }
 
             ThemeService.ApplyTheme(AppTheme.Dark);
 
-            // Start the backup scheduler service
-            BackupSchedulerService.Instance.Start();
-            System.Diagnostics.Debug.WriteLine("🗄️ Backup scheduler service started");
+            // DISABLED: Automatic backup scheduler (to be moved to Jenkins)
+            // BackupSchedulerService.Instance.Start();
+            // System.Diagnostics.Debug.WriteLine("🗄️ Backup scheduler service started");
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            // Stop the backup scheduler service when app exits
-            BackupSchedulerService.Instance.Stop();
-            System.Diagnostics.Debug.WriteLine("🗄️ Backup scheduler service stopped");
+            // DISABLED: Automatic backup scheduler
+            // BackupSchedulerService.Instance.Stop();
+            // System.Diagnostics.Debug.WriteLine("🗄️ Backup scheduler service stopped");
 
             base.OnExit(e);
         }
