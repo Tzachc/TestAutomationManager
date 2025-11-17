@@ -522,6 +522,17 @@
                             </ItemsControl>
                         </StackPanel>
 
+                        <!-- Backups Navigation Item -->
+                        <RadioButton GroupName="Navigation"
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Backups"
+                                   Click="NavigationButton_Click"
+                                   Margin="0,8,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🗄️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Backups" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
 
                         <Border Height="1"
                                Background="{DynamicResource BorderBrush}"

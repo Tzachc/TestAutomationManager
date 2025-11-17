@@ -747,6 +747,9 @@ namespace TestAutomationManager
                     case "Functions":
                         OpenFunctionsTab();
                         break;
+                    case "Backups":
+                        OpenBackupsTab();
+                        break;
                     case "News":
                         OpenNewsTab();
                         break;
@@ -866,6 +869,16 @@ namespace TestAutomationManager
                     view.DataLoaded += (s, e) => UpdateRecordCount();
                     return view;
                 }
+            );
+        }
+
+        private void OpenBackupsTab()
+        {
+            OpenOrSwitchToTab(
+                "backups",
+                "Backups",
+                "🗄️",
+                () => new Views.BackupsView()
             );
         }
 

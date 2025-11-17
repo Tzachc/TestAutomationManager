@@ -33,6 +33,19 @@ namespace TestAutomationManager
             }
 
             ThemeService.ApplyTheme(AppTheme.Dark);
+
+            // Start the backup scheduler service
+            BackupSchedulerService.Instance.Start();
+            System.Diagnostics.Debug.WriteLine("🗄️ Backup scheduler service started");
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            // Stop the backup scheduler service when app exits
+            BackupSchedulerService.Instance.Stop();
+            System.Diagnostics.Debug.WriteLine("🗄️ Backup scheduler service stopped");
+
+            base.OnExit(e);
         }
     }
 }
