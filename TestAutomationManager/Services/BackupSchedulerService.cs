@@ -195,7 +195,7 @@ namespace TestAutomationManager.Services
             try
             {
                 // Get configured schemas from SchemaConfigService
-                var currentSchema = SchemaConfigService.Instance.CurrentSchemaName;
+                var currentSchema = SchemaConfigService.Instance.CurrentSchema;
 
                 // Always add the current schema
                 if (!string.IsNullOrEmpty(currentSchema))
@@ -228,24 +228,21 @@ namespace TestAutomationManager.Services
         {
             try
             {
-                // Use DbConnectionConfig to build connection string
-                var config = DbConnectionConfig.Instance;
-
                 // Temporarily switch to target schema to get its connection string
-                var originalSchema = SchemaConfigService.Instance.CurrentSchemaName;
-                SchemaConfigService.Instance.CurrentSchemaName = schema;
+                var originalSchema = SchemaConfigService.Instance.CurrentSchema;
+                SchemaConfigService.Instance.CurrentSchema = schema;
 
-                var connectionString = config.GetConnectionString();
+                var connectionString = DbConnectionConfig.GetConnectionString();
 
                 // Restore original schema
-                SchemaConfigService.Instance.CurrentSchemaName = originalSchema;
+                SchemaConfigService.Instance.CurrentSchema = originalSchema;
 
                 return connectionString;
             }
             catch
             {
                 // Fallback to default connection string
-                return DbConnectionConfig.Instance.GetConnectionString();
+                return DbConnectionConfig.GetConnectionString();
             }
         }
 

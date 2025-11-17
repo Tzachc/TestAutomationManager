@@ -156,8 +156,8 @@ namespace TestAutomationManager.ViewModels
 
             try
             {
-                var currentSchema = SchemaConfigService.Instance.CurrentSchemaName;
-                var connectionString = DbConnectionConfig.Instance.GetConnectionString();
+                var currentSchema = SchemaConfigService.Instance.CurrentSchema;
+                var connectionString = DbConnectionConfig.GetConnectionString();
 
                 var progress = new Progress<string>(msg =>
                 {
@@ -212,7 +212,7 @@ namespace TestAutomationManager.ViewModels
 
             try
             {
-                var connectionString = DbConnectionConfig.Instance.GetConnectionString();
+                var connectionString = DbConnectionConfig.GetConnectionString();
 
                 var progress = new Progress<string>(msg =>
                 {
