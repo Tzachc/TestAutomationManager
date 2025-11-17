@@ -1,0 +1,496 @@
+<UserControl x:Class="TestAutomationManager.Views.BackupsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:TestAutomationManager.Views"
+             xmlns:vm="clr-namespace:TestAutomationManager.ViewModels"
+             xmlns:services="clr-namespace:TestAutomationManager.Services"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1200"
+             Background="{DynamicResource BackgroundBrush}">
+
+    <UserControl.DataContext>
+        <vm:BackupsViewModel />
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <!-- Animations -->
+        <Storyboard x:Key="FadeIn">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
+        </Storyboard>
+
+        <!-- Backup Item Template -->
+        <DataTemplate x:Key="BackupItemTemplate">
+            <Border Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="2"
+                    CornerRadius="10"
+                    Margin="0,0,0,12"
+                    Padding="18,14"
+                    Cursor="Hand">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Opacity" Value="1"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource HoverBackgroundBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                <Setter Property="BorderThickness" Value="2"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                           To="1"
+                                                           Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter Property="Background" Value="#1A539BF5"/>
+                                <Setter Property="BorderBrush" Value="#539BF5"/>
+                                <Setter Property="BorderThickness" Value="3"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Icon -->
+                    <Border Grid.Column="0"
+                            Width="50"
+                            Height="50"
+                            Background="{DynamicResource PrimaryBlueBrush}"
+                            CornerRadius="12"
+                            Margin="0,0,16,0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="💾"
+                                   FontSize="24"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Info -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding DateTimeDisplay}"
+                                   FontWeight="Bold"
+                                   FontSize="16"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   Margin="0,0,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- File Size Badge -->
+                            <Border Grid.Column="0"
+                                    Background="#1C2E4A"
+                                    CornerRadius="4"
+                                    Padding="8,4"
+                                    Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📦"
+                                               FontSize="10"
+                                               Margin="0,0,4,0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding SizeFormatted}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="#539BF5"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Schema Badge -->
+                            <Border Grid.Column="1"
+                                    Background="#0D1117"
+                                    CornerRadius="4"
+                                    Padding="8,4">
+                                <TextBlock Text="{Binding Schema}"
+                                           FontSize="10"
+                                           FontWeight="Medium"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Selection Indicator -->
+                    <Border Grid.Column="2"
+                            Width="28"
+                            Height="28"
+                            Background="#3FB950"
+                            CornerRadius="14"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="✓"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,20" Style="{StaticResource ModernCard}" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="🗄️ Database Backups"
+                               FontSize="28"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="Manage database backups and restore points"
+                               FontSize="14"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="🔄 Refresh"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            Margin="0,0,8,0"
+                            Padding="16,8"/>
+                    <Button Content="➕ Create Backup"
+                            Command="{Binding CreateBackupCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            Margin="0,0,8,0"
+                            Padding="16,8"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Info Banner -->
+        <Border Grid.Row="1" Margin="0,0,0,20" Style="{StaticResource ModernCard}" Padding="20" Background="#1C2E4A">
+            <StackPanel>
+                <TextBlock Text="ℹ️ Backup Information"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="#539BF5"
+                           Margin="0,0,0,8"/>
+                <TextBlock FontSize="13"
+                           Foreground="#C9D1D9"
+                           TextWrapping="Wrap">
+                    <Run Text="Automatic backups are currently disabled." FontWeight="SemiBold"/>
+                    <Run Text="Use the '➕ Create Backup' button above to manually create backups."/>
+                    <LineBreak/>
+                    <Run Text="For production environments, consider setting up Jenkins or SQL Server Agent for automated backups."/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Backup List -->
+            <Border Grid.Column="0" Style="{StaticResource ModernCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- List Header -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource SurfaceBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="0,0,0,1"
+                            Padding="16,12">
+                        <TextBlock Text="📋 Available Backups"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Border>
+
+                    <!-- Backup Groups -->
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Padding="16">
+                        <ItemsControl ItemsSource="{Binding BackupGroups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,16" Style="{StaticResource ModernCard}" Padding="0">
+                                        <StackPanel>
+                                            <!-- Schema Header -->
+                                            <Border Background="{DynamicResource PrimaryBlueBrush}"
+                                                    CornerRadius="8,8,0,0"
+                                                    Padding="16,12">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="🗂️"
+                                                                   FontSize="16"
+                                                                   Margin="0,0,8,0"
+                                                                   VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding SchemaName}"
+                                                                   FontSize="16"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="#010409"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <Border Grid.Column="1"
+                                                            Background="White"
+                                                            CornerRadius="12"
+                                                            Padding="8,4">
+                                                        <TextBlock FontSize="12"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="#010409">
+                                                            <Run Text="{Binding BackupCount, Mode=OneWay}"/>
+                                                            <Run Text=" backups"/>
+                                                        </TextBlock>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- Backup Items -->
+                                            <Border Padding="16,12">
+                                                <ListBox ItemsSource="{Binding Backups}"
+                                                         SelectedItem="{Binding DataContext.SelectedBackup, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                         ItemTemplate="{StaticResource BackupItemTemplate}"
+                                                         Background="Transparent"
+                                                         BorderThickness="0"
+                                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                    <ListBox.ItemContainerStyle>
+                                                        <Style TargetType="ListBoxItem">
+                                                            <Setter Property="Padding" Value="0"/>
+                                                            <Setter Property="Margin" Value="0"/>
+                                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                                        <ContentPresenter/>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ListBox.ItemContainerStyle>
+                                                </ListBox>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Loading Overlay -->
+                    <Border Grid.Row="1"
+                            Background="#AA000000"
+                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="⌛"
+                                       FontSize="48"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,0,0,16">
+                                <TextBlock.RenderTransform>
+                                    <RotateTransform x:Name="LoadingRotate" CenterX="24" CenterY="24"/>
+                                </TextBlock.RenderTransform>
+                                <TextBlock.Triggers>
+                                    <EventTrigger RoutedEvent="Loaded">
+                                        <BeginStoryboard>
+                                            <Storyboard RepeatBehavior="Forever">
+                                                <DoubleAnimation Storyboard.TargetProperty="(TextBlock.RenderTransform).(RotateTransform.Angle)"
+                                                               From="0" To="360" Duration="0:0:2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger>
+                                </TextBlock.Triggers>
+                            </TextBlock>
+                            <TextBlock Text="Loading backups..."
+                                       FontSize="16"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel - Actions -->
+            <StackPanel Grid.Column="2">
+                <!-- Selected Backup Info -->
+                <Border Margin="0,0,0,16"
+                        Style="{StaticResource ModernCard}"
+                        Padding="20"
+                        Visibility="{Binding SelectedBackup, Converter={StaticResource NullToVisibilityConverter}}">
+                    <StackPanel>
+                        <TextBlock Text="📝 Selected Backup"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   Margin="0,0,0,12"/>
+
+                        <Border Background="{DynamicResource SurfaceBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="12"
+                                Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="{Binding SelectedBackup.FileName}"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,8"/>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4">
+                                    <Run Text="Schema:"/>
+                                    <Run Text="{Binding SelectedBackup.Schema, Mode=OneWay}" FontWeight="SemiBold"/>
+                                </TextBlock>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4">
+                                    <Run Text="Date:"/>
+                                    <Run Text="{Binding SelectedBackup.DateTimeDisplay, Mode=OneWay}" FontWeight="SemiBold"/>
+                                </TextBlock>
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
+                                    <Run Text="Size:"/>
+                                    <Run Text="{Binding SelectedBackup.SizeFormatted, Mode=OneWay}" FontWeight="SemiBold"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Actions -->
+                        <Button Content="👁️ Preview Backup"
+                                Command="{Binding RestorePreviewCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Margin="0,0,0,8"
+                                Padding="12,10"
+                                ToolTip="Create a preview database without affecting live data"/>
+
+                        <Button Content="✅ Apply to Real DB"
+                                Command="{Binding ApplyToRealDbCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Margin="0,0,0,8"
+                                Padding="12,10"
+                                ToolTip="Replace live database with this backup">
+                            <Button.Background>
+                                <SolidColorBrush Color="#DA3633"/>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Content="🗑️ Delete Backup"
+                                Command="{Binding DeleteBackupCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Padding="12,10"
+                                ToolTip="Permanently delete this backup file"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Help Card - Always visible -->
+                <Border Style="{StaticResource ModernCard}"
+                        Padding="20"
+                        Background="#1C2E4A"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="💡 Quick Guide"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="#539BF5"
+                                   Margin="0,0,0,12"/>
+
+                        <TextBlock TextWrapping="Wrap"
+                                   FontSize="13"
+                                   Foreground="#C9D1D9"
+                                   LineHeight="22">
+                            <Run Text="📌 " FontWeight="Bold" Foreground="#539BF5"/>
+                            <Run Text="Create manual backups using '➕ Create Backup'" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="👁️ " FontWeight="Bold" Foreground="#539BF5"/>
+                            <Run Text="Preview opens a NEW WINDOW with backup data" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="✅ " FontWeight="Bold" Foreground="#3FB950"/>
+                            <Run Text="Apply to Real DB replaces your live database" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="🗑️ " FontWeight="Bold" Foreground="#F85149"/>
+                            <Run Text="Delete old backups to free up space" FontWeight="SemiBold"/>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run Text="⚠️ " FontWeight="Bold" Foreground="#D29922"/>
+                            <Run Text="Always verify backups before applying to production!" FontWeight="Bold"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3" Margin="0,16,0,0" Style="{StaticResource ModernCard}" Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Width="8"
+                        Height="8"
+                        CornerRadius="4"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#3FB950"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                    <Setter Property="Background" Value="#D29922"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsRestoring}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryBlueBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                </Border>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="13"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding ProgressMessage}"
+                               FontSize="11"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Margin="0,4,0,0"
+                               Visibility="{Binding ProgressMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

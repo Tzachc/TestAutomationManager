@@ -80,11 +80,35 @@
                             Margin="12,0,0,0">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="🗃️" FontSize="11" Margin="0,0,6,0"/>
-                            <TextBlock FontSize="11" 
+                            <TextBlock FontSize="11"
                                      Foreground="{DynamicResource TextSecondaryBrush}"
                                      FontWeight="Medium">
                                 <Run Text="Schema:"/>
                                 <Run Text="{Binding CurrentSchema, Source={x:Static services:SchemaConfigService.Instance}, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Preview Mode Badge - Only visible when in preview mode -->
+                    <Border Background="#DA3633"
+                            BorderThickness="0"
+                            CornerRadius="6"
+                            Padding="10,4"
+                            Margin="8,0,0,0"
+                            Visibility="{Binding IsPreviewMode, Source={x:Static services:DatabaseConnectionService.Instance}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔵" FontSize="12" Margin="0,0,6,0"/>
+                            <TextBlock FontSize="11"
+                                     Foreground="White"
+                                     FontWeight="Bold">
+                                <Run Text="PREVIEW MODE"/>
+                            </TextBlock>
+                            <TextBlock Text=" - " FontSize="11" Foreground="White" Margin="4,0"/>
+                            <TextBlock FontSize="10"
+                                     Foreground="White"
+                                     FontWeight="Medium">
+                                <Run Text="Backup from:"/>
+                                <Run Text="{Binding PreviewBackupDate, Source={x:Static services:DatabaseConnectionService.Instance}, Mode=OneWay, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" FontWeight="Bold"/>
                             </TextBlock>
                         </StackPanel>
                     </Border>
@@ -522,6 +546,17 @@
                             </ItemsControl>
                         </StackPanel>
 
+                        <!-- Backups Navigation Item -->
+                        <RadioButton GroupName="Navigation"
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Backups"
+                                   Click="NavigationButton_Click"
+                                   Margin="0,8,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🗄️" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Backups" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
 
                         <Border Height="1"
                                Background="{DynamicResource BorderBrush}"
