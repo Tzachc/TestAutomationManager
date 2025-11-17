@@ -40,7 +40,7 @@ namespace TestAutomationManager.Views
             {
                 // Show loading state
                 LoadingPanel.Visibility = Visibility.Visible;
-                NewsItemsControl.Visibility = Visibility.Collapsed;
+                ContentRootPanel.Visibility = Visibility.Collapsed; // NEW: Hide main content
                 EmptyPanel.Visibility = Visibility.Collapsed;
                 RefreshButton.IsEnabled = false;
 
@@ -54,13 +54,16 @@ namespace TestAutomationManager.Views
                 LoadingPanel.Visibility = Visibility.Collapsed;
                 RefreshButton.IsEnabled = true;
 
+                // Visibility logic updated
                 if (_allArticles.Count == 0)
                 {
                     EmptyPanel.Visibility = Visibility.Visible;
+                    ContentRootPanel.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    NewsItemsControl.Visibility = Visibility.Visible;
+                    EmptyPanel.Visibility = Visibility.Collapsed;
+                    ContentRootPanel.Visibility = Visibility.Visible;
                 }
             }
             catch (Exception ex)
@@ -69,6 +72,7 @@ namespace TestAutomationManager.Views
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 LoadingPanel.Visibility = Visibility.Collapsed;
                 EmptyPanel.Visibility = Visibility.Visible;
+                ContentRootPanel.Visibility = Visibility.Collapsed;
                 RefreshButton.IsEnabled = true;
             }
         }
@@ -77,14 +81,41 @@ namespace TestAutomationManager.Views
         {
             _currentFilter = filter;
 
-            IEnumerable<NewsArticle> filteredArticles = _allArticles;
+            IEnumerable<NewsArticle> filteredArticles;
 
             if (filter != "All")
             {
                 filteredArticles = _allArticles.Where(a => a.Category == filter);
             }
+            else
+            {
+                filteredArticles = _allArticles;
+            }
 
-            NewsItemsControl.ItemsSource = filteredArticles.ToList();
+            var articlesList = filteredArticles.ToList();
+
+            // --- NEW LOGIC: Split articles ---
+
+            // 1. Set the Featured Article
+            FeaturedNewsControl.Content = articlesList.FirstOrDefault();
+
+            // 2. Set the rest of the articles in the grid
+            RegularNewsItemsControl.ItemsSource = articlesList.Skip(1);
+
+            // --- End of new logic ---
+
+
+            // Update visibility based on filtered results
+            if (!articlesList.Any())
+            {
+                EmptyPanel.Visibility = Visibility.Visible;
+                ContentRootPanel.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                EmptyPanel.Visibility = Visibility.Collapsed;
+                ContentRootPanel.Visibility = Visibility.Visible;
+            }
 
             // Update button styles
             UpdateFilterButtonStyles(filter);
