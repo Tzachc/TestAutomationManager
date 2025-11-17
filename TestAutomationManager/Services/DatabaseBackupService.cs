@@ -92,7 +92,6 @@ namespace TestAutomationManager.Services
                         WITH FORMAT,
                         MEDIANAME = '{schema}_Backup',
                         NAME = '{schema} Full Backup - {timestamp}',
-                        COMPRESSION,
                         STATS = 10;";
 
                     using (var command = new SqlCommand(backupCommand, connection))
