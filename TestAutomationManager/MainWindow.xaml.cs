@@ -115,6 +115,10 @@ namespace TestAutomationManager
             // Subscribe to statistics changes
             TestStatisticsService.Instance.PropertyChanged += OnStatisticsChanged;
 
+            // Subscribe to database connection changes for preview mode
+            DatabaseConnectionService.Instance.PropertyChanged += OnDatabaseConnectionChanged;
+            UpdateWindowTitle();
+
             // Load initial view as first tab
             OpenTestsTab();
 
@@ -685,6 +689,36 @@ namespace TestAutomationManager
         private void OnStatisticsChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateRecordCount();
+        }
+
+        /// <summary>
+        /// Update window title when database connection changes (preview mode)
+        /// </summary>
+        private void OnDatabaseConnectionChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DatabaseConnectionService.IsPreviewMode) ||
+                e.PropertyName == nameof(DatabaseConnectionService.PreviewModeText))
+            {
+                UpdateWindowTitle();
+            }
+        }
+
+        /// <summary>
+        /// Updates the window title to show preview mode status
+        /// </summary>
+        private void UpdateWindowTitle()
+        {
+            var baseTitle = "Test Automation Manager";
+            var previewText = DatabaseConnectionService.Instance.PreviewModeText;
+
+            if (!string.IsNullOrEmpty(previewText))
+            {
+                Title = $"{baseTitle} - {previewText}";
+            }
+            else
+            {
+                Title = baseTitle;
+            }
         }
 
         /// <summary>
