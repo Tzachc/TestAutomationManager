@@ -939,15 +939,7 @@ namespace TestAutomationManager
                 "📈",
                 () =>
                 {
-                    var textBlock = new TextBlock
-                    {
-                        Text = "Reports View - Coming Soon",
-                        FontSize = 24,
-                        Foreground = (Brush)Application.Current.Resources["TextPrimaryBrush"],
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-                    return textBlock;
+                    return new Views.ReportsView();
                 }
             );
         }

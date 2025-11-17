@@ -1,0 +1,556 @@
+<UserControl x:Class="TestAutomationManager.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:TestAutomationManager.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1400"
+             Background="{DynamicResource BackgroundBrush}">
+
+    <UserControl.DataContext>
+        <vm:ReportsViewModel />
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <!-- Card Style -->
+        <Style x:Key="StatCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,15,15"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlueBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Title Text Style -->
+        <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Value Text Style -->
+        <Style x:Key="ValueTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="36"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+
+        <!-- Section Header Style -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="📊 Test Reports Dashboard"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="{Binding CurrentSchema, StringFormat='Schema: {0}'}"
+                           FontSize="14"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <TextBlock Grid.Column="1"
+                       Text="{Binding StatusMessage}"
+                       FontSize="12"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <!-- Loading Indicator -->
+                <Border Background="{DynamicResource CardBackgroundBrush}"
+                        BorderBrush="{DynamicResource PrimaryBlueBrush}"
+                        BorderThickness="2"
+                        CornerRadius="8"
+                        Padding="15"
+                        Margin="0,0,0,20"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏳ Loading reports..."
+                                   FontSize="14"
+                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Summary Statistics Cards -->
+                <TextBlock Text="Overview" Style="{StaticResource SectionHeaderStyle}"/>
+                <Grid Margin="0,0,0,25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Total Tests Card -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Total Tests" Style="{StaticResource TitleTextStyle}"/>
+                            <TextBlock Text="{Binding TotalTests}" Style="{StaticResource ValueTextStyle}"/>
+                            <TextBlock Text="All test cases"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Passed Tests Card -->
+                    <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="✓ Passed" Style="{StaticResource TitleTextStyle}"/>
+                            <TextBlock Text="{Binding PassedTests}"
+                                       Style="{StaticResource ValueTextStyle}"
+                                       Foreground="#4CAF50"/>
+                            <TextBlock FontSize="12" Margin="0,5,0,0">
+                                <Run Text="{Binding PassPercentage, StringFormat={}{0:F1}%}" Foreground="#4CAF50" FontWeight="Bold"/>
+                                <Run Text=" success rate" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Failed Tests Card -->
+                    <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="✗ Failed" Style="{StaticResource TitleTextStyle}"/>
+                            <TextBlock Text="{Binding FailedTests}"
+                                       Style="{StaticResource ValueTextStyle}"
+                                       Foreground="#F44336"/>
+                            <TextBlock FontSize="12" Margin="0,5,0,0">
+                                <Run Text="{Binding FailPercentage, StringFormat={}{0:F1}%}" Foreground="#F44336" FontWeight="Bold"/>
+                                <Run Text=" failure rate" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Running Tests Card -->
+                    <Border Grid.Column="3" Style="{StaticResource StatCardStyle}" Margin="0,0,0,15">
+                        <StackPanel>
+                            <TextBlock Text="⟳ Running" Style="{StaticResource TitleTextStyle}"/>
+                            <TextBlock Text="{Binding RunningTests}"
+                                       Style="{StaticResource ValueTextStyle}"
+                                       Foreground="#FF9800"/>
+                            <TextBlock Text="Currently executing"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Charts Section -->
+                <Grid Margin="0,0,0,25">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Status Distribution Pie Chart (Visual representation) -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Status Distribution" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <!-- Status Breakdown List -->
+                            <ItemsControl ItemsSource="{Binding StatusChartData}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Color Indicator -->
+                                            <Border Grid.Column="0"
+                                                    Width="12"
+                                                    Height="12"
+                                                    CornerRadius="6"
+                                                    Margin="0,0,10,0"
+                                                    VerticalAlignment="Center">
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="{Binding Color}"/>
+                                                </Border.Background>
+                                            </Border>
+
+                                            <!-- Progress Bar -->
+                                            <Grid Grid.Column="1">
+                                                <Border Background="#1C2E4A"
+                                                        Height="24"
+                                                        CornerRadius="4"/>
+                                                <Border Height="24"
+                                                        CornerRadius="4"
+                                                        HorizontalAlignment="Left"
+                                                        Width="{Binding Percentage, Converter={StaticResource PercentageToWidthConverter}}">
+                                                    <Border.Background>
+                                                        <SolidColorBrush Color="{Binding Color}"/>
+                                                    </Border.Background>
+                                                </Border>
+                                                <StackPanel Orientation="Horizontal"
+                                                            VerticalAlignment="Center"
+                                                            Margin="10,0">
+                                                    <TextBlock Text="{Binding Status}"
+                                                               FontWeight="Bold"
+                                                               FontSize="12"
+                                                               Foreground="White"/>
+                                                    <TextBlock Text="{Binding Count, StringFormat=' ({0})'}"
+                                                               FontSize="11"
+                                                               Foreground="White"
+                                                               Opacity="0.8"/>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- Percentage -->
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding Percentage, StringFormat={}{0:F1}%}"
+                                                       FontWeight="Bold"
+                                                       FontSize="14"
+                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                       Margin="10,0,0,0"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Category Statistics -->
+                    <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Category Performance" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding CategoryStatistics}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Padding="12"
+                                                    Margin="0,0,0,8">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <Grid Grid.Row="0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding Category}"
+                                                                   FontWeight="Bold"
+                                                                   FontSize="13"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+
+                                                        <Border Grid.Column="1"
+                                                                Background="#4CAF50"
+                                                                CornerRadius="4"
+                                                                Padding="6,2">
+                                                            <TextBlock Text="{Binding SuccessRate, StringFormat={}{0:F1}%}"
+                                                                       FontSize="11"
+                                                                       FontWeight="Bold"
+                                                                       Foreground="White"/>
+                                                        </Border>
+                                                    </Grid>
+
+                                                    <StackPanel Grid.Row="1"
+                                                                Orientation="Horizontal"
+                                                                Margin="0,6,0,0">
+                                                        <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
+                                                            <Run Text="Total: "/>
+                                                            <Run Text="{Binding Total}" FontWeight="Bold"/>
+                                                        </TextBlock>
+                                                        <TextBlock FontSize="11"
+                                                                   Foreground="#4CAF50"
+                                                                   Margin="15,0,0,0">
+                                                            <Run Text="✓ "/>
+                                                            <Run Text="{Binding Passed}" FontWeight="Bold"/>
+                                                        </TextBlock>
+                                                        <TextBlock FontSize="11"
+                                                                   Foreground="#F44336"
+                                                                   Margin="10,0,0,0">
+                                                            <Run Text="✗ "/>
+                                                            <Run Text="{Binding Failed}" FontWeight="Bold"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Daily Trends Section -->
+                <TextBlock Text="30-Day Trend Analysis" Style="{StaticResource SectionHeaderStyle}"/>
+                <Border Style="{StaticResource StatCardStyle}" Margin="0,0,0,25">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Test execution history over the last 30 days"
+                                       FontSize="13"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Border Background="#4CAF50"
+                                        Width="12"
+                                        Height="12"
+                                        CornerRadius="2"
+                                        Margin="0,0,5,0"/>
+                                <TextBlock Text="Passed"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Margin="0,0,15,0"/>
+                                <Border Background="#F44336"
+                                        Width="12"
+                                        Height="12"
+                                        CornerRadius="2"
+                                        Margin="0,0,5,0"/>
+                                <TextBlock Text="Failed"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Simplified Bar Chart -->
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding DailyTrends}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Width="35" Margin="2,0">
+                                            <!-- Bars Container -->
+                                            <Grid Height="150" Margin="0,0,0,5">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Bars -->
+                                                <Grid Grid.Row="0" VerticalAlignment="Bottom">
+                                                    <StackPanel VerticalAlignment="Bottom">
+                                                        <!-- Passed Bar -->
+                                                        <Border Background="#4CAF50"
+                                                                Height="{Binding PassedRuns, Converter={StaticResource CountToHeightConverter}}"
+                                                                CornerRadius="2"
+                                                                Margin="0,0,0,1"
+                                                                ToolTip="{Binding PassedRuns, StringFormat='Passed: {0}'}"/>
+
+                                                        <!-- Failed Bar -->
+                                                        <Border Background="#F44336"
+                                                                Height="{Binding FailedRuns, Converter={StaticResource CountToHeightConverter}}"
+                                                                CornerRadius="2"
+                                                                ToolTip="{Binding FailedRuns, StringFormat='Failed: {0}'}"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Grid>
+
+                                            <!-- Date Label -->
+                                            <TextBlock Text="{Binding DateDisplay}"
+                                                       FontSize="9"
+                                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       HorizontalAlignment="Center"
+                                                       TextAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <!-- Bottom Section -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Top Failures -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="🔥 Failed Tests" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding TopFailures}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="#F44336"
+                                                    BorderThickness="2,0,0,0"
+                                                    Padding="12"
+                                                    Margin="0,0,0,8">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <TextBlock Grid.Row="0"
+                                                               Text="{Binding TestName}"
+                                                               FontWeight="Bold"
+                                                               FontSize="13"
+                                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                                               TextWrapping="Wrap"/>
+
+                                                    <StackPanel Grid.Row="1"
+                                                                Orientation="Horizontal"
+                                                                Margin="0,4,0,0">
+                                                        <Border Background="#1C2E4A"
+                                                                CornerRadius="3"
+                                                                Padding="5,2"
+                                                                Margin="0,0,6,0">
+                                                            <TextBlock Text="{Binding Category}"
+                                                                       FontSize="10"
+                                                                       Foreground="White"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding TestId, StringFormat='ID: {0}'}"
+                                                                   FontSize="10"
+                                                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <TextBlock Grid.Row="2"
+                                                               Text="{Binding LastFailed, StringFormat='Last failed: {0}'}"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               Margin="0,4,0,0"/>
+
+                                                    <TextBlock Grid.Row="3"
+                                                               Text="{Binding ErrorMessage}"
+                                                               FontSize="11"
+                                                               FontStyle="Italic"
+                                                               Foreground="#F44336"
+                                                               TextWrapping="Wrap"
+                                                               Margin="0,4,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Recent Activity -->
+                    <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="⚡ Recent Activity" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding RecentActivities}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="6"
+                                                    Padding="12"
+                                                    Margin="0,0,0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- Status Indicator -->
+                                                    <Border Grid.Column="0"
+                                                            Width="8"
+                                                            Height="8"
+                                                            CornerRadius="4"
+                                                            Margin="0,0,12,0"
+                                                            VerticalAlignment="Center">
+                                                        <Border.Background>
+                                                            <SolidColorBrush Color="{Binding StatusColor}"/>
+                                                        </Border.Background>
+                                                    </Border>
+
+                                                    <!-- Info -->
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="{Binding TestName}"
+                                                                   FontWeight="SemiBold"
+                                                                   FontSize="12"
+                                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                            <Border Background="#1C2E4A"
+                                                                    CornerRadius="2"
+                                                                    Padding="4,1"
+                                                                    Margin="0,0,6,0">
+                                                                <TextBlock Text="{Binding Status}"
+                                                                           FontSize="9"
+                                                                           Foreground="White"/>
+                                                            </Border>
+                                                            <TextBlock Text="{Binding Category}"
+                                                                       FontSize="10"
+                                                                       Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                    <!-- Time -->
+                                                    <TextBlock Grid.Column="2"
+                                                               Text="{Binding TimeDisplay}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                                               VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

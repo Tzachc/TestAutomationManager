@@ -15,6 +15,9 @@
             <!-- Converters -->
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <converters:PercentageToWidthConverter x:Key="PercentageToWidthConverter"/>
+            <converters:CountToHeightConverter x:Key="CountToHeightConverter"/>
+            <converters:StringToColorConverter x:Key="StringToColorConverter"/>
 
             <Style x:Key="ModernCard" TargetType="Border">
                 <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
