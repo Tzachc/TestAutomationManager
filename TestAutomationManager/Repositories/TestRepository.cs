@@ -426,8 +426,9 @@ namespace TestAutomationManager.Repositories
 
         /// <summary>
         /// Finds existing tests marked as FREE (available for reuse)
+        /// Returns tuple of (TestId, TestName, Status)
         /// </summary>
-        public async Task<List<int>> GetFreeTestIdsAsync()
+        public async Task<List<(int TestId, string TestName, string Status)>> GetFreeTestsAsync()
         {
             try
             {
@@ -476,7 +477,7 @@ namespace TestAutomationManager.Repositories
                         }
                     }
 
-                    var freeIds = tests
+                    var freeTests = tests
                         .Select(t => new
                         {
                             Id = CoerceToInt(t.TestID),
@@ -484,18 +485,17 @@ namespace TestAutomationManager.Repositories
                             t.RunStatus
                         })
                         .Where(t => t.Id.HasValue && (ContainsFree(t.TestName) || ContainsFree(t.RunStatus)))
-                        .Select(t => t.Id!.Value)
-                        .Distinct()
-                        .OrderBy(id => id)
+                        .Select(t => (TestId: t.Id!.Value, TestName: t.TestName ?? "Unnamed Test", Status: t.RunStatus ?? "Unknown"))
+                        .OrderBy(t => t.TestId)
                         .ToList();
 
-                    return freeIds;
+                    return freeTests;
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error finding FREE tests: {ex.Message}");
-                return new List<int>();
+                return new List<(int, string, string)>();
             }
         }
 

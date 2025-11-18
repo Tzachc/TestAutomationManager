@@ -1,0 +1,190 @@
+﻿<Window x:Class="TestAutomationManager.Dialogs.FreeTestsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FREE Tests"
+        Width="480"
+        Height="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False">
+
+    <Border Background="{DynamicResource SecondaryBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12">
+        <Border.Effect>
+            <DropShadowEffect Color="Black"
+                            Opacity="0.5"
+                            BlurRadius="20"
+                            ShadowDepth="0"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <Border Grid.Row="0"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    CornerRadius="12,12,0,0"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,0,0,1">
+                <Grid>
+                    <StackPanel Orientation="Horizontal"
+                               VerticalAlignment="Center"
+                               Margin="24,0,50,0">
+                        <!-- Icon -->
+                        <Border Width="36" Height="36"
+                               Background="{DynamicResource PrimaryBlueBrush}"
+                               CornerRadius="8"
+                               Margin="0,0,12,0">
+                            <TextBlock Text="🔍"
+                                     FontSize="20"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Title -->
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="FREE Tests Available"
+                                     FontSize="18"
+                                     FontWeight="SemiBold"
+                                     Foreground="{DynamicResource TextPrimaryBrush}"/>
+                            <TextBlock x:Name="SubtitleText"
+                                     FontSize="11"
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
+                                     Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Close Button -->
+                    <Button HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Width="32" Height="32"
+                            Margin="0,14,14,0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Click="CloseButton_Click">
+                        <TextBlock Text="✕"
+                                 FontSize="16"
+                                 Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- CONTENT - List of FREE Tests -->
+            <Border Grid.Row="1" Margin="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Info Message -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource StatusDefaultBackgroundBrush}"
+                            CornerRadius="6"
+                            Padding="12,10"
+                            Margin="0,0,0,12">
+                        <TextBlock FontSize="12"
+                                 Foreground="{DynamicResource TextSecondaryBrush}"
+                                 TextWrapping="Wrap">
+                            <Run Text="These tests are marked as FREE and available for reuse."/>
+                            <LineBreak/>
+                            <Run Text="Click 'Take Me' to navigate to a specific test."/>
+                        </TextBlock>
+                    </Border>
+
+                    <!-- Tests List -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="FreeTestsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource CardBackgroundBrush}"
+                                           BorderBrush="{DynamicResource BorderBrush}"
+                                           BorderThickness="1"
+                                           CornerRadius="6"
+                                           Padding="14,12"
+                                           Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Test ID Badge -->
+                                            <Border Grid.Column="0"
+                                                   Width="48" Height="48"
+                                                   Background="{DynamicResource PrimaryBlueBrush}"
+                                                   CornerRadius="8"
+                                                   Margin="0,0,14,0">
+                                                <TextBlock Text="{Binding TestId}"
+                                                         FontSize="20"
+                                                         FontWeight="Bold"
+                                                         Foreground="White"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <!-- Test Info -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock FontSize="14"
+                                                         FontWeight="SemiBold"
+                                                         Foreground="{DynamicResource TextPrimaryBrush}">
+                                                    <Run Text="Test #"/>
+                                                    <Run Text="{Binding TestId}"/>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding TestName}"
+                                                         FontSize="12"
+                                                         Foreground="{DynamicResource TextSecondaryBrush}"
+                                                         Margin="0,2,0,0"/>
+                                                <TextBlock FontSize="11"
+                                                         Foreground="{DynamicResource TextTertiaryBrush}"
+                                                         Margin="0,2,0,0">
+                                                    <Run Text="Status:"/>
+                                                    <Run Text="{Binding Status}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Take Me Button -->
+                                            <Button Grid.Column="2"
+                                                   Content="Take Me →"
+                                                   Tag="{Binding TestId}"
+                                                   Click="TakeMeButton_Click"
+                                                   Style="{StaticResource PrimaryButton}"
+                                                   Padding="16,8"
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- FOOTER -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    CornerRadius="0,0,12,12"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="20,14">
+                <Button Content="Close"
+                       Click="CloseButton_Click"
+                       Style="{StaticResource SecondaryButton}"
+                       Width="100"
+                       HorizontalAlignment="Right"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

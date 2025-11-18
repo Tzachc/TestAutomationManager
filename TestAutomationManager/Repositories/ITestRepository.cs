@@ -92,7 +92,8 @@ namespace TestAutomationManager.Repositories
 
         /// <summary>
         /// Finds existing tests marked as FREE (available for reuse)
+        /// Returns tuple of (TestId, TestName, Status)
         /// </summary>
-        Task<List<int>> GetFreeTestIdsAsync();
+        Task<List<(int TestId, string TestName, string Status)>> GetFreeTestsAsync();
     }
 }

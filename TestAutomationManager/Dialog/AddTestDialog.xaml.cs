@@ -48,6 +48,11 @@ namespace TestAutomationManager.Dialogs
         /// </summary>
         public bool IsSuccess { get; private set; }
 
+        /// <summary>
+        /// Test ID to navigate to (set when user clicks "Take Me" in FREE tests dialog)
+        /// </summary>
+        public int? NavigateToTestId { get; private set; }
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -275,9 +280,9 @@ namespace TestAutomationManager.Dialogs
         {
             try
             {
-                var freeTestIds = await _testRepository.GetFreeTestIdsAsync();
+                var freeTests = await _testRepository.GetFreeTestsAsync();
 
-                if (freeTestIds.Count == 0)
+                if (freeTests.Count == 0)
                 {
                     ModernMessageDialog.ShowInfo(
                         "No FREE tests found.\n\n" +
@@ -288,12 +293,26 @@ namespace TestAutomationManager.Dialogs
                 }
                 else
                 {
-                    string message = $"Found {freeTestIds.Count} FREE test(s) available for reuse:\n\n" +
-                                   string.Join(", ", freeTestIds.Select(id => $"Test #{id}")) + "\n\n" +
-                                   "These tests exist in the database but are marked as FREE, " +
-                                   "indicating they can be reused or repurposed.";
+                    // Convert to FreeTestInfo objects
+                    var freeTestInfos = freeTests.Select(t => new FreeTestInfo
+                    {
+                        TestId = t.TestId,
+                        TestName = t.TestName,
+                        Status = t.Status
+                    }).ToList();
 
-                    ModernMessageDialog.ShowInfo(message, "FREE Tests Found", Window.GetWindow(this));
+                    // Show the new FREE tests dialog
+                    var dialog = new FreeTestsDialog(freeTestInfos);
+                    dialog.Owner = Window.GetWindow(this);
+                    bool? result = dialog.ShowDialog();
+
+                    // If user clicked "Take Me", navigate to that test
+                    if (result == true && dialog.SelectedTestId.HasValue)
+                    {
+                        NavigateToTestId = dialog.SelectedTestId.Value;
+                        DialogResult = false; // Close this dialog without creating a test
+                        Close();
+                    }
                 }
             }
             catch (Exception ex)
@@ -657,6 +676,31 @@ namespace TestAutomationManager.Dialogs
             IsSuccess = false;
             DialogResult = false;
             Close();
+        }
+
+        /// <summary>
+        /// Handle Close button (X) click
+        /// </summary>
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            IsSuccess = false;
+            DialogResult = false;
+            Close();
+        }
+
+        /// <summary>
+        /// Allow dragging the window by clicking anywhere on it
+        /// </summary>
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                this.DragMove();
+            }
+            catch
+            {
+                // Ignore exceptions (can happen if window is maximized)
+            }
         }
     }
 }

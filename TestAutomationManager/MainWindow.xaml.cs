@@ -1207,6 +1207,36 @@ namespace TestAutomationManager
                     System.Diagnostics.Debug.WriteLine("✓ UI refreshed to show new test");
                 }
 
+                else if (dialog.NavigateToTestId.HasValue)
+                {
+                    // User clicked "Take Me" in FREE tests dialog - navigate to that test
+                    int testId = dialog.NavigateToTestId.Value;
+                    System.Diagnostics.Debug.WriteLine($"🔍 Navigating to FREE test: #{testId}");
+
+                    // Ensure no active filter is applied
+                    SearchBox.Text = "";
+
+                    // If Tests tab is already open/selected, refresh and focus
+                    if (ContentTabControl.SelectedItem is TabItem selTab1 &&
+                        selTab1.Content is TestAutomationManager.Views.TestsView tv1)
+                    {
+                        tv1.RefreshData();
+                        tv1.FocusTest(testId);
+                    }
+                    else
+                    {
+                        // Open Tests tab, wait for it to render, then focus the test
+                        OpenTestsTab();
+                        await System.Threading.Tasks.Task.Delay(400);
+
+                        if (ContentTabControl.SelectedItem is TabItem selTab2 &&
+                            selTab2.Content is TestAutomationManager.Views.TestsView tv2)
+                        {
+                            tv2.RefreshData();
+                            tv2.FocusTest(testId);
+                        }
+                    }
+                }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("ℹ Add New Test dialog cancelled");
