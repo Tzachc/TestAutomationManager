@@ -1,0 +1,249 @@
+<Window x:Class="TestAutomationManager.Dialogs.HistoryViewDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TestAutomationManager.Dialogs"
+        mc:Ignorable="d"
+        Title="History"
+        SizeToContent="Height"
+        MinWidth="650"
+        MaxWidth="900"
+        MaxHeight="700"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="{DynamicResource PrimaryBackgroundBrush}"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <!-- Converters -->
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <local:InverseNullToVisibilityConverter x:Key="InverseNullToVisibilityConverter"/>
+        <local:EntityTypeToVisibilityConverter x:Key="EntityTypeToVisibilityConverter"/>
+        <!-- Card style -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- History Entry Card Style -->
+        <Style x:Key="HistoryEntryCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Badge Style for Operation Type -->
+        <Style x:Key="OperationBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock x:Name="TitleTextBlock"
+                      Text="📝 History"
+                      FontSize="20"
+                      FontWeight="Bold"
+                      Foreground="{DynamicResource TextPrimaryBrush}"
+                      Margin="0,0,0,8"/>
+            <TextBlock x:Name="SubtitleTextBlock"
+                      Text="Recent changes to this item"
+                      FontSize="13"
+                      Foreground="{DynamicResource TextSecondaryBrush}"/>
+        </StackPanel>
+
+        <!-- History List -->
+        <Border Grid.Row="1"
+                Style="{StaticResource CardBorder}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                         MaxHeight="500">
+                <ItemsControl x:Name="HistoryItemsControl">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource HistoryEntryCard}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Header: Operation Badge + Time -->
+                                    <StackPanel Grid.Row="0"
+                                               Orientation="Horizontal"
+                                               Margin="0,0,0,10">
+                                        <!-- Operation Badge -->
+                                        <Border Style="{StaticResource OperationBadge}">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="{Binding OperationBadgeColor}"/>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding OperationDisplayText}"
+                                                      FontSize="11"
+                                                      FontWeight="Bold"
+                                                      Foreground="White"/>
+                                        </Border>
+
+                                        <!-- Time -->
+                                        <TextBlock Text="{Binding RelativeTime}"
+                                                  FontSize="12"
+                                                  Foreground="{DynamicResource TextSecondaryBrush}"
+                                                  VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Entity Info (for Process history showing Function changes) -->
+                                    <TextBlock Grid.Row="1"
+                                              Margin="0,0,0,8"
+                                              Visibility="{Binding EntityType, Converter={StaticResource EntityTypeToVisibilityConverter}}">
+                                        <Run Text="{Binding EntityType}"
+                                             FontWeight="SemiBold"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Run Text=": "
+                                             Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                        <Run Text="{Binding EntityName}"
+                                             FontWeight="Medium"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                    </TextBlock>
+
+                                    <!-- Change Details -->
+                                    <Grid Grid.Row="2">
+                                        <Grid.Visibility>
+                                            <Binding Path="FieldName">
+                                                <Binding.Converter>
+                                                    <local:NullToVisibilityConverter/>
+                                                </Binding.Converter>
+                                            </Binding>
+                                        </Grid.Visibility>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Field Name -->
+                                        <TextBlock Grid.Column="0"
+                                                  Text="{Binding FieldName}"
+                                                  FontWeight="SemiBold"
+                                                  FontSize="13"
+                                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                                  Margin="0,0,12,0"
+                                                  VerticalAlignment="Top"/>
+
+                                        <!-- Before/After Values -->
+                                        <StackPanel Grid.Column="1">
+                                            <!-- Old Value (with strikethrough for DELETE/UPDATE) -->
+                                            <StackPanel Orientation="Horizontal"
+                                                       Margin="0,0,0,4">
+                                                <TextBlock Text="Before: "
+                                                          FontSize="11"
+                                                          FontWeight="SemiBold"
+                                                          Foreground="#E74C3C"
+                                                          Margin="0,0,4,0"/>
+                                                <TextBlock Text="{Binding OldValue}"
+                                                          FontSize="12"
+                                                          FontFamily="Consolas"
+                                                          Foreground="#E74C3C"
+                                                          TextWrapping="Wrap">
+                                                    <TextBlock.TextDecorations>
+                                                        <TextDecoration Location="Strikethrough">
+                                                            <TextDecoration.Pen>
+                                                                <Pen Brush="#E74C3C" Thickness="1"/>
+                                                            </TextDecoration.Pen>
+                                                        </TextDecoration>
+                                                    </TextBlock.TextDecorations>
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!-- Arrow -->
+                                            <TextBlock Text="↓"
+                                                      FontSize="14"
+                                                      Foreground="#3498DB"
+                                                      Margin="0,2,0,2"/>
+
+                                            <!-- New Value -->
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="After: "
+                                                          FontSize="11"
+                                                          FontWeight="SemiBold"
+                                                          Foreground="#27AE60"
+                                                          Margin="0,0,4,0"/>
+                                                <TextBlock Text="{Binding NewValue}"
+                                                          FontSize="12"
+                                                          FontWeight="SemiBold"
+                                                          FontFamily="Consolas"
+                                                          Foreground="#27AE60"
+                                                          TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Description (for INSERT/DELETE operations) -->
+                                    <TextBlock Grid.Row="2"
+                                              Text="{Binding ChangeDescription}"
+                                              FontSize="13"
+                                              Foreground="{DynamicResource TextPrimaryBrush}"
+                                              TextWrapping="Wrap"
+                                              Visibility="{Binding FieldName, Converter={StaticResource InverseNullToVisibilityConverter}}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Empty State Message -->
+        <Border Grid.Row="1"
+                x:Name="EmptyStatePanel"
+                Visibility="Collapsed"
+                Style="{StaticResource CardBorder}">
+            <StackPanel HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Margin="0,40">
+                <TextBlock Text="📄"
+                          FontSize="48"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,12"/>
+                <TextBlock Text="No history available"
+                          FontSize="16"
+                          FontWeight="SemiBold"
+                          Foreground="{DynamicResource TextPrimaryBrush}"
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,4"/>
+                <TextBlock Text="Changes will appear here once you make edits"
+                          FontSize="13"
+                          Foreground="{DynamicResource TextSecondaryBrush}"
+                          HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Close Button -->
+        <StackPanel Grid.Row="2"
+                   Orientation="Horizontal"
+                   HorizontalAlignment="Right"
+                   Margin="0,16,0,0">
+            <Button x:Name="CloseButton"
+                   Content="Close"
+                   Width="120"
+                   Height="36"
+                   Click="CloseButton_Click"
+                   Background="{DynamicResource SecondaryBackgroundBrush}"
+                   Foreground="{DynamicResource TextPrimaryBrush}"/>
+        </StackPanel>
+    </Grid>
+</Window>

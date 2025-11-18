@@ -2757,6 +2757,74 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle Show History from context menu (for Test)
+        /// </summary>
+        private async void ContextMenu_ShowTestHistory(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Get the test from the context menu's DataContext
+                var menuItem = sender as FrameworkElement;
+                var test = menuItem?.DataContext as Test;
+
+                if (test == null || test.TestID == null)
+                {
+                    MessageBox.Show("No test selected to show history.",
+                        "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Show history dialog
+                await Dialogs.HistoryViewDialog.ShowTestHistoryAsync(
+                    (int)test.TestID.Value,
+                    test.TestName ?? "(Unnamed Test)",
+                    this
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error showing test history: {ex.Message}");
+                MessageBox.Show($"Failed to show history: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handle Show History from context menu (for Process)
+        /// </summary>
+        private async void ContextMenu_ShowProcessHistory(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Get the first selected process
+                var selectedProcess = _allTests
+                    .SelectMany(t => t.Processes)
+                    .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+
+                if (selectedProcess == null)
+                {
+                    MessageBox.Show("No process selected to show history.",
+                        "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Show history dialog
+                await Dialogs.HistoryViewDialog.ShowProcessHistoryAsync(
+                    selectedProcess.Index ?? 0,
+                    selectedProcess.ProcessID ?? 0,
+                    selectedProcess.ProcessName ?? "(Unnamed Process)",
+                    this
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error showing process history: {ex.Message}");
+                MessageBox.Show($"Failed to show history: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
         /// Delete selected processes and functions
         /// </summary>
         private async Task DeleteSelectedItems()

@@ -879,4 +879,158 @@ namespace TestAutomationManager.Models
         public string SqlQueryResult { get; set; }
 
     }
+
+    /// <summary>
+    /// Represents a history log entry for tracking changes to Tests, Processes, and Functions
+    /// Maps to [SCHEMA].[HistoryLog] table
+    /// </summary>
+    public class HistoryEntry : INotifyPropertyChanged
+    {
+        private int _id;
+        private string? _entityType;
+        private string? _entityId;
+        private string? _entityName;
+        private string? _operationType;
+        private string? _fieldName;
+        private string? _oldValue;
+        private string? _newValue;
+        private string? _changedBy;
+        private DateTime _changedAt;
+        private string? _changeDescription;
+
+        // ================================================
+        // DATABASE COLUMNS
+        // ================================================
+
+        public int Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(); }
+        }
+
+        public string? EntityType
+        {
+            get => _entityType;
+            set { _entityType = value; OnPropertyChanged(); }
+        }
+
+        public string? EntityId
+        {
+            get => _entityId;
+            set { _entityId = value; OnPropertyChanged(); }
+        }
+
+        public string? EntityName
+        {
+            get => _entityName;
+            set { _entityName = value; OnPropertyChanged(); }
+        }
+
+        public string? OperationType
+        {
+            get => _operationType;
+            set { _operationType = value; OnPropertyChanged(); }
+        }
+
+        public string? FieldName
+        {
+            get => _fieldName;
+            set { _fieldName = value; OnPropertyChanged(); }
+        }
+
+        public string? OldValue
+        {
+            get => _oldValue;
+            set { _oldValue = value; OnPropertyChanged(); }
+        }
+
+        public string? NewValue
+        {
+            get => _newValue;
+            set { _newValue = value; OnPropertyChanged(); }
+        }
+
+        public string? ChangedBy
+        {
+            get => _changedBy;
+            set { _changedBy = value; OnPropertyChanged(); }
+        }
+
+        public DateTime ChangedAt
+        {
+            get => _changedAt;
+            set { _changedAt = value; OnPropertyChanged(); }
+        }
+
+        public string? ChangeDescription
+        {
+            get => _changeDescription;
+            set { _changeDescription = value; OnPropertyChanged(); }
+        }
+
+        // ================================================
+        // UI HELPER PROPERTIES
+        // ================================================
+
+        [NotMapped]
+        public string RelativeTime
+        {
+            get
+            {
+                var timeSpan = DateTime.Now - ChangedAt;
+
+                if (timeSpan.TotalMinutes < 1)
+                    return "Just now";
+                if (timeSpan.TotalMinutes < 60)
+                    return $"{(int)timeSpan.TotalMinutes} minute{((int)timeSpan.TotalMinutes != 1 ? "s" : "")} ago";
+                if (timeSpan.TotalHours < 24)
+                    return $"{(int)timeSpan.TotalHours} hour{((int)timeSpan.TotalHours != 1 ? "s" : "")} ago";
+                if (timeSpan.TotalDays < 7)
+                    return $"{(int)timeSpan.TotalDays} day{((int)timeSpan.TotalDays != 1 ? "s" : "")} ago";
+
+                return ChangedAt.ToString("MMM dd, yyyy 'at' h:mm tt");
+            }
+        }
+
+        [NotMapped]
+        public string OperationDisplayText
+        {
+            get
+            {
+                return OperationType switch
+                {
+                    "INSERT" => "CREATED",
+                    "UPDATE" => "UPDATED",
+                    "DELETE" => "DELETED",
+                    _ => OperationType ?? "UNKNOWN"
+                };
+            }
+        }
+
+        [NotMapped]
+        public string OperationBadgeColor
+        {
+            get
+            {
+                return OperationType switch
+                {
+                    "INSERT" => "#4CAF50",  // Green
+                    "UPDATE" => "#FFA726",  // Orange
+                    "DELETE" => "#EF5350",  // Red
+                    _ => "#757575"          // Gray
+                };
+            }
+        }
+
+        // ================================================
+        // INotifyPropertyChanged Implementation
+        // ================================================
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 }

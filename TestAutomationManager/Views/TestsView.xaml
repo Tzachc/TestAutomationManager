@@ -410,6 +410,16 @@
 
                             <!-- Test Row -->
                             <Border Grid.Row="0" Padding="24,5" Background="Transparent" CornerRadius="8,8,0,0">
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Show History"
+                                                  Click="ContextMenu_ShowTestHistory">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="📝" FontSize="14"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
                                 <Grid MinWidth="2000">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="cActive"/>
@@ -871,6 +881,13 @@
                                                                                           InputGestureText="Ctrl+V">
                                                                                     <MenuItem.Icon>
                                                                                         <TextBlock Text="📄" FontSize="14"/>
+                                                                                    </MenuItem.Icon>
+                                                                                </MenuItem>
+                                                                                <Separator/>
+                                                                                <MenuItem Header="Show History"
+                                                                                          Click="ContextMenu_ShowProcessHistory">
+                                                                                    <MenuItem.Icon>
+                                                                                        <TextBlock Text="📝" FontSize="14"/>
                                                                                     </MenuItem.Icon>
                                                                                 </MenuItem>
                                                                                 <Separator/>
