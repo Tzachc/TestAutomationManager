@@ -1509,6 +1509,10 @@ namespace TestAutomationManager.Views
         {
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] START - Attempting to focus Test #{testId}");
 
+            // Clear any search filter
+            _currentSearchQuery = "";
+            FilterTests("");
+
             // Find the test
             var test = _allTests.FirstOrDefault(t => t.Id == testId);
             if (test == null)
@@ -1519,21 +1523,29 @@ namespace TestAutomationManager.Views
 
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Found test: {test.Name} (ID: {test.Id})");
 
+            // Get the test's index in the CURRENT filtered list
+            int testIndex = _filteredTests.IndexOf(test);
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test index in filtered list: {testIndex}");
+
             // Clear all existing selections
             ClearAllSelections();
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Cleared all selections");
 
-            // Use filter to force the test into view - this solves UI virtualization
-            // By filtering to show only this test, we guarantee its container will be generated
-            _currentSearchQuery = testId.ToString();
-            FilterTests(testId.ToString());
-            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Applied filter to show only Test #{testId}");
+            // Collapse all other tests to make the target test more prominent
+            foreach (var t in _allTests)
+            {
+                if (t.Id != testId)
+                {
+                    t.IsExpanded = false;
+                }
+            }
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Collapsed all other tests");
 
-            // Expand the test (this will trigger lazy loading of processes)
+            // Expand the target test (this will trigger lazy loading of processes)
             test.IsExpanded = true;
-            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test expanded");
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Target test expanded");
 
-            // Use Dispatcher to wait for processes to load, then select, scroll, and clear filter
+            // Use Dispatcher to wait for processes to load, select, and scroll
             Dispatcher.InvokeAsync(async () =>
             {
                 System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Waiting for processes to load...");
@@ -1560,11 +1572,11 @@ namespace TestAutomationManager.Views
                     System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Still no processes after waiting");
                 }
 
-                // Wait for UI to update with selection
+                // Wait for UI to update
                 await System.Threading.Tasks.Task.Delay(200);
                 TestsItemsControl.UpdateLayout();
 
-                // With the filter applied, the container should now exist
+                // Try to find and scroll to the container
                 var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
                 if (container != null)
                 {
@@ -1573,20 +1585,45 @@ namespace TestAutomationManager.Views
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Container still not found even with filter applied");
+                    // Container might not exist due to virtualization - try manual scroll
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Container not found, trying manual scroll...");
+
+                    // Find the ScrollViewer
+                    var scrollViewer = FindVisualChild<ScrollViewer>(TestsItemsControl);
+                    if (scrollViewer != null && testIndex >= 0)
+                    {
+                        // Estimate scroll position (each test ~80px when collapsed, more when expanded)
+                        double estimatedOffset = testIndex * 80.0;
+                        scrollViewer.ScrollToVerticalOffset(estimatedOffset);
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Scrolled to estimated offset: {estimatedOffset}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Could not find ScrollViewer or testIndex invalid");
+                    }
                 }
 
-                // Wait a moment to ensure scrolling completes
-                await System.Threading.Tasks.Task.Delay(300);
-
-                // Clear the filter to show all tests again
-                _currentSearchQuery = "";
-                FilterTests("");
-                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Filter cleared - all tests visible again");
-
-                // Keep the selection and expansion
                 System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] COMPLETE - Test #{testId} should be visible and selected");
             }, System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        // Helper method to find visual children
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                    return typedChild;
+
+                var result = FindVisualChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
