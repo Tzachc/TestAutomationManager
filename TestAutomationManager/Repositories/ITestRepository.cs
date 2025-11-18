@@ -89,5 +89,10 @@ namespace TestAutomationManager.Repositories
         /// Get specific tests by their IDs (for incremental updates)
         /// </summary>
         Task<List<Test>> GetTestsByIdsAsync(List<int> testIds);
+
+        /// <summary>
+        /// Finds existing tests marked as FREE (available for reuse)
+        /// </summary>
+        Task<List<int>> GetFreeTestIdsAsync();
     }
 }

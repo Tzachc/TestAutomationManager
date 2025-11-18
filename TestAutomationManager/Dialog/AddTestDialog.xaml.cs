@@ -24,7 +24,7 @@ namespace TestAutomationManager.Dialogs
 
         private readonly ITestRepository _testRepository;
         private readonly IExtTableRepository _extTableRepository;
-        private readonly IProcessRepository _processRepository;
+        private readonly ProcessRepository _processRepository;
 
         private ObservableCollection<ExternalTableInfo> _allExtTables;
         private ObservableCollection<ExternalTableInfo> _filteredExtTables;
