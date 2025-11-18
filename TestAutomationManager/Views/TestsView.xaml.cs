@@ -2834,29 +2834,61 @@ namespace TestAutomationManager.Views
         {
             try
             {
-                // Get the first selected process
-                var selectedProcess = _allTests
-                    .SelectMany(t => t.Processes)
-                    .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+                System.Diagnostics.Debug.WriteLine("📝 Show History clicked for Process");
 
-                if (selectedProcess == null)
+                Process? targetProcess = null;
+
+                // Try to get process from context menu's PlacementTarget (the right-clicked Border)
+                var menuItem = sender as MenuItem;
+                var contextMenu = menuItem?.Parent as ContextMenu;
+                var border = contextMenu?.PlacementTarget as Border;
+
+                if (border != null)
                 {
-                    MessageBox.Show("No process selected to show history.",
+                    // Try to get Process from the Border's DataContext
+                    targetProcess = border.DataContext as Process;
+                    if (targetProcess != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from context menu PlacementTarget: {targetProcess.ProcessName}");
+                    }
+                }
+
+                // Fallback: Get the first selected process
+                if (targetProcess == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ Could not get Process from PlacementTarget, trying IsSelected...");
+                    targetProcess = _allTests
+                        .SelectMany(t => t.Processes)
+                        .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+
+                    if (targetProcess != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from IsSelected: {targetProcess.ProcessName}");
+                    }
+                }
+
+                if (targetProcess == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("✗ No process found from PlacementTarget or IsSelected");
+                    MessageBox.Show("No process selected to show history.\n\nPlease click on a process row first to select it, then right-click.",
                         "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
+                System.Diagnostics.Debug.WriteLine($"📝 Showing history for Process: {targetProcess.ProcessName} (Index: {targetProcess.Index}, ProcessID: {targetProcess.ProcessID})");
+
                 // Show history dialog (get parent Window since this is a UserControl)
                 await Dialogs.HistoryViewDialog.ShowProcessHistoryAsync(
-                    selectedProcess.Index ?? 0,
-                    selectedProcess.ProcessID ?? 0,
-                    selectedProcess.ProcessName ?? "(Unnamed Process)",
+                    targetProcess.Index ?? 0,
+                    targetProcess.ProcessID ?? 0,
+                    targetProcess.ProcessName ?? "(Unnamed Process)",
                     Window.GetWindow(this)
                 );
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error showing process history: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {ex.StackTrace}");
                 MessageBox.Show($"Failed to show history: {ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }

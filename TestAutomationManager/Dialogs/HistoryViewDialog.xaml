@@ -104,6 +104,22 @@
                                                   FontSize="12"
                                                   Foreground="{DynamicResource TextSecondaryBrush}"
                                                   VerticalAlignment="Center"/>
+
+                                        <!-- Separator -->
+                                        <TextBlock Text="  •  "
+                                                  FontSize="12"
+                                                  Foreground="{DynamicResource TextSecondaryBrush}"
+                                                  VerticalAlignment="Center"/>
+
+                                        <!-- Changed By -->
+                                        <TextBlock FontSize="12"
+                                                  VerticalAlignment="Center">
+                                            <Run Text="by "
+                                                 Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            <Run Text="{Binding ChangedBy}"
+                                                 FontWeight="SemiBold"
+                                                 Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        </TextBlock>
                                     </StackPanel>
 
                                     <!-- Entity Info (for Process history showing Function changes) -->
