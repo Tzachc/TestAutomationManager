@@ -2811,11 +2811,11 @@ namespace TestAutomationManager.Views
 
                 System.Diagnostics.Debug.WriteLine($"📝 Showing history for Test: {test.TestName} (ID: {test.TestID})");
 
-                // Show history dialog
+                // Show history dialog (get parent Window since this is a UserControl)
                 await Dialogs.HistoryViewDialog.ShowTestHistoryAsync(
                     (int)test.TestID.Value,
                     test.TestName ?? "(Unnamed Test)",
-                    this
+                    Window.GetWindow(this)
                 );
             }
             catch (Exception ex)
@@ -2846,12 +2846,12 @@ namespace TestAutomationManager.Views
                     return;
                 }
 
-                // Show history dialog
+                // Show history dialog (get parent Window since this is a UserControl)
                 await Dialogs.HistoryViewDialog.ShowProcessHistoryAsync(
                     selectedProcess.Index ?? 0,
                     selectedProcess.ProcessID ?? 0,
                     selectedProcess.ProcessName ?? "(Unnamed Process)",
-                    this
+                    Window.GetWindow(this)
                 );
             }
             catch (Exception ex)
