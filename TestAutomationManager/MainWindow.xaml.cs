@@ -1216,23 +1216,23 @@ namespace TestAutomationManager
                     // Ensure no active filter is applied
                     SearchBox.Text = "";
 
-                    // If Tests tab is already open/selected, refresh and focus
+                    // If Tests tab is already open/selected, just focus (don't refresh - data is already loaded!)
                     if (ContentTabControl.SelectedItem is TabItem selTab1 &&
                         selTab1.Content is TestAutomationManager.Views.TestsView tv1)
                     {
-                        tv1.RefreshData();
+                        // Don't refresh - just focus the test immediately
                         tv1.FocusTest(testId);
                     }
                     else
                     {
                         // Open Tests tab, wait for it to render, then focus the test
                         OpenTestsTab();
-                        await System.Threading.Tasks.Task.Delay(400);
+                        await System.Threading.Tasks.Task.Delay(500);
 
                         if (ContentTabControl.SelectedItem is TabItem selTab2 &&
                             selTab2.Content is TestAutomationManager.Views.TestsView tv2)
                         {
-                            tv2.RefreshData();
+                            // Don't refresh - just focus the test
                             tv2.FocusTest(testId);
                         }
                     }
