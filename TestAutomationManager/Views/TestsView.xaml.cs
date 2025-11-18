@@ -1528,54 +1528,69 @@ namespace TestAutomationManager.Views
             ClearAllSelections();
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Cleared all selections");
 
-            // Expand the test
+            // Expand the test (this will trigger lazy loading of processes)
             test.IsExpanded = true;
-            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test expanded, has {test.Processes.Count} processes");
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test expanded, currently has {test.Processes.Count} processes (may load asynchronously)");
 
-            // Select the first process (even if it's a placeholder) to visually highlight the test
-            if (test.Processes.Count > 0)
-            {
-                var firstProcess = test.Processes[0];
-                firstProcess.IsSelected = true;
-                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Selected first process: {firstProcess.ProcessName} (IsPlaceholder: {firstProcess.IsPlaceholder})");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ No processes to select");
-            }
-
-            // Scroll to the test with proper timing
+            // Use Dispatcher to wait for processes to load, then select and scroll
             Dispatcher.InvokeAsync(async () =>
             {
-                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] First UpdateLayout...");
-                TestsItemsControl.UpdateLayout();
-                await System.Threading.Tasks.Task.Delay(100);
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Waiting for processes to load...");
 
-                var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
-                if (container != null)
+                // Wait for processes to load (including placeholder) - up to 1 second
+                int attempts = 0;
+                while (test.Processes.Count == 0 && attempts < 20)
                 {
-                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found, bringing into view...");
-                    container.BringIntoView();
+                    await System.Threading.Tasks.Task.Delay(50);
+                    attempts++;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] After waiting: {test.Processes.Count} processes loaded (wait attempts: {attempts})");
+
+                // Select the first process to visually highlight the test
+                if (test.Processes.Count > 0)
+                {
+                    var firstProcess = test.Processes[0];
+                    firstProcess.IsSelected = true;
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Selected first process: {firstProcess.ProcessName} (IsPlaceholder: {firstProcess.IsPlaceholder})");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Container not ready, retrying...");
-                    await System.Threading.Tasks.Task.Delay(200);
-                    TestsItemsControl.UpdateLayout();
-                    var c2 = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
-                    if (c2 != null)
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Still no processes after waiting");
+                }
+
+                // Wait a bit for UI to update with the selection
+                await System.Threading.Tasks.Task.Delay(150);
+
+                // Scroll to the test - try multiple times
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Attempting to scroll to test...");
+                TestsItemsControl.UpdateLayout();
+
+                bool scrolled = false;
+                for (int i = 0; i < 3 && !scrolled; i++)
+                {
+                    var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                    if (container != null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found on retry, bringing into view...");
-                        c2.BringIntoView();
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found (attempt {i + 1}), bringing into view...");
+                        container.BringIntoView();
+                        scrolled = true;
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✗ Container still not found after retry");
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Container not found (attempt {i + 1}), waiting...");
+                        await System.Threading.Tasks.Task.Delay(150);
+                        TestsItemsControl.UpdateLayout();
                     }
                 }
 
+                if (!scrolled)
+                {
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Could not find container after {3} attempts");
+                }
+
                 System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] COMPLETE");
-            }, System.Windows.Threading.DispatcherPriority.Loaded);
+            }, System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
