@@ -15,6 +15,23 @@
             <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,6"/>
         </Style>
+
+        <Style x:Key="ColorPickerButtonStyle" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}">
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Margin="25">
@@ -68,25 +85,25 @@
             <TextBlock Text="Note Color" Style="{StaticResource LabelStyle}" Margin="0,0,0,10"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="ColorButton1" Width="50" Height="50" Margin="0,0,8,0"
+                       Style="{StaticResource ColorPickerButtonStyle}"
                        Background="#FFE57F" Click="ColorButton_Click" Tag="#FFE57F"
-                       BorderThickness="3" BorderBrush="Transparent"
-                       CornerRadius="8"/>
+                       BorderThickness="3" BorderBrush="Transparent"/>
                 <Button x:Name="ColorButton2" Width="50" Height="50" Margin="0,0,8,0"
+                       Style="{StaticResource ColorPickerButtonStyle}"
                        Background="#A7FFEB" Click="ColorButton_Click" Tag="#A7FFEB"
-                       BorderThickness="3" BorderBrush="Transparent"
-                       CornerRadius="8"/>
+                       BorderThickness="3" BorderBrush="Transparent"/>
                 <Button x:Name="ColorButton3" Width="50" Height="50" Margin="0,0,8,0"
+                       Style="{StaticResource ColorPickerButtonStyle}"
                        Background="#B3E5FC" Click="ColorButton_Click" Tag="#B3E5FC"
-                       BorderThickness="3" BorderBrush="Transparent"
-                       CornerRadius="8"/>
+                       BorderThickness="3" BorderBrush="Transparent"/>
                 <Button x:Name="ColorButton4" Width="50" Height="50" Margin="0,0,8,0"
+                       Style="{StaticResource ColorPickerButtonStyle}"
                        Background="#F8BBD0" Click="ColorButton_Click" Tag="#F8BBD0"
-                       BorderThickness="3" BorderBrush="Transparent"
-                       CornerRadius="8"/>
+                       BorderThickness="3" BorderBrush="Transparent"/>
                 <Button x:Name="ColorButton5" Width="50" Height="50" Margin="0,0,8,0"
+                       Style="{StaticResource ColorPickerButtonStyle}"
                        Background="#E1BEE7" Click="ColorButton_Click" Tag="#E1BEE7"
-                       BorderThickness="3" BorderBrush="Transparent"
-                       CornerRadius="8"/>
+                       BorderThickness="3" BorderBrush="Transparent"/>
             </StackPanel>
         </StackPanel>
 
