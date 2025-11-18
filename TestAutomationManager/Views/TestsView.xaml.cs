@@ -1507,33 +1507,75 @@ namespace TestAutomationManager.Views
 
         public void FocusTest(int testId)
         {
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] START - Attempting to focus Test #{testId}");
+
+            // Clear search filter
             _currentSearchQuery = "";
             FilterTests("");
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Search filter cleared");
 
+            // Find the test
             var test = _allTests.FirstOrDefault(t => t.Id == testId);
-            if (test == null) return;
-
-            test.IsExpanded = true;
-
-            Dispatcher.InvokeAsync(() =>
+            if (test == null)
             {
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✗ Test #{testId} not found in _allTests!");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Found test: {test.Name} (ID: {test.Id})");
+
+            // Clear all existing selections
+            ClearAllSelections();
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Cleared all selections");
+
+            // Expand the test
+            test.IsExpanded = true;
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test expanded, has {test.Processes.Count} processes");
+
+            // Select the first process (even if it's a placeholder) to visually highlight the test
+            if (test.Processes.Count > 0)
+            {
+                var firstProcess = test.Processes[0];
+                firstProcess.IsSelected = true;
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Selected first process: {firstProcess.ProcessName} (IsPlaceholder: {firstProcess.IsPlaceholder})");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ No processes to select");
+            }
+
+            // Scroll to the test with proper timing
+            Dispatcher.InvokeAsync(async () =>
+            {
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] First UpdateLayout...");
                 TestsItemsControl.UpdateLayout();
+                await System.Threading.Tasks.Task.Delay(100);
 
                 var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
                 if (container != null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found, bringing into view...");
                     container.BringIntoView();
                 }
                 else
                 {
-                    Dispatcher.InvokeAsync(() =>
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Container not ready, retrying...");
+                    await System.Threading.Tasks.Task.Delay(200);
+                    TestsItemsControl.UpdateLayout();
+                    var c2 = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                    if (c2 != null)
                     {
-                        TestsItemsControl.UpdateLayout();
-                        var c2 = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
-                        c2?.BringIntoView();
-                    }, System.Windows.Threading.DispatcherPriority.Background);
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found on retry, bringing into view...");
+                        c2.BringIntoView();
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✗ Container still not found after retry");
+                    }
                 }
-            }, System.Windows.Threading.DispatcherPriority.Background);
+
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] COMPLETE");
+            }, System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
