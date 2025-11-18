@@ -119,7 +119,17 @@ namespace TestAutomationManager.Services
                 await _repository.UpdateTestAsync(test);
 
                 // Log history
-                await HistoryService.Instance.LogTestFieldUpdatedAsync(test, fieldName, oldValue, newValue);
+                System.Diagnostics.Debug.WriteLine($"🔍 About to log history for Test {test.TestID}: {fieldName} '{oldValue}' → '{newValue}'");
+                try
+                {
+                    await HistoryService.Instance.LogTestFieldUpdatedAsync(test, fieldName, oldValue, newValue);
+                    System.Diagnostics.Debug.WriteLine($"✓ History logged successfully");
+                }
+                catch (Exception histEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"✗ HISTORY LOGGING FAILED: {histEx.Message}");
+                    System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {histEx.StackTrace}");
+                }
 
                 System.Diagnostics.Debug.WriteLine($"✓ Test {test.TestID} updated: {fieldName} = '{newValue}'");
 

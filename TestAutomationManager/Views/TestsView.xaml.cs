@@ -2757,22 +2757,59 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle right-click on Test row to show context menu
+        /// </summary>
+        private void TestRow_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("🖱️ Right-click detected on Test row");
+
+            // Get the Border that was right-clicked
+            var border = sender as Border;
+            if (border == null) return;
+
+            // Get the Test from the DataContext
+            var test = border.DataContext as Test;
+            if (test == null)
+            {
+                System.Diagnostics.Debug.WriteLine("✗ Could not get Test from DataContext");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"✓ Right-clicked on Test: {test.TestName} (ID: {test.TestID})");
+
+            // The context menu should open automatically, but we can ensure it
+            if (border.ContextMenu != null)
+            {
+                border.ContextMenu.PlacementTarget = border;
+                border.ContextMenu.IsOpen = true;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
         /// Handle Show History from context menu (for Test)
         /// </summary>
         private async void ContextMenu_ShowTestHistory(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Get the test from the context menu's DataContext
-                var menuItem = sender as FrameworkElement;
-                var test = menuItem?.DataContext as Test;
+                System.Diagnostics.Debug.WriteLine("📝 Show History clicked for Test");
+
+                // Get the test from the context menu's PlacementTarget
+                var menuItem = sender as MenuItem;
+                var contextMenu = menuItem?.Parent as ContextMenu;
+                var border = contextMenu?.PlacementTarget as Border;
+                var test = border?.DataContext as Test;
 
                 if (test == null || test.TestID == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("✗ Could not get Test from context menu");
                     MessageBox.Show("No test selected to show history.",
                         "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
+
+                System.Diagnostics.Debug.WriteLine($"📝 Showing history for Test: {test.TestName} (ID: {test.TestID})");
 
                 // Show history dialog
                 await Dialogs.HistoryViewDialog.ShowTestHistoryAsync(
@@ -2784,6 +2821,7 @@ namespace TestAutomationManager.Views
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"✗ Error showing test history: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {ex.StackTrace}");
                 MessageBox.Show($"Failed to show history: {ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }

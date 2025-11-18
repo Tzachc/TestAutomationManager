@@ -409,9 +409,10 @@
                             </Grid.RowDefinitions>
 
                             <!-- Test Row -->
-                            <Border Grid.Row="0" Padding="24,5" Background="Transparent" CornerRadius="8,8,0,0">
+                            <Border Grid.Row="0" Padding="24,5" Background="#01FFFFFF" CornerRadius="8,8,0,0"
+                                    MouseRightButtonDown="TestRow_MouseRightButtonDown">
                                 <Border.ContextMenu>
-                                    <ContextMenu>
+                                    <ContextMenu x:Name="TestContextMenu">
                                         <MenuItem Header="Show History"
                                                   Click="ContextMenu_ShowTestHistory">
                                             <MenuItem.Icon>
