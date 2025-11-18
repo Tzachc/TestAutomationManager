@@ -1509,11 +1509,6 @@ namespace TestAutomationManager.Views
         {
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] START - Attempting to focus Test #{testId}");
 
-            // Clear search filter
-            _currentSearchQuery = "";
-            FilterTests("");
-            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Search filter cleared");
-
             // Find the test
             var test = _allTests.FirstOrDefault(t => t.Id == testId);
             if (test == null)
@@ -1528,16 +1523,22 @@ namespace TestAutomationManager.Views
             ClearAllSelections();
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Cleared all selections");
 
+            // Use filter to force the test into view - this solves UI virtualization
+            // By filtering to show only this test, we guarantee its container will be generated
+            _currentSearchQuery = testId.ToString();
+            FilterTests(testId.ToString());
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Applied filter to show only Test #{testId}");
+
             // Expand the test (this will trigger lazy loading of processes)
             test.IsExpanded = true;
-            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test expanded, currently has {test.Processes.Count} processes (may load asynchronously)");
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test expanded");
 
-            // Use Dispatcher to wait for processes to load, then select and scroll
+            // Use Dispatcher to wait for processes to load, then select, scroll, and clear filter
             Dispatcher.InvokeAsync(async () =>
             {
                 System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Waiting for processes to load...");
 
-                // Wait for processes to load (including placeholder) - up to 1 second
+                // Wait for processes to load (including placeholder)
                 int attempts = 0;
                 while (test.Processes.Count == 0 && attempts < 20)
                 {
@@ -1559,37 +1560,32 @@ namespace TestAutomationManager.Views
                     System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Still no processes after waiting");
                 }
 
-                // Wait a bit for UI to update with the selection
-                await System.Threading.Tasks.Task.Delay(150);
-
-                // Scroll to the test - try multiple times
-                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Attempting to scroll to test...");
+                // Wait for UI to update with selection
+                await System.Threading.Tasks.Task.Delay(200);
                 TestsItemsControl.UpdateLayout();
 
-                bool scrolled = false;
-                for (int i = 0; i < 3 && !scrolled; i++)
+                // With the filter applied, the container should now exist
+                var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
+                if (container != null)
                 {
-                    var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
-                    if (container != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found (attempt {i + 1}), bringing into view...");
-                        container.BringIntoView();
-                        scrolled = true;
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Container not found (attempt {i + 1}), waiting...");
-                        await System.Threading.Tasks.Task.Delay(150);
-                        TestsItemsControl.UpdateLayout();
-                    }
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found! Bringing into view...");
+                    container.BringIntoView();
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Container still not found even with filter applied");
                 }
 
-                if (!scrolled)
-                {
-                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Could not find container after {3} attempts");
-                }
+                // Wait a moment to ensure scrolling completes
+                await System.Threading.Tasks.Task.Delay(300);
 
-                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] COMPLETE");
+                // Clear the filter to show all tests again
+                _currentSearchQuery = "";
+                FilterTests("");
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Filter cleared - all tests visible again");
+
+                // Keep the selection and expansion
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] COMPLETE - Test #{testId} should be visible and selected");
             }, System.Windows.Threading.DispatcherPriority.Background);
         }
 
