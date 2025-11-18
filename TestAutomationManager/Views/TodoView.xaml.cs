@@ -41,6 +41,9 @@ namespace TestAutomationManager.Views
         private Point _stickyNoteDragStart;
         private UIElement? _draggedStickyNoteElement;
 
+        // Loading state
+        private bool _isDataLoaded = false;
+
         // Event for parent window
         public event EventHandler? DataLoaded;
 
@@ -85,11 +88,16 @@ namespace TestAutomationManager.Views
 
                 // Load todos
                 _allTodos = await _repository.GetAllTodosAsync();
-                ApplyFilter("All Tasks");
 
                 // Load sticky notes
                 _allStickyNotes = await _repository.GetAllStickyNotesAsync();
                 LoadStickyNotes();
+
+                // Mark data as loaded
+                _isDataLoaded = true;
+
+                // Now apply initial filter
+                ApplyFilter("All Tasks");
 
                 LoadingPanel.Visibility = Visibility.Collapsed;
             }
@@ -107,6 +115,9 @@ namespace TestAutomationManager.Views
 
         private void ApplyFilter(string filter)
         {
+            // Safety check - don't filter if data isn't loaded yet
+            if (_allTodos == null) return;
+
             IEnumerable<TodoItem> filteredTodos = filter switch
             {
                 "Active" => _allTodos.Where(t => !t.IsCompleted),
@@ -181,6 +192,9 @@ namespace TestAutomationManager.Views
 
         private void Filter_Changed(object sender, SelectionChangedEventArgs e)
         {
+            // Don't apply filter until data is loaded
+            if (!_isDataLoaded) return;
+
             if (FilterComboBox?.SelectedItem is ComboBoxItem item)
             {
                 ApplyFilter(item.Content?.ToString() ?? "All Tasks");
@@ -189,6 +203,9 @@ namespace TestAutomationManager.Views
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
+            // Don't apply filter until data is loaded
+            if (!_isDataLoaded) return;
+
             if (FilterComboBox?.SelectedItem is ComboBoxItem item)
             {
                 ApplyFilter(item.Content?.ToString() ?? "All Tasks");
