@@ -1524,7 +1524,7 @@ namespace TestAutomationManager.Views
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Found test: {test.Name} (ID: {test.Id})");
 
             // Get the test's index in the CURRENT filtered list
-            int testIndex = _filteredTests.IndexOf(test);
+            int testIndex = Tests.IndexOf(test);
             System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test index in filtered list: {testIndex}");
 
             // Clear all existing selections
