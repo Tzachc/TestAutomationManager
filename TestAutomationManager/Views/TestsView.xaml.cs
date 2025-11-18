@@ -2427,6 +2427,38 @@ namespace TestAutomationManager.Views
         }
 
         /// <summary>
+        /// Handle right-click on entire process row (new handler for Grid-level context menu)
+        /// </summary>
+        private void ProcessRow_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("🖱️ Right-click detected on Process row (Grid)");
+
+            if (sender is Grid grid && grid.DataContext is Process process)
+            {
+                System.Diagnostics.Debug.WriteLine($"✓ Process: {process.ProcessName} (Index: {process.Index}, ProcessID: {process.ProcessID})");
+
+                // If right-clicking on an unselected row, select it first
+                if (!process.IsSelected)
+                {
+                    System.Diagnostics.Debug.WriteLine("  → Selecting process");
+                    ClearAllSelections();
+                    process.IsSelected = true;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("  → Process already selected");
+                }
+
+                // The context menu will open automatically since it's attached to the Grid
+                System.Diagnostics.Debug.WriteLine("  ✓ Context menu will open automatically");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("✗ Could not get Process from Grid DataContext");
+            }
+        }
+
+        /// <summary>
         /// Handle right-click on function selection border
         /// </summary>
         private void FunctionSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -2863,18 +2895,27 @@ namespace TestAutomationManager.Views
 
                 Process? targetProcess = null;
 
-                // Try to get process from context menu's PlacementTarget (the right-clicked Border)
+                // Try to get process from context menu's PlacementTarget (Grid or Border)
                 var menuItem = sender as MenuItem;
                 var contextMenu = menuItem?.Parent as ContextMenu;
-                var border = contextMenu?.PlacementTarget as Border;
+                var placementTarget = contextMenu?.PlacementTarget;
 
-                if (border != null)
+                // Try Grid first (new context menu location)
+                if (placementTarget is Grid grid)
                 {
-                    // Try to get Process from the Border's DataContext
+                    targetProcess = grid.DataContext as Process;
+                    if (targetProcess != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from Grid PlacementTarget: {targetProcess.ProcessName}");
+                    }
+                }
+                // Fallback to Border (old context menu location for backward compatibility)
+                else if (placementTarget is Border border)
+                {
                     targetProcess = border.DataContext as Process;
                     if (targetProcess != null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from context menu PlacementTarget: {targetProcess.ProcessName}");
+                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from Border PlacementTarget: {targetProcess.ProcessName}");
                     }
                 }
 

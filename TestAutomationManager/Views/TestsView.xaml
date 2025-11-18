@@ -795,7 +795,42 @@
                                                                 <RowDefinition Height="Auto"/>
                                                             </Grid.RowDefinitions>
 
-                                                            <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" MinWidth="6600">
+                                                            <Grid Grid.Row="0" Grid.IsSharedSizeScope="True" MinWidth="6600"
+                                                                  Background="#01FFFFFF"
+                                                                  MouseRightButtonDown="ProcessRow_MouseRightButtonDown">
+                                                                <Grid.ContextMenu>
+                                                                    <ContextMenu x:Name="ProcessRowContextMenu">
+                                                                        <MenuItem Header="Copy"
+                                                                                  Click="ContextMenu_Copy"
+                                                                                  InputGestureText="Ctrl+C">
+                                                                            <MenuItem.Icon>
+                                                                                <TextBlock Text="📋" FontSize="14"/>
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <MenuItem Header="Paste"
+                                                                                  Click="ContextMenu_Paste"
+                                                                                  InputGestureText="Ctrl+V">
+                                                                            <MenuItem.Icon>
+                                                                                <TextBlock Text="📄" FontSize="14"/>
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <Separator/>
+                                                                        <MenuItem Header="Show History"
+                                                                                  Click="ContextMenu_ShowProcessHistory">
+                                                                            <MenuItem.Icon>
+                                                                                <TextBlock Text="📝" FontSize="14"/>
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                        <Separator/>
+                                                                        <MenuItem Header="Delete"
+                                                                                  Click="ContextMenu_Delete"
+                                                                                  InputGestureText="Del">
+                                                                            <MenuItem.Icon>
+                                                                                <TextBlock Text="🗑️" FontSize="14"/>
+                                                                            </MenuItem.Icon>
+                                                                        </MenuItem>
+                                                                    </ContextMenu>
+                                                                </Grid.ContextMenu>
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="36"  SharedSizeGroup="procExpand"/>
                                                                     <ColumnDefinition Width="120" SharedSizeGroup="procPosition"/>
@@ -866,41 +901,7 @@
                                                                             Cursor="Hand"
                                                                             ToolTip="Click to select row | Right-click for options"
                                                                             MouseLeftButtonDown="ProcessSelectionBorder_MouseLeftButtonDown"
-                                                                            MouseMove="ProcessSelectionBorder_MouseMove"
-                                                                            MouseRightButtonDown="ProcessSelectionBorder_MouseRightButtonDown">
-                                                                        <Border.ContextMenu>
-                                                                            <ContextMenu x:Name="ProcessContextMenu">
-                                                                                <MenuItem Header="Copy"
-                                                                                          Click="ContextMenu_Copy"
-                                                                                          InputGestureText="Ctrl+C">
-                                                                                    <MenuItem.Icon>
-                                                                                        <TextBlock Text="📋" FontSize="14"/>
-                                                                                    </MenuItem.Icon>
-                                                                                </MenuItem>
-                                                                                <MenuItem Header="Paste"
-                                                                                          Click="ContextMenu_Paste"
-                                                                                          InputGestureText="Ctrl+V">
-                                                                                    <MenuItem.Icon>
-                                                                                        <TextBlock Text="📄" FontSize="14"/>
-                                                                                    </MenuItem.Icon>
-                                                                                </MenuItem>
-                                                                                <Separator/>
-                                                                                <MenuItem Header="Show History"
-                                                                                          Click="ContextMenu_ShowProcessHistory">
-                                                                                    <MenuItem.Icon>
-                                                                                        <TextBlock Text="📝" FontSize="14"/>
-                                                                                    </MenuItem.Icon>
-                                                                                </MenuItem>
-                                                                                <Separator/>
-                                                                                <MenuItem Header="Delete"
-                                                                                          Click="ContextMenu_Delete"
-                                                                                          InputGestureText="Del">
-                                                                                    <MenuItem.Icon>
-                                                                                        <TextBlock Text="🗑️" FontSize="14"/>
-                                                                                    </MenuItem.Icon>
-                                                                                </MenuItem>
-                                                                            </ContextMenu>
-                                                                        </Border.ContextMenu>
+                                                                            MouseMove="ProcessSelectionBorder_MouseMove">
                                                                         <Border.Style>
                                                                             <Style TargetType="Border">
                                                                                 <Setter Property="Background" Value="Transparent"/>
