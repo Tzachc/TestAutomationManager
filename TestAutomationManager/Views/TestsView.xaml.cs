@@ -1507,33 +1507,123 @@ namespace TestAutomationManager.Views
 
         public void FocusTest(int testId)
         {
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] START - Attempting to focus Test #{testId}");
+
+            // Clear any search filter
             _currentSearchQuery = "";
             FilterTests("");
 
+            // Find the test
             var test = _allTests.FirstOrDefault(t => t.Id == testId);
-            if (test == null) return;
-
-            test.IsExpanded = true;
-
-            Dispatcher.InvokeAsync(() =>
+            if (test == null)
             {
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✗ Test #{testId} not found in _allTests!");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Found test: {test.Name} (ID: {test.Id})");
+
+            // Get the test's index in the CURRENT filtered list
+            int testIndex = Tests.IndexOf(test);
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Test index in filtered list: {testIndex}");
+
+            // Clear all existing selections
+            ClearAllSelections();
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Cleared all selections");
+
+            // Collapse all other tests to make the target test more prominent
+            foreach (var t in _allTests)
+            {
+                if (t.Id != testId)
+                {
+                    t.IsExpanded = false;
+                }
+            }
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Collapsed all other tests");
+
+            // Expand the target test (this will trigger lazy loading of processes)
+            test.IsExpanded = true;
+            System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Target test expanded");
+
+            // Use Dispatcher to wait for processes to load, select, and scroll
+            Dispatcher.InvokeAsync(async () =>
+            {
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Waiting for processes to load...");
+
+                // Wait for processes to load (including placeholder)
+                int attempts = 0;
+                while (test.Processes.Count == 0 && attempts < 20)
+                {
+                    await System.Threading.Tasks.Task.Delay(50);
+                    attempts++;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] After waiting: {test.Processes.Count} processes loaded (wait attempts: {attempts})");
+
+                // Select the first process to visually highlight the test
+                if (test.Processes.Count > 0)
+                {
+                    var firstProcess = test.Processes[0];
+                    firstProcess.IsSelected = true;
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Selected first process: {firstProcess.ProcessName} (IsPlaceholder: {firstProcess.IsPlaceholder})");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Still no processes after waiting");
+                }
+
+                // Wait for UI to update
+                await System.Threading.Tasks.Task.Delay(200);
                 TestsItemsControl.UpdateLayout();
 
+                // Try to find and scroll to the container
                 var container = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
                 if (container != null)
                 {
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Container found! Bringing into view...");
                     container.BringIntoView();
                 }
                 else
                 {
-                    Dispatcher.InvokeAsync(() =>
+                    // Container might not exist due to virtualization - try manual scroll
+                    System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] Container not found, trying manual scroll...");
+
+                    // Find the ScrollViewer
+                    var scrollViewer = FindVisualChild<ScrollViewer>(TestsItemsControl);
+                    if (scrollViewer != null && testIndex >= 0)
                     {
-                        TestsItemsControl.UpdateLayout();
-                        var c2 = TestsItemsControl.ItemContainerGenerator.ContainerFromItem(test) as FrameworkElement;
-                        c2?.BringIntoView();
-                    }, System.Windows.Threading.DispatcherPriority.Background);
+                        // Estimate scroll position (each test ~80px when collapsed, more when expanded)
+                        double estimatedOffset = testIndex * 80.0;
+                        scrollViewer.ScrollToVerticalOffset(estimatedOffset);
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ✓ Scrolled to estimated offset: {estimatedOffset}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] ⚠ Could not find ScrollViewer or testIndex invalid");
+                    }
                 }
+
+                System.Diagnostics.Debug.WriteLine($"📍 [FocusTest] COMPLETE - Test #{testId} should be visible and selected");
             }, System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        // Helper method to find visual children
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                    return typedChild;
+
+                var result = FindVisualChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
         }
 
         private void ProcRowsScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)

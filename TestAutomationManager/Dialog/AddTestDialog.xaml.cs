@@ -24,6 +24,7 @@ namespace TestAutomationManager.Dialogs
 
         private readonly ITestRepository _testRepository;
         private readonly IExtTableRepository _extTableRepository;
+        private readonly ProcessRepository _processRepository;
 
         private ObservableCollection<ExternalTableInfo> _allExtTables;
         private ObservableCollection<ExternalTableInfo> _filteredExtTables;
@@ -47,6 +48,11 @@ namespace TestAutomationManager.Dialogs
         /// </summary>
         public bool IsSuccess { get; private set; }
 
+        /// <summary>
+        /// Test ID to navigate to (set when user clicks "Take Me" in FREE tests dialog)
+        /// </summary>
+        public int? NavigateToTestId { get; private set; }
+
         // ================================================
         // CONSTRUCTOR
         // ================================================
@@ -58,6 +64,7 @@ namespace TestAutomationManager.Dialogs
             // Initialize repositories
             _testRepository = new TestRepository();
             _extTableRepository = new ExtTableRepository();
+            _processRepository = new ProcessRepository();
 
             // Initialize collections
             _allExtTables = new ObservableCollection<ExternalTableInfo>();
@@ -263,44 +270,59 @@ namespace TestAutomationManager.Dialogs
         }
 
         // ================================================
-        // GAPS FEATURE
+        // FIND FREE TESTS FEATURE
         // ================================================
 
         /// <summary>
-        /// Get list of gap test IDs (only between existing tests, not beyond the last one)
+        /// Find and display FREE tests (tests that exist but are marked as available for reuse)
         /// </summary>
-        private List<int> GetGapTestIds()
+        private async void FindFreeTestsButton_Click(object sender, RoutedEventArgs e)
         {
-            var gaps = new List<int>();
-
-            if (!_allExistingTestIds.Any())
-                return gaps;
-
-            int maxId = _allExistingTestIds.Max();
-
-            // Find all gaps between 1 and maxId
-            for (int i = 1; i <= maxId; i++)
+            try
             {
-                if (!_allExistingTestIds.Contains(i))
+                var freeTests = await _testRepository.GetFreeTestsAsync();
+
+                if (freeTests.Count == 0)
                 {
-                    gaps.Add(i);
+                    ModernMessageDialog.ShowInfo(
+                        "No FREE tests found.\n\n" +
+                        "FREE tests are existing tests that have \"FREE\" in their name or status, " +
+                        "indicating they are available for reuse.",
+                        "No FREE Tests",
+                        Window.GetWindow(this));
+                }
+                else
+                {
+                    // Convert to FreeTestInfo objects
+                    var freeTestInfos = freeTests.Select(t => new FreeTestInfo
+                    {
+                        TestId = t.TestId,
+                        TestName = t.TestName,
+                        Status = t.Status
+                    }).ToList();
+
+                    // Show the new FREE tests dialog
+                    var dialog = new FreeTestsDialog(freeTestInfos);
+                    dialog.Owner = Window.GetWindow(this);
+                    bool? result = dialog.ShowDialog();
+
+                    // If user clicked "Take Me", navigate to that test
+                    if (result == true && dialog.SelectedTestId.HasValue)
+                    {
+                        NavigateToTestId = dialog.SelectedTestId.Value;
+                        DialogResult = false; // Close this dialog without creating a test
+                        Close();
+                    }
                 }
             }
-
-            return gaps;
-        }
-
-        // ================================================
-        // CATEGORY CLICKABLE ROW
-        // ================================================
-
-        /// <summary>
-        /// Open category dropdown when clicking anywhere on the row
-        /// </summary>
-        private void CategoryBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            CategoryComboBox.IsDropDownOpen = true;
-            CategoryComboBox.Focus();
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error finding FREE tests: {ex.Message}");
+                ModernMessageDialog.ShowInfo(
+                    $"Failed to find FREE tests.\n\nError: {ex.Message}",
+                    "Error",
+                    Window.GetWindow(this));
+            }
         }
 
         // ================================================
@@ -342,6 +364,14 @@ namespace TestAutomationManager.Dialogs
         private void ExtTableSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchQuery = ExtTableSearchBox.Text?.Trim() ?? "";
+
+            // Toggle placeholder visibility
+            if (SearchPlaceholder != null)
+            {
+                SearchPlaceholder.Visibility = string.IsNullOrWhiteSpace(searchQuery)
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
 
             _filteredExtTables.Clear();
 
@@ -490,6 +520,108 @@ namespace TestAutomationManager.Dialogs
                     System.Diagnostics.Debug.WriteLine($"✓ {newTableName} created from {sourceTable}");
                 }
 
+                // ========== ADD SELECTED PROCESSES ==========
+                var selectedProcessIds = new List<int>();
+                if (Process988CheckBox.IsChecked == true) selectedProcessIds.Add(988);
+                if (Process271CheckBox.IsChecked == true) selectedProcessIds.Add(271);
+                if (Process137CheckBox.IsChecked == true) selectedProcessIds.Add(137);
+
+                if (selectedProcessIds.Count > 0)
+                {
+                    StatusMessage.Text = $"Adding {selectedProcessIds.Count} process(es) to test...";
+
+                    foreach (var processId in selectedProcessIds)
+                    {
+                        try
+                        {
+                            // Get the process template
+                            var processTemplate = await _processRepository.GetProcessTemplateByIdAsync(processId);
+
+                            if (processTemplate != null)
+                            {
+                                // Clone the process with new TestID
+                                var newProcess = new Process
+                                {
+                                    TestID = testId,
+                                    ProcessID = processTemplate.ProcessID,
+                                    ProcessName = processTemplate.ProcessName,
+                                    ProcessPosition = processTemplate.ProcessPosition,
+                                    Module = processTemplate.Module,
+                                    Comments = processTemplate.Comments,
+                                    Repeat = processTemplate.Repeat,
+                                    WEB3Operator = processTemplate.WEB3Operator,
+                                    Pass_Fail_WEB3Operator = processTemplate.Pass_Fail_WEB3Operator,
+                                    LastRunning = processTemplate.LastRunning,
+                                    TempParam = processTemplate.TempParam,
+                                    TempParam1 = processTemplate.TempParam1,
+                                    TempParam11 = processTemplate.TempParam11,
+                                    TempParam111 = processTemplate.TempParam111,
+                                    TempParam1111 = processTemplate.TempParam1111,
+                                    TempParam11111 = processTemplate.TempParam11111,
+                                    // Copy all Param columns
+                                    Param1 = processTemplate.Param1,
+                                    Param2 = processTemplate.Param2,
+                                    Param3 = processTemplate.Param3,
+                                    Param4 = processTemplate.Param4,
+                                    Param5 = processTemplate.Param5,
+                                    Param6 = processTemplate.Param6,
+                                    Param7 = processTemplate.Param7,
+                                    Param8 = processTemplate.Param8,
+                                    Param9 = processTemplate.Param9,
+                                    Param10 = processTemplate.Param10,
+                                    Param11 = processTemplate.Param11,
+                                    Param12 = processTemplate.Param12,
+                                    Param13 = processTemplate.Param13,
+                                    Param14 = processTemplate.Param14,
+                                    Param15 = processTemplate.Param15,
+                                    Param16 = processTemplate.Param16,
+                                    Param17 = processTemplate.Param17,
+                                    Param18 = processTemplate.Param18,
+                                    Param19 = processTemplate.Param19,
+                                    Param20 = processTemplate.Param20,
+                                    Param21 = processTemplate.Param21,
+                                    Param22 = processTemplate.Param22,
+                                    Param23 = processTemplate.Param23,
+                                    Param24 = processTemplate.Param24,
+                                    Param25 = processTemplate.Param25,
+                                    Param26 = processTemplate.Param26,
+                                    Param27 = processTemplate.Param27,
+                                    Param28 = processTemplate.Param28,
+                                    Param29 = processTemplate.Param29,
+                                    Param30 = processTemplate.Param30,
+                                    Param31 = processTemplate.Param31,
+                                    Param32 = processTemplate.Param32,
+                                    Param33 = processTemplate.Param33,
+                                    Param34 = processTemplate.Param34,
+                                    Param35 = processTemplate.Param35,
+                                    Param36 = processTemplate.Param36,
+                                    Param37 = processTemplate.Param37,
+                                    Param38 = processTemplate.Param38,
+                                    Param39 = processTemplate.Param39,
+                                    Param40 = processTemplate.Param40,
+                                    Param41 = processTemplate.Param41,
+                                    Param42 = processTemplate.Param42,
+                                    Param43 = processTemplate.Param43,
+                                    Param44 = processTemplate.Param44,
+                                    Param45 = processTemplate.Param45,
+                                    Param46 = processTemplate.Param46,
+                                    Functions = new ObservableCollection<Function>()
+                                };
+
+                                // Insert the process
+                                await _processRepository.InsertProcessAsync(newProcess);
+                                System.Diagnostics.Debug.WriteLine($"✓ Added Process #{processId} to Test #{testId}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"✗ Failed to add Process #{processId}: {ex.Message}");
+                            // Continue with other processes even if one fails
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"✓ Added {selectedProcessIds.Count} process(es) to test");
+                }
 
                 // ========== SUCCESS ==========
                 CreatedTest = newTest;
@@ -499,13 +631,18 @@ namespace TestAutomationManager.Dialogs
                 StatusMessage.Foreground = (Brush)Application.Current.Resources["SuccessBrush"];
 
                 // Show success message
-                ModernMessageDialog.ShowInfo(
-                    $"Test #{testId} '{newTest.Name}' has been created successfully!\n\n" +
+                string successMessage = $"Test #{testId} '{newTest.Name}' has been created successfully!\n\n" +
                     $"• Test added to database\n" +
-                    $"• {newTableName} created from {sourceTable}\n\n" +
-                    "The UI will refresh to show the new test.",
-                    "Success",
-                    Window.GetWindow(this));
+                    $"• {newTableName} created from {sourceTable}";
+
+                if (selectedProcessIds.Count > 0)
+                {
+                    successMessage += $"\n• {selectedProcessIds.Count} process(es) added to test";
+                }
+
+                successMessage += "\n\nThe UI will refresh to show the new test.";
+
+                ModernMessageDialog.ShowInfo(successMessage, "Success", Window.GetWindow(this));
 
                 // Close dialog
                 DialogResult = true;
@@ -539,6 +676,31 @@ namespace TestAutomationManager.Dialogs
             IsSuccess = false;
             DialogResult = false;
             Close();
+        }
+
+        /// <summary>
+        /// Handle Close button (X) click
+        /// </summary>
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            IsSuccess = false;
+            DialogResult = false;
+            Close();
+        }
+
+        /// <summary>
+        /// Allow dragging the window by clicking anywhere on it
+        /// </summary>
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                this.DragMove();
+            }
+            catch
+            {
+                // Ignore exceptions (can happen if window is maximized)
+            }
         }
     }
 }
