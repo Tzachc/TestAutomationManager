@@ -578,6 +578,16 @@
                             </StackPanel>
                         </RadioButton>
 
+                        <RadioButton GroupName="Navigation"
+                                   Style="{StaticResource NavigationRadioButton}"
+                                   Tag="Todo"
+                                   Click="NavigationButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="✅" FontSize="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Todo" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </RadioButton>
+
                         <Border Height="1"
                                Background="{DynamicResource BorderBrush}"
                                Margin="8,8"/>

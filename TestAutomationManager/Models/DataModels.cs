@@ -1033,4 +1033,358 @@ namespace TestAutomationManager.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+    /// <summary>
+    /// Todo entity for task management
+    /// Maps to [schema].[Todo] table
+    /// </summary>
+    public class TodoItem : INotifyPropertyChanged
+    {
+        private int _id;
+        private string? _title;
+        private string? _description;
+        private DateTime? _dueDate;
+        private string? _priority; // "High", "Medium", "Low"
+        private string? _status; // "Todo", "InProgress", "Done"
+        private string? _category;
+        private string? _tags; // Comma-separated
+        private bool _isCompleted;
+        private string? _color; // Hex color for visual organization
+        private int? _estimatedMinutes;
+        private int? _actualMinutes;
+        private bool _isRecurring;
+        private string? _recurrencePattern; // "Daily", "Weekly", "Monthly"
+        private string? _attachmentUrl;
+        private int _sortOrder;
+        private DateTime _createdAt;
+        private DateTime _updatedAt;
+        private string? _createdBy;
+
+        // ================================================
+        // DATABASE COLUMNS
+        // ================================================
+
+        public int Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(); }
+        }
+
+        public string? Title
+        {
+            get => _title;
+            set { _title = value; OnPropertyChanged(); }
+        }
+
+        public string? Description
+        {
+            get => _description;
+            set { _description = value; OnPropertyChanged(); }
+        }
+
+        public DateTime? DueDate
+        {
+            get => _dueDate;
+            set { _dueDate = value; OnPropertyChanged(); OnPropertyChanged(nameof(DueDateDisplay)); OnPropertyChanged(nameof(IsOverdue)); }
+        }
+
+        public string? Priority
+        {
+            get => _priority;
+            set { _priority = value; OnPropertyChanged(); OnPropertyChanged(nameof(PriorityColor)); }
+        }
+
+        public string? Status
+        {
+            get => _status;
+            set { _status = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusColor)); }
+        }
+
+        public string? Category
+        {
+            get => _category;
+            set { _category = value; OnPropertyChanged(); }
+        }
+
+        public string? Tags
+        {
+            get => _tags;
+            set { _tags = value; OnPropertyChanged(); }
+        }
+
+        public bool IsCompleted
+        {
+            get => _isCompleted;
+            set { _isCompleted = value; OnPropertyChanged(); }
+        }
+
+        public string? Color
+        {
+            get => _color;
+            set { _color = value; OnPropertyChanged(); }
+        }
+
+        public int? EstimatedMinutes
+        {
+            get => _estimatedMinutes;
+            set { _estimatedMinutes = value; OnPropertyChanged(); OnPropertyChanged(nameof(EstimatedTimeDisplay)); }
+        }
+
+        public int? ActualMinutes
+        {
+            get => _actualMinutes;
+            set { _actualMinutes = value; OnPropertyChanged(); OnPropertyChanged(nameof(ActualTimeDisplay)); }
+        }
+
+        public bool IsRecurring
+        {
+            get => _isRecurring;
+            set { _isRecurring = value; OnPropertyChanged(); }
+        }
+
+        public string? RecurrencePattern
+        {
+            get => _recurrencePattern;
+            set { _recurrencePattern = value; OnPropertyChanged(); }
+        }
+
+        public string? AttachmentUrl
+        {
+            get => _attachmentUrl;
+            set { _attachmentUrl = value; OnPropertyChanged(); }
+        }
+
+        public int SortOrder
+        {
+            get => _sortOrder;
+            set { _sortOrder = value; OnPropertyChanged(); }
+        }
+
+        public DateTime CreatedAt
+        {
+            get => _createdAt;
+            set { _createdAt = value; OnPropertyChanged(); }
+        }
+
+        public DateTime UpdatedAt
+        {
+            get => _updatedAt;
+            set { _updatedAt = value; OnPropertyChanged(); }
+        }
+
+        public string? CreatedBy
+        {
+            get => _createdBy;
+            set { _createdBy = value; OnPropertyChanged(); }
+        }
+
+        // ================================================
+        // UI-ONLY PROPERTIES
+        // ================================================
+
+        [NotMapped]
+        public string DueDateDisplay
+        {
+            get
+            {
+                if (!DueDate.HasValue) return "No due date";
+
+                var daysUntil = (DueDate.Value.Date - DateTime.Now.Date).Days;
+
+                if (daysUntil < 0) return $"Overdue by {Math.Abs(daysUntil)} day{(Math.Abs(daysUntil) == 1 ? "" : "s")}";
+                if (daysUntil == 0) return "Due Today";
+                if (daysUntil == 1) return "Due Tomorrow";
+                if (daysUntil <= 7) return $"Due in {daysUntil} days";
+
+                return DueDate.Value.ToString("MMM dd, yyyy");
+            }
+        }
+
+        [NotMapped]
+        public bool IsOverdue => DueDate.HasValue && DueDate.Value.Date < DateTime.Now.Date && !IsCompleted;
+
+        [NotMapped]
+        public string PriorityColor
+        {
+            get => Priority switch
+            {
+                "High" => "#EF5350",    // Red
+                "Medium" => "#FFA726",  // Orange
+                "Low" => "#66BB6A",     // Green
+                _ => "#9E9E9E"          // Gray
+            };
+        }
+
+        [NotMapped]
+        public string StatusColor
+        {
+            get => Status switch
+            {
+                "Todo" => "#539BF5",       // Blue
+                "InProgress" => "#FFA726", // Orange
+                "Done" => "#66BB6A",       // Green
+                _ => "#9E9E9E"             // Gray
+            };
+        }
+
+        [NotMapped]
+        public string EstimatedTimeDisplay
+        {
+            get
+            {
+                if (!EstimatedMinutes.HasValue) return "";
+                var hours = EstimatedMinutes.Value / 60;
+                var mins = EstimatedMinutes.Value % 60;
+                if (hours > 0)
+                    return mins > 0 ? $"{hours}h {mins}m" : $"{hours}h";
+                return $"{mins}m";
+            }
+        }
+
+        [NotMapped]
+        public string ActualTimeDisplay
+        {
+            get
+            {
+                if (!ActualMinutes.HasValue) return "";
+                var hours = ActualMinutes.Value / 60;
+                var mins = ActualMinutes.Value % 60;
+                if (hours > 0)
+                    return mins > 0 ? $"{hours}h {mins}m" : $"{hours}h";
+                return $"{mins}m";
+            }
+        }
+
+        // ================================================
+        // INotifyPropertyChanged Implementation
+        // ================================================
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    /// <summary>
+    /// StickyNote entity for quick notes with drag-drop positioning
+    /// Maps to [schema].[StickyNote] table
+    /// </summary>
+    public class StickyNote : INotifyPropertyChanged
+    {
+        private int _id;
+        private string? _content;
+        private string? _color; // Hex color for note background
+        private double _positionX; // X coordinate on canvas
+        private double _positionY; // Y coordinate on canvas
+        private int _width;
+        private int _height;
+        private int _zIndex; // Layering order
+        private bool _isPinned; // Pin to keep visible
+        private DateTime _createdAt;
+        private DateTime _updatedAt;
+        private string? _createdBy;
+
+        // ================================================
+        // DATABASE COLUMNS
+        // ================================================
+
+        public int Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(); }
+        }
+
+        public string? Content
+        {
+            get => _content;
+            set { _content = value; OnPropertyChanged(); }
+        }
+
+        public string? Color
+        {
+            get => _color;
+            set { _color = value; OnPropertyChanged(); }
+        }
+
+        public double PositionX
+        {
+            get => _positionX;
+            set { _positionX = value; OnPropertyChanged(); }
+        }
+
+        public double PositionY
+        {
+            get => _positionY;
+            set { _positionY = value; OnPropertyChanged(); }
+        }
+
+        public int Width
+        {
+            get => _width;
+            set { _width = value; OnPropertyChanged(); }
+        }
+
+        public int Height
+        {
+            get => _height;
+            set { _height = value; OnPropertyChanged(); }
+        }
+
+        public int ZIndex
+        {
+            get => _zIndex;
+            set { _zIndex = value; OnPropertyChanged(); }
+        }
+
+        public bool IsPinned
+        {
+            get => _isPinned;
+            set { _isPinned = value; OnPropertyChanged(); }
+        }
+
+        public DateTime CreatedAt
+        {
+            get => _createdAt;
+            set { _createdAt = value; OnPropertyChanged(); }
+        }
+
+        public DateTime UpdatedAt
+        {
+            get => _updatedAt;
+            set { _updatedAt = value; OnPropertyChanged(); }
+        }
+
+        public string? CreatedBy
+        {
+            get => _createdBy;
+            set { _createdBy = value; OnPropertyChanged(); }
+        }
+
+        // ================================================
+        // UI-ONLY PROPERTIES
+        // ================================================
+
+        [NotMapped]
+        public string PreviewContent
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Content)) return "Empty note";
+                return Content.Length > 100 ? Content.Substring(0, 100) + "..." : Content;
+            }
+        }
+
+        // ================================================
+        // INotifyPropertyChanged Implementation
+        // ================================================
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 }

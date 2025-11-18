@@ -34,6 +34,16 @@ namespace TestAutomationManager.Data
         /// </summary>
         public DbSet<HistoryEntry> HistoryLogs { get; set; }
 
+        /// <summary>
+        /// Todo items table - task management with Kanban board
+        /// </summary>
+        public DbSet<TodoItem> TodoItems { get; set; }
+
+        /// <summary>
+        /// Sticky Notes table - free-form draggable notes
+        /// </summary>
+        public DbSet<StickyNote> StickyNotes { get; set; }
+
         // ================================================
         // Configuration
         // ================================================
@@ -315,6 +325,173 @@ namespace TestAutomationManager.Data
                 entity.Ignore(e => e.RelativeTime);
                 entity.Ignore(e => e.OperationDisplayText);
                 entity.Ignore(e => e.OperationBadgeColor);
+            });
+
+            // ================================================
+            // TODO ITEM ENTITY CONFIGURATION (Todo)
+            // ================================================
+            modelBuilder.Entity<TodoItem>(entity =>
+            {
+                // Map to schema and table (e.g., [PRODUCTION_Selenium].[Todo])
+                entity.ToTable("Todo", currentSchema);
+
+                // Primary key
+                entity.HasKey(e => e.Id);
+
+                // Properties
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Title)
+                    .HasColumnName("Title")
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Description)
+                    .HasColumnName("Description")
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.DueDate)
+                    .HasColumnName("DueDate");
+
+                entity.Property(e => e.Priority)
+                    .HasColumnName("Priority")
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Medium");
+
+                entity.Property(e => e.Status)
+                    .HasColumnName("Status")
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Todo");
+
+                entity.Property(e => e.Category)
+                    .HasColumnName("Category")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Tags)
+                    .HasColumnName("Tags")
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.IsCompleted)
+                    .HasColumnName("IsCompleted")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.Color)
+                    .HasColumnName("Color")
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.EstimatedMinutes)
+                    .HasColumnName("EstimatedMinutes");
+
+                entity.Property(e => e.ActualMinutes)
+                    .HasColumnName("ActualMinutes");
+
+                entity.Property(e => e.IsRecurring)
+                    .HasColumnName("IsRecurring")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.RecurrencePattern)
+                    .HasColumnName("RecurrencePattern")
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.AttachmentUrl)
+                    .HasColumnName("AttachmentUrl")
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.SortOrder)
+                    .HasColumnName("SortOrder")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("CreatedAt")
+                    .IsRequired();
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnName("UpdatedAt")
+                    .IsRequired();
+
+                entity.Property(e => e.CreatedBy)
+                    .HasColumnName("CreatedBy")
+                    .HasMaxLength(100);
+
+                // Indexes for common queries
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.DueDate);
+                entity.HasIndex(e => e.IsCompleted);
+
+                // Ignore UI-only properties
+                entity.Ignore(e => e.DueDateDisplay);
+                entity.Ignore(e => e.IsOverdue);
+                entity.Ignore(e => e.PriorityColor);
+                entity.Ignore(e => e.StatusColor);
+                entity.Ignore(e => e.EstimatedTimeDisplay);
+                entity.Ignore(e => e.ActualTimeDisplay);
+            });
+
+            // ================================================
+            // STICKY NOTE ENTITY CONFIGURATION (StickyNote)
+            // ================================================
+            modelBuilder.Entity<StickyNote>(entity =>
+            {
+                // Map to schema and table (e.g., [PRODUCTION_Selenium].[StickyNote])
+                entity.ToTable("StickyNote", currentSchema);
+
+                // Primary key
+                entity.HasKey(e => e.Id);
+
+                // Properties
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Content)
+                    .HasColumnName("Content")
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.Color)
+                    .HasColumnName("Color")
+                    .HasMaxLength(20)
+                    .HasDefaultValue("#FFE57F"); // Yellow sticky note default
+
+                entity.Property(e => e.PositionX)
+                    .HasColumnName("PositionX")
+                    .HasDefaultValue(100.0);
+
+                entity.Property(e => e.PositionY)
+                    .HasColumnName("PositionY")
+                    .HasDefaultValue(100.0);
+
+                entity.Property(e => e.Width)
+                    .HasColumnName("Width")
+                    .HasDefaultValue(200);
+
+                entity.Property(e => e.Height)
+                    .HasColumnName("Height")
+                    .HasDefaultValue(200);
+
+                entity.Property(e => e.ZIndex)
+                    .HasColumnName("ZIndex")
+                    .HasDefaultValue(1);
+
+                entity.Property(e => e.IsPinned)
+                    .HasColumnName("IsPinned")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnName("CreatedAt")
+                    .IsRequired();
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnName("UpdatedAt")
+                    .IsRequired();
+
+                entity.Property(e => e.CreatedBy)
+                    .HasColumnName("CreatedBy")
+                    .HasMaxLength(100);
+
+                // Ignore UI-only properties
+                entity.Ignore(e => e.PreviewContent);
             });
         }
     }

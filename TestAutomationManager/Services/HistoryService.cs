@@ -322,5 +322,124 @@ namespace TestAutomationManager.Services
         {
             return await _historyRepository.GetHistoryForEntityAsync("Function", functionIndex.ToString(), top);
         }
+
+        // ================================================
+        // TODO ITEM HISTORY LOGGING
+        // ================================================
+
+        /// <summary>
+        /// Log a Todo creation
+        /// </summary>
+        public async Task LogTodoCreatedAsync(TodoItem todo)
+        {
+            try
+            {
+                var entry = new HistoryEntry
+                {
+                    EntityType = "Todo",
+                    EntityId = todo.Id.ToString(),
+                    EntityName = todo.Title ?? "(Unnamed)",
+                    OperationType = "INSERT",
+                    ChangeDescription = $"Todo '{todo.Title}' created (Priority: {todo.Priority}, Status: {todo.Status})",
+                    ChangedBy = todo.CreatedBy ?? "System",
+                    ChangedAt = DateTime.Now
+                };
+
+                await _historyRepository.InsertHistoryEntryAsync(entry);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to log todo creation: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Log a Todo update
+        /// </summary>
+        public async Task LogTodoUpdatedAsync(TodoItem todo, string changeDescription)
+        {
+            try
+            {
+                var entry = new HistoryEntry
+                {
+                    EntityType = "Todo",
+                    EntityId = todo.Id.ToString(),
+                    EntityName = todo.Title ?? "(Unnamed)",
+                    OperationType = "UPDATE",
+                    ChangeDescription = changeDescription,
+                    ChangedBy = "System",
+                    ChangedAt = DateTime.Now
+                };
+
+                await _historyRepository.InsertHistoryEntryAsync(entry);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to log todo update: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Log a Todo field update
+        /// </summary>
+        public async Task LogTodoFieldUpdatedAsync(TodoItem todo, string fieldName, string? oldValue, string? newValue)
+        {
+            try
+            {
+                var entry = new HistoryEntry
+                {
+                    EntityType = "Todo",
+                    EntityId = todo.Id.ToString(),
+                    EntityName = todo.Title ?? "(Unnamed)",
+                    OperationType = "UPDATE",
+                    FieldName = fieldName,
+                    OldValue = oldValue ?? "",
+                    NewValue = newValue ?? "",
+                    ChangeDescription = $"Updated {fieldName}: '{oldValue}' → '{newValue}'",
+                    ChangedBy = "System",
+                    ChangedAt = DateTime.Now
+                };
+
+                await _historyRepository.InsertHistoryEntryAsync(entry);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to log todo field update: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Log a Todo deletion
+        /// </summary>
+        public async Task LogTodoDeletedAsync(TodoItem todo)
+        {
+            try
+            {
+                var entry = new HistoryEntry
+                {
+                    EntityType = "Todo",
+                    EntityId = todo.Id.ToString(),
+                    EntityName = todo.Title ?? "(Unnamed)",
+                    OperationType = "DELETE",
+                    ChangeDescription = $"Todo '{todo.Title}' deleted",
+                    ChangedBy = "System",
+                    ChangedAt = DateTime.Now
+                };
+
+                await _historyRepository.InsertHistoryEntryAsync(entry);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Failed to log todo deletion: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Get history for a Todo
+        /// </summary>
+        public async Task<System.Collections.Generic.List<HistoryEntry>> GetTodoHistoryAsync(int todoId, int top = 3)
+        {
+            return await _historyRepository.GetHistoryForEntityAsync("Todo", todoId.ToString(), top);
+        }
     }
 }
