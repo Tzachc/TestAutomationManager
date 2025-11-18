@@ -381,34 +381,7 @@ namespace TestAutomationManager.Repositories
                         }
                     }
 
-                    // 1) Prefer reusing an existing "FREE" test (name/status contains "FREE", case-insensitive)
-                    bool ContainsFree(string? s) =>
-                        !string.IsNullOrWhiteSpace(s) &&
-                        s.IndexOf("FREE", StringComparison.OrdinalIgnoreCase) >= 0;
-
-                    var freeIds = tests
-                        .Select(t => new
-                        {
-                            Id = CoerceToInt(t.TestID),        // <-- tolerant coercion
-                            t.TestName,
-                            t.RunStatus
-                        })
-                        .Where(t => t.Id.HasValue && (ContainsFree(t.TestName) || ContainsFree(t.RunStatus)))
-                        .Select(t => t.Id!.Value)
-                        .Distinct()
-                        .OrderBy(id => id)
-                        .ToList();
-
-                    if (freeIds.Count > 0)
-                    {
-                        var reuseId = freeIds.First();
-                        System.Diagnostics.Debug.WriteLine($"✓ Found existing 'FREE' test #{reuseId}. Returning as next available (REUSE).");
-                        // Note: InsertTestAsync will reject inserting an existing ID.
-                        // If you intend to reuse, update/overwrite that row instead of inserting.
-                        return reuseId;
-                    }
-
-                    // 2) No FREE rows — classic gap search
+                    // Find next available ID (gap or next sequential)
                     var existingIds = tests
                         .Select(t => CoerceToInt(t.TestID))
                         .Where(id => id.HasValue)
@@ -451,7 +424,80 @@ namespace TestAutomationManager.Repositories
             }
         }
 
+        /// <summary>
+        /// Finds existing tests marked as FREE (available for reuse)
+        /// </summary>
+        public async Task<List<int>> GetFreeTestIdsAsync()
+        {
+            try
+            {
+                using (var context = new TestAutomationDbContext())
+                {
+                    var tests = await context.Tests
+                        .AsNoTracking()
+                        .ToListAsync();
 
+                    // Helper function to check for "FREE" keyword (case-insensitive)
+                    bool ContainsFree(string? s) =>
+                        !string.IsNullOrWhiteSpace(s) &&
+                        s.IndexOf("FREE", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    // Helper: robustly coerce various nullable numeric/string shapes into int?
+                    static int? CoerceToInt(object? id)
+                    {
+                        if (id is null) return null;
+
+                        var t = id.GetType();
+                        if (Nullable.GetUnderlyingType(t) is Type underlying && id is not string)
+                        {
+                            id = Convert.ChangeType(id, underlying);
+                            t = underlying;
+                        }
+
+                        try
+                        {
+                            if (t == typeof(int)) return (int)id!;
+                            if (t == typeof(long)) return checked((int)(long)id!);
+                            if (t == typeof(short)) return (short)id!;
+                            if (t == typeof(byte)) return (byte)id!;
+                            if (t == typeof(double)) return (int)Math.Truncate((double)id!);
+                            if (t == typeof(float)) return (int)Math.Truncate((float)id!);
+                            if (t == typeof(decimal)) return (int)Math.Truncate((decimal)id!);
+                            if (t == typeof(string))
+                            {
+                                return int.TryParse((string)id!, out var i) ? i : (int?)null;
+                            }
+
+                            return Convert.ToInt32(id);
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+                    }
+
+                    var freeIds = tests
+                        .Select(t => new
+                        {
+                            Id = CoerceToInt(t.TestID),
+                            t.TestName,
+                            t.RunStatus
+                        })
+                        .Where(t => t.Id.HasValue && (ContainsFree(t.TestName) || ContainsFree(t.RunStatus)))
+                        .Select(t => t.Id!.Value)
+                        .Distinct()
+                        .OrderBy(id => id)
+                        .ToList();
+
+                    return freeIds;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"✗ Error finding FREE tests: {ex.Message}");
+                return new List<int>();
+            }
+        }
 
         /// <summary>
         /// Get total process count across all tests (optimized for statistics)
