@@ -1211,31 +1211,65 @@ namespace TestAutomationManager
                 {
                     // User clicked "Take Me" in FREE tests dialog - navigate to that test
                     int testId = dialog.NavigateToTestId.Value;
-                    System.Diagnostics.Debug.WriteLine($"🔍 Navigating to FREE test: #{testId}");
+                    System.Diagnostics.Debug.WriteLine($"🔍 [NAVIGATION START] Navigating to FREE test: #{testId}");
 
                     // Ensure no active filter is applied
+                    System.Diagnostics.Debug.WriteLine($"🔍 [STEP 1] Clearing search box...");
                     SearchBox.Text = "";
+                    System.Diagnostics.Debug.WriteLine($"🔍 [STEP 2] Search box cleared");
+
+                    // Check tab control state
+                    System.Diagnostics.Debug.WriteLine($"🔍 [STEP 3] Checking ContentTabControl state...");
+                    System.Diagnostics.Debug.WriteLine($"🔍   - SelectedItem type: {ContentTabControl.SelectedItem?.GetType().Name ?? "null"}");
+
+                    if (ContentTabControl.SelectedItem is TabItem selTab)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"🔍   - Tab Header: {selTab.Header}");
+                        System.Diagnostics.Debug.WriteLine($"🔍   - Content type: {selTab.Content?.GetType().Name ?? "null"}");
+                    }
 
                     // If Tests tab is already open/selected, just focus (don't refresh - data is already loaded!)
                     if (ContentTabControl.SelectedItem is TabItem selTab1 &&
                         selTab1.Content is TestAutomationManager.Views.TestsView tv1)
                     {
-                        // Don't refresh - just focus the test immediately
+                        System.Diagnostics.Debug.WriteLine($"🔍 [STEP 4A] Tests tab IS already open - will focus Test #{testId}");
+
+                        // Small delay to let UI settle, then focus
+                        await System.Threading.Tasks.Task.Delay(200);
+                        System.Diagnostics.Debug.WriteLine($"🔍 [STEP 5A] Calling FocusTest({testId})...");
                         tv1.FocusTest(testId);
+                        System.Diagnostics.Debug.WriteLine($"🔍 [STEP 6A] ✓ FocusTest({testId}) called successfully");
                     }
                     else
                     {
                         // Open Tests tab, wait for it to render, then focus the test
+                        System.Diagnostics.Debug.WriteLine($"🔍 [STEP 4B] Tests tab NOT open - opening it now...");
                         OpenTestsTab();
-                        await System.Threading.Tasks.Task.Delay(500);
+                        System.Diagnostics.Debug.WriteLine($"🔍 [STEP 5B] OpenTestsTab() called, waiting 600ms...");
+
+                        // Wait for tab to fully load
+                        await System.Threading.Tasks.Task.Delay(600);
+                        System.Diagnostics.Debug.WriteLine($"🔍 [STEP 6B] Delay complete, checking tab again...");
 
                         if (ContentTabControl.SelectedItem is TabItem selTab2 &&
                             selTab2.Content is TestAutomationManager.Views.TestsView tv2)
                         {
-                            // Don't refresh - just focus the test
+                            System.Diagnostics.Debug.WriteLine($"🔍 [STEP 7B] Tests tab confirmed open, calling FocusTest({testId})...");
                             tv2.FocusTest(testId);
+                            System.Diagnostics.Debug.WriteLine($"🔍 [STEP 8B] ✓ FocusTest({testId}) called successfully");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"🔍 [ERROR] ⚠ Could not find TestsView after opening Tests tab!");
+                            if (ContentTabControl.SelectedItem is TabItem errorTab)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"🔍   - Current tab: {errorTab.Header}");
+                                System.Diagnostics.Debug.WriteLine($"🔍   - Content: {errorTab.Content?.GetType().Name ?? "null"}");
+                            }
                         }
                     }
+
+                    System.Diagnostics.Debug.WriteLine($"🔍 [NAVIGATION END] Navigation logic complete");
                 }
                 else
                 {
