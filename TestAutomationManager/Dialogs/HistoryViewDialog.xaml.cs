@@ -73,7 +73,6 @@ namespace TestAutomationManager.Dialogs
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error showing test history: {ex.Message}");
                 MessageBox.Show(
                     $"Failed to load history: {ex.Message}",
                     "Error",
@@ -105,7 +104,6 @@ namespace TestAutomationManager.Dialogs
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error showing process history: {ex.Message}");
                 MessageBox.Show(
                     $"Failed to load history: {ex.Message}",
                     "Error",
@@ -137,7 +135,6 @@ namespace TestAutomationManager.Dialogs
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error showing function history: {ex.Message}");
                 MessageBox.Show(
                     $"Failed to load history: {ex.Message}",
                     "Error",

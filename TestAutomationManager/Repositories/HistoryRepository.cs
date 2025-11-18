@@ -30,7 +30,6 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
-                    System.Diagnostics.Debug.WriteLine($"⏳ Inserting history entry: {entry.OperationType} for {entry.EntityType} #{entry.EntityId}...");
 
                     // Use stored procedure for insertion
                     var parameters = new[]
@@ -53,14 +52,11 @@ namespace TestAutomationManager.Repositories
                     // Execute and get the new ID
                     await context.Database.ExecuteSqlRawAsync(spName, parameters);
 
-                    System.Diagnostics.Debug.WriteLine($"✓ History entry inserted successfully");
                     return entry;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error inserting history entry: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {ex.StackTrace}");
                 throw new Exception("Failed to insert history entry", ex);
             }
         }
@@ -80,7 +76,6 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading history for {entityType} #{entityId} (top {top})...");
 
                     var parameters = new[]
                     {
@@ -95,13 +90,11 @@ namespace TestAutomationManager.Repositories
                         .FromSqlRaw(spName, parameters)
                         .ToListAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {history.Count} history entries for {entityType} #{entityId}");
                     return history;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error loading history: {ex.Message}");
                 throw new Exception("Failed to load history entries", ex);
             }
         }
@@ -117,7 +110,6 @@ namespace TestAutomationManager.Repositories
                 using (var context = new TestAutomationDbContext())
                 {
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
-                    System.Diagnostics.Debug.WriteLine($"⏳ Loading history for Process Index={processIndex}, ProcessID={processId} with functions (top {top})...");
 
                     var parameters = new[]
                     {
@@ -132,13 +124,11 @@ namespace TestAutomationManager.Repositories
                         .FromSqlRaw(spName, parameters)
                         .ToListAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Loaded {history.Count} history entries for Process (including functions)");
                     return history;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error loading process history with functions: {ex.Message}");
                 throw new Exception("Failed to load process history", ex);
             }
         }
@@ -160,19 +150,15 @@ namespace TestAutomationManager.Repositories
                     var schemaName = SchemaConfigService.Instance.CurrentSchema;
                     var cutoffDate = DateTime.Now.AddDays(-daysToKeep);
 
-                    System.Diagnostics.Debug.WriteLine($"⏳ Deleting history entries older than {daysToKeep} days (before {cutoffDate:yyyy-MM-dd})...");
-
                     var deletedCount = await context.HistoryLogs
                         .Where(h => h.ChangedAt < cutoffDate)
                         .ExecuteDeleteAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"✓ Deleted {deletedCount} old history entries");
                     return deletedCount;
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error deleting old history: {ex.Message}");
                 throw new Exception("Failed to delete old history entries", ex);
             }
         }

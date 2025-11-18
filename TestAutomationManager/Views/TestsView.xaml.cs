@@ -2390,22 +2390,13 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void ProcessSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("🖱️ Right-click detected on Process row");
-
             if (sender is Border border && border.DataContext is Process process)
             {
-                System.Diagnostics.Debug.WriteLine($"✓ Process: {process.ProcessName} (Index: {process.Index}, ProcessID: {process.ProcessID})");
-
                 // If right-clicking on an unselected row, select it first
                 if (!process.IsSelected)
                 {
-                    System.Diagnostics.Debug.WriteLine("  → Selecting process");
                     ClearAllSelections();
                     process.IsSelected = true;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("  → Process already selected");
                 }
 
                 // Ensure context menu opens
@@ -2413,16 +2404,7 @@ namespace TestAutomationManager.Views
                 {
                     border.ContextMenu.PlacementTarget = border;
                     border.ContextMenu.IsOpen = true;
-                    System.Diagnostics.Debug.WriteLine("  ✓ Context menu opened");
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("  ✗ No context menu found on border");
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("✗ Could not get Process from Border DataContext");
             }
         }
 
@@ -2431,30 +2413,14 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void ProcessRow_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("🖱️ Right-click detected on Process row (Grid)");
-
             if (sender is Grid grid && grid.DataContext is Process process)
             {
-                System.Diagnostics.Debug.WriteLine($"✓ Process: {process.ProcessName} (Index: {process.Index}, ProcessID: {process.ProcessID})");
-
                 // If right-clicking on an unselected row, select it first
                 if (!process.IsSelected)
                 {
-                    System.Diagnostics.Debug.WriteLine("  → Selecting process");
                     ClearAllSelections();
                     process.IsSelected = true;
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("  → Process already selected");
-                }
-
-                // The context menu will open automatically since it's attached to the Grid
-                System.Diagnostics.Debug.WriteLine("  ✓ Context menu will open automatically");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("✗ Could not get Process from Grid DataContext");
             }
         }
 
@@ -2818,23 +2784,11 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void TestRow_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("🖱️ Right-click detected on Test row");
-
             // Get the Border that was right-clicked
             var border = sender as Border;
             if (border == null) return;
 
-            // Get the Test from the DataContext
-            var test = border.DataContext as Test;
-            if (test == null)
-            {
-                System.Diagnostics.Debug.WriteLine("✗ Could not get Test from DataContext");
-                return;
-            }
-
-            System.Diagnostics.Debug.WriteLine($"✓ Right-clicked on Test: {test.TestName} (ID: {test.TestID})");
-
-            // The context menu should open automatically, but we can ensure it
+            // Ensure context menu opens
             if (border.ContextMenu != null)
             {
                 border.ContextMenu.PlacementTarget = border;
@@ -2850,8 +2804,6 @@ namespace TestAutomationManager.Views
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("📝 Show History clicked for Test");
-
                 // Get the test from the context menu's PlacementTarget
                 var menuItem = sender as MenuItem;
                 var contextMenu = menuItem?.Parent as ContextMenu;
@@ -2860,13 +2812,10 @@ namespace TestAutomationManager.Views
 
                 if (test == null || test.TestID == null)
                 {
-                    System.Diagnostics.Debug.WriteLine("✗ Could not get Test from context menu");
                     MessageBox.Show("No test selected to show history.",
                         "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
-
-                System.Diagnostics.Debug.WriteLine($"📝 Showing history for Test: {test.TestName} (ID: {test.TestID})");
 
                 // Show history dialog (get parent Window since this is a UserControl)
                 await Dialogs.HistoryViewDialog.ShowTestHistoryAsync(
@@ -2877,8 +2826,6 @@ namespace TestAutomationManager.Views
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error showing test history: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {ex.StackTrace}");
                 MessageBox.Show($"Failed to show history: {ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -2891,8 +2838,6 @@ namespace TestAutomationManager.Views
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("📝 Show History clicked for Process");
-
                 Process? targetProcess = null;
 
                 // Try to get process from context menu's PlacementTarget (Grid or Border)
@@ -2904,44 +2849,27 @@ namespace TestAutomationManager.Views
                 if (placementTarget is Grid grid)
                 {
                     targetProcess = grid.DataContext as Process;
-                    if (targetProcess != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from Grid PlacementTarget: {targetProcess.ProcessName}");
-                    }
                 }
                 // Fallback to Border (old context menu location for backward compatibility)
                 else if (placementTarget is Border border)
                 {
                     targetProcess = border.DataContext as Process;
-                    if (targetProcess != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from Border PlacementTarget: {targetProcess.ProcessName}");
-                    }
                 }
 
                 // Fallback: Get the first selected process
                 if (targetProcess == null)
                 {
-                    System.Diagnostics.Debug.WriteLine("⚠️ Could not get Process from PlacementTarget, trying IsSelected...");
                     targetProcess = _allTests
                         .SelectMany(t => t.Processes)
                         .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
-
-                    if (targetProcess != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"✓ Got Process from IsSelected: {targetProcess.ProcessName}");
-                    }
                 }
 
                 if (targetProcess == null)
                 {
-                    System.Diagnostics.Debug.WriteLine("✗ No process found from PlacementTarget or IsSelected");
                     MessageBox.Show("No process selected to show history.\n\nPlease click on a process row first to select it, then right-click.",
                         "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
-
-                System.Diagnostics.Debug.WriteLine($"📝 Showing history for Process: {targetProcess.ProcessName} (Index: {targetProcess.Index}, ProcessID: {targetProcess.ProcessID})");
 
                 // Show history dialog (get parent Window since this is a UserControl)
                 await Dialogs.HistoryViewDialog.ShowProcessHistoryAsync(
@@ -2953,8 +2881,6 @@ namespace TestAutomationManager.Views
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"✗ Error showing process history: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"✗ Stack trace: {ex.StackTrace}");
                 MessageBox.Show($"Failed to show history: {ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
