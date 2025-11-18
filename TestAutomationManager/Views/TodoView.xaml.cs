@@ -214,6 +214,11 @@ namespace TestAutomationManager.Views
 
         private void ViewToggle_Changed(object sender, RoutedEventArgs e)
         {
+            // Null checks to prevent errors during XAML initialization
+            if (KanbanViewToggle == null || StickyNotesViewToggle == null ||
+                KanbanScrollViewer == null || StickyNotesScrollViewer == null)
+                return;
+
             if (sender == KanbanViewToggle && KanbanViewToggle.IsChecked == true)
             {
                 StickyNotesViewToggle.IsChecked = false;
