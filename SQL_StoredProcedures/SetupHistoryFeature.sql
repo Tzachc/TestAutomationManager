@@ -81,6 +81,7 @@ PRINT '';
 -- =============================================
 
 PRINT '  Creating [usp_InsertHistoryLog]...';
+GO
 
 -- SeleniumDB Schema
 CREATE OR ALTER PROCEDURE [SeleniumDB].[usp_InsertHistoryLog]
@@ -171,12 +172,14 @@ END
 GO
 
 PRINT '    ✓ [usp_InsertHistoryLog] created in both schemas';
+GO
 
 -- =============================================
 -- STEP 3: CREATE STORED PROCEDURE - GET HISTORY
 -- =============================================
 
 PRINT '  Creating [usp_GetHistoryLog]...';
+GO
 
 -- SeleniumDB Schema
 CREATE OR ALTER PROCEDURE [SeleniumDB].[usp_GetHistoryLog]
@@ -237,12 +240,14 @@ END
 GO
 
 PRINT '    ✓ [usp_GetHistoryLog] created in both schemas';
+GO
 
 -- =============================================
 -- STEP 4: CREATE STORED PROCEDURE - GET PROCESS HISTORY WITH FUNCTIONS
 -- =============================================
 
 PRINT '  Creating [usp_GetProcessHistoryWithFunctions]...';
+GO
 
 -- SeleniumDB Schema
 CREATE OR ALTER PROCEDURE [SeleniumDB].[usp_GetProcessHistoryWithFunctions]
@@ -322,6 +327,7 @@ GO
 
 PRINT '    ✓ [usp_GetProcessHistoryWithFunctions] created in both schemas';
 PRINT '';
+GO
 
 -- =============================================
 -- COMPLETION MESSAGE
