@@ -862,14 +862,14 @@
 
                                                                     <!-- Selection Area -->
                                                                     <Border Grid.Column="0"
-                                                                            Background="Transparent"
+                                                                            Background="#01FFFFFF"
                                                                             Cursor="Hand"
                                                                             ToolTip="Click to select row | Right-click for options"
                                                                             MouseLeftButtonDown="ProcessSelectionBorder_MouseLeftButtonDown"
                                                                             MouseMove="ProcessSelectionBorder_MouseMove"
                                                                             MouseRightButtonDown="ProcessSelectionBorder_MouseRightButtonDown">
                                                                         <Border.ContextMenu>
-                                                                            <ContextMenu>
+                                                                            <ContextMenu x:Name="ProcessContextMenu">
                                                                                 <MenuItem Header="Copy"
                                                                                           Click="ContextMenu_Copy"
                                                                                           InputGestureText="Ctrl+C">

@@ -2390,14 +2390,39 @@ namespace TestAutomationManager.Views
         /// </summary>
         private void ProcessSelectionBorder_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine("🖱️ Right-click detected on Process row");
+
             if (sender is Border border && border.DataContext is Process process)
             {
+                System.Diagnostics.Debug.WriteLine($"✓ Process: {process.ProcessName} (Index: {process.Index}, ProcessID: {process.ProcessID})");
+
                 // If right-clicking on an unselected row, select it first
                 if (!process.IsSelected)
                 {
+                    System.Diagnostics.Debug.WriteLine("  → Selecting process");
                     ClearAllSelections();
                     process.IsSelected = true;
                 }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("  → Process already selected");
+                }
+
+                // Ensure context menu opens
+                if (border.ContextMenu != null)
+                {
+                    border.ContextMenu.PlacementTarget = border;
+                    border.ContextMenu.IsOpen = true;
+                    System.Diagnostics.Debug.WriteLine("  ✓ Context menu opened");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("  ✗ No context menu found on border");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("✗ Could not get Process from Border DataContext");
             }
         }
 
