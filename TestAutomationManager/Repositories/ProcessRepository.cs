@@ -263,6 +263,9 @@ namespace TestAutomationManager.Repositories
                     System.Diagnostics.Debug.WriteLine($"✓ Process added to context, calling SaveChangesAsync...");
                     await context.SaveChangesAsync();
 
+                    // Log history
+                    await TestAutomationManager.Services.HistoryService.Instance.LogProcessCreatedAsync(process);
+
                     System.Diagnostics.Debug.WriteLine($"✓ Process #{process.ProcessID} inserted successfully with Index #{process.Index}");
                     return process;
                 }
@@ -313,6 +316,9 @@ namespace TestAutomationManager.Repositories
                     // Add the new function
                     await context.Set<Function>().AddAsync(function);
                     await context.SaveChangesAsync();
+
+                    // Log history
+                    await TestAutomationManager.Services.HistoryService.Instance.LogFunctionCreatedAsync(function);
 
                     System.Diagnostics.Debug.WriteLine($"✓ Function #{function.Index} inserted successfully");
                     return function;
@@ -472,8 +478,15 @@ namespace TestAutomationManager.Repositories
                         throw new InvalidOperationException($"Process with Index {index} not found");
                     }
 
+                    // Save process details before deletion for history logging
+                    var processName = process.ProcessName;
+                    var processIndex = process.Index ?? 0;
+
                     context.Set<Process>().Remove(process);
                     await context.SaveChangesAsync();
+
+                    // Log history
+                    await TestAutomationManager.Services.HistoryService.Instance.LogProcessDeletedAsync(processIndex, processName);
 
                     System.Diagnostics.Debug.WriteLine($"✓ Process Index #{index} deleted successfully");
                 }
@@ -502,8 +515,15 @@ namespace TestAutomationManager.Repositories
                         throw new InvalidOperationException($"Function with Index {index} not found");
                     }
 
+                    // Save function details before deletion for history logging
+                    var functionName = function.FunctionName;
+                    var functionIndex = function.Index ?? 0;
+
                     context.Set<Function>().Remove(function);
                     await context.SaveChangesAsync();
+
+                    // Log history
+                    await TestAutomationManager.Services.HistoryService.Instance.LogFunctionDeletedAsync(functionIndex, functionName);
 
                     System.Diagnostics.Debug.WriteLine($"✓ Function Index #{index} deleted successfully");
                 }

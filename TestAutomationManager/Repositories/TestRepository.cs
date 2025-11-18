@@ -225,6 +225,9 @@ namespace TestAutomationManager.Repositories
 
                     await transaction.CommitAsync();
 
+                    // Log history
+                    await TestAutomationManager.Services.HistoryService.Instance.LogTestCreatedAsync(test);
+
                     System.Diagnostics.Debug.WriteLine($"✓ Test #{test.TestID} '{test.Name}' inserted successfully");
                 }
             }
@@ -316,9 +319,15 @@ namespace TestAutomationManager.Repositories
                     int processCount = test.Processes?.Count ?? 0;
                     int functionCount = test.Processes?.Sum(p => p.Functions?.Count ?? 0) ?? 0;
 
+                    // Save test name before deletion for history logging
+                    var testName = test.TestName;
+
                     // Remove test (cascade delete will handle processes and functions)
                     context.Tests.Remove(test);
                     await context.SaveChangesAsync();
+
+                    // Log history
+                    await TestAutomationManager.Services.HistoryService.Instance.LogTestDeletedAsync(testId, testName);
 
                     System.Diagnostics.Debug.WriteLine($"✓ Test #{testId} deleted successfully (including {processCount} processes and {functionCount} functions)");
                 }

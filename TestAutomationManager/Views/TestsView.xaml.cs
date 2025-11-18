@@ -2398,6 +2398,29 @@ namespace TestAutomationManager.Views
                     ClearAllSelections();
                     process.IsSelected = true;
                 }
+
+                // Ensure context menu opens
+                if (border.ContextMenu != null)
+                {
+                    border.ContextMenu.PlacementTarget = border;
+                    border.ContextMenu.IsOpen = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle right-click on entire process row (new handler for Grid-level context menu)
+        /// </summary>
+        private void ProcessRow_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Grid grid && grid.DataContext is Process process)
+            {
+                // If right-clicking on an unselected row, select it first
+                if (!process.IsSelected)
+                {
+                    ClearAllSelections();
+                    process.IsSelected = true;
+                }
             }
         }
 
@@ -2754,6 +2777,113 @@ namespace TestAutomationManager.Views
         private async void ContextMenu_Delete(object sender, RoutedEventArgs e)
         {
             await DeleteSelectedItems();
+        }
+
+        /// <summary>
+        /// Handle right-click on Test row to show context menu
+        /// </summary>
+        private void TestRow_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Get the Border that was right-clicked
+            var border = sender as Border;
+            if (border == null) return;
+
+            // Ensure context menu opens
+            if (border.ContextMenu != null)
+            {
+                border.ContextMenu.PlacementTarget = border;
+                border.ContextMenu.IsOpen = true;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Handle Show History from context menu (for Test)
+        /// </summary>
+        private async void ContextMenu_ShowTestHistory(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Get the test from the context menu's PlacementTarget
+                var menuItem = sender as MenuItem;
+                var contextMenu = menuItem?.Parent as ContextMenu;
+                var border = contextMenu?.PlacementTarget as Border;
+                var test = border?.DataContext as Test;
+
+                if (test == null || test.TestID == null)
+                {
+                    MessageBox.Show("No test selected to show history.",
+                        "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Show history dialog (get parent Window since this is a UserControl)
+                await Dialogs.HistoryViewDialog.ShowTestHistoryAsync(
+                    (int)test.TestID.Value,
+                    test.TestName ?? "(Unnamed Test)",
+                    Window.GetWindow(this)
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to show history: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Handle Show History from context menu (for Process)
+        /// </summary>
+        private async void ContextMenu_ShowProcessHistory(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process? targetProcess = null;
+
+                // Try to get process from context menu's PlacementTarget (Grid or Border)
+                var menuItem = sender as MenuItem;
+                var contextMenu = menuItem?.Parent as ContextMenu;
+                var placementTarget = contextMenu?.PlacementTarget;
+
+                // Try Grid first (new context menu location)
+                if (placementTarget is Grid grid)
+                {
+                    targetProcess = grid.DataContext as Process;
+                }
+                // Fallback to Border (old context menu location for backward compatibility)
+                else if (placementTarget is Border border)
+                {
+                    targetProcess = border.DataContext as Process;
+                }
+
+                // Fallback: Get the first selected process
+                if (targetProcess == null)
+                {
+                    targetProcess = _allTests
+                        .SelectMany(t => t.Processes)
+                        .FirstOrDefault(p => p.IsSelected && !p.IsPlaceholder);
+                }
+
+                if (targetProcess == null)
+                {
+                    MessageBox.Show("No process selected to show history.\n\nPlease click on a process row first to select it, then right-click.",
+                        "Show History", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Show history dialog (get parent Window since this is a UserControl)
+                await Dialogs.HistoryViewDialog.ShowProcessHistoryAsync(
+                    targetProcess.Index ?? 0,
+                    targetProcess.ProcessID ?? 0,
+                    targetProcess.ProcessName ?? "(Unnamed Process)",
+                    Window.GetWindow(this)
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to show history: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>

@@ -29,6 +29,11 @@ namespace TestAutomationManager.Data
         /// </summary>
         public DbSet<Function> Functions { get; set; }
 
+        /// <summary>
+        /// History Log table - tracks all changes to Tests, Processes, and Functions
+        /// </summary>
+        public DbSet<HistoryEntry> HistoryLogs { get; set; }
+
         // ================================================
         // Configuration
         // ================================================
@@ -246,6 +251,70 @@ namespace TestAutomationManager.Data
                 entity.Ignore(e => e.Parameters);
                 entity.Ignore(e => e.ExpectedResult);
                 entity.Ignore(e => e.Sequence);
+            });
+
+            // ================================================
+            // HISTORY LOG ENTITY CONFIGURATION (HistoryLog)
+            // ================================================
+            modelBuilder.Entity<HistoryEntry>(entity =>
+            {
+                // Map to schema and table (e.g., [PRODUCTION_Selenium].[HistoryLog])
+                entity.ToTable("HistoryLog", currentSchema);
+
+                // Primary key
+                entity.HasKey(e => e.Id);
+
+                // Properties
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.EntityType)
+                    .HasColumnName("EntityType")
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.EntityId)
+                    .HasColumnName("EntityId")
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.EntityName)
+                    .HasColumnName("EntityName")
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.OperationType)
+                    .HasColumnName("OperationType")
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.FieldName)
+                    .HasColumnName("FieldName")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.OldValue)
+                    .HasColumnName("OldValue");
+
+                entity.Property(e => e.NewValue)
+                    .HasColumnName("NewValue");
+
+                entity.Property(e => e.ChangedBy)
+                    .HasColumnName("ChangedBy")
+                    .HasMaxLength(100)
+                    .HasDefaultValue("System");
+
+                entity.Property(e => e.ChangedAt)
+                    .HasColumnName("ChangedAt")
+                    .IsRequired();
+
+                entity.Property(e => e.ChangeDescription)
+                    .HasColumnName("ChangeDescription")
+                    .HasMaxLength(500);
+
+                // Ignore UI-only properties
+                entity.Ignore(e => e.RelativeTime);
+                entity.Ignore(e => e.OperationDisplayText);
+                entity.Ignore(e => e.OperationBadgeColor);
             });
         }
     }

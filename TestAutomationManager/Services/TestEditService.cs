@@ -118,6 +118,9 @@ namespace TestAutomationManager.Services
                 // Save to database
                 await _repository.UpdateTestAsync(test);
 
+                // Log history
+                await HistoryService.Instance.LogTestFieldUpdatedAsync(test, fieldName, oldValue, newValue);
+
                 System.Diagnostics.Debug.WriteLine($"✓ Test {test.TestID} updated: {fieldName} = '{newValue}'");
 
                 return EditResult.Success($"{fieldName} updated successfully");
@@ -254,6 +257,9 @@ namespace TestAutomationManager.Services
                 // Save to database
                 await _processRepository.UpdateProcessAsync(process);
 
+                // Log history
+                await HistoryService.Instance.LogProcessFieldUpdatedAsync(process, fieldName, oldValue, newValue);
+
                 System.Diagnostics.Debug.WriteLine($"✓ Process {process.ProcessID} updated: {fieldName} = '{newValue}'");
 
                 return EditResult.Success($"{fieldName} updated successfully");
@@ -356,6 +362,9 @@ namespace TestAutomationManager.Services
 
                 // Save to database
                 await _processRepository.UpdateFunctionAsync(function);
+
+                // Log history
+                await HistoryService.Instance.LogFunctionFieldUpdatedAsync(function, fieldName, oldValue, newValue);
 
                 System.Diagnostics.Debug.WriteLine($"✓ Function {function.Index} updated: {fieldName} = '{newValue}'");
 
