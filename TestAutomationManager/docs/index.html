@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Automation Manager - Documentation</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar-main" data-bs-offset="100">
+
+    <!-- Navigation -->
+    <nav id="navbar-main" class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>
+                <span class="brand-text">Test Automation Manager</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#overview">Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#getting-started">Getting Started</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tests">Tests</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#processes">Processes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#functions">Functions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#exttables">External Tables</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#backups">Backups</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tips">Tips & Tricks</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="hero-content animate-fade-in">
+                        <h1 class="hero-title">Test Automation Manager</h1>
+                        <p class="hero-subtitle">Comprehensive Documentation & User Guide</p>
+                        <p class="hero-description">
+                            Master your test automation infrastructure with our powerful management platform.
+                            Built for professionals who demand efficiency, reliability, and control.
+                        </p>
+                        <div class="hero-buttons">
+                            <a href="#getting-started" class="btn btn-primary btn-lg">
+                                <i class="fas fa-rocket me-2"></i>Get Started
+                            </a>
+                            <a href="#features" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-list me-2"></i>Explore Features
+                            </a>
+                        </div>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-vial"></i>
+                                <div>
+                                    <strong>Tests</strong>
+                                    <span>Manage & Execute</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-cogs"></i>
+                                <div>
+                                    <strong>Processes</strong>
+                                    <span>Automation Flows</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-database"></i>
+                                <div>
+                                    <strong>Backups</strong>
+                                    <span>Data Protection</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="hero-illustration">
+                        <div class="floating-card">
+                            <i class="fas fa-chart-line fa-3x"></i>
+                            <p>Real-time Monitoring</p>
+                        </div>
+                        <div class="floating-card delay-1">
+                            <i class="fas fa-shield-alt fa-3x"></i>
+                            <p>Secure & Reliable</p>
+                        </div>
+                        <div class="floating-card delay-2">
+                            <i class="fas fa-bolt fa-3x"></i>
+                            <p>Fast Performance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <a href="#overview">
+                <i class="fas fa-chevron-down"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section id="overview" class="content-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">What is Test Automation Manager?</h2>
+                <p class="section-subtitle">A comprehensive platform for managing your test automation infrastructure</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="overview-content">
+                        <p class="lead">
+                            Test Automation Manager is a sophisticated desktop application built with WPF and .NET 8.0
+                            that provides centralized management for your Selenium-based test automation infrastructure.
+                        </p>
+                        <div class="feature-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <h4>Multi-Schema Support</h4>
+                                <p>Work with multiple database schemas seamlessly, switch between PRODUCTION and DEV environments.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h4>Complete Audit Trail</h4>
+                                <p>Track every change with detailed history logging. Know who changed what and when.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-sync"></i>
+                                </div>
+                                <h4>Real-time Sync</h4>
+                                <p>Database changes are monitored and synced automatically across your application.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-paint-brush"></i>
+                                </div>
+                                <h4>Modern UI</h4>
+                                <p>Beautiful dark theme with Material Design components for a premium user experience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section id="getting-started" class="content-section bg-light">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Getting Started</h2>
+                <p class="section-subtitle">Quick start guide to begin using Test Automation Manager</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <div class="getting-started-steps">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Launch the Application</h4>
+                                <p>Start Test Automation Manager from your desktop. The application will connect to your configured SQL Server database.</p>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Database Connection:</strong> Ensure your database connection strings are properly configured in the application settings.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Select Your Schema</h4>
+                                <p>In the left sidebar, use the schema selector dropdown to choose your working environment (PRODUCTION, DEV, etc.).</p>
+                                <div class="code-block">
+                                    <code>Available Schemas: Test_WEB3, Process_WEB3, and custom configurations</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Navigate the Interface</h4>
+                                <p>Use the left sidebar to access different sections:</p>
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-check"></i> <strong>Tests</strong> - Manage your test cases</li>
+                                    <li><i class="fas fa-check"></i> <strong>Processes</strong> - Configure automation workflows</li>
+                                    <li><i class="fas fa-check"></i> <strong>Functions</strong> - Define test functions</li>
+                                    <li><i class="fas fa-check"></i> <strong>ExtTables</strong> - Work with external data</li>
+                                    <li><i class="fas fa-check"></i> <strong>Backups</strong> - Manage database backups</li>
+                                    <li><i class="fas fa-check"></i> <strong>News</strong> - Stay updated with tech news</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Check System Status</h4>
+                                <p>Monitor your database connection status at the bottom of the left sidebar. The indicator shows:</p>
+                                <div class="status-badges">
+                                    <span class="badge bg-success"><i class="fas fa-circle"></i> Connected</span>
+                                    <span class="badge bg-danger"><i class="fas fa-circle"></i> Disconnected</span>
+                                    <span class="badge bg-warning"><i class="fas fa-circle"></i> Checking</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Overview Section -->
+    <section id="features" class="content-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Core Features</h2>
+                <p class="section-subtitle">Powerful tools to manage your test automation infrastructure</p>
+            </div>
+            <div class="features-showcase">
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="showcase-card">
+                            <div class="showcase-icon">
+                                <i class="fas fa-vial"></i>
+                            </div>
+                            <h4>Tests Management</h4>
+                            <p>Create, edit, and organize test cases with comprehensive metadata tracking and execution statistics.</p>
+                            <a href="#tests" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="showcase-card">
+                            <div class="showcase-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h4>Process Automation</h4>
+                            <p>Define automation workflows with processes that execute in sequence with configurable parameters.</p>
+                            <a href="#processes" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="showcase-card">
+                            <div class="showcase-icon">
+                                <i class="fas fa-function"></i>
+                            </div>
+                            <h4>Function Library</h4>
+                            <p>Build reusable functions with operators and parameters for flexible test automation.</p>
+                            <a href="#functions" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="showcase-card">
+                            <div class="showcase-icon">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <h4>External Tables</h4>
+                            <p>Manage external data sources with full CRUD operations and column management.</p>
+                            <a href="#exttables" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="showcase-card">
+                            <div class="showcase-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h4>Database Backups</h4>
+                            <p>Create, browse, and restore database backups with preview mode for safe testing.</p>
+                            <a href="#backups" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-4">
+                        <div class="showcase-card">
+                            <div class="showcase-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h4>Version History</h4>
+                            <p>Complete audit trail tracking all changes with detailed information about who, what, and when.</p>
+                            <a href="#tips" class="card-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tests Section -->
+    <section id="tests" class="content-section bg-light">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-vial me-2"></i>Tests Management
+                </h2>
+                <p class="section-subtitle">Comprehensive test case management and execution tracking</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="feature-detail-card">
+                        <h3>Overview</h3>
+                        <p>
+                            The Tests module is the heart of Test Automation Manager. Here you can create, edit, and manage
+                            all your test cases with detailed metadata, execution statistics, and hierarchical organization.
+                        </p>
+
+                        <h4 class="mt-4"><i class="fas fa-star me-2"></i>Key Features</h4>
+                        <div class="feature-list-grid">
+                            <div class="feature-list-item">
+                                <i class="fas fa-edit"></i>
+                                <div>
+                                    <strong>Inline Editing</strong>
+                                    <p>Double-click any field to edit directly in the grid</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-chart-bar"></i>
+                                <div>
+                                    <strong>Real-time Statistics</strong>
+                                    <p>View Active, Passed, Failed, and Running test counts</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-search"></i>
+                                <div>
+                                    <strong>Advanced Search</strong>
+                                    <p>Fuzzy search with typo tolerance and ID lookup</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-filter"></i>
+                                <div>
+                                    <strong>Column Filtering</strong>
+                                    <p>Filter by any column with custom criteria</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-expand"></i>
+                                <div>
+                                    <strong>Hierarchical View</strong>
+                                    <p>Expand tests to see their processes and functions</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-history"></i>
+                                <div>
+                                    <strong>Change History</strong>
+                                    <p>Right-click to view complete modification history</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-4"><i class="fas fa-laptop-code me-2"></i>Test Properties</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Description</th>
+                                        <th>Editable</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>TestID</code></td>
+                                        <td>Unique identifier for the test</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>TestName</code></td>
+                                        <td>Name of the test case</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>RunStatus</code></td>
+                                        <td>Current execution status (Passed, Failed, Running, Inactive)</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>IsActive</code></td>
+                                        <td>Whether the test is active</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Bugs</code></td>
+                                        <td>Associated bug tracking information</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Email</code></td>
+                                        <td>Email notifications for test results</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>ExceptionMessage</code></td>
+                                        <td>Last exception or error message</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Driver</code></td>
+                                        <td>Selenium driver configuration</td>
+                                        <td><span class="badge bg-success">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>LastRun</code></td>
+                                        <td>Last execution timestamp</td>
+                                        <td><span class="badge bg-warning">Auto</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>LastPass</code></td>
+                                        <td>Last successful run timestamp</td>
+                                        <td><span class="badge bg-warning">Auto</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-sidebar">
+                        <h4><i class="fas fa-lightbulb me-2"></i>Quick Tips</h4>
+
+                        <div class="tip-card">
+                            <h5>Create New Test</h5>
+                            <p>Click the <strong>"Add Test"</strong> button in the toolbar to create a new test case.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Edit Test Details</h5>
+                            <p>Double-click any cell to edit. Press <kbd>Enter</kbd> to save or <kbd>Esc</kbd> to cancel.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>View Processes</h5>
+                            <p>Click the expand arrow <i class="fas fa-chevron-right"></i> to see all processes associated with a test.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Search by ID</h5>
+                            <p>Type <code>#123</code> in the search box to jump directly to Test ID 123.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Filter Results</h5>
+                            <p>Click the filter icon <i class="fas fa-filter"></i> in any column header to apply filters.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>View History</h5>
+                            <p>Right-click on any test and select <strong>"View History"</strong> to see all changes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="workflow-card">
+                        <h4><i class="fas fa-project-diagram me-2"></i>Typical Workflow</h4>
+                        <div class="workflow-steps">
+                            <div class="workflow-step">
+                                <div class="step-badge">1</div>
+                                <div class="step-info">
+                                    <h5>Create Test</h5>
+                                    <p>Add a new test with basic information</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right workflow-arrow"></i>
+                            <div class="workflow-step">
+                                <div class="step-badge">2</div>
+                                <div class="step-info">
+                                    <h5>Add Processes</h5>
+                                    <p>Define automation processes for the test</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right workflow-arrow"></i>
+                            <div class="workflow-step">
+                                <div class="step-badge">3</div>
+                                <div class="step-info">
+                                    <h5>Configure Functions</h5>
+                                    <p>Set up functions within each process</p>
+                                </div>
+                            </div>
+                            <i class="fas fa-arrow-right workflow-arrow"></i>
+                            <div class="workflow-step">
+                                <div class="step-badge">4</div>
+                                <div class="step-info">
+                                    <h5>Execute & Monitor</h5>
+                                    <p>Run tests and track results</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Processes Section -->
+    <section id="processes" class="content-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-cogs me-2"></i>Process Management
+                </h2>
+                <p class="section-subtitle">Define and manage automation workflows</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="feature-detail-card">
+                        <h3>Overview</h3>
+                        <p>
+                            Processes are the automation workflows that execute within your tests. Each process contains
+                            a sequence of functions and can be configured with parameters for flexible execution.
+                        </p>
+
+                        <h4 class="mt-4"><i class="fas fa-star me-2"></i>Key Capabilities</h4>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check"></i> Create and edit processes with detailed metadata</li>
+                            <li><i class="fas fa-check"></i> Set execution order and position</li>
+                            <li><i class="fas fa-check"></i> Configure process parameters for dynamic behavior</li>
+                            <li><i class="fas fa-check"></i> Copy and paste processes for rapid duplication (<kbd>Ctrl+C</kbd>, <kbd>Ctrl+V</kbd>)</li>
+                            <li><i class="fas fa-check"></i> Navigate parameters using up/down arrow keys</li>
+                            <li><i class="fas fa-check"></i> View and modify process comments and descriptions</li>
+                            <li><i class="fas fa-check"></i> Delete processes with confirmation dialog</li>
+                            <li><i class="fas fa-check"></i> Inline editing for quick updates</li>
+                        </ul>
+
+                        <h4 class="mt-4"><i class="fas fa-table me-2"></i>Process Properties</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Description</th>
+                                        <th>Example</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>ProcessID</code></td>
+                                        <td>Unique process identifier</td>
+                                        <td>1001</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>ProcessName</code></td>
+                                        <td>Descriptive name for the process</td>
+                                        <td>"Login Flow"</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Module</code></td>
+                                        <td>Module or category grouping</td>
+                                        <td>"Authentication"</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Position</code></td>
+                                        <td>Execution order within test</td>
+                                        <td>1, 2, 3...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Param</code></td>
+                                        <td>Process parameters</td>
+                                        <td>"username=admin"</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Comments</code></td>
+                                        <td>Additional notes and documentation</td>
+                                        <td>"Handles login retry logic"</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>TestID</code></td>
+                                        <td>Parent test identifier</td>
+                                        <td>500</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="mt-4"><i class="fas fa-clipboard-list me-2"></i>Common Operations</h4>
+                        <div class="operations-grid">
+                            <div class="operation-card">
+                                <div class="operation-icon">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <h5>Create Process</h5>
+                                <p>Click "Add Process" button to create a new automation workflow.</p>
+                            </div>
+                            <div class="operation-card">
+                                <div class="operation-icon">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <h5>Edit Details</h5>
+                                <p>Double-click any field to modify process properties inline.</p>
+                            </div>
+                            <div class="operation-card">
+                                <div class="operation-icon">
+                                    <i class="fas fa-copy"></i>
+                                </div>
+                                <h5>Duplicate Process</h5>
+                                <p>Select a process and press <kbd>Ctrl+C</kbd> then <kbd>Ctrl+V</kbd> to duplicate.</p>
+                            </div>
+                            <div class="operation-card">
+                                <div class="operation-icon">
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                </div>
+                                <h5>Change Order</h5>
+                                <p>Edit the Position field to change execution order.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-sidebar">
+                        <h4><i class="fas fa-lightbulb me-2"></i>Pro Tips</h4>
+
+                        <div class="tip-card">
+                            <h5>Parameter Navigation</h5>
+                            <p>Use <kbd>↑</kbd> and <kbd>↓</kbd> arrow keys to quickly navigate between process parameters.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Quick Duplication</h5>
+                            <p>Copy/paste is perfect for creating similar processes with slight variations.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Context Menu</h5>
+                            <p>Right-click on any process row to access quick actions like view history and delete.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Position Management</h5>
+                            <p>Processes execute in order based on the Position field. Lower numbers run first.</p>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note:</strong> Deleting a process will also remove all its associated functions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Functions Section -->
+    <section id="functions" class="content-section bg-light">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-function me-2"></i>Function Library
+                </h2>
+                <p class="section-subtitle">Build reusable test automation functions</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="feature-detail-card">
+                        <h3>Overview</h3>
+                        <p>
+                            Functions are the building blocks of your automation processes. Each function represents
+                            a discrete action or operation with configurable operators and parameters.
+                        </p>
+
+                        <h4 class="mt-4"><i class="fas fa-cog me-2"></i>Function Configuration</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Description</th>
+                                        <th>Usage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>FunctionID</code></td>
+                                        <td>Unique identifier</td>
+                                        <td>Auto-generated</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>FunctionName</code></td>
+                                        <td>Name of the function</td>
+                                        <td>"Click Login Button"</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Module</code></td>
+                                        <td>Module classification</td>
+                                        <td>"UI Actions"</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Operator</code></td>
+                                        <td>Web3 operator type</td>
+                                        <td>Click, SendKeys, Wait, etc.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Position</code></td>
+                                        <td>Execution order in process</td>
+                                        <td>1, 2, 3...</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Param</code></td>
+                                        <td>Function parameters</td>
+                                        <td>Element locators, values</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Pass</code></td>
+                                        <td>Success condition</td>
+                                        <td>Expected result for pass</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Fail</code></td>
+                                        <td>Failure condition</td>
+                                        <td>Expected result for fail</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>tempParam1-11111</code></td>
+                                        <td>Temporary parameters</td>
+                                        <td>Runtime data storage</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="mt-4"><i class="fas fa-tools me-2"></i>Working with Functions</h4>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check"></i> Create functions within processes</li>
+                            <li><i class="fas fa-check"></i> Set operators for Web3 automation</li>
+                            <li><i class="fas fa-check"></i> Configure pass/fail conditions</li>
+                            <li><i class="fas fa-check"></i> Use temporary parameters (tempParam1 through tempParam11111)</li>
+                            <li><i class="fas fa-check"></i> Edit functions inline for quick updates</li>
+                            <li><i class="fas fa-check"></i> Organize functions by module</li>
+                            <li><i class="fas fa-check"></i> Set execution position within process</li>
+                        </ul>
+
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Temporary Parameters:</strong> Functions support temporary parameters from tempParam1 to tempParam11111
+                            for storing and passing data during test execution.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-sidebar">
+                        <h4><i class="fas fa-magic me-2"></i>Function Tips</h4>
+
+                        <div class="tip-card">
+                            <h5>Operator Selection</h5>
+                            <p>Choose the appropriate Web3 operator for your automation action (Click, SendKeys, Wait, etc.).</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Pass/Fail Logic</h5>
+                            <p>Define clear pass and fail conditions to enable automatic result validation.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Modular Design</h5>
+                            <p>Group related functions by Module for better organization and reusability.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Execution Order</h5>
+                            <p>Use the Position field to control the order of function execution within a process.</p>
+                        </div>
+
+                        <div class="example-box">
+                            <h5>Example Function</h5>
+                            <div class="code-block">
+                                <strong>Name:</strong> EnterUsername<br>
+                                <strong>Operator:</strong> SendKeys<br>
+                                <strong>Param:</strong> #username-field<br>
+                                <strong>Pass:</strong> Element filled<br>
+                                <strong>Fail:</strong> Element not found
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- External Tables Section -->
+    <section id="exttables" class="content-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-table me-2"></i>External Tables
+                </h2>
+                <p class="section-subtitle">Manage external data sources and tables</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="feature-detail-card">
+                        <h3>Overview</h3>
+                        <p>
+                            External Tables (ExtTables) allow you to browse, manage, and manipulate external data sources
+                            that your tests depend on. View table metadata, edit data, and manage columns with ease.
+                        </p>
+
+                        <h4 class="mt-4"><i class="fas fa-star me-2"></i>Key Features</h4>
+                        <div class="feature-list-grid">
+                            <div class="feature-list-item">
+                                <i class="fas fa-list"></i>
+                                <div>
+                                    <strong>Table Browser</strong>
+                                    <p>Browse all available external tables with metadata</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-search"></i>
+                                <div>
+                                    <strong>Fuzzy Search</strong>
+                                    <p>Find tables quickly with intelligent search</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-columns"></i>
+                                <div>
+                                    <strong>Column Management</strong>
+                                    <p>Add, rename, and modify column properties</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-edit"></i>
+                                <div>
+                                    <strong>Data Editing</strong>
+                                    <p>Full CRUD operations on table data</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <strong>Metadata View</strong>
+                                    <p>View row counts and table information</p>
+                                </div>
+                            </div>
+                            <div class="feature-list-item">
+                                <i class="fas fa-database"></i>
+                                <div>
+                                    <strong>Schema Support</strong>
+                                    <p>Works across multiple database schemas</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-4"><i class="fas fa-tasks me-2"></i>Common Operations</h4>
+
+                        <div class="accordion" id="extTablesAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#browseTables">
+                                        Browse Tables
+                                    </button>
+                                </h2>
+                                <div id="browseTables" class="accordion-collapse collapse show" data-bs-parent="#extTablesAccordion">
+                                    <div class="accordion-body">
+                                        <p>In the left sidebar, you'll see a searchable list of all external tables. Each entry shows:</p>
+                                        <ul>
+                                            <li>Table name</li>
+                                            <li>Row count</li>
+                                            <li>Schema information</li>
+                                        </ul>
+                                        <p>Click on any table to view its detailed data in the main panel.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#viewData">
+                                        View Table Data
+                                    </button>
+                                </h2>
+                                <div id="viewData" class="accordion-collapse collapse" data-bs-parent="#extTablesAccordion">
+                                    <div class="accordion-body">
+                                        <p>When you select a table, the detail view displays:</p>
+                                        <ul>
+                                            <li><strong>Data Grid:</strong> All rows and columns</li>
+                                            <li><strong>Column Headers:</strong> Sortable and filterable</li>
+                                            <li><strong>Row Controls:</strong> Add, edit, delete operations</li>
+                                            <li><strong>Pagination:</strong> For large datasets</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#manageColumns">
+                                        Manage Columns
+                                    </button>
+                                </h2>
+                                <div id="manageColumns" class="accordion-collapse collapse" data-bs-parent="#extTablesAccordion">
+                                    <div class="accordion-body">
+                                        <p>Column management options include:</p>
+                                        <ul>
+                                            <li><strong>Add Column:</strong> Create new columns with custom types</li>
+                                            <li><strong>Rename Column:</strong> Change column names</li>
+                                            <li><strong>Edit Length:</strong> Modify column data length</li>
+                                            <li><strong>Delete Column:</strong> Remove columns (with confirmation)</li>
+                                        </ul>
+                                        <p>Right-click on any column header to access these options.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#editData">
+                                        Edit Table Data
+                                    </button>
+                                </h2>
+                                <div id="editData" class="accordion-collapse collapse" data-bs-parent="#extTablesAccordion">
+                                    <div class="accordion-body">
+                                        <p>Data editing capabilities:</p>
+                                        <ul>
+                                            <li><strong>Add Row:</strong> Click "Add Row" button to insert new records</li>
+                                            <li><strong>Edit Cell:</strong> Double-click any cell to modify its value</li>
+                                            <li><strong>Delete Row:</strong> Select a row and use the delete button</li>
+                                            <li><strong>Bulk Operations:</strong> Select multiple rows for batch actions</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-sidebar">
+                        <h4><i class="fas fa-lightbulb me-2"></i>ExtTable Tips</h4>
+
+                        <div class="tip-card">
+                            <h5>Quick Search</h5>
+                            <p>Use the search box in the sidebar to quickly find tables by name with fuzzy matching.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Data Validation</h5>
+                            <p>The system validates data types when you edit cells to prevent invalid data entry.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Schema Context</h5>
+                            <p>External tables respect your current schema selection. Switch schemas to see different table sets.</p>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Caution:</strong> Changes to external tables affect your test data. Use preview mode for safe testing.
+                        </div>
+
+                        <div class="example-box">
+                            <h5>Use Cases</h5>
+                            <ul class="small">
+                                <li>Manage test user credentials</li>
+                                <li>Configure test environment settings</li>
+                                <li>Store test data sets</li>
+                                <li>Maintain lookup tables</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Backups Section -->
+    <section id="backups" class="content-section bg-light">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-database me-2"></i>Database Backups
+                </h2>
+                <p class="section-subtitle">Protect your data with comprehensive backup management</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="feature-detail-card">
+                        <h3>Overview</h3>
+                        <p>
+                            The Backups module provides comprehensive database backup and restore capabilities.
+                            Create snapshots of your database, browse backup history, and safely work with backup copies in preview mode.
+                        </p>
+
+                        <h4 class="mt-4"><i class="fas fa-shield-alt me-2"></i>Key Features</h4>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-check"></i> <strong>View Backup History:</strong> Browse all database backups with creation dates and file sizes</li>
+                            <li><i class="fas fa-check"></i> <strong>Create Backups:</strong> Generate new database snapshots on demand</li>
+                            <li><i class="fas fa-check"></i> <strong>Restore from Backup:</strong> Roll back to previous database states</li>
+                            <li><i class="fas fa-check"></i> <strong>Preview Mode:</strong> Work with backup copies without affecting production data</li>
+                            <li><i class="fas fa-check"></i> <strong>Multiple Schemas:</strong> Backup support for all configured database schemas</li>
+                            <li><i class="fas fa-check"></i> <strong>Backup Information:</strong> View detailed metadata including size and timestamp</li>
+                        </ul>
+
+                        <h4 class="mt-4"><i class="fas fa-clipboard-list me-2"></i>Working with Backups</h4>
+
+                        <div class="backup-workflow">
+                            <div class="backup-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-save"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h5>1. Create Backup</h5>
+                                    <p>Click the "Create Backup" button to generate a new database snapshot. The system will create a backup with a timestamp.</p>
+                                    <div class="code-block">
+                                        Format: DatabaseName_YYYY-MM-DD_HH-MM-SS.bak
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="backup-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h5>2. Browse Backups</h5>
+                                    <p>View all available backups in a chronological list. Each entry shows:</p>
+                                    <ul class="small">
+                                        <li>Backup name</li>
+                                        <li>Creation date and time</li>
+                                        <li>File size</li>
+                                        <li>Restore status</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="backup-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-laptop"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h5>3. Preview Mode</h5>
+                                    <p>Click "Preview" to create a temporary copy of the backup and work with it safely. The window title will show "[PREVIEW]" indicator.</p>
+                                    <div class="alert alert-info small">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Preview mode creates a temporary database that won't affect your production data.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="backup-step">
+                                <div class="step-icon">
+                                    <i class="fas fa-undo"></i>
+                                </div>
+                                <div class="step-content">
+                                    <h5>4. Restore Backup</h5>
+                                    <p>Select a backup and click "Restore" to roll back your database to that point in time.</p>
+                                    <div class="alert alert-warning small">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Warning:</strong> Restoring will overwrite your current database. Create a backup first!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-4"><i class="fas fa-info-circle me-2"></i>Backup Information</h4>
+                        <p>Each backup entry displays comprehensive information:</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Name</strong></td>
+                                        <td>Backup file name with timestamp</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>CreationDate</strong></td>
+                                        <td>When the backup was created</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Size</strong></td>
+                                        <td>Backup file size in MB/GB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status</strong></td>
+                                        <td>Current status (Available, Restoring, etc.)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="tips-sidebar">
+                        <h4><i class="fas fa-lightbulb me-2"></i>Backup Best Practices</h4>
+
+                        <div class="tip-card">
+                            <h5>Regular Backups</h5>
+                            <p>Create backups before major changes or test runs to ensure you can roll back if needed.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Use Preview Mode</h5>
+                            <p>Always use preview mode when testing changes. This protects your production data.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Naming Convention</h5>
+                            <p>Backups are automatically named with timestamps, making it easy to identify when they were created.</p>
+                        </div>
+
+                        <div class="tip-card">
+                            <h5>Check Preview Indicator</h5>
+                            <p>When in preview mode, the window title shows "[PREVIEW]" to remind you that you're working with a copy.</p>
+                        </div>
+
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Pro Tip:</strong> Exit preview mode to return to production database. The preview copy is automatically cleaned up.
+                        </div>
+
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Important:</strong> Restore operations cannot be undone. Always backup current state first!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tips & Tricks Section -->
+    <section id="tips" class="content-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">
+                    <i class="fas fa-magic me-2"></i>Tips & Tricks
+                </h2>
+                <p class="section-subtitle">Master Test Automation Manager with these productivity tips</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <h4>Keyboard Shortcuts</h4>
+                        <ul class="trick-list">
+                            <li><kbd>Ctrl+C</kbd> - Copy selected item</li>
+                            <li><kbd>Ctrl+V</kbd> - Paste copied item</li>
+                            <li><kbd>Delete</kbd> - Delete selected item</li>
+                            <li><kbd>Enter</kbd> - Save inline edit</li>
+                            <li><kbd>Esc</kbd> - Cancel inline edit</li>
+                            <li><kbd>↑</kbd> <kbd>↓</kbd> - Navigate parameters</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4>Search Features</h4>
+                        <ul class="trick-list">
+                            <li><strong>#123</strong> - Jump to ID 123</li>
+                            <li><strong>Fuzzy Search</strong> - Typo tolerance</li>
+                            <li><strong>Multi-word</strong> - Search multiple terms</li>
+                            <li><strong>Column Filters</strong> - Filter by any column</li>
+                            <li><strong>Global Search</strong> - Search all entities</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                        <h4>Context Menus</h4>
+                        <ul class="trick-list">
+                            <li><strong>Right-click</strong> on any row</li>
+                            <li><strong>View History</strong> - See all changes</li>
+                            <li><strong>Delete</strong> - Remove with confirmation</li>
+                            <li><strong>Edit</strong> - Quick edit access</li>
+                            <li><strong>Copy</strong> - Duplicate items</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h4>Version History</h4>
+                        <ul class="trick-list">
+                            <li>Track <strong>all changes</strong></li>
+                            <li>See <strong>who made</strong> changes</li>
+                            <li>View <strong>when</strong> changes occurred</li>
+                            <li>Filter by <strong>entity type</strong></li>
+                            <li>See <strong>before/after</strong> values</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h4>Inline Editing</h4>
+                        <ul class="trick-list">
+                            <li><strong>Double-click</strong> any field</li>
+                            <li>Edit <strong>directly in grid</strong></li>
+                            <li><strong>Validation</strong> on save</li>
+                            <li><strong>Escape</strong> to cancel</li>
+                            <li><strong>Tab</strong> to next field</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h4>Schema Management</h4>
+                        <ul class="trick-list">
+                            <li><strong>Switch schemas</strong> easily</li>
+                            <li><strong>Preview mode</strong> for safety</li>
+                            <li><strong>[PREVIEW]</strong> in title</li>
+                            <li><strong>Multiple environments</strong></li>
+                            <li><strong>Connection status</strong> indicator</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </div>
+                        <h4>Hierarchical Views</h4>
+                        <ul class="trick-list">
+                            <li><strong>Expand tests</strong> to see processes</li>
+                            <li><strong>Collapse</strong> for clean view</li>
+                            <li><strong>Visual hierarchy</strong></li>
+                            <li><strong>Parent-child</strong> relationships</li>
+                            <li><strong>Nested editing</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h4>Test Statistics</h4>
+                        <ul class="trick-list">
+                            <li><strong>Real-time counts</strong></li>
+                            <li><strong>Active tests</strong> tracking</li>
+                            <li><strong>Pass/Fail</strong> statistics</li>
+                            <li><strong>Running tests</strong> monitor</li>
+                            <li><strong>Visual indicators</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="trick-card">
+                        <div class="trick-icon">
+                            <i class="fas fa-copy"></i>
+                        </div>
+                        <h4>Copy & Paste</h4>
+                        <ul class="trick-list">
+                            <li><strong>Duplicate</strong> tests quickly</li>
+                            <li><strong>Copy processes</strong> with Ctrl+C</li>
+                            <li><strong>Paste</strong> with Ctrl+V</li>
+                            <li><strong>Preserve settings</strong></li>
+                            <li><strong>Rapid prototyping</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-lg-10 mx-auto">
+                    <div class="advanced-features-card">
+                        <h3><i class="fas fa-graduation-cap me-2"></i>Advanced Features</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-bolt me-2"></i>Performance Features</h5>
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-check"></i> Process caching for faster loads</li>
+                                    <li><i class="fas fa-check"></i> Real-time database watching</li>
+                                    <li><i class="fas fa-check"></i> Async operations for responsiveness</li>
+                                    <li><i class="fas fa-check"></i> Efficient data binding with MVVM</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-shield-alt me-2"></i>Data Protection</h5>
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-check"></i> Automatic backup creation</li>
+                                    <li><i class="fas fa-check"></i> Preview mode for safe testing</li>
+                                    <li><i class="fas fa-check"></i> History tracking for all changes</li>
+                                    <li><i class="fas fa-check"></i> Restore capabilities</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Info Section -->
+    <section id="technical" class="content-section bg-light">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">
+                    <i class="fas fa-code me-2"></i>Technical Information
+                </h2>
+                <p class="section-subtitle">System requirements and technical details</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="tech-card">
+                        <h4><i class="fas fa-laptop me-2"></i>System Requirements</h4>
+                        <ul class="tech-list">
+                            <li><strong>Platform:</strong> Windows Desktop</li>
+                            <li><strong>.NET Framework:</strong> .NET 8.0</li>
+                            <li><strong>Database:</strong> SQL Server (2016 or later)</li>
+                            <li><strong>Memory:</strong> 4GB RAM minimum (8GB recommended)</li>
+                            <li><strong>Display:</strong> 1920x1080 or higher resolution</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="tech-card">
+                        <h4><i class="fas fa-tools me-2"></i>Technology Stack</h4>
+                        <ul class="tech-list">
+                            <li><strong>Frontend:</strong> WPF with XAML</li>
+                            <li><strong>Backend:</strong> C# .NET 8.0</li>
+                            <li><strong>ORM:</strong> Entity Framework Core 9.0</li>
+                            <li><strong>UI Libraries:</strong> MahApps.Metro, MaterialDesign</li>
+                            <li><strong>Architecture:</strong> MVVM Pattern</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-12">
+                    <div class="tech-card">
+                        <h4><i class="fas fa-database me-2"></i>Database Schemas</h4>
+                        <p>Test Automation Manager supports multiple database schemas:</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Test_WEB3 Schema</h5>
+                                <ul class="small">
+                                    <li>Tests table</li>
+                                    <li>Test history tracking</li>
+                                    <li>Test statistics</li>
+                                    <li>Test metadata</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Process_WEB3 Schema</h5>
+                                <ul class="small">
+                                    <li>Processes table</li>
+                                    <li>Functions table</li>
+                                    <li>External tables</li>
+                                    <li>Process parameters</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <h5><i class="fas fa-robot me-2"></i>Test Automation Manager</h5>
+                    <p class="text-muted">Professional test automation infrastructure management platform.</p>
+                </div>
+                <div class="col-lg-4">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#getting-started">Getting Started</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#tips">Tips & Tricks</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h5>Technical</h5>
+                    <ul class="footer-links">
+                        <li><a href="#technical">System Requirements</a></li>
+                        <li><a href="#technical">Technology Stack</a></li>
+                        <li><a href="#backups">Backup Management</a></li>
+                        <li><a href="#tips">Advanced Features</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024 Test Automation Manager. Built with <i class="fas fa-heart text-danger"></i> for test automation professionals.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" class="scroll-top-btn" title="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="assets/js/script.js"></script>
+</body>
+</html>

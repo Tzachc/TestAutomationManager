@@ -259,6 +259,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Border Grid.Row="0" Padding="20,5">
@@ -610,7 +611,46 @@
                     </StackPanel>
                 </ScrollViewer>
 
-                <Border Grid.Row="2" 
+                <!-- Documentation Link -->
+                <Border Grid.Row="2"
+       Margin="12,8,12,8"
+       Background="{DynamicResource CardBackgroundBrush}"
+       BorderBrush="{DynamicResource BorderBrush}"
+       BorderThickness="1"
+       CornerRadius="8"
+       Padding="12"
+       Cursor="Hand"
+       ToolTip="Open Documentation Site"
+       MouseLeftButtonDown="DocumentationLink_Click">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="32" Height="32"
+               CornerRadius="6"
+               Background="{DynamicResource PrimaryBlueBrush}">
+                            <TextBlock Text="📚"
+                       FontSize="18"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <TextBlock Text="Documentation"
+                     FontSize="11"
+                     Foreground="{DynamicResource TextPrimaryBrush}"
+                     FontWeight="SemiBold"/>
+                            <TextBlock Text="View user guide &amp; help"
+                     FontSize="10"
+                     Foreground="{DynamicResource TextSecondaryBrush}"
+                     Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3"
        Margin="12,8,12,16"
        Background="{DynamicResource CardBackgroundBrush}"
        BorderBrush="{DynamicResource BorderBrush}"

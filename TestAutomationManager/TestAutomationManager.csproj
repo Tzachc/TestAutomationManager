@@ -49,4 +49,11 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Copy docs folder to output directory -->
+    <None Update="docs\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
