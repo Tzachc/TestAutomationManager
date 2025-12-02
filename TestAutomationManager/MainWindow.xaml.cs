@@ -1024,12 +1024,12 @@ namespace TestAutomationManager
                 if (System.IO.File.Exists(docsPath))
                 {
                     // Open the documentation in the default browser
-                    var psi = new ProcessStartInfo
+                    var psi = new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = docsPath,
                         UseShellExecute = true
                     };
-                    Process.Start(psi);
+                    System.Diagnostics.Process.Start(psi);
                 }
                 else
                 {
