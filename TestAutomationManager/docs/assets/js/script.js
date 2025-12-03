@@ -186,23 +186,32 @@ document.querySelectorAll('.accordion-button').forEach(button => {
 // ============================================
 
 function addCopyButtons() {
-    const codeBlocks = document.querySelectorAll('.code-block');
+    const codeBlocks = document.querySelectorAll('.code-snippet');
 
     codeBlocks.forEach(block => {
+        // Check if button already exists
+        if (block.querySelector('.copy-btn')) return;
+
         const copyButton = document.createElement('button');
         copyButton.className = 'copy-btn';
-        copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-        copyButton.title = 'Copy to clipboard';
+        copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        copyButton.title = 'Copy code to clipboard';
 
         copyButton.addEventListener('click', function() {
-            const code = block.textContent;
+            const code = block.querySelector('code').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                copyButton.innerHTML = '<i class="fas fa-check"></i>';
-                copyButton.style.color = '#10b981';
+                copyButton.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                copyButton.classList.add('copied');
 
                 setTimeout(() => {
-                    copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-                    copyButton.style.color = '';
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    copyButton.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                copyButton.innerHTML = '<i class="fas fa-times"></i> Error';
+                setTimeout(() => {
+                    copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
                 }, 2000);
             });
         });
@@ -211,6 +220,13 @@ function addCopyButtons() {
         block.appendChild(copyButton);
     });
 }
+
+// Add copy buttons when page loads and after dynamic content
+document.addEventListener('DOMContentLoaded', function() {
+    addCopyButtons();
+    // Re-run after a short delay to catch any dynamically loaded content
+    setTimeout(addCopyButtons, 500);
+});
 
 // ============================================
 // SEARCH FUNCTIONALITY (OPTIONAL ENHANCEMENT)
