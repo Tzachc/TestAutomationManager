@@ -1,0 +1,616 @@
+/*
+ * VIBRANT COLOR SCHEME - Multi-Color Enhancement
+ * Purple, Orange, Teal, Pink, Green, and More!
+ */
+
+:root {
+    /* Vibrant Primary Colors */
+    --color-purple: #a855f7;
+    --color-purple-dark: #9333ea;
+    --color-purple-light: #c084fc;
+
+    --color-orange: #f97316;
+    --color-orange-dark: #ea580c;
+    --color-orange-light: #fb923c;
+
+    --color-teal: #14b8a6;
+    --color-teal-dark: #0d9488;
+    --color-teal-light: #2dd4bf;
+
+    --color-pink: #ec4899;
+    --color-pink-dark: #db2777;
+    --color-pink-light: #f472b6;
+
+    --color-green: #10b981;
+    --color-green-dark: #059669;
+    --color-green-light: #34d399;
+
+    --color-blue: #3b82f6;
+    --color-blue-dark: #2563eb;
+    --color-blue-light: #60a5fa;
+
+    --color-yellow: #f59e0b;
+    --color-red: #ef4444;
+
+    /* Gradients */
+    --gradient-purple: linear-gradient(135deg, var(--color-purple), var(--color-pink));
+    --gradient-orange: linear-gradient(135deg, var(--color-orange), var(--color-yellow));
+    --gradient-teal: linear-gradient(135deg, var(--color-teal), var(--color-green));
+    --gradient-rainbow: linear-gradient(135deg, var(--color-purple), var(--color-pink), var(--color-orange), var(--color-teal));
+}
+
+/* ============================================
+   COLORFUL SECTION HEADERS
+   ============================================ */
+
+.section-header-colored {
+    position: relative;
+    padding-bottom: 1rem;
+    margin-bottom: 3rem;
+}
+
+.section-header-colored::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 4px;
+    background: var(--gradient-rainbow);
+    border-radius: 2px;
+}
+
+.section-title-purple {
+    background: var(--gradient-purple);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-title-orange {
+    background: var(--gradient-orange);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-title-teal {
+    background: var(--gradient-teal);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================
+   COLORFUL CARDS
+   ============================================ */
+
+.card-purple {
+    border-left: 4px solid var(--color-purple);
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1));
+}
+
+.card-purple:hover {
+    box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+    border-color: var(--color-purple-light);
+}
+
+.card-orange {
+    border-left: 4px solid var(--color-orange);
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(245, 158, 11, 0.1));
+}
+
+.card-orange:hover {
+    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.3);
+    border-color: var(--color-orange-light);
+}
+
+.card-teal {
+    border-left: 4px solid var(--color-teal);
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(16, 185, 129, 0.1));
+}
+
+.card-teal:hover {
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    border-color: var(--color-teal-light);
+}
+
+.card-pink {
+    border-left: 4px solid var(--color-pink);
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.1));
+}
+
+.card-pink:hover {
+    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.3);
+    border-color: var(--color-pink-light);
+}
+
+/* ============================================
+   COLORFUL BADGES
+   ============================================ */
+
+.badge-purple {
+    background: var(--gradient-purple);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.badge-orange {
+    background: var(--gradient-orange);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.badge-teal {
+    background: var(--gradient-teal);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.badge-pink {
+    background: linear-gradient(135deg, var(--color-pink), var(--color-pink-light));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* ============================================
+   STORED PROCEDURE CARDS
+   ============================================ */
+
+.sp-card {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.sp-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.sp-card-purple::before {
+    background: var(--gradient-purple);
+}
+
+.sp-card-orange::before {
+    background: var(--gradient-orange);
+}
+
+.sp-card-teal::before {
+    background: var(--gradient-teal);
+}
+
+.sp-card-pink::before {
+    background: linear-gradient(135deg, var(--color-pink), var(--color-pink-light));
+}
+
+.sp-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.sp-card-purple:hover {
+    border-color: var(--color-purple);
+}
+
+.sp-card-orange:hover {
+    border-color: var(--color-orange);
+}
+
+.sp-card-teal:hover {
+    border-color: var(--color-teal);
+}
+
+.sp-card-pink:hover {
+    border-color: var(--color-pink);
+}
+
+.sp-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.sp-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.sp-icon-purple {
+    background: var(--gradient-purple);
+}
+
+.sp-icon-orange {
+    background: var(--gradient-orange);
+}
+
+.sp-icon-teal {
+    background: var(--gradient-teal);
+}
+
+.sp-icon-pink {
+    background: linear-gradient(135deg, var(--color-pink), var(--color-pink-light));
+}
+
+.sp-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.sp-subtitle {
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+.sp-section {
+    margin-top: 1.5rem;
+}
+
+.sp-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sp-section-title i {
+    font-size: 1rem;
+}
+
+/* ============================================
+   CLASS NAVIGATION SIDEBAR
+   ============================================ */
+
+.class-nav-sidebar {
+    position: sticky;
+    top: 100px;
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #334155;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.class-nav-section {
+    margin-bottom: 1.5rem;
+}
+
+.class-nav-header {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #334155;
+}
+
+.class-nav-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.class-nav-link:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--color-purple-light);
+    padding-left: 1rem;
+}
+
+.class-nav-link.active {
+    background: var(--gradient-purple);
+    color: white;
+    font-weight: 600;
+}
+
+/* ============================================
+   CLASS DETAIL CARDS
+   ============================================ */
+
+.class-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    border: 1px solid #334155;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.class-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.class-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #334155;
+}
+
+.class-icon-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.class-title-section h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 0.5rem;
+}
+
+.class-subtitle {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin-bottom: 0.75rem;
+}
+
+.class-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   PARAMETER TABLES
+   ============================================ */
+
+.param-table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.param-table thead {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.param-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #f1f5f9;
+    border-bottom: 2px solid #334155;
+}
+
+.param-table td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #334155;
+}
+
+.param-table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.param-table code {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   RELATIONSHIP DIAGRAM
+   ============================================ */
+
+.relationship-diagram {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.relationship-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.relationship-box {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    min-width: 150px;
+}
+
+.relationship-box-purple {
+    border-color: var(--color-purple);
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
+}
+
+.relationship-box-orange {
+    border-color: var(--color-orange);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.2);
+}
+
+.relationship-box-teal {
+    border-color: var(--color-teal);
+    box-shadow: 0 4px 16px rgba(20, 184, 166, 0.2);
+}
+
+.relationship-arrow {
+    font-size: 2rem;
+}
+
+.relationship-arrow-purple {
+    color: var(--color-purple);
+}
+
+.relationship-arrow-orange {
+    color: var(--color-orange);
+}
+
+.relationship-arrow-teal {
+    color: var(--color-teal);
+}
+
+/* ============================================
+   COLORFUL ICONS
+   ============================================ */
+
+.icon-purple {
+    color: var(--color-purple);
+}
+
+.icon-orange {
+    color: var(--color-orange);
+}
+
+.icon-teal {
+    color: var(--color-teal);
+}
+
+.icon-pink {
+    color: var(--color-pink);
+}
+
+.icon-green {
+    color: var(--color-green);
+}
+
+.icon-blue {
+    color: var(--color-blue);
+}
+
+/* ============================================
+   PERFORMANCE STATS
+   ============================================ */
+
+.perf-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid var(--color-green);
+    border-radius: 20px;
+    color: var(--color-green-light);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.perf-stat i {
+    font-size: 1rem;
+}
+
+/* ============================================
+   RAINBOW HOVER EFFECTS
+   ============================================ */
+
+.hover-rainbow {
+    transition: all 0.3s ease;
+}
+
+.hover-rainbow:hover {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.3),
+                0 0 40px rgba(236, 72, 153, 0.2),
+                0 0 50px rgba(249, 115, 22, 0.1);
+}
+
+/* ============================================
+   ANIMATED GRADIENT BACKGROUNDS
+   ============================================ */
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animated-gradient {
+    background: linear-gradient(270deg,
+        var(--color-purple),
+        var(--color-pink),
+        var(--color-orange),
+        var(--color-teal));
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* ============================================
+   SCROLLBAR COLORFUL
+   ============================================ */
+
+.class-nav-sidebar::-webkit-scrollbar-thumb {
+    background: var(--gradient-purple);
+}
+
+.class-nav-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--gradient-rainbow);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 992px) {
+    .class-nav-sidebar {
+        position: static;
+        margin-bottom: 2rem;
+        max-height: none;
+    }
+
+    .sp-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
