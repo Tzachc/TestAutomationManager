@@ -1013,6 +1013,45 @@ namespace TestAutomationManager
             LoadExtTablesForNavigation();
         }
 
+        private void DocumentationLink_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
+                // Get the path to the documentation file
+                string docsPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "docs", "index.html");
+
+                // Check if the file exists
+                if (System.IO.File.Exists(docsPath))
+                {
+                    // Open the documentation in the default browser
+                    var psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = docsPath,
+                        UseShellExecute = true
+                    };
+                    System.Diagnostics.Process.Start(psi);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Documentation file not found. Please ensure the docs folder is in the application directory.",
+                        "Documentation Not Found",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error opening documentation: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
+        }
+
         // ================================================
         // TAB DRAG AND DROP
         // ================================================
